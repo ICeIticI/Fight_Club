@@ -4,14 +4,16 @@ local GlobalRemoteEvent = Instance.new("RemoteEvent")
 GlobalRemoteEvent.Name = "GlobalRemoteEvent"
 GlobalRemoteEvent.Parent = game.ReplicatedStorage
 
+
+
 Players.PlayerAdded:Connect(function(player)
 	local plrObjectsFolder = Instance.new("Folder")
 	plrObjectsFolder.Name = player.Name .. "_GameObjects"
 	plrObjectsFolder.Parent = player
 
-    local LocalBindableEvent = Instance.new("BindableEvent")
-    LocalBindableEvent.Name = "LocalBindableEvent"
-    LocalBindableEvent.Parent = game.ReplicatedStorage
+    -- local LocalBindableEvent = Instance.new("BindableEvent")
+    -- LocalBindableEvent.Name = "LocalBindableEvent"
+    -- LocalBindableEvent.Parent = game.ReplicatedStorage
 	
 	-- Animation defining:
 	local FC_Idle = Instance.new("Animation")

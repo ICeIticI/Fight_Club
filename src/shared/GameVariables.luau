@@ -33,7 +33,10 @@ GameVariables.plrObjectsFolder = GameVariables.player:WaitForChild(GameVariables
 
 -- Global Remote Event - Because each player having their own remote event is redundant.
 GameVariables.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
-GameVariables.LocalBindableEvent = game.ReplicatedStorage:WaitForChild("LocalBindableEvent")
+
+GameVariables.LocalBindableEvent = Instance.new("BindableEvent")
+GameVariables.LocalBindableEvent.Name = "LocalBindableEvent"
+GameVariables.LocalBindableEvent.Parent = game.ReplicatedStorage
 
 GameVariables.Protocol = nil
 
@@ -82,6 +85,12 @@ GameVariables.randLvl1Type = nil --[[ Used to determine what lvl 1 attacks
 GameVariables.animPair = nil
 
 GameVariables.actionTable = {GameVariables.isBlocking, GameVariables.isAttacking, GameVariables.isDodging}
+
+GameVariables.rayParams = RaycastParams.new()
+GameVariables.rayParams.FilterDescendantsInstances = GameVariables.character:GetChildren()
+GameVariables.rayParams.FilterType = Enum.RaycastFilterType.Exclude
+
+GameVariables.raycastResult = workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, GameVariables.rayParams)
 
 -- NOTE*: Perhaps instead of creating a bunch of animations, we make a single animation then when the player needs to animate, load the animId into the animation. Id's would prob be in a table.
 -- *animations (attacker)*
@@ -189,10 +198,230 @@ GameVariables.pairedChain = 0 -- players can only do 2 sync block attacks in a r
 
 GameVariables.TestObject = 12
 
-function GameVariables.Set(givenObject, newValue)
-    GameVariables[givenObject] = newValue
+-- functions
+function GameVariables.stopAnimations() -- add params? Perhaps we could change function to "changeAnimations" with the first parameter being whether we should stop or play, and add animations in following parameters
+	GameVariables.FC_IdleTRACK:Stop()
+end
+
+function GameVariables.boolCheck(a, b, c)
+	for _, v in pairs({a,b,c}) do
+		if v == true then
+			return false
+		end
+	end
+-- if none of the bools are currently active (true) then the desired action can be completed as it won't interrupt any other action, so we return function as true.
+	return true
+end
+
+function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
+	if GameVariables.pairedChain <= 2 then
+		
+		if followupCombo or (GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying) then -- For followup attacks
+			if GameVariables.pairedAttack and GameVariables.pairedAttack.IsPlaying then -- runs for the attacker
+			GameVariables.pairedAttack:Stop()
+				if GameVariables.pairedAttack == GameVariables.FC_SyncBlock1LTRACK then
+					GameVariables.pairedAttack = GameVariables.FC_SyncBlock1RTRACK
+				elseif GameVariables.pairedAttack == GameVariables.FC_SyncBlock1RTRACK then
+					GameVariables.pairedAttack = GameVariables.FC_SyncBlock1LTRACK
+				elseif GameVariables.pairedAttack == GameVariables.FC_SyncBlock2LTRACK then
+					GameVariables.pairedAttack = GameVariables.FC_SyncBlock2RTRACK
+				elseif GameVariables.pairedAttack == GameVariables.FC_SyncBlock2RTRACK then
+					GameVariables.pairedAttack = GameVariables.FC_SyncBlock2LTRACK
+				end
+				
+			elseif GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying then -- runs for the receiver
+			GameVariables.pairedBlock:Stop()
+				if GameVariables.pairedBlock == GameVariables.FC_SyncBlock1LRECEIVERTRACK then
+					GameVariables.pairedBlock = GameVariables.FC_SyncBlock1RRECEIVERTRACK
+				elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock1RRECEIVERTRACK then
+					GameVariables.pairedBlock = GameVariables.FC_SyncBlock1LRECEIVERTRACK
+				elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock2LRECEIVERTRACK then
+					GameVariables.pairedBlock = GameVariables.FC_SyncBlock2RRECEIVERTRACK
+				elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock2RRECEIVERTRACK then
+					GameVariables.pairedBlock = GameVariables.FC_SyncBlock2LRECEIVERTRACK
+				end
+			end
+		
+		else -- for non-followup attacks
+			
+			if (sentAnimPair and sentAnimPair[1] == 1) or (GameVariables.animPair and GameVariables.animPair[1] == 1) then
+				if (sentAnimPair and sentAnimPair[2] == 1) or (GameVariables.animPair and GameVariables.animPair[2] == 1) then
+					GameVariables.pairedAttack = GameVariables.FC_SyncBlock1LTRACK
+					GameVariables.pairedBlock = GameVariables.FC_SyncBlock1LRECEIVERTRACK
+				elseif (sentAnimPair and sentAnimPair[2] == 2) or (GameVariables.animPair and GameVariables.animPair[2] == 2) then
+					GameVariables.pairedAttack = GameVariables.FC_SyncBlock2LTRACK
+					GameVariables.pairedBlock = GameVariables.FC_SyncBlock2LRECEIVERTRACK
+				end
+			
+			elseif (sentAnimPair and sentAnimPair[1] == 2) or (GameVariables.animPair and GameVariables.animPair[1] == 2) then
+				if (sentAnimPair and sentAnimPair[2] == 1) or (GameVariables.animPair and GameVariables.animPair[2] == 1) then
+					GameVariables.pairedAttack = GameVariables.FC_SyncBlock1RTRACK
+					GameVariables.pairedBlock = GameVariables.FC_SyncBlock1RRECEIVERTRACK
+				elseif (sentAnimPair and sentAnimPair[2] == 2) or (GameVariables.animPair and GameVariables.animPair[2] == 2) then
+					GameVariables.pairedAttack = GameVariables.FC_SyncBlock2RTRACK
+					GameVariables.pairedBlock = GameVariables.FC_SyncBlock2RRECEIVERTRACK
+				end
+			end
+		end
+		
+		GameVariables.pairedPlaying = true
 	
+		GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed
+		GameVariables.humanoid.WalkSpeed = 0
+		
+		if GameVariables.isBlocking then
+		
+			GameVariables.pairedBlock:Play()
+		
+		elseif GameVariables.isAttacking then
+		
+			GameVariables.currentAttack = GameVariables.pairedAttack
+			
+			if GameVariables.distanceBetween ~= 3 then -- we want the sync to happen at three studs ideally
+				local enemyRoot = GameVariables.raycastResult.Instance.Parent.HumanoidRootPart
+				
+				local direction = enemyRoot.Position - GameVariables.humanoidRootPart.Position -- the direction toward the enemy from the player
+				local normalizedDirection = direction.Unit -- makes the unit measuring toward the player equal to 1. It is the |absolute value|
+				
+				local tweenPart = GameVariables.character:WaitForChild("HumanoidRootPart")
+
+				local Info = TweenInfo.new(
+
+					0.2,
+					Enum.EasingStyle.Linear,
+					Enum.EasingDirection.Out,
+					0,
+					false,
+					0
+
+				)
+
+				local tweenGoals = {}
+				
+				tweenGoals.CFrame = CFrame.new(enemyRoot.Position - normalizedDirection * 3) * CFrame.Angles(GameVariables.humanoidRootPart.CFrame:ToOrientation())
+																							    -- This above basically makes the player maintain the same orientation.
+				local repositionTween = GameVariables.TweenService:Create(tweenPart, Info, tweenGoals)
+				repositionTween:Play()
+			end
+				
+			GameVariables.pairedAttack:Play()
+			
+		--end
+		-- player will play their part of the synched block while the enemy does theirs.
+		end
+	end
+end
+
+--[[
+function GameVariables.attack(followupCombo)
+	if GameVariables.isEnemyHoldingBlock then
+		GameVariables.isAttacking = true
+		GameVariables.synchedBlock(nil, followupCombo)
+	else
+		local randAttackTABLE = {}
+		if GameVariables.comboCounter == 0 then
+			local randNumber
+			GameVariables.randAttack = nil
+			if followupCombo == true then -- players will be possibly able to do uppercuts if they are doing a followup combo from a past combo
+				randNumber = math.random(2, 3)
+			elseif not followupCombo then
+				randNumber = math.random(1, 2) -- on a new combo without a followup, they can do only jabs or hooks on lvl 1's
+			end
+			-- a random number will be generated from above
+			if randNumber == 1 then -- Hooks
+			GameVariables.randLvl1Type = "Jabs" -- Will choose randomly between a set of attack types.
+			elseif randNumber == 2 then
+				GameVariables.randLvl1Type = "Hooks"
+			elseif randNumber == 3 then
+				GameVariables.randLvl1Type = "Uppercuts"
+			end
+		end
+		
+		if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid.Health > 10 then
+			
+			if not GameVariables.randAttack then -- This will run if the player hasn't started a combo yet
+				for _, v in pairs(GameVariables.attack1Table) do -- This will get all attacks that are in the given attackSeries and puts them in a table, then randomly selects one of them by index number.
+					if v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
+						table.insert(randAttackTABLE, v)
+					end
+				end
+				GameVariables.randAttack = randAttackTABLE[math.random(1,#randAttackTABLE)]
+				
+			else -- The player has thrown an attack before.
+				
+				local sameAttackChance = math.random(1,100)
+				if sameAttackChance > 10 or GameVariables.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
+					for _, v in pairs(GameVariables.attack1Table) do
+						if v ~= GameVariables.randAttack and v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
+							GameVariables.randAttack = v
+							break
+						end
+					end
+				end
+			end
+			
+			if GameVariables.lastAttack and GameVariables.lastAttack.IsPlaying and not GameVariables.isAttacking then
+				GameVariables.lastAttack:Stop()
+			end
+			
+			GameVariables.currentAttack = GameVariables.randAttack.Animation
+			
+			GameVariables.isAttacking = true
+			GameVariables.randAttack:Play()
+			GameVariables.lastAttack = GameVariables.randAttack
+			GameVariables.comboCounter += 1
+			
+		elseif GameVariables.comboCounter >= 3 or GameVariables.enemyHumanoid.Health <= 10 then
+			GameVariables.randAttack = GameVariables.attack2Table[math.random(1, #GameVariables.attack2Table)]
+
+			if GameVariables.lastAttack and GameVariables.lastAttack.IsPlaying and not GameVariables.isAttacking then
+				GameVariables.lastAttack:Stop()
+			end
+			
+			GameVariables.currentAttack = GameVariables.randAttack.Animation
+			GameVariables.isAttacking = true
+			GameVariables.randAttack:Play()
+			GameVariables.lastAttack = GameVariables.randAttack
+			GameVariables.comboCounter+=1
+
+		end
+	end
+end
+--]]
+
+function GameVariables.receive(currentAttackID, Protocol)
+	
+	if GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying then
+		GameVariables.currentReceiveAnimTRACK:Stop()
+	end
+	if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
+	GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
+	elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
+	GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
+	elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
+	elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
+	elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
+	elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
+	end
+	GameVariables.currentReceiveAnimTRACK:Play()
+	
+end
+
+function GameVariables.Set(givenObject, newValue)
+    givenObject = newValue
 	GameVariables.LocalBindableEvent:Fire(givenObject, newValue)
+end
+
+function GameVariables.Sync()
+	GameVariables.LocalBindableEvent.Event:Connect(function(givenObject, newValue)
+		givenObject = newValue
+		print(givenObject)
+		warn("neext")
+	end)
 end
 
 return GameVariables

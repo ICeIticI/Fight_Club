@@ -411,6 +411,7 @@ function GameVariables.receive(currentAttackID, Protocol)
 	
 end
 
+
 function GameVariables.Set(givenObject, newValue)
     givenObject = newValue
 	GameVariables.LocalBindableEvent:Fire(givenObject, newValue)

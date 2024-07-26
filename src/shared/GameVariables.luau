@@ -1,6 +1,17 @@
 local GameVariables = {}
 
-GameVariables.player = game.Players.LocalPlayer
+GameVariables.player = game:GetService("Players").LocalPlayer
+
+while not GameVariables.player do
+	wait(0.1)
+	print("waiting for player...")
+	if GameVariables.player ~= nil then
+		warn("WEEE'REE FREEEE")
+		break
+	end
+end
+
+print(GameVariables.player)
 GameVariables.character = GameVariables.player.Character or GameVariables.player.CharacterAdded:Wait()
 GameVariables.humanoid = GameVariables.character:WaitForChild("Humanoid")
 GameVariables.previousHealth = GameVariables.humanoid.Health -- This var is used to determine how much damage the character takes.
@@ -86,11 +97,11 @@ GameVariables.animPair = nil
 
 GameVariables.actionTable = {GameVariables.isBlocking, GameVariables.isAttacking, GameVariables.isDodging}
 
-GameVariables.rayParams = RaycastParams.new()
-GameVariables.rayParams.FilterDescendantsInstances = GameVariables.character:GetChildren()
-GameVariables.rayParams.FilterType = Enum.RaycastFilterType.Exclude
+-- GameVariables.rayParams = RaycastParams.new()
+-- GameVariables.rayParams.FilterDescendantsInstances = GameVariables.character:GetChildren()
+-- GameVariables.rayParams.FilterType = Enum.RaycastFilterType.Exclude
 
-GameVariables.raycastResult = workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, GameVariables.rayParams)
+-- GameVariables.raycastResult = workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, GameVariables.rayParams)
 
 -- NOTE*: Perhaps instead of creating a bunch of animations, we make a single animation then when the player needs to animate, load the animId into the animation. Id's would prob be in a table.
 -- *animations (attacker)*
@@ -389,27 +400,27 @@ function GameVariables.attack(followupCombo)
 end
 --]]
 
-function GameVariables.receive(currentAttackID, Protocol)
+-- function GameVariables.receive(currentAttackID, Protocol)
 	
-	if GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying then
-		GameVariables.currentReceiveAnimTRACK:Stop()
-	end
-	if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
-	GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
-	elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
-	GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
-	elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
-		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
-	elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
-		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
-	elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
-		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
-	elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
-		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
-	end
-	GameVariables.currentReceiveAnimTRACK:Play()
+-- 	if GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying then
+-- 		GameVariables.currentReceiveAnimTRACK:Stop()
+-- 	end
+-- 	if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
+-- 	GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
+-- 	elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
+-- 	GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
+-- 	elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
+-- 		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
+-- 	elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
+-- 		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
+-- 	elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
+-- 		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
+-- 	elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
+-- 		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
+-- 	end
+-- 	GameVariables.currentReceiveAnimTRACK:Play()
 	
-end
+-- end
 
 
 function GameVariables.Set(givenObject, newValue)
@@ -423,6 +434,11 @@ function GameVariables.Sync()
 		print(givenObject)
 		warn("neext")
 	end)
+end
+
+function GameVariables.SetPlayer(givenPlayer)
+	GameVariables.player = givenPlayer
+	warn(tostring(givenPlayer) .. " is the player that has been set for " .. tostring(GameVariables.player))
 end
 
 return GameVariables

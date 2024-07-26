@@ -1,5 +1,5 @@
+--local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
--- local GlobalBindableEvent = game.ReplicatedStorage:WaitForChild("GlobalBindableEvent")
 
 GlobalRemoteEvent.OnServerEvent:Connect(function(_, hitPlayer, Protocol, currentAttackID, animPair, pairedChain)
 	
@@ -12,6 +12,7 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(_, hitPlayer, Protocol, current
 	elseif Protocol == "Haymaker" then
 	hitPlayer.Character.Humanoid.Health -= 11
 	elseif Protocol == "AttackStarted" or Protocol == "HoldingBlock" then
+		print(Protocol)
 		GlobalRemoteEvent:FireClient(hitPlayer, nil, Protocol, animPair, pairedChain)
 	end
 end)

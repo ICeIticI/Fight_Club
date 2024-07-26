@@ -4,8 +4,6 @@ local GlobalRemoteEvent = Instance.new("RemoteEvent")
 GlobalRemoteEvent.Name = "GlobalRemoteEvent"
 GlobalRemoteEvent.Parent = game.ReplicatedStorage
 
-
-
 Players.PlayerAdded:Connect(function(player)
 	local plrObjectsFolder = Instance.new("Folder")
 	plrObjectsFolder.Name = player.Name .. "_GameObjects"

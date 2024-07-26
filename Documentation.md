@@ -519,8 +519,16 @@ upd: slowed the player when locked on, and also just slowed the general speed of
   - What I intend to do: Fix the delay issue, allow mouse spamming for sync blocks,
   	make player do normal attacks again when enemy drops guard.
 
+
   7/21-22/24 (Switching to OOP)
   - What I was working on: Alright so I was completely overwhelmed with how many lines of code were in my single local
     script, let alone the server one as well (wasnt as bad as my client script thom which had over 1100+ lines! Yikes!), so I thought to re-organize my code into multiple scripts instead of just a single local and server script. I also decided to switch to VSC since this project is seemingly bigger than I thought. So far, I added the LockOnSystem script (for when the player presses Q... basically the entire LockOnDebounce variable detection part of my code), and also the UserInput as well. The code isn't really implemented yet as I am trying to figure out client-based communication with a module script involved. Speaking of, I added a module script called GameVariables. This is where all of my variables that the other local scripts depend on will live. These scripts will pull and use from the module's variables as they need. But the issue is I'm trying to get local changes to sync with the rest of the scripts. I tried a remote event first (didn't work because I was trying to use the OnClientEvent from a module that was client-based, which only servers can do), and I last ended off trying to use a bindable event.
   
   - What I intend to do: Hopefully get the bindable event to work with local synchronization for variable changes, then add the rest of the code in various scripts (organized like the OOP way), and hopefully continue where I left off before the OOP reboot.
+
+  7/26/24
+
+  - What I was working on: I actually got the scripts split up and working! It took awhile to figure out, but yeah it wasn't that bad! In fact, I didn't even need a sync() function, as module scripts sync automatically. I split up those two giant local and server scripts into many scripts. I divided the old local script into 4 nice scripts, and split the server script into 2. All of the variables for the local scripts rest inside the GameVariables module script. There is one small issue though: The module script will
+  only work for one client at a time as of now, and cloning the script is very bad practice and can cause other issues as well. Because it only works with one client, sync blocking doesn't work until it gets fixed.
+
+  - What I intend to do: Make the script compatable with all clients in a server, then it should be able to work properly. After that, continue where I left off with uh... mouse spamming for sync blocking and making players do normal attacks after the enemy drops their guard... ahahaha!

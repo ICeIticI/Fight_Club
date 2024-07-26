@@ -1,6 +1,9 @@
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
+print(GameVariables)
+
+-- GameVariables.SetPlayer(Players.LocalPlayer)
 
 local function attack(followupCombo)
 	if GameVariables.isEnemyHoldingBlock then
@@ -77,24 +80,52 @@ local function attack(followupCombo)
 	end
 end
 
-GameVariables.Sync()
+-- GameVariables.Sync()
 
-local player = GameVariables.player
-local humanoidRootPart = GameVariables.humanoidRootPart
-local TestObject = GameVariables.TestObject
-print(player)
-wait(3)
-GameVariables.Set(TestObject, 9)
-warn("changed on first client")
+-- local player = GameVariables.player
+-- local humanoidRootPart = GameVariables.humanoidRootPart
+-- local TestObject = GameVariables.TestObject
+-- print(player)
+-- wait(3)
+-- GameVariables.Set(TestObject, 9)
+-- warn("changed on first client")
+
+for _, v in pairs(GameVariables.hitboxesFolderATTACK) do --[[Creates :Connect events for each element in the 
+										   hitboxesFolderATTACK folder.]]		
+	v.Touched:Connect(function(touchedObject)
+		if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") then
+			GameVariables.hitDebounce = true
+			local enemyCharacter = touchedObject.Parent.Parent
+			local enemyPlayer = game.Players:GetPlayerFromCharacter(enemyCharacter)
+			
+			if GameVariables.currentAttack:GetAttribute("AttackLevel") == 1 then
+				GameVariables.Protocol = "Hook" -- Protocol is used to determine what function in the server to perform when a RemoteEvent is used. A "Hook" Protocol will do more damage than a "Jab" Protocol for example.
+			elseif GameVariables.currentAttack:GetAttribute("AttackLevel") == 2 then
+				GameVariables.Protocol = "Haymaker"
+			end
+			
+			if not GameVariables.attackFrames then
+				repeat
+					wait()
+				until GameVariables.attackFrames or not GameVariables.isAttacking
+			end
+			
+			if enemyPlayer and GameVariables.isAttacking then
+				GameVariables.GlobalRemoteEvent:FireServer(enemyPlayer, GameVariables.Protocol, GameVariables.currentAttack.AnimationId) -- Deal damage to other client.
+			end		
+		end
+	end)
+end
+
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and not GameVariables.waitingToAttack and GameVariables.pairedChain <= 2 and (GameVariables.raycastResult.Instance.Position - humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and not GameVariables.waitingToAttack and GameVariables.pairedChain <= 2 and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
 																																				-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
 		--[[ When the player presses attack, we want to randomly choose between a series of hooks or jabs
 			 for attack level 1. Once combo counter finishes it's 3rd attack, we will transition to level
 			 2 attacks (haymakers).]]
 
-		GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - humanoidRootPart.Position).Magnitude
+		GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 		GameVariables.followUpCount += 1
 		if GameVariables.isEnemyHoldingBlock then
 			GameVariables.pairedChain += 1
@@ -107,10 +138,10 @@ UserInputService.InputBegan:Connect(function(input)
 				GameVariables.Protocol = "AttackStarted"
 				GameVariables.GlobalRemoteEvent:FireServer(Players:GetPlayerFromCharacter(GameVariables.enemyChar), GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
 			end
-			print(GameVariables.isAttacking)
 			attack()
 
 		elseif GameVariables.canFollowUp == true then -- the player followed up with their attack.
+
         GameVariables.waitingToAttack = true
 			print("waiting on next attack")
 			while GameVariables.isAttacking do

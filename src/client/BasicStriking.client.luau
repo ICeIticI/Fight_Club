@@ -112,6 +112,7 @@ for _, v in pairs(GameVariables.hitboxesFolderATTACK) do --[[Creates :Connect ev
 			
 			if enemyPlayer and GameVariables.isAttacking then
 				GameVariables.GlobalRemoteEvent:FireServer(enemyPlayer, GameVariables.Protocol, GameVariables.currentAttack.AnimationId) -- Deal damage to other client.
+				-- warn(GameVariables.hitboxesFolder.Parent)
 			end		
 		end
 	end)
@@ -137,6 +138,7 @@ UserInputService.InputBegan:Connect(function(input)
 				GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
 				GameVariables.Protocol = "AttackStarted"
 				GameVariables.GlobalRemoteEvent:FireServer(Players:GetPlayerFromCharacter(GameVariables.enemyChar), GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
+				warn("protocol has been sent 2")
 			end
 			attack()
 
@@ -155,6 +157,7 @@ UserInputService.InputBegan:Connect(function(input)
 					GameVariables.animPair = {math.random(1,2), math.random(1,2)}
 					GameVariables.Protocol = "AttackStarted"
 					GameVariables.GlobalRemoteEvent:FireServer(Players:GetPlayerFromCharacter(GameVariables.enemyChar), GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
+					warn("protocol has been sent 3")
 				end
 				print(GameVariables.isAttacking)
 				attack(true) -- true is used for a followup combo, which enables uppercuts.

@@ -1,8 +1,8 @@
 --local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 
-GlobalRemoteEvent.OnServerEvent:Connect(function(_, hitPlayer, Protocol, currentAttackID, animPair, pairedChain)
-	
+GlobalRemoteEvent.OnServerEvent:Connect(function(ee, hitPlayer, Protocol, currentAttackID, animPair, pairedChain)
+	print("received fromy".. tostring(ee))
 	if Protocol == "Hook" or Protocol == "Haymaker" then
 		local otherProtocol = "Receive"
 		GlobalRemoteEvent:FireClient(hitPlayer, currentAttackID, otherProtocol)

@@ -76,7 +76,7 @@ for _, v in pairs(GameVariables.AllAnimations) do -- When the player presses an 
 						CFrame = tweenPart.CFrame * CFrame.new(0,0,2)
 					}
 					
-					local reactTween = GameVariables.TweenService:Create(tweenPart, Info, tweenGoals)
+					local reactTween = game:GetService("TweenService"):Create(tweenPart, Info, tweenGoals)
 					reactTween:Play()
 				end
 			end

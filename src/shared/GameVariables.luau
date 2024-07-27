@@ -1,3 +1,4 @@
+local TweenService = game:GetService("TweenService")
 local GameVariables = {}
 
 GameVariables.player = game:GetService("Players").LocalPlayer
@@ -311,7 +312,7 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 				
 				tweenGoals.CFrame = CFrame.new(enemyRoot.Position - normalizedDirection * 3) * CFrame.Angles(GameVariables.humanoidRootPart.CFrame:ToOrientation())
 																							    -- This above basically makes the player maintain the same orientation.
-				local repositionTween = GameVariables.TweenService:Create(tweenPart, Info, tweenGoals)
+				local repositionTween = game:GetService("TweenService"):Create(tweenPart, Info, tweenGoals)
 				repositionTween:Play()
 			end
 				

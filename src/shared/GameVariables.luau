@@ -76,7 +76,7 @@ GameVariables.attackFrames = false -- when the StartOfAttack marker fires in att
 --GameVariables.attackEnded = false
 
 GameVariables.isDodging = false
-GameVariables.canFollowUp = false
+GameVariables.canFollowUp = false -- The status of whether a player is able to do a followup attack. If its true, then that means they are able to do one. 
 GameVariables.isEnemyHoldingBlock = false -- for attacks to be synched attacks when blocked in a synched block.
 GameVariables.followUpCount = 0 -- followUpCount is used so a followup wont be done twice back to back when a follow up is done
 GameVariables.lastAttack = nil
@@ -204,11 +204,10 @@ GameVariables.attack2Table = {GameVariables.FC_LeftHaymakerTRACK, GameVariables.
 
 GameVariables.pairedAttacksTable = {GameVariables.FC_SyncBlock1LTRACK, GameVariables.FC_SyncBlock1RTRACK, GameVariables.FC_SyncBlock2LTRACK, GameVariables.FC_SyncBlock2RTRACK}
 GameVariables.pairedBlocksTable = {GameVariables.FC_SyncBlock1LRECEIVERTRACK, GameVariables.FC_SyncBlock1RRECEIVERTRACK, GameVariables.FC_SyncBlock2LRECEIVERTRACK, GameVariables.FC_SyncBlock2RRECEIVERTRACK}
-GameVariables.pairedAttack = nil
-GameVariables.pairedBlock = nil
-GameVariables.pairedChain = 0 -- players can only do 2 sync block attacks in a row.
-
-GameVariables.TestObject = 12
+GameVariables.pairedAttack = nil -- the variable for which paired attack the attacker is doing
+GameVariables.pairedBlock = nil -- the variable for which paired block the attacker is doing
+GameVariables.pairedChain = 0 -- The tracker of the character's sync block attack chain. They can only do as many as the max allows
+GameVariables.PairedChainMAX = 2 -- The max value for pairedChain. This can be changed to 3 if needed.
 
 -- functions
 function GameVariables.stopAnimations() -- add params? Perhaps we could change function to "changeAnimations" with the first parameter being whether we should stop or play, and add animations in following parameters
@@ -226,7 +225,7 @@ function GameVariables.boolCheck(a, b, c)
 end
 
 function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
-	if GameVariables.pairedChain <= 2 then
+	if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 		
 		if followupCombo or (GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying) then -- For followup attacks
 			if GameVariables.pairedAttack and GameVariables.pairedAttack.IsPlaying then -- runs for the attacker
@@ -323,106 +322,6 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 		end
 	end
 end
-
---[[
-function GameVariables.attack(followupCombo)
-	if GameVariables.isEnemyHoldingBlock then
-		GameVariables.isAttacking = true
-		GameVariables.synchedBlock(nil, followupCombo)
-	else
-		local randAttackTABLE = {}
-		if GameVariables.comboCounter == 0 then
-			local randNumber
-			GameVariables.randAttack = nil
-			if followupCombo == true then -- players will be possibly able to do uppercuts if they are doing a followup combo from a past combo
-				randNumber = math.random(2, 3)
-			elseif not followupCombo then
-				randNumber = math.random(1, 2) -- on a new combo without a followup, they can do only jabs or hooks on lvl 1's
-			end
-			-- a random number will be generated from above
-			if randNumber == 1 then -- Hooks
-			GameVariables.randLvl1Type = "Jabs" -- Will choose randomly between a set of attack types.
-			elseif randNumber == 2 then
-				GameVariables.randLvl1Type = "Hooks"
-			elseif randNumber == 3 then
-				GameVariables.randLvl1Type = "Uppercuts"
-			end
-		end
-		
-		if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid.Health > 10 then
-			
-			if not GameVariables.randAttack then -- This will run if the player hasn't started a combo yet
-				for _, v in pairs(GameVariables.attack1Table) do -- This will get all attacks that are in the given attackSeries and puts them in a table, then randomly selects one of them by index number.
-					if v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
-						table.insert(randAttackTABLE, v)
-					end
-				end
-				GameVariables.randAttack = randAttackTABLE[math.random(1,#randAttackTABLE)]
-				
-			else -- The player has thrown an attack before.
-				
-				local sameAttackChance = math.random(1,100)
-				if sameAttackChance > 10 or GameVariables.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
-					for _, v in pairs(GameVariables.attack1Table) do
-						if v ~= GameVariables.randAttack and v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
-							GameVariables.randAttack = v
-							break
-						end
-					end
-				end
-			end
-			
-			if GameVariables.lastAttack and GameVariables.lastAttack.IsPlaying and not GameVariables.isAttacking then
-				GameVariables.lastAttack:Stop()
-			end
-			
-			GameVariables.currentAttack = GameVariables.randAttack.Animation
-			
-			GameVariables.isAttacking = true
-			GameVariables.randAttack:Play()
-			GameVariables.lastAttack = GameVariables.randAttack
-			GameVariables.comboCounter += 1
-			
-		elseif GameVariables.comboCounter >= 3 or GameVariables.enemyHumanoid.Health <= 10 then
-			GameVariables.randAttack = GameVariables.attack2Table[math.random(1, #GameVariables.attack2Table)]
-
-			if GameVariables.lastAttack and GameVariables.lastAttack.IsPlaying and not GameVariables.isAttacking then
-				GameVariables.lastAttack:Stop()
-			end
-			
-			GameVariables.currentAttack = GameVariables.randAttack.Animation
-			GameVariables.isAttacking = true
-			GameVariables.randAttack:Play()
-			GameVariables.lastAttack = GameVariables.randAttack
-			GameVariables.comboCounter+=1
-
-		end
-	end
-end
---]]
-
--- function GameVariables.receive(currentAttackID, Protocol)
-	
--- 	if GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying then
--- 		GameVariables.currentReceiveAnimTRACK:Stop()
--- 	end
--- 	if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
--- 	GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
--- 	elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
--- 	GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
--- 	elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
--- 		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
--- 	elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
--- 		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
--- 	elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
--- 		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
--- 	elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
--- 		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
--- 	end
--- 	GameVariables.currentReceiveAnimTRACK:Play()
-	
--- end
-
 
 function GameVariables.Set(givenObject, newValue)
     givenObject = newValue

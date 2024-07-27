@@ -80,16 +80,6 @@ local function attack(followupCombo)
 	end
 end
 
--- GameVariables.Sync()
-
--- local player = GameVariables.player
--- local humanoidRootPart = GameVariables.humanoidRootPart
--- local TestObject = GameVariables.TestObject
--- print(player)
--- wait(3)
--- GameVariables.Set(TestObject, 9)
--- warn("changed on first client")
-
 for _, v in pairs(GameVariables.hitboxesFolderATTACK) do --[[Creates :Connect events for each element in the 
 										   hitboxesFolderATTACK folder.]]		
 	v.Touched:Connect(function(touchedObject)
@@ -112,7 +102,6 @@ for _, v in pairs(GameVariables.hitboxesFolderATTACK) do --[[Creates :Connect ev
 			
 			if enemyPlayer and GameVariables.isAttacking then
 				GameVariables.GlobalRemoteEvent:FireServer(enemyPlayer, GameVariables.Protocol, GameVariables.currentAttack.AnimationId) -- Deal damage to other client.
-				-- warn(GameVariables.hitboxesFolder.Parent)
 			end		
 		end
 	end)
@@ -120,7 +109,7 @@ end
 
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and not GameVariables.waitingToAttack and GameVariables.pairedChain <= 2 and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and not GameVariables.waitingToAttack and GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.followUpCount <= 1 and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
 																																				-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
 		--[[ When the player presses attack, we want to randomly choose between a series of hooks or jabs
 			 for attack level 1. Once combo counter finishes it's 3rd attack, we will transition to level
@@ -128,17 +117,16 @@ UserInputService.InputBegan:Connect(function(input)
 
 		GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 		GameVariables.followUpCount += 1
-		if GameVariables.isEnemyHoldingBlock then
+		if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 			GameVariables.pairedChain += 1
 			print("paired chain added. Num of times: ".. tostring(GameVariables.pairedChain))
 		end
-		
+		print(GameVariables.pairedChain)
 		if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.waitingToAttack then
-			if GameVariables.pairedChain <= 2 then
+			if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 				GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
 				GameVariables.Protocol = "AttackStarted"
 				GameVariables.GlobalRemoteEvent:FireServer(Players:GetPlayerFromCharacter(GameVariables.enemyChar), GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
-				warn("protocol has been sent 2")
 			end
 			attack()
 
@@ -150,14 +138,14 @@ UserInputService.InputBegan:Connect(function(input)
 				wait()
 			end
 			if GameVariables.followUpCount == 1 then
+				warn("followup")
 				--[[ *NOTE: Uppercuts will ONLY be doable on a follow-up, so I will
 				            need to create a unique attack() function to make it
 				            a choice.]]
-				if GameVariables.pairedChain <= 2 then
+				if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 					GameVariables.animPair = {math.random(1,2), math.random(1,2)}
 					GameVariables.Protocol = "AttackStarted"
 					GameVariables.GlobalRemoteEvent:FireServer(Players:GetPlayerFromCharacter(GameVariables.enemyChar), GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
-					warn("protocol has been sent 3")
 				end
 				print(GameVariables.isAttacking)
 				attack(true) -- true is used for a followup combo, which enables uppercuts.

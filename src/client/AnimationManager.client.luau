@@ -10,19 +10,23 @@ for _, v in pairs(GameVariables.AllAnimations) do -- When the player presses an 
 		
 		v:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
 			GameVariables.attackFrames = true
-			GameVariables.canFollowUp = true
-			GameVariables.followUpCount = 0
+			-- GameVariables.followUpCount = 1
+			print(GameVariables.followUpCount)
+		end)
+
+		v:GetMarkerReachedSignal("Anti_Followup"):Connect(function()
+			GameVariables.canFollowUp = false
+			print("anti frame reached")
 		end)
 		
 		v:GetMarkerReachedSignal("EndOfAttack"):Connect(function() -- Runs when player can attack cancel
-			--comboCounter = 1
 			GameVariables.isAttacking = false
 			GameVariables.hitDebounce = false
-			GameVariables.canFollowUp = false
-			--warn("attack avaliable")
+
 			if currentAnim:GetAttribute("AttackLevel") == 2 then
 				GameVariables.comboCounter = 0
 			end
+
 		end)
 		
 		v.Stopped:Connect(function() -- Runs when the animation stops for any reason
@@ -32,18 +36,23 @@ for _, v in pairs(GameVariables.AllAnimations) do -- When the player presses an 
 			
 			elseif v.TimePosition == v.Length and not attackEnded then -- Runs when full animation is done playing
             GameVariables.comboCounter = 0
-				delay(3, function()
-					GameVariables.pairedChain = 0
-					print("reached")
-				end)
-				print("paired chain 000")
-				GameVariables.isAttacking = false
-				GameVariables.hitDebounce = false
+				
+				-- print("paired chain 000")
+				
 			end
 			
 			if v.Animation:GetAttribute("Paired") == true and v.TimePosition == v.Length then
+				delay(0.5, function()
+					GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
+					GameVariables.followUpCount = 0 -- If this value is more than 1, the player cannot attack
+					GameVariables.isAttacking = false
+					GameVariables.hitDebounce = false
+					print("reached")
+				end)
 				GameVariables.pairedPlaying = false
+				GameVariables.isAttacking = false
 				GameVariables.humanoid.WalkSpeed = GameVariables.previousWalkSpeed
+				GameVariables.canFollowUp = true
 			end
 			
 			attackEnded = false

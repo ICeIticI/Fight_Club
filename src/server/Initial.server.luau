@@ -83,6 +83,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_LeftHaymaker.AnimationId = "rbxassetid://18195506368"
 	FC_LeftHaymaker:SetAttribute("AttackLevel", 2)
 	FC_LeftHaymaker:SetAttribute("AnimType", 1)
+	FC_LeftHaymaker:SetAttribute("AttackSeries", "Haymakers")
 	FC_LeftHaymaker.Parent = plrObjectsFolder
 	
 	local FC_RightHaymaker = Instance.new("Animation")
@@ -90,6 +91,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_RightHaymaker.AnimationId = "rbxassetid://17216832518"
 	FC_RightHaymaker:SetAttribute("AttackLevel", 2)
 	FC_RightHaymaker:SetAttribute("AnimType", 1)
+	FC_RightHaymaker:SetAttribute("AttackSeries", "Haymakers")
 	FC_RightHaymaker.Parent = plrObjectsFolder
 	
 	
@@ -197,6 +199,74 @@ Players.PlayerAdded:Connect(function(player)
 	FC_SyncBlock2RRECEIVER:SetAttribute("AnimDirection", "Right")
 	FC_SyncBlock2RRECEIVER:SetAttribute("Paired", true)
 	FC_SyncBlock2RRECEIVER.Parent = plrObjectsFolder
+
+	local FC_SyncBlock3L1 = Instance.new("Animation")
+	FC_SyncBlock3L1.Name = "FC_SyncBlock3L1"
+	FC_SyncBlock3L1.AnimationId = "rbxassetid://18740951548"
+	FC_SyncBlock3L1:SetAttribute("AttackLevel", 3)
+	FC_SyncBlock3L1:SetAttribute("AnimType", 1)
+	FC_SyncBlock3L1:SetAttribute("AnimDirection", "Left")
+	FC_SyncBlock3L1:SetAttribute("Paired", true)
+	FC_SyncBlock3L1.Parent = plrObjectsFolder
+	
+	local FC_SyncBlock3L1RECEIVER = Instance.new("Animation")
+	FC_SyncBlock3L1RECEIVER.Name = "FC_SyncBlock3L1RECEIVER"
+	FC_SyncBlock3L1RECEIVER.AnimationId = "rbxassetid://18740954203"
+	FC_SyncBlock3L1RECEIVER:SetAttribute("AnimType", 2)
+	FC_SyncBlock3L1RECEIVER:SetAttribute("AnimDirection", "Left")
+	FC_SyncBlock3L1RECEIVER:SetAttribute("Paired", true)
+	FC_SyncBlock3L1RECEIVER.Parent = plrObjectsFolder
+
+	local FC_SyncBlock3R1 = Instance.new("Animation")
+	FC_SyncBlock3R1.Name = "FC_SyncBlock3R1"
+	FC_SyncBlock3R1.AnimationId = "rbxassetid://18743711875"
+	FC_SyncBlock3R1:SetAttribute("AttackLevel", 3)
+	FC_SyncBlock3R1:SetAttribute("AnimType", 1)
+	FC_SyncBlock3R1:SetAttribute("AnimDirection", "Right")
+	FC_SyncBlock3R1:SetAttribute("Paired", true)
+	FC_SyncBlock3R1.Parent = plrObjectsFolder
+	
+	local FC_SyncBlock3R1RECEIVER = Instance.new("Animation")
+	FC_SyncBlock3R1RECEIVER.Name = "FC_SyncBlock3R1RECEIVER"
+	FC_SyncBlock3R1RECEIVER.AnimationId = "rbxassetid://18743714470"
+	FC_SyncBlock3R1RECEIVER:SetAttribute("AnimType", 2)
+	FC_SyncBlock3R1RECEIVER:SetAttribute("AnimDirection", "Right")
+	FC_SyncBlock3R1RECEIVER:SetAttribute("Paired", true)
+	FC_SyncBlock3R1RECEIVER.Parent = plrObjectsFolder
+
+	local FC_SyncBlock3L2 = Instance.new("Animation")
+	FC_SyncBlock3L2.Name = "FC_SyncBlock3L2"
+	FC_SyncBlock3L2.AnimationId = "rbxassetid://18747173117"
+	FC_SyncBlock3L2:SetAttribute("AttackLevel", 3)
+	FC_SyncBlock3L2:SetAttribute("AnimType", 1)
+	FC_SyncBlock3L2:SetAttribute("AnimDirection", "Left")
+	FC_SyncBlock3L2:SetAttribute("Paired", true)
+	FC_SyncBlock3L2.Parent = plrObjectsFolder
+	
+	local FC_SyncBlock3L2RECEIVER = Instance.new("Animation")
+	FC_SyncBlock3L2RECEIVER.Name = "FC_SyncBlock3L2RECEIVER"
+	FC_SyncBlock3L2RECEIVER.AnimationId = "rbxassetid://18747180819"
+	FC_SyncBlock3L2RECEIVER:SetAttribute("AnimType", 2)
+	FC_SyncBlock3L2RECEIVER:SetAttribute("AnimDirection", "Left")
+	FC_SyncBlock3L2RECEIVER:SetAttribute("Paired", true)
+	FC_SyncBlock3L2RECEIVER.Parent = plrObjectsFolder
+
+	local FC_SyncBlock3R2 = Instance.new("Animation")
+	FC_SyncBlock3R2.Name = "FC_SyncBlock3R2"
+	FC_SyncBlock3R2.AnimationId = "rbxassetid://18757168674"
+	FC_SyncBlock3R2:SetAttribute("AttackLevel", 3)
+	FC_SyncBlock3R2:SetAttribute("AnimType", 1)
+	FC_SyncBlock3R2:SetAttribute("AnimDirection", "Right")
+	FC_SyncBlock3R2:SetAttribute("Paired", true)
+	FC_SyncBlock3R2.Parent = plrObjectsFolder
+	
+	local FC_SyncBlock3R2RECEIVER = Instance.new("Animation")
+	FC_SyncBlock3R2RECEIVER.Name = "FC_SyncBlock3R2RECEIVER"
+	FC_SyncBlock3R2RECEIVER.AnimationId = "rbxassetid://18757172855"
+	FC_SyncBlock3R2RECEIVER:SetAttribute("AnimType", 2)
+	FC_SyncBlock3R2RECEIVER:SetAttribute("AnimDirection", "Right")
+	FC_SyncBlock3R2RECEIVER:SetAttribute("Paired", true)
+	FC_SyncBlock3R2RECEIVER.Parent = plrObjectsFolder
 	
 
 	player.CharacterAdded:Connect(function(character)
@@ -248,6 +318,7 @@ Players.PlayerAdded:Connect(function(player)
 		hitboxLeftArm.CanCollide = false
 		hitboxLeftArm.Transparency = 0.5 -- Set to fully transparent when ready to launch
 		hitboxLeftArm:SetAttribute("AttackDirection", "Left")
+		hitboxLeftArm:SetAttribute("ReceiveBox", true) -- while the left and right arm hitboxes are attackboxes, they are used in sync blocking where the enemy attacks it, so its in some cases a receivebox.
 		hitboxLeftArm.Parent = character:WaitForChild(hbFolder.Name)
 		local lftArmHB_Weld = Instance.new("Weld")
 		lftArmHB_Weld.Part0 = hitboxLeftArm
@@ -262,6 +333,7 @@ Players.PlayerAdded:Connect(function(player)
 		hitboxRightArm.CanCollide = false
 		hitboxRightArm.Transparency = 0.5
 		hitboxRightArm:SetAttribute("AttackDirection", "Right")
+		hitboxRightArm:SetAttribute("ReceiveBox", true)
 		hitboxRightArm.Parent = character:WaitForChild(hbFolder.Name)
 		local rghtArm_Weld = Instance.new("Weld")
 		rghtArm_Weld.Part0  = hitboxRightArm

@@ -8,13 +8,14 @@ print(GameVariables)
 local function attack(followupCombo)
 	if GameVariables.isEnemyHoldingBlock then
 		GameVariables.isAttacking = true
-		GameVariables.synchedBlock(nil, followupCombo)
+		GameVariables.synchedBlock(nil, followupCombo) -- followupCombo will be nil the first time, as the attack() parameter will be empty, but afterwards it will have value.
 	else
+		print("not a sync block???")
 		local randAttackTABLE = {}
 		if GameVariables.comboCounter == 0 then
 			local randNumber
 			GameVariables.randAttack = nil
-			if followupCombo == true then -- players will be possibly able to do uppercuts if they are doing a followup combo from a past combo
+			if followupCombo then -- players will be possibly able to do uppercuts if they are doing a followup combo from a past combo
 				randNumber = math.random(2, 3)
 			elseif not followupCombo then
 				randNumber = math.random(1, 2) -- on a new combo without a followup, they can do only jabs or hooks on lvl 1's
@@ -92,6 +93,8 @@ for _, v in pairs(GameVariables.hitboxesFolderATTACK) do --[[Creates :Connect ev
 				GameVariables.Protocol = "Hook" -- Protocol is used to determine what function in the server to perform when a RemoteEvent is used. A "Hook" Protocol will do more damage than a "Jab" Protocol for example.
 			elseif GameVariables.currentAttack:GetAttribute("AttackLevel") == 2 then
 				GameVariables.Protocol = "Haymaker"
+			elseif GameVariables.currentAttack:GetAttribute("Paired") and not GameVariables.currentAttack:GetAttribute("Finisher") and not GameVariables.currentAttack:GetAttribute("Counter") then -- if its paired and not a finisher or counter, then it must be a synced block.
+				GameVariables.Protocol = "SyncedBlock"
 			end
 			
 			if not GameVariables.attackFrames then
@@ -109,20 +112,19 @@ end
 
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and not GameVariables.waitingToAttack and GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.followUpCount <= 1 and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
-																																				-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and not GameVariables.waitingToAttack and GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
+																																																																									-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
 		--[[ When the player presses attack, we want to randomly choose between a series of hooks or jabs
 			 for attack level 1. Once combo counter finishes it's 3rd attack, we will transition to level
 			 2 attacks (haymakers).]]
-
 		GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 		GameVariables.followUpCount += 1
-		if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then
+		
+		if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then -- For paired attacks. To keep track of the number of times the player does a sync block.
 			GameVariables.pairedChain += 1
 			print("paired chain added. Num of times: ".. tostring(GameVariables.pairedChain))
 		end
-		print(GameVariables.pairedChain)
-		if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.waitingToAttack then
+		if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then -- for the sync block and attack to play simultaneously
 			if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 				GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
 				GameVariables.Protocol = "AttackStarted"
@@ -131,14 +133,12 @@ UserInputService.InputBegan:Connect(function(input)
 			attack()
 
 		elseif GameVariables.canFollowUp == true then -- the player followed up with their attack.
-
         GameVariables.waitingToAttack = true
 			print("waiting on next attack")
 			while GameVariables.isAttacking do
 				wait()
 			end
-			if GameVariables.followUpCount == 1 then
-				warn("followup")
+			if GameVariables.followUpCount > 1 then
 				--[[ *NOTE: Uppercuts will ONLY be doable on a follow-up, so I will
 				            need to create a unique attack() function to make it
 				            a choice.]]
@@ -147,10 +147,24 @@ UserInputService.InputBegan:Connect(function(input)
 					GameVariables.Protocol = "AttackStarted"
 					GameVariables.GlobalRemoteEvent:FireServer(Players:GetPlayerFromCharacter(GameVariables.enemyChar), GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
 				end
-				print(GameVariables.isAttacking)
-				attack(true) -- true is used for a followup combo, which enables uppercuts.
-				GameVariables.waitingToAttack = false
+				print(GameVariables.pairedChain)
+				attack(GameVariables.pairedChain) -- pairedChain is used for a followup combo, which enables uppercuts.
 			end
+			GameVariables.waitingToAttack = false
 		end
-    end
+	end
+	if GameVariables.raycastResult and input.UserInputType == Enum.UserInputType.MouseButton1 then
+		local debuggingAttackTable = {
+			GameVariables.lockOnDebounce.Value,
+			GameVariables.waitingToAttack,
+			GameVariables.canFollowUp,
+			GameVariables.pairedPlaying,
+			GameVariables.pairedChain,
+			GameVariables.followUpCount,
+			GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging),
+		   (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
+		} -- alot of the time it wont allow the player to attack no matter what, so this table will print when the player can't attack at all.
+		print("variables for attacking:")
+		print(debuggingAttackTable)
+	end
 end)

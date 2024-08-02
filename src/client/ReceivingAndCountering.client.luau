@@ -1,7 +1,7 @@
 local UserInputService = game:GetService("UserInputService")
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
-local function receive(currentAttackID, Protocol)
+local function receive(currentAttackID)
 	
 	if GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying then
 		GameVariables.currentReceiveAnimTRACK:Stop()
@@ -23,29 +23,29 @@ local function receive(currentAttackID, Protocol)
 	
 end
 
-GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttackID, Protocol, sentAnimPair, sentPairedChain) --[[Used to find out what reaction the player
+GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttackID, Protocol, sentAnimPair, sentValue) --[[Used to find out what reaction the player
     should do based on what attack the enemy
     did. ]]
-	print(Protocol)
+	print(sentValue)
     if Protocol == "Receive" then
         receive(currentAttackID)
     elseif Protocol == "AttackStarted" then -- if the enemy is starting an attack, and the player is blocking, perform a synched block.
         if GameVariables.isBlocking then
-            GameVariables.synchedBlock(sentAnimPair)
+            GameVariables.synchedBlock(sentAnimPair, sentValue)
         end
     elseif Protocol == "HoldingBlock" then
-        GameVariables.isEnemyHoldingBlock = true
+        GameVariables.isEnemyHoldingBlock = sentValue
     end
 end)
 
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) then -- blocking/dodging
-            GameVariables.isBlocking = true
-            GameVariables.FC_BlockStartTRACK:Play()
-            GameVariables.humanoid.WalkSpeed /= 1.5
-        end
-    end)
+	if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) then -- blocking/dodging  
+		GameVariables.isBlocking = true
+		GameVariables.FC_BlockStartTRACK:Play()
+		GameVariables.humanoid.WalkSpeed /= 1.5
+	end
+end)
 
 UserInputService.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton2 and (GameVariables.FC_BlockStartTRACK.IsPlaying or GameVariables.FC_BlockTRACK.IsPlaying) then

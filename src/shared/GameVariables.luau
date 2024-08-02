@@ -55,6 +55,7 @@ GameVariables.Protocol = nil
 GameVariables.walkingSpeed = 12
 GameVariables.humanoid.WalkSpeed = GameVariables.walkingSpeed
 
+GameVariables.humanoid.JumpPower = 0
 -- origins
 GameVariables.originalWalkSpeed = GameVariables.humanoid.WalkSpeed
 GameVariables.originalCamFocus = GameVariables.Camera.Focus
@@ -183,6 +184,31 @@ GameVariables.FC_SyncBlock2RTRACK = GameVariables.charAnimator:LoadAnimation(Gam
 GameVariables.FC_SyncBlock2RRECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2RRECEIVER")
 GameVariables.FC_SyncBlock2RRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock2RRECEIVER)
 
+GameVariables.FC_SyncBlock3L1 = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1")
+GameVariables.FC_SyncBlock3L1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3L1)
+
+GameVariables.FC_SyncBlock3L1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1RECEIVER")
+GameVariables.FC_SyncBlock3L1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3L1RECEIVER)
+
+GameVariables.FC_SyncBlock3R1 = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1")
+GameVariables.FC_SyncBlock3R1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R1)
+
+GameVariables.FC_SyncBlock3R1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1RECEIVER")
+GameVariables.FC_SyncBlock3R1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R1RECEIVER)
+
+GameVariables.FC_SyncBlock3L2 = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2")
+GameVariables.FC_SyncBlock3L2TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3L2)
+
+GameVariables.FC_SyncBlock3L2RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2RECEIVER")
+GameVariables.FC_SyncBlock3L2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3L2RECEIVER)
+
+GameVariables.FC_SyncBlock3R2 = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2")
+GameVariables.FC_SyncBlock3R2TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R2)
+
+GameVariables.FC_SyncBlock3R2RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2RECEIVER")
+GameVariables.FC_SyncBlock3R2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R2RECEIVER)
+
+
 -- *Animation tables*
 GameVariables.AllAnimations = {
 	GameVariables.FC_IdleTRACK, GameVariables.FC_BlockStartTRACK, GameVariables.FC_BlockTRACK,
@@ -196,18 +222,51 @@ GameVariables.AllAnimations = {
 	GameVariables.FC_SyncBlock1LTRACK, GameVariables.FC_SyncBlock1LRECEIVERTRACK,
 	GameVariables.FC_SyncBlock1RTRACK, GameVariables.FC_SyncBlock1RRECEIVERTRACK,
 	GameVariables.FC_SyncBlock2LTRACK, GameVariables.FC_SyncBlock2LRECEIVERTRACK,
-	GameVariables.FC_SyncBlock2RTRACK, GameVariables.FC_SyncBlock2RRECEIVERTRACK
+	GameVariables.FC_SyncBlock2RTRACK, GameVariables.FC_SyncBlock2RRECEIVERTRACK,
+	GameVariables.FC_SyncBlock3L1TRACK, GameVariables.FC_SyncBlock3L1RECEIVERTRACK,
+	GameVariables.FC_SyncBlock3R1TRACK, GameVariables.FC_SyncBlock3R1RECEIVERTRACK,
+	GameVariables.FC_SyncBlock3L2TRACK, GameVariables.FC_SyncBlock3L2RECEIVERTRACK,
+	GameVariables.FC_SyncBlock3R2TRACK, GameVariables.FC_SyncBlock3R2RECEIVERTRACK
 }
 
-GameVariables.attack1Table = {GameVariables.FC_LeftHook1TRACK, GameVariables.FC_RightHook1TRACK, GameVariables.FC_LeftJabTRACK, GameVariables.FC_RightJabTRACK, GameVariables.FC_LeftUppercutTRACK, GameVariables.FC_RightUppercutTRACK}
-GameVariables.attack2Table = {GameVariables.FC_LeftHaymakerTRACK, GameVariables.FC_RightHaymakerTrack}
+GameVariables.attack1Table = {}
+GameVariables.attack2Table = {}
 
-GameVariables.pairedAttacksTable = {GameVariables.FC_SyncBlock1LTRACK, GameVariables.FC_SyncBlock1RTRACK, GameVariables.FC_SyncBlock2LTRACK, GameVariables.FC_SyncBlock2RTRACK}
-GameVariables.pairedBlocksTable = {GameVariables.FC_SyncBlock1LRECEIVERTRACK, GameVariables.FC_SyncBlock1RRECEIVERTRACK, GameVariables.FC_SyncBlock2LRECEIVERTRACK, GameVariables.FC_SyncBlock2RRECEIVERTRACK}
+for _, v in pairs(GameVariables.AllAnimations) do -- this for loop fills in the attack1 and attack2Table based off attributes
+	if v.Animation:GetAttribute("AttackSeries") then -- standard attacks have the "AttackSeries" attribute so its how we define it as a stnadard attack
+		if v.Animation:GetAttribute("AttackLevel") == 1 then -- level 1's will be added to the attack1Table
+			table.insert(GameVariables.attack1Table, v)
+		elseif v.Animation:GetAttribute("AttackLevel") == 2 then -- level 2's will be added to the attack2Table
+			table.insert(GameVariables.attack2Table, v)
+		end
+	end
+end
+
+print(GameVariables.attack1Table)
+print(GameVariables.attack2Table)
+
+-- USE FOR LOOP ON ANIMATIONS TABLE FOR BOTH THESE TABLES TO FIND THE CORRECT ANIMATION TYPE DEPENDING ON WHAT AnimType THEY ARE!!!:
+GameVariables.pairedAttacksTable = {} -- the for loop below will fill this with all of the attacking paired animations
+GameVariables.pairedBlocksTable = {} -- same above except for receiving animations.
+
+for _, v in pairs(GameVariables.AllAnimations) do
+	if v.Animation:GetAttribute("Paired") then
+		print(true)
+		if v.Animation:GetAttribute("AnimType") == 1 then
+			table.insert(GameVariables.pairedAttacksTable, v)
+		elseif v.Animation:GetAttribute("AnimType") == 2 then
+			table.insert(GameVariables.pairedBlocksTable, v)
+		end
+	end
+
+end
+print(GameVariables.pairedAttacksTable)
+print(GameVariables.pairedBlocksTable)
+
 GameVariables.pairedAttack = nil -- the variable for which paired attack the attacker is doing
 GameVariables.pairedBlock = nil -- the variable for which paired block the attacker is doing
 GameVariables.pairedChain = 0 -- The tracker of the character's sync block attack chain. They can only do as many as the max allows
-GameVariables.PairedChainMAX = 2 -- The max value for pairedChain. This can be changed to 3 if needed.
+GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
 
 -- functions
 function GameVariables.stopAnimations() -- add params? Perhaps we could change function to "changeAnimations" with the first parameter being whether we should stop or play, and add animations in following parameters
@@ -225,11 +284,30 @@ function GameVariables.boolCheck(a, b, c)
 end
 
 function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
+	warn(followupCombo)
 	if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 		
-		if followupCombo or (GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying) then -- For followup attacks
+		if followupCombo and followupCombo > 1 or (GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying) then -- For followup attacks
+			warn("Are you somehow in here?")
 			if GameVariables.pairedAttack and GameVariables.pairedAttack.IsPlaying then -- runs for the attacker
 			GameVariables.pairedAttack:Stop()
+			print("Are we good pleaseeeE?")
+			if followupCombo == 3 then
+				if GameVariables.animPair and GameVariables.animPair[1] == 1 then
+					if GameVariables.animPair and GameVariables.animPair[2] == 1 then
+						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3L1TRACK
+					elseif GameVariables.animPair and GameVariables.animPair[2] == 2 then
+						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3L2TRACK
+					end
+				elseif GameVariables.animPair and GameVariables.animPair[1] == 2 then
+					if GameVariables.animPair and GameVariables.animPair[2] == 1 then
+						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3R1TRACK
+					elseif GameVariables.animPair and GameVariables.animPair[2] == 2 then
+						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3R2TRACK
+					end
+				end
+				warn(GameVariables.pairedAttack)
+			else
 				if GameVariables.pairedAttack == GameVariables.FC_SyncBlock1LTRACK then
 					GameVariables.pairedAttack = GameVariables.FC_SyncBlock1RTRACK
 				elseif GameVariables.pairedAttack == GameVariables.FC_SyncBlock1RTRACK then
@@ -239,22 +317,40 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 				elseif GameVariables.pairedAttack == GameVariables.FC_SyncBlock2RTRACK then
 					GameVariables.pairedAttack = GameVariables.FC_SyncBlock2LTRACK
 				end
+			end
 				
 			elseif GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying then -- runs for the receiver
-			GameVariables.pairedBlock:Stop()
-				if GameVariables.pairedBlock == GameVariables.FC_SyncBlock1LRECEIVERTRACK then
-					GameVariables.pairedBlock = GameVariables.FC_SyncBlock1RRECEIVERTRACK
-				elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock1RRECEIVERTRACK then
-					GameVariables.pairedBlock = GameVariables.FC_SyncBlock1LRECEIVERTRACK
-				elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock2LRECEIVERTRACK then
-					GameVariables.pairedBlock = GameVariables.FC_SyncBlock2RRECEIVERTRACK
-				elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock2RRECEIVERTRACK then
-					GameVariables.pairedBlock = GameVariables.FC_SyncBlock2LRECEIVERTRACK
+				GameVariables.pairedBlock:Stop()
+				if followupCombo == 3 then
+					if sentAnimPair and sentAnimPair[1] == 1 then
+						if sentAnimPair and sentAnimPair[2] == 1 then
+							GameVariables.pairedBlock = GameVariables.FC_SyncBlock3L1RECEIVERTRACK
+						elseif sentAnimPair and sentAnimPair[2] == 2 then
+							GameVariables.pairedBlock = GameVariables.FC_SyncBlock3L2RECEIVERTRACK
+						end
+					elseif sentAnimPair and sentAnimPair[1] == 2 then
+						if sentAnimPair and sentAnimPair[2] == 1 then
+							GameVariables.pairedBlock = GameVariables.FC_SyncBlock3R1RECEIVERTRACK
+						elseif sentAnimPair and sentAnimPair[2] == 2 then
+							GameVariables.pairedBlock = GameVariables.FC_SyncBlock3R2RECEIVERTRACK
+						end
+					end
+				else
+					if GameVariables.pairedBlock == GameVariables.FC_SyncBlock1LRECEIVERTRACK then
+						GameVariables.pairedBlock = GameVariables.FC_SyncBlock1RRECEIVERTRACK
+					elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock1RRECEIVERTRACK then
+						GameVariables.pairedBlock = GameVariables.FC_SyncBlock1LRECEIVERTRACK
+					elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock2LRECEIVERTRACK then
+						GameVariables.pairedBlock = GameVariables.FC_SyncBlock2RRECEIVERTRACK
+					elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock2RRECEIVERTRACK then
+						GameVariables.pairedBlock = GameVariables.FC_SyncBlock2LRECEIVERTRACK
+					end
 				end
 			end
+				
 		
 		else -- for non-followup attacks
-			
+			print("weve bgen here")
 			if (sentAnimPair and sentAnimPair[1] == 1) or (GameVariables.animPair and GameVariables.animPair[1] == 1) then
 				if (sentAnimPair and sentAnimPair[2] == 1) or (GameVariables.animPair and GameVariables.animPair[2] == 1) then
 					GameVariables.pairedAttack = GameVariables.FC_SyncBlock1LTRACK
@@ -281,12 +377,12 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 		GameVariables.humanoid.WalkSpeed = 0
 		
 		if GameVariables.isBlocking then
-		
+		print(sentAnimPair)
 			GameVariables.pairedBlock:Play()
 		
 		elseif GameVariables.isAttacking then
 		
-			GameVariables.currentAttack = GameVariables.pairedAttack
+			GameVariables.currentAttack = GameVariables.pairedAttack.Animation
 			
 			if GameVariables.distanceBetween ~= 3 then -- we want the sync to happen at three studs ideally
 				local enemyRoot = GameVariables.raycastResult.Instance.Parent.HumanoidRootPart
@@ -316,6 +412,7 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 			end
 				
 			GameVariables.pairedAttack:Play()
+			GameVariables.canFollowUp = true -- once the paired attack starts, the player can immediately follow up (when the animation ends that is)
 			
 		--end
 		-- player will play their part of the synched block while the enemy does theirs.

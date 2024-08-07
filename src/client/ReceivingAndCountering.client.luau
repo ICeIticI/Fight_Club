@@ -35,7 +35,11 @@ GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttackID, 
         end
     elseif Protocol == "HoldingBlock" then
         GameVariables.isEnemyHoldingBlock = sentValue
-    end
+	elseif Protocol == "CameraChange" then
+		-- The sent value here is charClone, a clone of the player's character. The reason for this is so we can parent the player's local camera to the new cloned body.
+		game.Workspace.Camera.CameraSubject = sentValue.Humanoid
+		print("REACHEDDDD")
+	end
 end)
 
 

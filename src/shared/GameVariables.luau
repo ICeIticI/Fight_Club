@@ -3,21 +3,102 @@ local GameVariables = {}
 
 GameVariables.player = game:GetService("Players").LocalPlayer
 
-while not GameVariables.player do
-	wait(0.1)
-	print("waiting for player...")
-	if GameVariables.player ~= nil then
-		warn("WEEE'REE FREEEE")
-		break
-	end
-end
-
-print(GameVariables.player)
 GameVariables.character = GameVariables.player.Character or GameVariables.player.CharacterAdded:Wait()
 GameVariables.humanoid = GameVariables.character:WaitForChild("Humanoid")
 GameVariables.previousHealth = GameVariables.humanoid.Health -- This var is used to determine how much damage the character takes.
 GameVariables.charAnimator = GameVariables.character:WaitForChild("Humanoid"):WaitForChild("charAnimator")
 GameVariables.humanoidRootPart = GameVariables.character:WaitForChild("HumanoidRootPart")
+
+GameVariables.player.CharacterAdded:Connect(function(character)
+	GameVariables.character = character
+	GameVariables.humanoid = character:WaitForChild("Humanoid")
+	GameVariables.previousHealth = GameVariables.humanoid.Health -- This var is used to determine how much damage the character takes.
+	GameVariables.charAnimator = character:WaitForChild("Humanoid"):WaitForChild("charAnimator")
+	GameVariables.humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+	
+	
+	GameVariables.Protocol = nil
+	GameVariables.walkingSpeed = 12
+	GameVariables.humanoid.WalkSpeed = GameVariables.walkingSpeed
+	GameVariables.humanoid.JumpPower = 0
+
+	GameVariables.lockOnDebounce.Value = false
+	GameVariables.hitDebounce = false
+	GameVariables.isBlocking = false
+	GameVariables.isAttacking = false
+	GameVariables.waitingToAttack = false
+	GameVariables.pairedPlaying = false
+	GameVariables.previousWalkSpeed = nil
+
+	GameVariables.attackFrames = false
+	--GameVariables.attackEnded = false
+
+	GameVariables.isDodging = false
+	GameVariables.canFollowUp = false
+	GameVariables.isEnemyHoldingBlock = false
+	GameVariables.followUpCount = 0
+	GameVariables.lastAttack = nil
+	GameVariables.comboCounter = 0
+	GameVariables.parryWindow = 0.5
+	GameVariables.currentAttack = nil
+	GameVariables.currentReceiveAnimTRACK = nil
+	GameVariables.attackSeries = nil
+	GameVariables.randAttack = nil
+	GameVariables.distanceBetween = nil
+	GameVariables.enemyHumanoid = nil
+	GameVariables.enemyChar = nil
+	GameVariables.randLvl1Type = nil
+	GameVariables.animPair = nil
+
+	-- *animations (attacker)*	
+	print(GameVariables.FC_Idle)
+	GameVariables.FC_IdleTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_Idle)
+	GameVariables.FC_BlockTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_Block)
+	GameVariables.FC_BlockStartTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_BlockStart)
+	GameVariables.FC_LeftHook1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftHook1)
+	GameVariables.FC_RightHook1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightHook1)
+	GameVariables.FC_LeftJabTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftJab)
+	GameVariables.FC_RightJabTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightJab)
+	GameVariables.FC_LeftUppercutTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftUppercut)
+	GameVariables.FC_RightUppercutTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightUppercut)
+	GameVariables.FC_LeftHaymakerTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftHaymaker)
+	GameVariables.FC_RightHaymakerTrack = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightHaymaker)
+	-- *animations (receiver)*
+	GameVariables.FC_LeftHook1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftHook1RECEIVER)
+	GameVariables.FC_RightHook1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightHook1RECEIVER)
+	GameVariables.FC_LeftUppercutRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftUppercutRECEIVER)
+	GameVariables.FC_RightUppercutRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightUppercutRECEIVER)
+	GameVariables.FC_LeftHaymakerRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftHaymakerRECEIVER)
+	GameVariables.FC_RightHaymakerReceiverTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightHaymakerRECEIVER)
+	-- *animations (paired)*
+	GameVariables.FC_SyncBlock1LTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock1L)
+	GameVariables.FC_SyncBlock1LRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock1LRECEIVER)
+	GameVariables.FC_SyncBlock1RTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock1R)
+	GameVariables.FC_SyncBlock1RRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock1RRECEIVER)
+	GameVariables.FC_SyncBlock2LTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock2L)
+	GameVariables.FC_SyncBlock2LRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock2LRECEIVER)
+	GameVariables.FC_SyncBlock2RTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock2R)
+	GameVariables.FC_SyncBlock2RRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock2RRECEIVER)
+	GameVariables.FC_SyncBlock3L1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3L1)
+	GameVariables.FC_SyncBlock3L1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3L1RECEIVER)
+	GameVariables.FC_SyncBlock3R1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R1)
+	GameVariables.FC_SyncBlock3R1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R1RECEIVER)
+	GameVariables.FC_SyncBlock3L2TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3L2)
+	GameVariables.FC_SyncBlock3L2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3L2RECEIVER)
+	GameVariables.FC_SyncBlock3R2TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R2)
+	GameVariables.FC_SyncBlock3R2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R2RECEIVER)
+
+	GameVariables.pairedAttack = nil
+	GameVariables.pairedBlock = nil
+	GameVariables.pairedChain = 0
+	
+	print("plrs spawned")
+end)
+
+GameVariables.humanoid.Died:Connect(function()
+
+	print("plr died")
+end)
 --GameVariables.attackAttri = character:GetAttribute("attackAttri")
 
 -- character hitboxes
@@ -37,7 +118,7 @@ GameVariables.hitboxesFolderRECEIVE = {GameVariables.hitboxHead, GameVariables.h
 -- create a table for hitboxes, then run :Connect function(s) via for loop for .Touched event and more.
 
 GameVariables.Camera = game.Workspace.CurrentCamera
-GameVariables.plrObjectsFolder = GameVariables.player:WaitForChild(GameVariables.player.Name .. "_GameObjects")
+GameVariables.plrObjectsFolder = GameVariables.player:WaitForChild(GameVariables.player.Name .. "_GameObjects") -- perhaps change it from player.Name to player.playerId for saving and stuff in the future
 
 -- player remote & bindable event"
 --GameVariables.remoteEvent = plrObjectsFolder:WaitForChild(player.Name.."_RemoteEvent")
@@ -86,11 +167,10 @@ GameVariables.parryWindow = 0.5
 GameVariables.currentAttack = nil										
 --GameVariables.enemyCurrentAttackID = nil -- the anim id the enemy attacked the player with
 GameVariables.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
-GameVariables.currentDirection = nil
 GameVariables.attackSeries = nil
 GameVariables.randAttack = nil
 GameVariables.distanceBetween = nil
-GameVariables.enemyHumanoid = nil -- pre-defined enemyHumanoid because the script hates global variables. Used for the enemy.
+GameVariables.enemyHumanoid = nil -- pre-defined enemy Humanoid because the script hates global variables. Used for the enemy.
 GameVariables.enemyChar = nil
 GameVariables.randLvl1Type = nil --[[ Used to determine what lvl 1 attacks
 					   the player will use for said combo ]]

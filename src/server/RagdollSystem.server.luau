@@ -33,6 +33,12 @@ local function GetMotor6Ds(givenChar)
 end
 
 local function Ragdoll(givenChar) -- this will be the function that.. well.. ragdolls the character
+	-- givenChar:WaitForChild("HumanoidRootPart").CFrame = givenChar.HumanoidRootPart.CFrame
+	-- 		givenChar.Parent = game.Workspace
+	-- 		local Protocol = "CameraChange"
+	-- 		GlobalRemoteEvent:FireClient(plr, nil, Protocol, nil, charClone) -- sending a remote event so we can parent the player's camera to the new clone
+	-- 		char:Destroy()
+	
 	local givenCharsHumanoid = givenChar.Humanoid
 	
 	givenCharsHumanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true) -- Will help the script run better. In other words, it will not be able to apply it's own physical force on other objects so long as the .Physics state is enabled.
@@ -65,34 +71,70 @@ local function Ragdoll(givenChar) -- this will be the function that.. well.. rag
 		socket.Parent = v.Parent -- setting the parent last is best practice, because if we set the parent earlier, it will have to load everything about the socket, THEN re-assign values.
 		
 	end
+
+
 	jointsCache[givenChar] = nil -- to clean up the given character's portion of the cache since they died.
 end
 
 -- Connects
 Players.PlayerAdded:Connect(function(plr) -- for joining players
 	
-	local charClone = nil
+	-- local charClone = nil
+
+		local linearVelocity = Instance.new("LinearVelocity")
+		local angularVelocity = Instance.new("AngularVelocity")
+
 	
 	plr.CharacterAdded:Connect(function(char) -- and for their spawning characters
-		if charClone ~= nil then
-			charClone:Destroy()
-		end
+		-- if charClone ~= nil then
+		-- 	charClone:Destroy()
+		-- end
+		
+		-- local charCFrame = nil
+		
+		-- delay(0, function()
+		-- 	while char.Humanoid:GetState() ~= Enum.HumanoidStateType.Dead do
+		-- 		wait()
+		-- 		charCFrame = char.HumanoidRootPart.CFrame
+		-- 		print(charCFrame)
+		-- 	end
+		-- end)
+
+		linearVelocity.Attachment0 = char:WaitForChild("HumanoidRootPart").RootAttachment
+		linearVelocity.Enabled = false
+		linearVelocity.Parent = char.HumanoidRootPart
+
+		angularVelocity.Attachment0 = char.HumanoidRootPart.RootAttachment
+		angularVelocity.Enabled = false
+		angularVelocity.Parent = char.HumanoidRootPart
+
 		
 		local humanoid = char.Humanoid -- we dont need to use :WaitForChild because humanoid is one of the first things that spawn in
 		humanoid.BreakJointsOnDeath = false -- so the player's body parts don't fall apart.
-		char.Archivable = true
-        charClone = char:Clone() -- We do the ragdoll physics on a clone since we can't add velocity to a dead player's character
+		-- char.Archivable = true
+        --charClone = char:Clone() -- We do the ragdoll physics on a clone since we can't add velocity to a dead player's character
 		humanoid.Died:Connect(function() -- to ragdoll the character on death
-            charClone:WaitForChild("HumanoidRootPart").CFrame = char.HumanoidRootPart.CFrame
-			charClone.Parent = game.Workspace
-			local Protocol = "CameraChange"
-			GlobalRemoteEvent:FireClient(plr, nil, Protocol, nil, charClone) -- sending a remote event so we can parent the player's camera to the new clone
-			char:Destroy()
-            Ragdoll(charClone)
-			charClone.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
-			charClone.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
+			
+			--charClone:WaitForChild("HumanoidRootPart").CFrame = charCFrame
+			-- local Protocol = "CameraChange"
+			-- print(char.HumanoidRootPart.Position)
+			--char:Destroy()
+			--charClone.Parent = game.Workspace
+			--print(charClone.HumanoidRootPart.Position)
+			--GlobalRemoteEvent:FireClient(plr, nil, Protocol, nil, charClone) -- sending a remote event so we can parent the player's camera to the new clone
+            Ragdoll(char)
+			linearVelocity.Enabled = true
+			linearVelocity.VectorVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
+			
+			angularVelocity.Enabled = true
+			angularVelocity.AngularVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
+
+
+			-- charClone.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
+			-- charClone.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
+			
 		end)
 		
-		jointsCache[charClone] = GetMotor6Ds(charClone) -- getting the Motor6Ds of the given player and storing it in as it's own key in this table.
+		jointsCache[char] = GetMotor6Ds(char) -- getting the Motor6Ds of the given player and storing it in as it's own key in this table.
 	end)
 end)

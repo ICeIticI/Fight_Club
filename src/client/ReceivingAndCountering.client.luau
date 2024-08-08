@@ -38,6 +38,7 @@ GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttackID, 
 	elseif Protocol == "CameraChange" then
 		-- The sent value here is charClone, a clone of the player's character. The reason for this is so we can parent the player's local camera to the new cloned body.
 		game.Workspace.Camera.CameraSubject = sentValue.Humanoid
+		game.Workspace.Camera.CFrame = sentValue.Head.CFrame
 		print("REACHEDDDD")
 	end
 end)

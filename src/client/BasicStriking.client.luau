@@ -139,9 +139,7 @@ UserInputService.InputBegan:Connect(function(input)
 				wait()
 			end
 			if GameVariables.followUpCount > 1 then
-				--[[ *NOTE: Uppercuts will ONLY be doable on a follow-up, so I will
-				            need to create a unique attack() function to make it
-				            a choice.]]
+
 				if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 					GameVariables.animPair = {math.random(1,2), math.random(1,2)}
 					GameVariables.Protocol = "AttackStarted"
@@ -155,12 +153,12 @@ UserInputService.InputBegan:Connect(function(input)
 	end
 	if GameVariables.raycastResult and input.UserInputType == Enum.UserInputType.MouseButton1 then
 		local debuggingAttackTable = {
-			GameVariables.lockOnDebounce.Value,
-			GameVariables.waitingToAttack,
-			GameVariables.canFollowUp,
-			GameVariables.pairedPlaying,
-			GameVariables.pairedChain,
-			GameVariables.followUpCount,
+			GameVariables.lockOnDebounce.Value, -- should be true
+			GameVariables.waitingToAttack, -- should be false
+			GameVariables.canFollowUp, -- at first it should be false, on followup it should be true
+			GameVariables.pairedPlaying, -- false at first
+			GameVariables.pairedChain, -- less than 3
+			GameVariables.followUpCount, -- less than 1 at first
 			GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging),
 		   (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 		} -- alot of the time it wont allow the player to attack no matter what, so this table will print when the player can't attack at all.

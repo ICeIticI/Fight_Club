@@ -7,6 +7,7 @@ GameVariables.lockOnDebounce.Changed:Connect(function()
 	
 	if GameVariables.lockOnDebounce.Value == true then -- Runs when the player locks onto somebody
     GameVariables.FC_IdleTRACK:Play()
+	print(GameVariables.FC_IdleTRACK)
 		-- character changes below:
 		GameVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
 		GameVariables.humanoid.WalkSpeed = GameVariables.lockOnSpeed

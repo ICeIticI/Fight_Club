@@ -12,6 +12,7 @@ local function attack(followupCombo)
 	else
 		print("not a sync block???")
 		local randAttackTABLE = {}
+
 		if GameVariables.comboCounter == 0 then
 			local randNumber
 			GameVariables.randAttack = nil
@@ -20,6 +21,7 @@ local function attack(followupCombo)
 			elseif not followupCombo then
 				randNumber = math.random(1, 2) -- on a new combo without a followup, they can do only jabs or hooks on lvl 1's
 			end
+			warn(randNumber)
 			-- a random number will be generated from above
 			if randNumber == 1 then -- Hooks
 			GameVariables.randLvl1Type = "Jabs" -- Will choose randomly between a set of attack types.
@@ -30,7 +32,7 @@ local function attack(followupCombo)
 			end
 		end
 		
-		if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid.Health > 10 then
+		if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid.Health > 10 then -- Will only throw lvl 1 attacks
 			
 			if not GameVariables.randAttack then -- This will run if the player hasn't started a combo yet
 				for _, v in pairs(GameVariables.attack1Table) do -- This will get all attacks that are in the given attackSeries and puts them in a table, then randomly selects one of them by index number.
@@ -52,7 +54,7 @@ local function attack(followupCombo)
 					end
 				end
 			end
-			
+			-- warn(true)
 			if GameVariables.lastAttack and GameVariables.lastAttack.IsPlaying and not GameVariables.isAttacking then
 				GameVariables.lastAttack:Stop()
 			end
@@ -61,10 +63,11 @@ local function attack(followupCombo)
 			
 			GameVariables.isAttacking = true
 			GameVariables.randAttack:Play()
+			warn((GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude)
 			GameVariables.lastAttack = GameVariables.randAttack
 			GameVariables.comboCounter += 1
 			
-		elseif GameVariables.comboCounter >= 3 or GameVariables.enemyHumanoid.Health <= 10 then
+		elseif GameVariables.comboCounter >= 3 or GameVariables.enemyHumanoid.Health <= 10 then -- Will throw only haymakers
 			GameVariables.randAttack = GameVariables.attack2Table[math.random(1, #GameVariables.attack2Table)]
 
 			if GameVariables.lastAttack and GameVariables.lastAttack.IsPlaying and not GameVariables.isAttacking then
@@ -113,11 +116,12 @@ end
 
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and not GameVariables.waitingToAttack and GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
-																																																																									-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
+																																																																							-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
 		--[[ When the player presses attack, we want to randomly choose between a series of hooks or jabs
 			 for attack level 1. Once combo counter finishes it's 3rd attack, we will transition to level
 			 2 attacks (haymakers).]]
 		GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
+		print(GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging))
 		GameVariables.followUpCount += 1
 		
 		if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then -- For paired attacks. To keep track of the number of times the player does a sync block.
@@ -159,7 +163,11 @@ UserInputService.InputBegan:Connect(function(input)
 			GameVariables.pairedPlaying, -- false at first
 			GameVariables.pairedChain, -- less than 3
 			GameVariables.followUpCount, -- less than 1 at first
+			GameVariables.comboCounter, -- should be 0 at first
 			GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging),
+			GameVariables.isAttacking,
+			GameVariables.isBlocking,
+			GameVariables.isDodging,
 		   (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 		} -- alot of the time it wont allow the player to attack no matter what, so this table will print when the player can't attack at all.
 		print("variables for attacking:")

@@ -33,10 +33,12 @@ GameVariables.lockOnDebounce.Changed:Connect(function()
 		end
 		
 		-- camera changes:
+		--[[ -- Roblox is having some camera-related issues as of now. Once they fix it I intend to re-enable this.
 		GameVariables.Camera.CameraType = Enum.CameraType.Orbital
 		GameVariables.Camera.CameraSubject = subject
 		--Camera.CameraSubject = raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart")
 		GameVariables.Camera.Focus = GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.CFrame
+		]]
 		
 		while GameVariables.lockOnDebounce.Value == true and GameVariables.raycastResult ~= nil do
 				wait()
@@ -57,9 +59,11 @@ GameVariables.lockOnDebounce.Changed:Connect(function()
 		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 		
 		-- camera changes
+		--[[ -- Roblox is having some camera-related issues as of now. Once they fix it I intend to re-enable this.
 		GameVariables.Camera.Focus = GameVariables.originalCamFocus
 		GameVariables.Camera.CameraSubject = GameVariables.originalCamSubject
 		GameVariables.Camera.CameraType = Enum.CameraType.Custom
+		]]
 	end
 end)
 

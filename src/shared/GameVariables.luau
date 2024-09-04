@@ -16,7 +16,21 @@ GameVariables.player.CharacterAdded:Connect(function(character)
 	GameVariables.charAnimator = character:WaitForChild("Humanoid"):WaitForChild("charAnimator")
 	GameVariables.humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 	
+	-- character hitboxes
+	GameVariables.hitboxesFolder = GameVariables.character:WaitForChild(GameVariables.player.Name.."_hitboxesFolder")
+
+	GameVariables.hitboxHead = GameVariables.hitboxesFolder:WaitForChild(GameVariables.player.Name.."_hitboxHead")
+	GameVariables.hitboxLeftArm = GameVariables.hitboxesFolder:WaitForChild(GameVariables.player.Name.."_hitboxLeftArm")
+	GameVariables.hitboxLeftLeg = GameVariables.hitboxesFolder:WaitForChild(GameVariables.player.Name.."_hitboxLeftLeg")
+	GameVariables.hitboxRightArm = GameVariables.hitboxesFolder:WaitForChild(GameVariables.player.Name.."_hitboxRightArm")
+	GameVariables.hitboxRightLeg = GameVariables.hitboxesFolder:WaitForChild(GameVariables.player.Name.."_hitboxRightLeg")
+	GameVariables.hitboxTorso = GameVariables.hitboxesFolder:WaitForChild(GameVariables.player.Name.."_hitboxTorso")
+
+	-- *Hitbox tables*
+	GameVariables.hitboxesFolderATTACK = {GameVariables.hitboxLeftArm, GameVariables.hitboxLeftLeg, GameVariables.hitboxRightArm, GameVariables.hitboxRightLeg}
+	GameVariables.hitboxesFolderRECEIVE = {GameVariables.hitboxHead, GameVariables.hitboxTorso}
 	
+
 	GameVariables.Protocol = nil
 	GameVariables.walkingSpeed = 12
 	GameVariables.humanoid.WalkSpeed = GameVariables.walkingSpeed
@@ -28,6 +42,7 @@ GameVariables.player.CharacterAdded:Connect(function(character)
 	GameVariables.isAttacking = false
 	GameVariables.waitingToAttack = false
 	GameVariables.pairedPlaying = false
+	GameVariables.canSyncBlock = true
 	GameVariables.previousWalkSpeed = nil
 
 	GameVariables.attackFrames = false
@@ -88,6 +103,59 @@ GameVariables.player.CharacterAdded:Connect(function(character)
 	GameVariables.FC_SyncBlock3R2TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R2)
 	GameVariables.FC_SyncBlock3R2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R2RECEIVER)
 
+	-- *Animation tables*
+	GameVariables.AllAnimations = {
+		GameVariables.FC_IdleTRACK, GameVariables.FC_BlockStartTRACK, GameVariables.FC_BlockTRACK,
+		GameVariables.FC_LeftHook1TRACK, GameVariables.FC_RightHook1TRACK, 
+		GameVariables.FC_LeftJabTRACK, GameVariables.FC_RightJabTRACK,
+		GameVariables.FC_LeftUppercutTRACK, GameVariables.FC_RightUppercutTRACK, 
+		GameVariables.FC_LeftHaymakerTRACK, GameVariables.FC_RightHaymakerTrack, 
+		GameVariables.FC_LeftHook1RECEIVERTRACK, GameVariables.FC_RightHook1RECEIVERTRACK, 
+		GameVariables.FC_LeftUppercutRECEIVERTRACK, GameVariables.FC_RightUppercutRECEIVERTRACK, 
+		GameVariables.FC_LeftHaymakerRECEIVERTRACK, GameVariables.FC_RightHaymakerReceiverTRACK,
+		GameVariables.FC_SyncBlock1LTRACK, GameVariables.FC_SyncBlock1LRECEIVERTRACK,
+		GameVariables.FC_SyncBlock1RTRACK, GameVariables.FC_SyncBlock1RRECEIVERTRACK,
+		GameVariables.FC_SyncBlock2LTRACK, GameVariables.FC_SyncBlock2LRECEIVERTRACK,
+		GameVariables.FC_SyncBlock2RTRACK, GameVariables.FC_SyncBlock2RRECEIVERTRACK,
+		GameVariables.FC_SyncBlock3L1TRACK, GameVariables.FC_SyncBlock3L1RECEIVERTRACK,
+		GameVariables.FC_SyncBlock3R1TRACK, GameVariables.FC_SyncBlock3R1RECEIVERTRACK,
+		GameVariables.FC_SyncBlock3L2TRACK, GameVariables.FC_SyncBlock3L2RECEIVERTRACK,
+		GameVariables.FC_SyncBlock3R2TRACK, GameVariables.FC_SyncBlock3R2RECEIVERTRACK
+	}
+
+	GameVariables.attack1Table = {}
+	GameVariables.attack2Table = {}
+
+	for _, v in pairs(GameVariables.AllAnimations) do -- this for loop fills in the attack1 and attack2Table based off attributes
+		if v.Animation:GetAttribute("AttackSeries") then -- standard attacks have the "AttackSeries" attribute so its how we define it as a stnadard attack
+			if v.Animation:GetAttribute("AttackLevel") == 1 then -- level 1's will be added to the attack1Table
+				table.insert(GameVariables.attack1Table, v)
+			elseif v.Animation:GetAttribute("AttackLevel") == 2 then -- level 2's will be added to the attack2Table
+				table.insert(GameVariables.attack2Table, v)
+			end
+		end
+	end
+
+	print(GameVariables.attack1Table)
+	print(GameVariables.attack2Table)
+
+	GameVariables.pairedAttacksTable = {} -- the for loop below will fill this with all of the attacking paired animations
+	GameVariables.pairedBlocksTable = {} -- same above except for receiving animations.
+
+	for _, v in pairs(GameVariables.AllAnimations) do
+		if v.Animation:GetAttribute("Paired") then
+			print(true)
+			if v.Animation:GetAttribute("AnimType") == 1 then
+				table.insert(GameVariables.pairedAttacksTable, v)
+			elseif v.Animation:GetAttribute("AnimType") == 2 then
+				table.insert(GameVariables.pairedBlocksTable, v)
+			end
+		end
+
+	end
+	print(GameVariables.pairedAttacksTable)
+	print(GameVariables.pairedBlocksTable)
+
 	GameVariables.pairedAttack = nil
 	GameVariables.pairedBlock = nil
 	GameVariables.pairedChain = 0
@@ -147,10 +215,11 @@ GameVariables.lockOnDebounce = Instance.new("BoolValue") -- shouldn't this be in
 GameVariables.lockOnDebounce.Name = "lockOnDebounce"
 GameVariables.lockOnDebounce.Parent = GameVariables.plrObjectsFolder
 GameVariables.hitDebounce = false
-GameVariables.isBlocking = false
+GameVariables.isBlocking = false -- set to true when the client blocks
 GameVariables.isAttacking = false
 GameVariables.waitingToAttack = false
 GameVariables.pairedPlaying = false -- used to make sure the paired animations don't play while already playing.
+GameVariables.canSyncBlock = true
 GameVariables.previousWalkSpeed = nil
 
 GameVariables.lockOnSpeed = GameVariables.originalWalkSpeed / 1.85
@@ -288,6 +357,12 @@ GameVariables.FC_SyncBlock3R2TRACK = GameVariables.charAnimator:LoadAnimation(Ga
 GameVariables.FC_SyncBlock3R2RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2RECEIVER")
 GameVariables.FC_SyncBlock3R2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_SyncBlock3R2RECEIVER)
 
+GameVariables.FC_BracingBlockL = GameVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockL")
+GameVariables.FC_BracingBlockLTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_BracingBlockL)
+
+GameVariables.FC_BracingBlockR = GameVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockR")
+GameVariables.FC_BracingBlockRTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_BracingBlockR)
+
 
 -- *Animation tables*
 GameVariables.AllAnimations = {
@@ -306,7 +381,8 @@ GameVariables.AllAnimations = {
 	GameVariables.FC_SyncBlock3L1TRACK, GameVariables.FC_SyncBlock3L1RECEIVERTRACK,
 	GameVariables.FC_SyncBlock3R1TRACK, GameVariables.FC_SyncBlock3R1RECEIVERTRACK,
 	GameVariables.FC_SyncBlock3L2TRACK, GameVariables.FC_SyncBlock3L2RECEIVERTRACK,
-	GameVariables.FC_SyncBlock3R2TRACK, GameVariables.FC_SyncBlock3R2RECEIVERTRACK
+	GameVariables.FC_SyncBlock3R2TRACK, GameVariables.FC_SyncBlock3R2RECEIVERTRACK,
+	GameVariables.FC_BracingBlockLTRACK, GameVariables.FC_BracingBlockRTRACK
 }
 
 GameVariables.attack1Table = {}
@@ -322,16 +398,12 @@ for _, v in pairs(GameVariables.AllAnimations) do -- this for loop fills in the 
 	end
 end
 
-print(GameVariables.attack1Table)
-print(GameVariables.attack2Table)
-
 -- USE FOR LOOP ON ANIMATIONS TABLE FOR BOTH THESE TABLES TO FIND THE CORRECT ANIMATION TYPE DEPENDING ON WHAT AnimType THEY ARE!!!:
 GameVariables.pairedAttacksTable = {} -- the for loop below will fill this with all of the attacking paired animations
 GameVariables.pairedBlocksTable = {} -- same above except for receiving animations.
 
 for _, v in pairs(GameVariables.AllAnimations) do
 	if v.Animation:GetAttribute("Paired") then
-		print(true)
 		if v.Animation:GetAttribute("AnimType") == 1 then
 			table.insert(GameVariables.pairedAttacksTable, v)
 		elseif v.Animation:GetAttribute("AnimType") == 2 then
@@ -340,8 +412,6 @@ for _, v in pairs(GameVariables.AllAnimations) do
 	end
 
 end
-print(GameVariables.pairedAttacksTable)
-print(GameVariables.pairedBlocksTable)
 
 GameVariables.pairedAttack = nil -- the variable for which paired attack the attacker is doing
 GameVariables.pairedBlock = nil -- the variable for which paired block the attacker is doing
@@ -365,7 +435,7 @@ end
 
 function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
 	warn(followupCombo)
-	if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
+	if GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.canSyncBlock then
 		
 		if followupCombo and followupCombo > 1 or (GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying) then -- For followup attacks
 			warn("Are you somehow in here?")
@@ -430,7 +500,6 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 				
 		
 		else -- for non-followup attacks
-			print("weve bgen here")
 			if (sentAnimPair and sentAnimPair[1] == 1) or (GameVariables.animPair and GameVariables.animPair[1] == 1) then
 				if (sentAnimPair and sentAnimPair[2] == 1) or (GameVariables.animPair and GameVariables.animPair[2] == 1) then
 					GameVariables.pairedAttack = GameVariables.FC_SyncBlock1LTRACK
@@ -460,7 +529,7 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 		print(sentAnimPair)
 			GameVariables.pairedBlock:Play()
 		
-		elseif GameVariables.isAttacking then
+		elseif GameVariables.isAttacking and GameVariables.pairedAttack then -- Script breaks if pairedAttack doesn't exist, so we need to add it in as a check.
 		
 			GameVariables.currentAttack = GameVariables.pairedAttack.Animation
 			

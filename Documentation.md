@@ -551,3 +551,21 @@ upd: slowed the player when locked on, and also just slowed the general speed of
   - What I was working on: Decided I'm going to add two different types of thirdhand synced blocks, which will be 4 animation pairs total. The first pair will be for dodging/evading the third hit while the second will be blocking it in a way where it repells the enemy's attack. I created all except the last pair, which will be FC_SyncBlock3R2. I will apply it to the game once its done. However, I'm having a small issue getting it to play. Sending it through the sync block function, I have two parameters: sentAnimPair (the index numbers) and followupCombo (the players current combo). It seems the receiver thinks the followup is a different number that the attacker things it is (ex. 3 when its really 4). The thirdhand sync block animations arent playing oddly either, so I will need to get that working.
 
   - What I intend to do: Get the 3rd sync block animations to work, add the ragdoll system, then hopefully finally move to the bracing blocks segment of my game.
+
+  8/20/24
+
+  - What I was working on: Not done an update in awhile, but basically throughout this time, I got sync blocks done. Finally! It was more complicated than I thought, but other than possibly tweaking values and stuff or changing/adding animations in the future, I'm basically done. But before I decided to move onto bracing blocks, I wanted to scratch the itch that my game didnt work after the player respawned. So, I added a .CharacterAdded event to the GameVariables file and re-initialized variables when the player respawned to get the game to work on respawn. This fixed many things, but then animations still weren't working. I then also added the animation track folders in the .CharacterAdded event so it will be re-initialized on respawn, which definitely helped. The player can now throw 1 attack after respawn. So this means the animations are working fine.
+
+  - What I intend to do: Find out why the player can't throw more than 1 attack on respawn, make sure everything else is working fine after the player respawned, and eventually start working on bracing blocks.
+
+  8/25/24
+
+  - What I was working on: Found out how to get the player to throw more than 1 attack after respawn. All we had to do was crate some functions such as basically the entire animationManager script, then call that after defining it, and call it again when the player respawns. Also added a wait() statement at the beginning of these functions to allow the player time to load things in. If I was wanting to be more professional, I could make a script that waits for all of the variables to load before allowing these functions to run. But the wait() is simple and did the job. Now, I finally moved onto bracing blocks. I created two animations, one for bracing left and one for bracing right, depending on what attack the enemy threw. If they threw a left punch, then we brace right because our lefts and rights are opposite when facing each other. I was last trying to make the isEnemyHoldingBlock animation being sent to the attacker only work if they are not being attacked as they are brace-blocking.
+
+  - What I intend to do: Figure out how to get that attribute to only send & work if they are not under pressure while brace-blocking. Then we can pretty much move onto the parry mechanic.
+
+  8/29/24
+
+  - What I was working on: Brace-blocking is working out pretty well, but there are some errors that appear, particularly when we block too early to where it becomes a sync block. Decided I was gonna add functionality to the TestDummy so I can test these things on it as if it was a real player, and save some time.
+  
+  - What I intend to do: Last made a UI that will only appear when locking on with the dummy, and gonna finish its functionality

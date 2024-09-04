@@ -3,7 +3,6 @@ local Players = game.Players
 local GlobalRemoteEvent = Instance.new("RemoteEvent")
 GlobalRemoteEvent.Name = "GlobalRemoteEvent"
 GlobalRemoteEvent.Parent = game.ReplicatedStorage
-print("thanks, server script")
 
 Players.PlayerAdded:Connect(function(player)
 	local plrObjectsFolder = Instance.new("Folder")
@@ -35,6 +34,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_LeftHook1.AnimationId = "rbxassetid://16998937874"
 	FC_LeftHook1:SetAttribute("AttackLevel", 1) -- *There will be three types of attack levels: 1 is for jabs and hooks etc, 2 is for haymakers and other powerful attacks, 3 is for finishers, executions and other paired animations.
 	FC_LeftHook1:SetAttribute("AnimType", 1) -- AnimType will distinguish what kind of animation we're dealing with. 1 is attacks, 2 is receives,
+	FC_LeftHook1:SetAttribute("AnimDirection", "Left")
 	FC_LeftHook1:SetAttribute("AttackSeries", "Hooks")
 	FC_LeftHook1.Parent = plrObjectsFolder
 	
@@ -43,6 +43,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_RightHook1.AnimationId = "rbxassetid://17021541192"
 	FC_RightHook1:SetAttribute("AttackLevel", 1)
 	FC_RightHook1:SetAttribute("AnimType", 1)
+	FC_RightHook1:SetAttribute("AnimDirection", "Right")
 	FC_RightHook1:SetAttribute("AttackSeries", "Hooks")
 	FC_RightHook1.Parent = plrObjectsFolder
 	
@@ -51,6 +52,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_LeftJab.AnimationId = "rbxassetid://18207098315"
 	FC_LeftJab:SetAttribute("AttackLevel", 1)
 	FC_LeftJab:SetAttribute("AnimType", 1)
+	FC_LeftJab:SetAttribute("AnimDirection", "Left")
 	FC_LeftJab:SetAttribute("AttackSeries", "Jabs")
 	FC_LeftJab.Parent = plrObjectsFolder
 	
@@ -59,6 +61,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_RightJab.AnimationId = "rbxassetid://18210186455"
 	FC_RightJab:SetAttribute("AttackLevel", 1)
 	FC_RightJab:SetAttribute("AnimType", 1)
+	FC_RightJab:SetAttribute("AnimDirection", "Right")
 	FC_RightJab:SetAttribute("AttackSeries", "Jabs")
 	FC_RightJab.Parent = plrObjectsFolder
 	
@@ -67,6 +70,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_LeftUppercut.AnimationId = "rbxassetid://18224256126"
 	FC_LeftUppercut:SetAttribute("AttackLevel", 1)
 	FC_LeftUppercut:SetAttribute("AnimType", 1)
+	FC_LeftUppercut:SetAttribute("AnimDirection", "Left")
 	FC_LeftUppercut:SetAttribute("AttackSeries", "Uppercuts")
 	FC_LeftUppercut.Parent = plrObjectsFolder
 	
@@ -75,6 +79,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_RightUppercut.AnimationId = "rbxassetid://18223875093"
 	FC_RightUppercut:SetAttribute("AttackLevel", 1)
 	FC_RightUppercut:SetAttribute("AnimType", 1)
+	FC_RightUppercut:SetAttribute("AnimDirection", "Right")
 	FC_RightUppercut:SetAttribute("AttackSeries", "Uppercuts")
 	FC_RightUppercut.Parent = plrObjectsFolder
 	
@@ -83,6 +88,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_LeftHaymaker.AnimationId = "rbxassetid://18195506368"
 	FC_LeftHaymaker:SetAttribute("AttackLevel", 2)
 	FC_LeftHaymaker:SetAttribute("AnimType", 1)
+	FC_LeftHaymaker:SetAttribute("AnimDirection", "Left")
 	FC_LeftHaymaker:SetAttribute("AttackSeries", "Haymakers")
 	FC_LeftHaymaker.Parent = plrObjectsFolder
 	
@@ -91,6 +97,7 @@ Players.PlayerAdded:Connect(function(player)
 	FC_RightHaymaker.AnimationId = "rbxassetid://17216832518"
 	FC_RightHaymaker:SetAttribute("AttackLevel", 2)
 	FC_RightHaymaker:SetAttribute("AnimType", 1)
+	FC_RightHaymaker:SetAttribute("AnimDirection", "Right")
 	FC_RightHaymaker:SetAttribute("AttackSeries", "Haymakers")
 	FC_RightHaymaker.Parent = plrObjectsFolder
 	
@@ -267,7 +274,21 @@ Players.PlayerAdded:Connect(function(player)
 	FC_SyncBlock3R2RECEIVER:SetAttribute("AnimDirection", "Right")
 	FC_SyncBlock3R2RECEIVER:SetAttribute("Paired", true)
 	FC_SyncBlock3R2RECEIVER.Parent = plrObjectsFolder
-	
+
+
+	local FC_BracingBlockL = Instance.new("Animation")
+	FC_BracingBlockL.Name = "FC_BracingBlockL"
+	FC_BracingBlockL.AnimationId = "rbxassetid://125158753103737"
+	FC_BracingBlockL:SetAttribute("AnimType", 2)
+	FC_BracingBlockL:SetAttribute("AnimDirection", "Left")
+	FC_BracingBlockL.Parent = plrObjectsFolder
+
+	local FC_BracingBlockR = Instance.new("Animation")
+	FC_BracingBlockR.Name = "FC_BracingBlockR"
+	FC_BracingBlockR.AnimationId = "rbxassetid://81054055418110"
+	FC_BracingBlockR:SetAttribute("AnimType", 2)
+	FC_BracingBlockR:SetAttribute("AnimDirection", "Right")
+	FC_BracingBlockR.Parent = plrObjectsFolder
 
 	player.CharacterAdded:Connect(function(character)
 		

@@ -4,18 +4,19 @@ local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 -- GameVariables.Sync()
 
 GameVariables.lockOnDebounce.Changed:Connect(function()
-	
+
 	if GameVariables.lockOnDebounce.Value == true then -- Runs when the player locks onto somebody
     GameVariables.FC_IdleTRACK:Play()
-	print(GameVariables.FC_IdleTRACK)
 		-- character changes below:
 		GameVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
 		GameVariables.humanoid.WalkSpeed = GameVariables.lockOnSpeed
-		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+		--[[
+		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
+		--]]
 		
 		-- camera subject part
 		local subject = GameVariables.character:FindFirstChild("subject") or Instance.new("Part") --[[ Subject is the point
-		That the player revoles around when they lock on. It is perfectly between the player and enemy.]]
+		That the player's camera revoles around when they lock on. It is perfectly between the player and enemy.]]
 		
 		if GameVariables.character:FindFirstChild("subject") == nil then --[[ Creates a subject if it's not created yet on
 		it's first lock on.]]
@@ -40,7 +41,7 @@ GameVariables.lockOnDebounce.Changed:Connect(function()
 		GameVariables.Camera.Focus = GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.CFrame
 		]]
 		
-		while GameVariables.lockOnDebounce.Value == true and GameVariables.raycastResult ~= nil do
+		while GameVariables.lockOnDebounce.Value == true and GameVariables.raycastResult ~= nil do -- constantly keeps the player facing the enemy
 				wait()
 				GameVariables.humanoidRootPart.CFrame = CFrame.lookAt(GameVariables.humanoidRootPart.Position, GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position) -- makes sure the player character is always facing the enemy character.
 			subject.CFrame = CFrame.new(
@@ -78,12 +79,18 @@ UserInputService.InputBegan:Connect(function(input)
 		rayParams.FilterType = Enum.RaycastFilterType.Exclude
 		
 		GameVariables.raycastResult = workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, rayParams)
-		if GameVariables.raycastResult --[[and game.Players:GetPlayerFromCharacter(raycastResult.Instance.Parent) - checks if locked on target is a player character. We turn off for now since it dont matter if its player yet.]]
-		and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto.
-        GameVariables.enemyHumanoid = GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
-        GameVariables.enemyChar = GameVariables.enemyHumanoid.Parent
-        GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
+		if GameVariables.raycastResult and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto.
+			GameVariables.enemyHumanoid = GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
+			GameVariables.enemyChar = GameVariables.enemyHumanoid.Parent
+			GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
+			print(game.Players:GetPlayerFromCharacter(GameVariables.enemyChar))
 			
+			if not game.Players:GetPlayerFromCharacter(GameVariables.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
+				if GameVariables.enemyChar.Name == "TestDummy" then
+					GameVariables.LocalBindableEvent:Fire(GameVariables.lockOnDebounce)
+				end
+			end
+				
 		elseif GameVariables.raycastResult == nil and GameVariables.lockOnDebounce.Value == true then
 			GameVariables.lockOnDebounce.Value = false
 			

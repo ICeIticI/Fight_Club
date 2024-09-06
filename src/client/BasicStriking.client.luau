@@ -1,13 +1,17 @@
+
+local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
+wait()
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
+
+print(GameVariables)
 
 -- GameVariables.SetPlayer(Players.LocalPlayer)
 
 local function attack(followupCombo)
 
 	if GameVariables.isEnemyHoldingBlock then
-		GameVariables.isAttacking = true and GameVariables.
+		GameVariables.isAttacking = true
 		print(GameVariables)
 		GameVariables.synchedBlock(nil, followupCombo) -- followupCombo will be nil the first time, as the attack() parameter will be empty, but afterwards it will have value.
 		warn("Sync attack thrown")

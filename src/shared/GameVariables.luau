@@ -522,7 +522,12 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 		
 		GameVariables.pairedPlaying = true
 	
-		GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed
+		if not GameVariables.isBlocking then
+			GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed
+		elseif GameVariables.isBlocking then
+			GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed / 1.5
+		end
+		
 		GameVariables.humanoid.WalkSpeed = 0
 		
 		if GameVariables.isBlocking then

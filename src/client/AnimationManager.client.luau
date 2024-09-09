@@ -136,7 +136,7 @@ local function manageAnimations()
 			end)
 			
 		else -- Misc. Animations such as blocking
-			
+
 			local MiscIsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function()
 				if v.Animation.AnimationId == GameVariables.FC_Block.AnimationId then
 						wait(0.15)
@@ -148,6 +148,8 @@ local function manageAnimations()
 					warn("Broke out of the for loop...")
 					GameVariables.Protocol = "HoldingBlock"
 					GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false) -- letting the enemy know the player is blocking
+					--elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then
+
 				end
 			end)
 			

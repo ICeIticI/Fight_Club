@@ -10,6 +10,12 @@ local attackDamage = nil -- How much damage the player's current attack will do.
 GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
 
+	if currentAttack:GetAttribute("AttackLevel") == 1 then
+		attackDamage = A1Damage
+	elseif currentAttack:GetAttribute("AttackLevel") == 2 then
+		attackDamage = A2Damage
+	end
+
 	if Protocol == "Hook" or Protocol == "Haymaker" then
 		local otherProtocol = "Receive"
 		if hitPlayer then
@@ -20,14 +26,14 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Pr
 		end
 	end
 	if Protocol == "Hook" then -- do Hook-worthy damage
-	attackDamage = A1Damage
+	-- attackDamage = A1Damage
 	if plrIsBlocking then
 		attackDamage = attackDamage/2
 		print("bracing block absorbed some damage")
 	end
 	hitPlayer.Character.Humanoid.Health -= attackDamage
 	elseif Protocol == "Haymaker" then
-		attackDamage = A2Damage
+		-- attackDamage = A2Damage
 		if plrIsBlocking then
 			attackDamage = attackDamage/2
 		end
@@ -45,6 +51,8 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Pr
 		elseif hitCharacter then -- Then its not a player we're attacking, but an AI
 			GlobalRemoteEvent:FireClient(sendingPlayer, nil, Protocol, animPair, sentValue, isAI)
 		end
+	elseif Protocol == "Parry" then
+		
 	end
 	attackDamage = nil
 end)

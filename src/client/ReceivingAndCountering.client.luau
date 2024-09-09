@@ -13,25 +13,29 @@ local function receive(currentAttack)
 		if GameVariables.FC_BlockStartTRACK.IsPlaying then -- if the player gets hit while the blockstart track is playing, then they will perform a parry
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then -- perform a left parry animation that will send to the server to damage the enemy slightly, and also make them do an animation in reaction.
 				warn("ParryL")
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockRTRACK -- If the enemy threw an attack to the left, then we brace right since their left is our right
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftParryTRACK -- If the enemy threw an attack to the left, then we brace right since their left is our right
 			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
 				warn("ParryR")
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockLTRACK
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightParryTRACK
 			end
-		end
+			print(currentAttack)
+			local Protocol = "Parry"
+			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
+		else -- the blockStart track is not playing, therefore its not a parry:
 
-		if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
-			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
-		elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
-			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
-		elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
-			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
-		elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
-			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
-		elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
-			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
-		elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
-			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
+			if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
+			elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
+			elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
+			elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
+			elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
+			elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
+			end
 		end
 	elseif GameVariables.isBlocking then -- Bracing block
 		GameVariables.canSyncBlock = false -- Trying to get this to dictate if receiving plr can sync block

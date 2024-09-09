@@ -363,6 +363,13 @@ GameVariables.FC_BracingBlockLTRACK = GameVariables.charAnimator:LoadAnimation(G
 GameVariables.FC_BracingBlockR = GameVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockR")
 GameVariables.FC_BracingBlockRTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_BracingBlockR)
 
+GameVariables.FC_LeftParry = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftParry")
+GameVariables.FC_LeftParryTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftParry)
+GameVariables.FC_LeftParryTRACK.Priority = Enum.AnimationPriority.Action4
+
+GameVariables.FC_RightParry = GameVariables.plrObjectsFolder:WaitForChild("FC_RightParry")
+GameVariables.FC_RightParryTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightParry)
+GameVariables.FC_RightParryTRACK.Priority = Enum.AnimationPriority.Action4
 
 -- *Animation tables*
 GameVariables.AllAnimations = {
@@ -382,7 +389,8 @@ GameVariables.AllAnimations = {
 	GameVariables.FC_SyncBlock3R1TRACK, GameVariables.FC_SyncBlock3R1RECEIVERTRACK,
 	GameVariables.FC_SyncBlock3L2TRACK, GameVariables.FC_SyncBlock3L2RECEIVERTRACK,
 	GameVariables.FC_SyncBlock3R2TRACK, GameVariables.FC_SyncBlock3R2RECEIVERTRACK,
-	GameVariables.FC_BracingBlockLTRACK, GameVariables.FC_BracingBlockRTRACK
+	GameVariables.FC_BracingBlockLTRACK, GameVariables.FC_BracingBlockRTRACK,
+	GameVariables.FC_LeftParryTRACK, GameVariables.FC_RightParryTRACK
 }
 
 GameVariables.attack1Table = {}

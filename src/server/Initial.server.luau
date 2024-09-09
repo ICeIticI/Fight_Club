@@ -289,6 +289,18 @@ Players.PlayerAdded:Connect(function(player)
 	FC_BracingBlockR:SetAttribute("AnimType", 2)
 	FC_BracingBlockR:SetAttribute("AnimDirection", "Right")
 	FC_BracingBlockR.Parent = plrObjectsFolder
+	
+	local FC_LeftParry = Instance.new("Animation")
+	FC_LeftParry.Name = "FC_LeftParry"
+	FC_LeftParry.AnimationId = "rbxassetid://98670773281611"
+	-- FC_LeftParry:SetAttribute("AnimDirection", "Left")
+	FC_LeftParry.Parent = plrObjectsFolder
+	
+	local FC_RightParry = Instance.new("Animation")
+	FC_RightParry.Name = "FC_RightParry"
+	FC_RightParry.AnimationId = "rbxassetid://113708135947767"
+	-- FC_RightParry:SetAttribute("AnimDirection", "Right")
+	FC_RightParry.Parent = plrObjectsFolder
 
 	player.CharacterAdded:Connect(function(character)
 		

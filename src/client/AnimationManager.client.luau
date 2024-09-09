@@ -157,7 +157,12 @@ local function manageAnimations()
 				end
 			end)
 
-			local MiscConnects = {MiscIsPlayingCONNECT, MiscStopppedCONNECT}
+			local MiscIsBlockingConnect = v:GetMarkerReachedSignal("isBlocking"):Connect(function()
+				GameVariables.isBlocking = true
+				print("player is now blocking...!")
+			end)
+
+			local MiscConnects = {MiscIsPlayingCONNECT, MiscStopppedCONNECT, MiscIsBlockingConnect}
 
 			GameVariables.humanoid.Died:Connect(function()
 				for _, connection in pairs(MiscConnects) do

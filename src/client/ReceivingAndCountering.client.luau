@@ -2,13 +2,24 @@ local UserInputService = game:GetService("UserInputService")
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
 local function receive(currentAttack)
-	local currentAttackID = currentAttack.AnimationId
+	local currentAttackID = currentAttack.AnimationId -- currentAttack is what the enemy is throwing
 	
 	if GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying then
 		GameVariables.currentReceiveAnimTRACK:Stop()
 	end
 	
 	if not GameVariables.isBlocking then -- Receiving attack (not blocking)
+
+		if GameVariables.FC_BlockStartTRACK.IsPlaying then -- if the player gets hit while the blockstart track is playing, then they will perform a parry
+			if currentAttack:GetAttribute("AnimDirection") == "Left" then -- perform a left parry animation that will send to the server to damage the enemy slightly, and also make them do an animation in reaction.
+				warn("ParryL")
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockRTRACK -- If the enemy threw an attack to the left, then we brace right since their left is our right
+			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
+				warn("ParryR")
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockLTRACK
+			end
+		end
+
 		if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
 			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
 		elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
@@ -65,7 +76,7 @@ end)
 
 UserInputService.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.pairedPlaying then -- blocking/dodging  
-		GameVariables.isBlocking = true
+		-- GameVariables.isBlocking = true
 		GameVariables.FC_BlockStartTRACK:Play()
 		GameVariables.humanoid.WalkSpeed /= 1.5
 	end

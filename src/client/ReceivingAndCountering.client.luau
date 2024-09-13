@@ -70,8 +70,16 @@ GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Pr
 		-- 	game.Workspace.Camera.CameraSubject = sentValue.Humanoid
 		-- 	game.Workspace.Camera.CFrame = sentValue.Head.CFrame
 		-- 	print("REACHEDDDD")
+		elseif Protocol == "Parry" then
+			-- if the enemy parried the player, then they will do a reaction to what direction the enemy 
+			if currentAttack:GetAttribute("AnimDirection") == "Left" then
+				-- if the enemy parried to the left, the player's right hand will repelled, and vice versa.
+			
+			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
+			
+			end
 		end
-	elseif isAI == true then
+	--elseif isAI == true then
 		
 	end
     

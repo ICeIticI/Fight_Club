@@ -10,9 +10,9 @@ local attackDamage = nil -- How much damage the player's current attack will do.
 GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
 
-	if currentAttack:GetAttribute("AttackLevel") == 1 then
+	if currentAttack and currentAttack:GetAttribute("AttackLevel") == 1 then
 		attackDamage = A1Damage
-	elseif currentAttack:GetAttribute("AttackLevel") == 2 then
+	elseif currentAttack and currentAttack:GetAttribute("AttackLevel") == 2 then
 		attackDamage = A2Damage
 	end
 
@@ -52,7 +52,10 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Pr
 			GlobalRemoteEvent:FireClient(sendingPlayer, nil, Protocol, animPair, sentValue, isAI)
 		end
 	elseif Protocol == "Parry" then
-		
+		attackDamage = attackDamage/2
+		hitCharacter.Humanoid.Health -= attackDamage
+		warn(tostring(hitPlayer) .. " has been parried!")
+		GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
 	end
 	attackDamage = nil
 end)

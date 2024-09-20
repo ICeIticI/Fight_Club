@@ -293,14 +293,26 @@ Players.PlayerAdded:Connect(function(player)
 	local FC_LeftParry = Instance.new("Animation")
 	FC_LeftParry.Name = "FC_LeftParry"
 	FC_LeftParry.AnimationId = "rbxassetid://98670773281611"
-	-- FC_LeftParry:SetAttribute("AnimDirection", "Left")
+	FC_LeftParry:SetAttribute("Paired", true)
 	FC_LeftParry.Parent = plrObjectsFolder
+	
+	local FC_LeftParryRECEIVER = Instance.new("Animation")
+	FC_LeftParryRECEIVER.Name = "FC_LeftParryRECEIVER"
+	FC_LeftParryRECEIVER.AnimationId = "rbxassetid://105843461082459 "
+	FC_LeftParryRECEIVER:SetAttribute("Paired", true)
+	FC_LeftParryRECEIVER.Parent = plrObjectsFolder
 	
 	local FC_RightParry = Instance.new("Animation")
 	FC_RightParry.Name = "FC_RightParry"
 	FC_RightParry.AnimationId = "rbxassetid://113708135947767"
-	-- FC_RightParry:SetAttribute("AnimDirection", "Right")
+	FC_RightParry:SetAttribute("Paired", true)
 	FC_RightParry.Parent = plrObjectsFolder
+
+	local FC_RightParryRECEIVER = Instance.new("Animation")
+	FC_RightParryRECEIVER.Name = "FC_RightParryRECEIVER"
+	FC_RightParryRECEIVER.AnimationId = "rbxassetid://134313731572876"
+	FC_RightParryRECEIVER:SetAttribute("Paired", true)
+	FC_RightParryRECEIVER.Parent = plrObjectsFolder
 
 	player.CharacterAdded:Connect(function(character)
 		

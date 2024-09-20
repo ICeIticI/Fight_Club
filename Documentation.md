@@ -575,3 +575,9 @@ upd: slowed the player when locked on, and also just slowed the general speed of
   - What I was working on: Leaving the test dummy stuff for parrys. Got the parry animations done, and got the remote event code ready. Was last making a check for what kind of attack the enemy threw that affected the damage type when the remote event runs, such as A1 or A2 damage.
 
   - What I intend to do: Get the damage types done, get parry damage, make the player unable to move when parrying, make a receiving parry animations, give player frame advantage, but not too much so the enemy can block the riposte, and move on to counters hopefully.
+
+9/19/24
+
+- What I was working on: Created receive parry anims, and implemented. Parries are having some issues with attacking after the parry. The enemy char may try to continue chain which it shouldnt.
+
+- What I intend to do: Make sure there is no chains after getting parried, both chars can play normally after a parry, frame advantage for parrier, and then move to counters hopefully.

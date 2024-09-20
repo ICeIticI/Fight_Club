@@ -72,11 +72,12 @@ GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Pr
 		-- 	print("REACHEDDDD")
 		elseif Protocol == "Parry" then
 			-- if the enemy parried the player, then they will do a reaction to what direction the enemy 
+			GameVariables.randAttack:Stop()
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then
 				-- if the enemy parried to the left, the player's right hand will repelled, and vice versa.
-			
+				GameVariables.FC_LeftParryRECEIVERTRACK:Play()
 			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
-			
+				GameVariables.FC_RightParryRECEIVERTRACK:Play()
 			end
 		end
 	--elseif isAI == true then

@@ -80,6 +80,7 @@ local function attack(followupCombo)
 			GameVariables.currentAttack = GameVariables.randAttack.Animation
 			GameVariables.isAttacking = true
 			GameVariables.randAttack:Play()
+			print("we got a randattackkkk")
 			GameVariables.lastAttack = GameVariables.randAttack
 			GameVariables.comboCounter+=1
 
@@ -92,7 +93,7 @@ local function hitboxManager()
 	for _, v in pairs(GameVariables.hitboxesFolderATTACK) do --[[Creates :Connect events for each element in the 
 										hitboxesFolderATTACK folder.]]		
 		local touchedConnection = v.Touched:Connect(function(touchedObject)
-			if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") then
+			if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") and GameVariables.currentAttack then
 				GameVariables.hitDebounce = true
 				local enemyCharacter = touchedObject.Parent.Parent
 				local enemyPlayer = game.Players:GetPlayerFromCharacter(enemyCharacter)
@@ -102,7 +103,7 @@ local function hitboxManager()
 				-- 		GameVariables.isEnemyHoldingBlock = true
 				-- 	end
 				-- end
-				
+				print(GameVariables.currentAttack)
 				if GameVariables.currentAttack:GetAttribute("AttackLevel") == 1 then
 					GameVariables.Protocol = "Hook" -- Protocol is used to determine what function in the server to perform when a RemoteEvent is used. A "Hook" Protocol will do more damage than a "Jab" Protocol for example.
 				elseif GameVariables.currentAttack:GetAttribute("AttackLevel") == 2 then
@@ -146,6 +147,7 @@ UserInputService.InputBegan:Connect(function(input)
 			 2 attacks (haymakers).]]
 
 		warn("2 seconds till attack...")
+		print(GameVariables.isAttacking)
 		wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
 
 		GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude

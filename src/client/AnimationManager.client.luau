@@ -6,7 +6,7 @@ local function manageAnimations()
 	for _, v in pairs(GameVariables.AllAnimations) do -- When the player presses an input and attacks (down below in UserInputService), this body of code will manage the player's current combo and their ability to do a followup attack after their first. It's up here so this isn't re-created
 		local currentAnim = v.Animation
 		local EndOfAttackExists = false -- for the functions that don't have this event, I want them to run code when the animation has stopped. However, animations that have this marker won't be able to run it.
-		
+		print(v.Priority)
 		if currentAnim:GetAttribute("AnimType") == 1 then -- anim type 1 is attacks
 			-- every time the player presses attack.
 			local attackEnded = false
@@ -150,12 +150,32 @@ local function manageAnimations()
 					GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false) -- letting the enemy know the player is blocking
 					--elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then
 
+				elseif v.Animation:GetAttribute("Paired") and v.IsPlaying then
+					if not GameVariables.isAttacking then
+						GameVariables.isAttacking = true -- so I dont have to set isAttacking to true if it's already true. This is to prevent any other action from occuring.
+					end
+
+					if v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then
+						-- if its one of the parries, then make their comboCounter is >= 3
+						GameVariables.comboCounter = 3
+						-- GameVariables.pairedChain = 0
+						GameVariables.followUpCount = 0
+					elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then
+						-- whoever got parried shouldnt be able to follow up with their last attack. They basically get their combo reset to 0.
+						GameVariables.canFollowUp = false
+						GameVariables.followUpCount = 0
+					end
 				end
 			end)
 			
 			local MiscStopppedCONNECT = v.Stopped:Connect(function()
 				if v.Animation.AnimationId == GameVariables.FC_BlockStart.AnimationId and v.TimePosition == v.Length then -- When the block starting animation ends, we want to play the looping version of the blocking animation.
-				GameVariables.FC_BlockTRACK:Play()
+					GameVariables.FC_BlockTRACK:Play()
+				elseif v.Animation:GetAttribute("Paired") then
+					if GameVariables.isAttacking then
+						warn("paired d")
+						GameVariables.isAttacking = false -- So the player will be able to attack after a parry again.
+					end
 				end
 			end)
 

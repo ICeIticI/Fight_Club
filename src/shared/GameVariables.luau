@@ -214,7 +214,7 @@ GameVariables.originalCamSubject = GameVariables.Camera.CameraSubject
 GameVariables.lockOnDebounce = Instance.new("BoolValue") -- shouldn't this be initialized by the server for more security?
 GameVariables.lockOnDebounce.Name = "lockOnDebounce"
 GameVariables.lockOnDebounce.Parent = GameVariables.plrObjectsFolder
-GameVariables.hitDebounce = false
+GameVariables.hitDebounce = false -- if false, then the player has the ability to deal damage. This is so the player won't hit the enemy multiple times in one attack.
 GameVariables.isBlocking = false -- set to true when the client blocks
 GameVariables.isAttacking = false
 GameVariables.waitingToAttack = false
@@ -243,6 +243,14 @@ GameVariables.enemyHumanoid = nil -- pre-defined enemy Humanoid because the scri
 GameVariables.enemyChar = nil
 GameVariables.randLvl1Type = nil --[[ Used to determine what lvl 1 attacks
 					   the player will use for said combo ]]
+
+
+-- New Variables that are replacing old:
+GameVariables.canAttack = false
+GameVariables.canGetHit = false
+GameVariables.areLockedOn = false
+-- Above are new variables that will be replacing old ^
+
 
 GameVariables.animPair = nil
 

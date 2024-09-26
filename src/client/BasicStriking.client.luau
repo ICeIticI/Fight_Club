@@ -93,8 +93,17 @@ local function hitboxManager()
 	for _, v in pairs(GameVariables.hitboxesFolderATTACK) do --[[Creates :Connect events for each element in the 
 										hitboxesFolderATTACK folder.]]		
 		local touchedConnection = v.Touched:Connect(function(touchedObject)
+
+			if touchedObject:GetAttribute("ReceiveBox") and GameVariables.comboCounter >= 3 then
+				print(GameVariables.isAttacking)
+				print(GameVariables.hitDebounce)
+			end
+			
+			-- warn(touchedObject)
 			if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") and GameVariables.currentAttack then
+				warn("we touched something")
 				GameVariables.hitDebounce = true
+				
 				local enemyCharacter = touchedObject.Parent.Parent
 				local enemyPlayer = game.Players:GetPlayerFromCharacter(enemyCharacter)
 
@@ -140,15 +149,26 @@ end)
 
 UserInputService.InputBegan:Connect(function(input)
 
-    if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and not GameVariables.waitingToAttack and GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then -- for testing
+		warn("2 seconds till attack...")
+		print(GameVariables.isAttacking)
+		wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
+	end
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+	
+	 and GameVariables.lockOnDebounce.Value -- the player is locked on
+	  and not GameVariables.waitingToAttack -- the player is not already waiting to attack
+	   and GameVariables.pairedChain <= GameVariables.PairedChainMAX -- their current chain of attacks isnt more than the max (3)
+	    and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) -- makes sure they arent attacking, blocking, or dodging
+		 and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
 																																																																							-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
 		--[[ When the player presses attack, we want to randomly choose between a series of hooks or jabs
 			 for attack level 1. Once combo counter finishes it's 3rd attack, we will transition to level
 			 2 attacks (haymakers).]]
 
-		warn("2 seconds till attack...")
-		print(GameVariables.isAttacking)
-		wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
+		
+		
 
 		GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 		GameVariables.followUpCount += 1
@@ -157,6 +177,7 @@ UserInputService.InputBegan:Connect(function(input)
 			GameVariables.pairedChain += 1 -- the current chain of attacks in a Sync block. There can be 3 chained sync blocks
 			print("paired chain added. Num of times: ".. tostring(GameVariables.pairedChain))
 		end
+		
 		if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then -- for the sync block and attack to play simultaneously
 			if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 				GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
@@ -187,6 +208,8 @@ UserInputService.InputBegan:Connect(function(input)
 	-- elseif input.KeyCode == Enum.KeyCode.T then -- for debugging why animations wont work on respawn -- ITS NOT THE ANIMATIONS THAT ISNT WORKING...
 	-- 	GameVariables.FC_LeftHook1TRACK:Play()
 	end
+
+	-- for printing:
 	if GameVariables.raycastResult and input.UserInputType == Enum.UserInputType.MouseButton1 then
 		local debuggingAttackTable = {
 			GameVariables.lockOnDebounce.Value, -- should be true
@@ -202,6 +225,31 @@ UserInputService.InputBegan:Connect(function(input)
 			GameVariables.isDodging,
 		   (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 		} -- alot of the time it wont allow the player to attack no matter what, so this table will print when the player can't attack at all.
+		-- if GameVariables.lockOnDebounce.Value ~= true then
+		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+		-- end
+		-- if GameVariables.waitingToAttack ~= false then
+		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+		-- end
+		-- if (GameVariables.canFollowUp ~= false and GameVariables.followUpCount < 1) or (GameVariables.canFollowUp ~= true and GameVariables.followUpCount >= 1) then
+		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+		-- end
+		-- if (GameVariables.pairedPlaying ~= false and GameVariables.followUpCount < 1) or (GameVariables.canFollowUp ~= true and GameVariables.followUpCount >= 1) then
+		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+		-- end
+		-- if GameVariables.pairedChain >= 3 then
+		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+		-- end
+		-- if GameVariables.followUpCount < 1 then
+		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+		-- end
+		-- if GameVariables.comboCounter ~= 0 then
+		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+		-- end
+		-- if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) ~= true then
+		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+		-- end
+		
 		print("variables for attacking:")
 		print(debuggingAttackTable)
 	end

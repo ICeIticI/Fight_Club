@@ -581,3 +581,7 @@ upd: slowed the player when locked on, and also just slowed the general speed of
 - What I was working on: Created receive parry anims, and implemented. Parries are having some issues with attacking after the parry. The enemy char may try to continue chain which it shouldnt.
 
 - What I intend to do: Make sure there is no chains after getting parried, both chars can play normally after a parry, frame advantage for parrier, and then move to counters hopefully.
+
+10/7/24
+
+- We need to reorganize I feel. Start taking a heavy OOP approach, break down our code into understandable chunks, and very importantly: SET DUE DATES FOR CODE!!! Perhaps take an agile

@@ -126,9 +126,10 @@ local function hitboxManager()
 						wait()
 					until GameVariables.attackFrames or not GameVariables.isAttacking
 				end
-				
+				print("eee")
 				if enemyPlayer and GameVariables.isAttacking then
 					GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false) -- Deal damage to other client.
+					print("We landed an attack on an enemy")
 				end		
 			end
 		end)

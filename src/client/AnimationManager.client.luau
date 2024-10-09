@@ -164,7 +164,7 @@ local function manageAnimations()
 					elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then
 						-- whoever got parried shouldnt be able to follow up with their last attack. They basically get their combo reset to 0.
 						-- GameVariables.isAttacking = false
-					-- GameVariables.canFollowUp = false
+						-- GameVariables.canFollowUp = false
 						GameVariables.comboCounter = 0
 						GameVariables.followUpCount = 0
 						print("Whoa! I just got parried!")

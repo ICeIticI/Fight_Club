@@ -2,8 +2,34 @@ local UserInputService = game:GetService("UserInputService")
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 -- local LocalBindableEvent = game.ReplicatedStorage:WaitForChild("LocalBindableEvent")
 -- GameVariables.Sync()
+local LockOnSystem = {}
 
-GameVariables.lockOnDebounce.Changed:Connect(function()
+function LockOnSystem.LockOn()
+
+	local rayParams = RaycastParams.new()
+		rayParams.FilterDescendantsInstances = GameVariables.character:GetChildren()
+		rayParams.FilterType = Enum.RaycastFilterType.Exclude
+		
+		GameVariables.raycastResult = workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, rayParams)
+		if GameVariables.raycastResult and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto.
+			GameVariables.enemyHumanoid = GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
+			GameVariables.enemyChar = GameVariables.enemyHumanoid.Parent
+			GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
+			print(game.Players:GetPlayerFromCharacter(GameVariables.enemyChar))
+			
+			if not game.Players:GetPlayerFromCharacter(GameVariables.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
+				if GameVariables.enemyChar.Name == "TestDummy" then
+					GameVariables.LocalBindableEvent:Fire(GameVariables.lockOnDebounce)
+				end
+			end
+				
+		elseif GameVariables.raycastResult == nil and GameVariables.lockOnDebounce.Value == true then
+			GameVariables.lockOnDebounce.Value = false
+			
+		end
+
+	-- GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value
+	
 
 	if GameVariables.lockOnDebounce.Value == true then -- Runs when the player locks onto somebody
     GameVariables.FC_IdleTRACK:Play()
@@ -66,35 +92,18 @@ GameVariables.lockOnDebounce.Changed:Connect(function()
 		GameVariables.Camera.CameraType = Enum.CameraType.Custom
 		]]
 	end
-end)
 
-UserInputService.InputBegan:Connect(function(input)
+
+
 	
-	if input.KeyCode == Enum.KeyCode.Q then -- lock on with Q
+	-- if input.KeyCode == Enum.KeyCode.Q then -- lock on with Q
 		
 		
 		-- lock on code below:
-		local rayParams = RaycastParams.new()
-		rayParams.FilterDescendantsInstances = GameVariables.character:GetChildren()
-		rayParams.FilterType = Enum.RaycastFilterType.Exclude
 		
-		GameVariables.raycastResult = workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, rayParams)
-		if GameVariables.raycastResult and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto.
-			GameVariables.enemyHumanoid = GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
-			GameVariables.enemyChar = GameVariables.enemyHumanoid.Parent
-			GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
-			print(game.Players:GetPlayerFromCharacter(GameVariables.enemyChar))
-			
-			if not game.Players:GetPlayerFromCharacter(GameVariables.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
-				if GameVariables.enemyChar.Name == "TestDummy" then
-					GameVariables.LocalBindableEvent:Fire(GameVariables.lockOnDebounce)
-				end
-			end
-				
-		elseif GameVariables.raycastResult == nil and GameVariables.lockOnDebounce.Value == true then
-			GameVariables.lockOnDebounce.Value = false
-			
-		end
 		
-    end
-end)
+    -- end
+
+end
+
+return LockOnSystem

@@ -585,3 +585,7 @@ upd: slowed the player when locked on, and also just slowed the general speed of
 10/7/24
 
 - We need to reorganize I feel. Start taking a heavy OOP approach, break down our code into understandable chunks, and very importantly: SET DUE DATES FOR CODE!!! Perhaps take an agile
+
+10/8/24
+
+- Ended off adding the .Attack() function of basic striking into when player presses MB1 on the client script. I plan to implement the rest and resume like before.

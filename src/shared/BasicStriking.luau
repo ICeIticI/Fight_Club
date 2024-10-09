@@ -6,6 +6,8 @@ local Players = game:GetService("Players")
 
 print(GameVariables)
 
+local BasicStriking = {}
+
 -- GameVariables.SetPlayer(Players.LocalPlayer)
 
 local function attack(followupCombo)
@@ -146,112 +148,115 @@ GameVariables.player.CharacterAdded:Connect(function()
 	hitboxManager()
 end)
 
+function BasicStriking.Attack()
 
+	UserInputService.InputBegan:Connect(function(input)
 
-UserInputService.InputBegan:Connect(function(input)
-
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then -- for testing
-		warn("2 seconds till attack...")
-		print(GameVariables.isAttacking)
-		wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
-	end
-
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-	
-	 and GameVariables.lockOnDebounce.Value -- the player is locked on
-	  and not GameVariables.waitingToAttack -- the player is not already waiting to attack
-	   and GameVariables.pairedChain <= GameVariables.PairedChainMAX -- their current chain of attacks isnt more than the max (3)
-	    and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) -- makes sure they arent attacking, blocking, or dodging
-		 and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
-																																																																							-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
-		--[[ When the player presses attack, we want to randomly choose between a series of hooks or jabs
-			 for attack level 1. Once combo counter finishes it's 3rd attack, we will transition to level
-			 2 attacks (haymakers).]]
-
-		
-		
-
-		GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
-		GameVariables.followUpCount += 1
-		
-		if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then -- For paired attacks. To keep track of the number of times the player does a sync block.
-			GameVariables.pairedChain += 1 -- the current chain of attacks in a Sync block. There can be 3 chained sync blocks
-			print("paired chain added. Num of times: ".. tostring(GameVariables.pairedChain))
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then -- for testing
+			warn("2 seconds till attack...")
+			print(GameVariables.isAttacking)
+			wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
 		end
+
+		if input.UserInputType == Enum.UserInputType.MouseButton1
 		
-		if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then -- for the sync block and attack to play simultaneously
-			if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
-				GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
-				GameVariables.Protocol = "AttackStarted"
-				GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, nil, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
-			end			
+		and GameVariables.lockOnDebounce.Value -- the player is locked on
+		and not GameVariables.waitingToAttack -- the player is not already waiting to attack
+		and GameVariables.pairedChain <= GameVariables.PairedChainMAX -- their current chain of attacks isnt more than the max (3)
+			and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) -- makes sure they arent attacking, blocking, or dodging
+			and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
+																																																																								-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
+			--[[ When the player presses attack, we want to randomly choose between a series of hooks or jabs
+				for attack level 1. Once combo counter finishes it's 3rd attack, we will transition to level
+				2 attacks (haymakers).]]
 
-			attack()
+			
+			
 
-		elseif GameVariables.canFollowUp == true then -- the player followed up with their attack.
-        GameVariables.waitingToAttack = true
-			print("waiting on next attack")
-			while GameVariables.isAttacking do
-				wait()
+			GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
+			GameVariables.followUpCount += 1
+			
+			if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then -- For paired attacks. To keep track of the number of times the player does a sync block.
+				GameVariables.pairedChain += 1 -- the current chain of attacks in a Sync block. There can be 3 chained sync blocks
+				print("paired chain added. Num of times: ".. tostring(GameVariables.pairedChain))
 			end
-			if GameVariables.followUpCount > 1 then -- For followup attacks
-
+			
+			if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then -- for the sync block and attack to play simultaneously
 				if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
-					GameVariables.animPair = {math.random(1,2), math.random(1,2)}
+					GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
 					GameVariables.Protocol = "AttackStarted"
-					GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
-				end
-				print(GameVariables.pairedChain)
-				attack(GameVariables.pairedChain) -- pairedChain is used for a followup combo, which enables uppercuts.
-			end
-			GameVariables.waitingToAttack = false
-		end
-	-- elseif input.KeyCode == Enum.KeyCode.T then -- for debugging why animations wont work on respawn -- ITS NOT THE ANIMATIONS THAT ISNT WORKING...
-	-- 	GameVariables.FC_LeftHook1TRACK:Play()
-	end
+					GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, nil, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
+				end			
 
-	-- for printing:
-	if GameVariables.raycastResult and input.UserInputType == Enum.UserInputType.MouseButton1 then
-		local debuggingAttackTable = {
-			GameVariables.lockOnDebounce.Value, -- should be true
-			GameVariables.waitingToAttack, -- should be false
-			GameVariables.canFollowUp, -- at first it should be false, on followup it should be true
-			GameVariables.pairedPlaying, -- false at first
-			GameVariables.pairedChain, -- less than 3
-			GameVariables.followUpCount, -- less than 1 at first
-			GameVariables.comboCounter, -- should be 0 at first
-			GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging),
-			GameVariables.isAttacking,
-			GameVariables.isBlocking,
-			GameVariables.isDodging,
-		   (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
-		} -- alot of the time it wont allow the player to attack no matter what, so this table will print when the player can't attack at all.
-		-- if GameVariables.lockOnDebounce.Value ~= true then
-		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
-		-- end
-		-- if GameVariables.waitingToAttack ~= false then
-		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
-		-- end
-		-- if (GameVariables.canFollowUp ~= false and GameVariables.followUpCount < 1) or (GameVariables.canFollowUp ~= true and GameVariables.followUpCount >= 1) then
-		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
-		-- end
-		-- if (GameVariables.pairedPlaying ~= false and GameVariables.followUpCount < 1) or (GameVariables.canFollowUp ~= true and GameVariables.followUpCount >= 1) then
-		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
-		-- end
-		-- if GameVariables.pairedChain >= 3 then
-		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
-		-- end
-		-- if GameVariables.followUpCount < 1 then
-		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
-		-- end
-		-- if GameVariables.comboCounter ~= 0 then
-		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
-		-- end
-		-- if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) ~= true then
-		-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
-		-- end
-		
-		print("variables for attacking:")
-		print(debuggingAttackTable)
-	end
-end)
+				attack()
+
+			elseif GameVariables.canFollowUp == true then -- the player followed up with their attack.
+			GameVariables.waitingToAttack = true
+				print("waiting on next attack")
+				while GameVariables.isAttacking do
+					wait()
+				end
+				if GameVariables.followUpCount > 1 then -- For followup attacks
+
+					if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
+						GameVariables.animPair = {math.random(1,2), math.random(1,2)}
+						GameVariables.Protocol = "AttackStarted"
+						GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
+					end
+					print(GameVariables.pairedChain)
+					attack(GameVariables.pairedChain) -- pairedChain is used for a followup combo, which enables uppercuts.
+				end
+				GameVariables.waitingToAttack = false
+			end
+		-- elseif input.KeyCode == Enum.KeyCode.T then -- for debugging why animations wont work on respawn -- ITS NOT THE ANIMATIONS THAT ISNT WORKING...
+		-- 	GameVariables.FC_LeftHook1TRACK:Play()
+		end
+
+		-- for printing:
+		if GameVariables.raycastResult and input.UserInputType == Enum.UserInputType.MouseButton1 then
+			local debuggingAttackTable = {
+				GameVariables.lockOnDebounce.Value, -- should be true
+				GameVariables.waitingToAttack, -- should be false
+				GameVariables.canFollowUp, -- at first it should be false, on followup it should be true
+				GameVariables.pairedPlaying, -- false at first
+				GameVariables.pairedChain, -- less than 3
+				GameVariables.followUpCount, -- less than 1 at first
+				GameVariables.comboCounter, -- should be 0 at first
+				GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging),
+				GameVariables.isAttacking,
+				GameVariables.isBlocking,
+				GameVariables.isDodging,
+			(GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
+			} -- alot of the time it wont allow the player to attack no matter what, so this table will print when the player can't attack at all.
+			-- if GameVariables.lockOnDebounce.Value ~= true then
+			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+			-- end
+			-- if GameVariables.waitingToAttack ~= false then
+			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+			-- end
+			-- if (GameVariables.canFollowUp ~= false and GameVariables.followUpCount < 1) or (GameVariables.canFollowUp ~= true and GameVariables.followUpCount >= 1) then
+			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+			-- end
+			-- if (GameVariables.pairedPlaying ~= false and GameVariables.followUpCount < 1) or (GameVariables.canFollowUp ~= true and GameVariables.followUpCount >= 1) then
+			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+			-- end
+			-- if GameVariables.pairedChain >= 3 then
+			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+			-- end
+			-- if GameVariables.followUpCount < 1 then
+			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+			-- end
+			-- if GameVariables.comboCounter ~= 0 then
+			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+			-- end
+			-- if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) ~= true then
+			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
+			-- end
+			
+			print("variables for attacking:")
+			print(debuggingAttackTable)
+		end
+	end)
+end
+
+return BasicStriking

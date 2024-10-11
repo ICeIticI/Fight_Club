@@ -1,10 +1,11 @@
-local Players = game.Players
+-- local Players = game.Players
 
-local GlobalRemoteEvent = Instance.new("RemoteEvent")
-GlobalRemoteEvent.Name = "GlobalRemoteEvent"
-GlobalRemoteEvent.Parent = game.ReplicatedStorage
+-- local GlobalRemoteEvent = Instance.new("RemoteEvent")
+-- GlobalRemoteEvent.Name = "GlobalRemoteEvent"
+-- GlobalRemoteEvent.Parent = game.ReplicatedStorage
+local ServerInit = {}
 
-Players.PlayerAdded:Connect(function(player)
+function ServerInit.InitializePlayer(player)
 	local plrObjectsFolder = Instance.new("Folder")
 	plrObjectsFolder.Name = player.Name .. "_GameObjects"
 	plrObjectsFolder.Parent = player
@@ -314,7 +315,9 @@ Players.PlayerAdded:Connect(function(player)
 	FC_RightParryRECEIVER:SetAttribute("Paired", true)
 	FC_RightParryRECEIVER.Parent = plrObjectsFolder
 
-	player.CharacterAdded:Connect(function(character)
+
+
+	function ServerInit.InitializeCharacter(character)
 		
 		local charAnimator = Instance.new("Animator")
 		charAnimator.Name = "charAnimator"
@@ -424,5 +427,8 @@ Players.PlayerAdded:Connect(function(player)
 		trso_Weld.Part0 = hitboxTorso
 		trso_Weld.Part1 = character:WaitForChild("Torso")
 		trso_Weld.Parent = character		
-	end)
-end)
+	end
+	
+end
+
+return ServerInit

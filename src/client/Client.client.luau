@@ -9,20 +9,35 @@ local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables) -- To
 local Animation_Manager = require(game.ReplicatedStorage.Shared.AnimationManager) -- Manages the animations of the character:
 local LockOnSystem = require(game.ReplicatedStorage.Shared.LockOnSystem) -- Holds the mechanics for locking onto enemies
 local BasicStriking = require(game.ReplicatedStorage.Shared.BasicStriking)
+local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAndCountering)
 
+GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
+    -- Manages the remote events the client receives.
+    ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
+end)
 
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
+game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
     print("Animation manager initializing")
-    Animation_Manager.manageAnimations()
+    Animation_Manager.manageAnimations() --We want to manage the animations of the player as soon as they spawn in.
+    BasicStriking.manageHitboxes() -- We also want to manage the plr char's attack hitboxes when they spawn as well.
 end)
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Q then
+    if input.KeyCode == Enum.KeyCode.Q then -- May have lock on inputs for each system.
         -- Locks the player onto the enemy
         LockOnSystem.LockOn()
     
-    elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+    elseif GameVariables.AttackInputs[input.UserInputType] or GameVariables.AttackInputs[input.KeyCode] then -- AttackInputs is a table of input types that are allowed in this context. The indexes of that table are actually the input types that we allow, so we can referance an index in that table by what the player inputed.
         -- The player will throw an attack
+        BasicStriking.Attack(input)
+
+    elseif GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
+        -- The player will block
+        ReceivingAndCountering.Block(input)
     end
 end)
 
+UserInputService.InputEnded:Connect(function(input)
+    -- The player will stop blocking
+    ReceivingAndCountering.EndBlock(input)
+end)

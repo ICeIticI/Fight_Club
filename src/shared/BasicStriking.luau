@@ -1,8 +1,8 @@
 
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 wait()
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
+-- local UserInputService = game:GetService("UserInputService")
+-- local Players = game:GetService("Players")
 
 print(GameVariables)
 
@@ -10,7 +10,7 @@ local BasicStriking = {}
 
 -- GameVariables.SetPlayer(Players.LocalPlayer)
 
-local function attack(followupCombo)
+local function attack(followupCombo) -- the local attack function. This is responsible for the mechanics of the attack.
 
 	if GameVariables.isEnemyHoldingBlock then
 		GameVariables.isAttacking = true
@@ -90,7 +90,8 @@ local function attack(followupCombo)
 	end
 end
 
-local function hitboxManager()
+function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the player's character. When the player is attacking and they hit an enemy, then we would send a remote event to the server if it's a player. Otherwise we would send a bindable event to the local script controlling the npc.
+	
 	wait() -- We can probably find a more 'professional' way of waiting for the character to load completely before running these functions.
 	for _, v in pairs(GameVariables.hitboxesFolderATTACK) do --[[Creates :Connect events for each element in the 
 										hitboxesFolderATTACK folder.]]		
@@ -142,21 +143,22 @@ local function hitboxManager()
 	end
 end
 
-hitboxManager()
+-- hitboxManager()
 
-GameVariables.player.CharacterAdded:Connect(function()
-	hitboxManager()
-end)
+-- GameVariables.player.CharacterAdded:Connect(function()
+-- 	hitboxManager()
+-- end)
 
-function BasicStriking.Attack()
+function BasicStriking.Attack(input) --[[ this will run through a series of checks as well as running the local function attack() within the script. ]]
 
-	UserInputService.InputBegan:Connect(function(input)
+	-- UserInputService.InputBegan:Connect(function(input)
 
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then -- for testing
 			warn("2 seconds till attack...")
 			print(GameVariables.isAttacking)
 			wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
 		end
+
 
 		if input.UserInputType == Enum.UserInputType.MouseButton1
 		
@@ -256,7 +258,7 @@ function BasicStriking.Attack()
 			print("variables for attacking:")
 			print(debuggingAttackTable)
 		end
-	end)
+	-- end)
 end
 
 return BasicStriking

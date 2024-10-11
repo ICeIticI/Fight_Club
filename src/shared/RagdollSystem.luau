@@ -12,13 +12,13 @@
  	 property called .LimitsEnabled. If set to true, the baseparts can rotate to a
  	 limited degree.]]
 
-
+local RagdollSystem = {}
 -- Services
 local Players = game:GetService("Players") -- to be able to ragdoll players who join the game
 
 -- Variables
 local jointsCache = {} -- assigns values to keys, like a dictionary. We can define keys such as jointsCache[character] = defined value. 
-local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
+-- local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 
 -- Functions
 local function GetMotor6Ds(givenChar)
@@ -77,15 +77,21 @@ local function Ragdoll(givenChar) -- this will be the function that.. well.. rag
 end
 
 -- Connects
-Players.PlayerAdded:Connect(function(plr) -- for joining players
+function RagdollSystem.InitializePlayer() -- When a player joins the game, we want to set up two instances: Linear and Angular velocities that will be given a parent of the current character of the player. The function will return these, so it can be used when initializing the plr char.
+-- Players.PlayerAdded:Connect(function(plr) -- for joining players
 	
 	-- local charClone = nil
 
 		local linearVelocity = Instance.new("LinearVelocity")
 		local angularVelocity = Instance.new("AngularVelocity")
 
+		return {linearVelocity, angularVelocity}
+
+end
+
+function RagdollSystem.InitializeCharacter(linearVelocity, angularVelocity, char)
 	
-	plr.CharacterAdded:Connect(function(char) -- and for their spawning characters
+	-- plr.CharacterAdded:Connect(fun`ction(char) -- and for their spawning characters
 		-- if charClone ~= nil then
 		-- 	charClone:Destroy()
 		-- end
@@ -136,5 +142,7 @@ Players.PlayerAdded:Connect(function(plr) -- for joining players
 		end)
 		
 		jointsCache[char] = GetMotor6Ds(char) -- getting the Motor6Ds of the given player and storing it in as it's own key in this table.
-	end)
-end)
+-- end)
+end
+
+return RagdollSystem

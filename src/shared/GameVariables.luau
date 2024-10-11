@@ -442,6 +442,12 @@ GameVariables.pairedBlock = nil -- the variable for which paired block the attac
 GameVariables.pairedChain = 0 -- The tracker of the character's sync block attack chain. They can only do as many as the max allows
 GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
 
+-- User Input Types
+GameVariables.AttackInputs = {[Enum.UserInputType.MouseButton1] = true, [Enum.UserInputType.Touch] = true, [Enum.KeyCode.ButtonB] = true} -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
+GameVariables.BlockInputs = {[Enum.UserInputType.MouseButton2] = true, [Enum.KeyCode.ButtonX] = true}
+GameVariables.GrappleInputs = {[Enum.KeyCode.R] = true, [Enum.KeyCode.ButtonY] = true}
+-- GameVariables.LockOnInputs = {Enum.KeyCode} -- May have LockOnInputs for each system
+
 -- functions
 function GameVariables.stopAnimations() -- add params? Perhaps we could change function to "changeAnimations" with the first parameter being whether we should stop or play, and add animations in following parameters
 	GameVariables.FC_IdleTRACK:Stop()

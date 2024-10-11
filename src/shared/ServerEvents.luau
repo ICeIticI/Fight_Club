@@ -1,13 +1,16 @@
 --local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 
+local ServerEvents = {}
+
 -- Damage types:
 local A1Damage = 5 -- default damage for lvl 1 attacks
 local A2Damage = 11 -- default damage for lvl 2 attacks
 local syncBlockDamage = 2.5 -- damage for sync blocks
 local attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
 
-GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
+function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, _, _, plrIsBlocking, isAI) -- bAttack stands for basic attack. This function is for the events of a player damaging another with a basic strike.
+-- GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
 
 	if currentAttack and currentAttack:GetAttribute("AttackLevel") == 1 then
@@ -38,8 +41,14 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Pr
 			attackDamage = attackDamage/2
 		end
 	hitPlayer.Character.Humanoid.Health -= attackDamage
+	end
+end
 
-	elseif Protocol == "SyncedBlock" then
+function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI) -- For misc. events that are sent for server-sided things such as synced blocks, parrying, countering etc.
+	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
+
+	
+	if Protocol == "SyncedBlock" then
 		attackDamage = syncBlockDamage
 		if plrIsBlocking then
 			attackDamage = attackDamage/2
@@ -58,4 +67,7 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Pr
 		GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
 	end
 	attackDamage = nil
-end)
+-- end)
+end
+
+return ServerEvents

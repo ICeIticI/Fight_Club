@@ -1,7 +1,9 @@
 local UserInputService = game:GetService("UserInputService")
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
-local function receive(currentAttack)
+local ReceivingAndCountering = {}
+
+local function receive(currentAttack) -- Local function that manages what "reaction" the player would do based on the attack/circumstances.
 	local currentAttackID = currentAttack.AnimationId -- currentAttack is what the enemy is throwing
 	
 	if GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying then
@@ -51,9 +53,10 @@ local function receive(currentAttack)
 	
 end
 
-GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI) --[[Used to find out what reaction the player
-    should do based on what attack the enemy
-    did. ]]
+function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
+-- GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI) --[[Used to find out what reaction the player
+    -- should do based on what attack the enemy
+    -- did. ]]
 	if not isAI then
 		if Protocol == "Receive" then
 			receive(currentAttack)
@@ -84,22 +87,24 @@ GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Pr
 		
 	end
     
-end)
+-- end)
+end
 
-
-UserInputService.InputBegan:Connect(function(input)
+function ReceivingAndCountering.Block(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.pairedPlaying then -- blocking/dodging  
 		-- GameVariables.isBlocking = true
 		GameVariables.FC_BlockStartTRACK:Play()
 		GameVariables.humanoid.WalkSpeed /= 1.5
 	end
-end)
+end
 
-UserInputService.InputEnded:Connect(function(input)
+function ReceivingAndCountering.EndBlock(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton2 and (GameVariables.FC_BlockStartTRACK.IsPlaying or GameVariables.FC_BlockTRACK.IsPlaying) and not GameVariables.pairedPlaying then
 		GameVariables.isBlocking = false
 		GameVariables.FC_BlockStartTRACK:Stop()
 		GameVariables.FC_BlockTRACK:Stop()
 		GameVariables.humanoid.WalkSpeed *= 1.5
 	end
-end)
+end
+
+return ReceivingAndCountering

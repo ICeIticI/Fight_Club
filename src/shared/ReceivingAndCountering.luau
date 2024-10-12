@@ -22,6 +22,7 @@ local function receive(currentAttack) -- Local function that manages what "react
 			end
 			print(currentAttack)
 			local Protocol = "Parry"
+			print("Parried something. Sending to server. Protocol: " .. tostring(Protocol))
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
 		else -- the blockStart track is not playing, therefore its not a parry:
 
@@ -74,6 +75,7 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 		-- 	game.Workspace.Camera.CFrame = sentValue.Head.CFrame
 		-- 	print("REACHEDDDD")
 		elseif Protocol == "Parry" then
+			warn("Should be playing receiving parry track")
 			-- if the enemy parried the player, then they will do a reaction to what direction the enemy 
 			GameVariables.randAttack:Stop()
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then
@@ -82,6 +84,7 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
 				GameVariables.FC_RightParryRECEIVERTRACK:Play()
 			end
+			
 		end
 	--elseif isAI == true then
 		
@@ -100,6 +103,7 @@ end
 
 function ReceivingAndCountering.EndBlock(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton2 and (GameVariables.FC_BlockStartTRACK.IsPlaying or GameVariables.FC_BlockTRACK.IsPlaying) and not GameVariables.pairedPlaying then
+		print("Ending block")
 		GameVariables.isBlocking = false
 		GameVariables.FC_BlockStartTRACK:Stop()
 		GameVariables.FC_BlockTRACK:Stop()

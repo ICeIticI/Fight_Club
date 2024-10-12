@@ -144,7 +144,6 @@ local function MiscAnimManager(v)
 			warn("Broke out of the for loop...")
 			GameVariables.Protocol = "HoldingBlock"
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false) -- letting the enemy know the player is blocking
-			--elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then
 
 		end
 	end)
@@ -152,6 +151,11 @@ local function MiscAnimManager(v)
 	local MiscStopppedCONNECT = v.Stopped:Connect(function()
 		if v.Animation.AnimationId == GameVariables.FC_BlockStart.AnimationId and v.TimePosition == v.Length then -- When the block starting animation ends, we want to play the looping version of the blocking animation.
 		GameVariables.FC_BlockTRACK:Play()
+		print("is playing block")
+
+		elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then -- waits for 
+			v:Stop()
+			GameVariables.isAttacking = false
 		end
 	end)
 
@@ -176,6 +180,8 @@ end
 function AnimationManager.manageAnimations()
 	wait()
 	for _, v in pairs(GameVariables.AllAnimations) do -- When the player presses an input and attacks (down below in UserInputService), this body of code will manage the player's current combo and their ability to do a followup attack after their first. It's up here so this isn't re-created
+		print(v.Name .. " .. " .. tostring(v.Priority))
+
 		local currentAnim = v.Animation
 		local EndOfAttackExists = false -- for the functions that don't have this event, I want them to run code when the animation has stopped. However, animations that have this marker won't be able to run it.
 
@@ -198,4 +204,5 @@ end
 -- 	manageAnimations()
 -- 	print("Animation manager activated.")
 -- end)
+
 return AnimationManager

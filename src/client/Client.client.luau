@@ -5,6 +5,7 @@
 
 local UserInputService = game:GetService("UserInputService") -- Gets the user input
 
+-- Modules
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables) -- To have access to the client's variables in this script:
 local Animation_Manager = require(game.ReplicatedStorage.Shared.AnimationManager) -- Manages the animations of the character:
 local LockOnSystem = require(game.ReplicatedStorage.Shared.LockOnSystem) -- Holds the mechanics for locking onto enemies
@@ -16,10 +17,20 @@ GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Pr
     ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
 end)
 
-game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
+if game.Players.LocalPlayer.Character then -- The player may load faster than the script, so this will ensure the player won't skip initializing
+    -- Initializes the player
     print("Animation manager initializing")
     Animation_Manager.manageAnimations() --We want to manage the animations of the player as soon as they spawn in.
     BasicStriking.manageHitboxes() -- We also want to manage the plr char's attack hitboxes when they spawn as well.
+    print("animation manager runs right?")
+end
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
+    -- Initializes the player
+    print("Animation manager initializing")
+    Animation_Manager.manageAnimations() --We want to manage the animations of the player as soon as they spawn in.
+    BasicStriking.manageHitboxes() -- We also want to manage the plr char's attack hitboxes when they spawn as well.
+    print("animation manager runs right?")
 end)
 
 UserInputService.InputBegan:Connect(function(input)

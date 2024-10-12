@@ -1,8 +1,8 @@
 -- local Players = game.Players
 
--- local GlobalRemoteEvent = Instance.new("RemoteEvent")
--- GlobalRemoteEvent.Name = "GlobalRemoteEvent"
--- GlobalRemoteEvent.Parent = game.ReplicatedStorage
+local GlobalRemoteEvent = Instance.new("RemoteEvent")
+GlobalRemoteEvent.Name = "GlobalRemoteEvent"
+GlobalRemoteEvent.Parent = game.ReplicatedStorage
 local ServerInit = {}
 
 function ServerInit.InitializePlayer(player)
@@ -18,16 +18,19 @@ function ServerInit.InitializePlayer(player)
 	local FC_Idle = Instance.new("Animation")
 	FC_Idle.Name = "FC_Idle"
 	FC_Idle.AnimationId = "rbxassetid://16976891984"
+	FC_Idle:SetAttribute("EventCategory", "bAttack") -- For simplicity, we split the remote events into two different functions: bAttackEvents (basic attacks), miscEvents (anything else).
 	FC_Idle.Parent = plrObjectsFolder
 
 	local FC_BlockStart = Instance.new("Animation")
 	FC_BlockStart.Name = "FC_BlockStart"
 	FC_BlockStart.AnimationId = "rbxassetid://18266066281"
+	FC_BlockStart:SetAttribute("EventCategory", "bAttack")
 	FC_BlockStart.Parent = plrObjectsFolder
 	
 	local FC_Block = Instance.new("Animation")
 	FC_Block.Name = "FC_Block"
 	FC_Block.AnimationId = "rbxassetid://16976697757"
+	FC_Block:SetAttribute("EventCategory", "bAttack")
 	FC_Block.Parent = plrObjectsFolder
 	
 	local FC_LeftHook1 = Instance.new("Animation")
@@ -37,6 +40,7 @@ function ServerInit.InitializePlayer(player)
 	FC_LeftHook1:SetAttribute("AnimType", 1) -- AnimType will distinguish what kind of animation we're dealing with. 1 is attacks, 2 is receives,
 	FC_LeftHook1:SetAttribute("AnimDirection", "Left")
 	FC_LeftHook1:SetAttribute("AttackSeries", "Hooks")
+	FC_LeftHook1:SetAttribute("EventCategory", "bAttack")
 	FC_LeftHook1.Parent = plrObjectsFolder
 	
 	local FC_RightHook1 = Instance.new("Animation")
@@ -46,6 +50,7 @@ function ServerInit.InitializePlayer(player)
 	FC_RightHook1:SetAttribute("AnimType", 1)
 	FC_RightHook1:SetAttribute("AnimDirection", "Right")
 	FC_RightHook1:SetAttribute("AttackSeries", "Hooks")
+	FC_RightHook1:SetAttribute("EventCategory", "bAttack")
 	FC_RightHook1.Parent = plrObjectsFolder
 	
 	local FC_LeftJab = Instance.new("Animation")
@@ -55,6 +60,7 @@ function ServerInit.InitializePlayer(player)
 	FC_LeftJab:SetAttribute("AnimType", 1)
 	FC_LeftJab:SetAttribute("AnimDirection", "Left")
 	FC_LeftJab:SetAttribute("AttackSeries", "Jabs")
+	FC_LeftJab:SetAttribute("EventCategory", "bAttack")
 	FC_LeftJab.Parent = plrObjectsFolder
 	
 	local FC_RightJab = Instance.new("Animation")
@@ -64,6 +70,7 @@ function ServerInit.InitializePlayer(player)
 	FC_RightJab:SetAttribute("AnimType", 1)
 	FC_RightJab:SetAttribute("AnimDirection", "Right")
 	FC_RightJab:SetAttribute("AttackSeries", "Jabs")
+	FC_RightJab:SetAttribute("EventCategory", "bAttack")
 	FC_RightJab.Parent = plrObjectsFolder
 	
 	local FC_LeftUppercut = Instance.new("Animation")
@@ -73,6 +80,7 @@ function ServerInit.InitializePlayer(player)
 	FC_LeftUppercut:SetAttribute("AnimType", 1)
 	FC_LeftUppercut:SetAttribute("AnimDirection", "Left")
 	FC_LeftUppercut:SetAttribute("AttackSeries", "Uppercuts")
+	FC_LeftUppercut:SetAttribute("EventCategory", "bAttack")
 	FC_LeftUppercut.Parent = plrObjectsFolder
 	
 	local FC_RightUppercut = Instance.new("Animation")
@@ -82,6 +90,7 @@ function ServerInit.InitializePlayer(player)
 	FC_RightUppercut:SetAttribute("AnimType", 1)
 	FC_RightUppercut:SetAttribute("AnimDirection", "Right")
 	FC_RightUppercut:SetAttribute("AttackSeries", "Uppercuts")
+	FC_RightUppercut:SetAttribute("EventCategory", "bAttack")
 	FC_RightUppercut.Parent = plrObjectsFolder
 	
 	local FC_LeftHaymaker = Instance.new("Animation")
@@ -91,6 +100,7 @@ function ServerInit.InitializePlayer(player)
 	FC_LeftHaymaker:SetAttribute("AnimType", 1)
 	FC_LeftHaymaker:SetAttribute("AnimDirection", "Left")
 	FC_LeftHaymaker:SetAttribute("AttackSeries", "Haymakers")
+	FC_LeftHaymaker:SetAttribute("EventCategory", "bAttack")
 	FC_LeftHaymaker.Parent = plrObjectsFolder
 	
 	local FC_RightHaymaker = Instance.new("Animation")
@@ -100,6 +110,7 @@ function ServerInit.InitializePlayer(player)
 	FC_RightHaymaker:SetAttribute("AnimType", 1)
 	FC_RightHaymaker:SetAttribute("AnimDirection", "Right")
 	FC_RightHaymaker:SetAttribute("AttackSeries", "Haymakers")
+	FC_RightHaymaker:SetAttribute("EventCategory", "bAttack")
 	FC_RightHaymaker.Parent = plrObjectsFolder
 	
 	
@@ -107,39 +118,46 @@ function ServerInit.InitializePlayer(player)
 	FC_LeftHook1RECEIVER.Name = "FC_LeftHook1RECEIVER"
 	FC_LeftHook1RECEIVER.AnimationId = "rbxassetid://17012688911"
 	FC_LeftHook1RECEIVER:SetAttribute("AnimType", 2)
+	FC_LeftHook1RECEIVER:SetAttribute("EventCategory", "bAttack")
 	FC_LeftHook1RECEIVER.Parent = plrObjectsFolder
 	
 	local FC_RightHook1RECEIVER = Instance.new("Animation")
 	FC_RightHook1RECEIVER.Name = "FC_RightHook1RECEIVER"
 	FC_RightHook1RECEIVER.AnimationId = "rbxassetid://17149671845"
 	FC_RightHook1RECEIVER:SetAttribute("AnimType", 2)
+	FC_RightHook1RECEIVER:SetAttribute("EventCategory", "bAttack")
 	FC_RightHook1RECEIVER.Parent = plrObjectsFolder
 	
 	local FC_LeftUppercutRECEIVER = Instance.new("Animation")
 	FC_LeftUppercutRECEIVER.Name = "FC_LeftUppercutRECEIVER"
 	FC_LeftUppercutRECEIVER.AnimationId = "rbxassetid://18224267835"
 	FC_LeftUppercutRECEIVER:SetAttribute("AnimType", 2)
+	FC_LeftUppercutRECEIVER:SetAttribute("EventCategory", "bAttack")
 	FC_LeftUppercutRECEIVER.Parent = plrObjectsFolder
 	
 	local FC_RightUppercutRECEIVER = Instance.new("Animation")
 	FC_RightUppercutRECEIVER.Name = "FC_RightUppercutRECEIVER"
 	FC_RightUppercutRECEIVER.AnimationId = "rbxassetid://18224216460"
 	FC_RightUppercutRECEIVER:SetAttribute("AnimType", 2)
+	FC_RightUppercutRECEIVER:SetAttribute("EventCategory", "bAttack")
 	FC_RightUppercutRECEIVER.Parent = plrObjectsFolder
 	
 	local FC_LeftHaymakerRECEIVER = Instance.new("Animation")
 	FC_LeftHaymakerRECEIVER.Name = "FC_LeftHaymakerRECEIVER"
 	FC_LeftHaymakerRECEIVER.AnimationId = "rbxassetid://18195570469"
 	FC_LeftHaymakerRECEIVER:SetAttribute("AnimType", 2)
+	FC_LeftHaymakerRECEIVER:SetAttribute("EventCategory", "bAttack")
 	FC_LeftHaymakerRECEIVER.Parent = plrObjectsFolder
 	
 	local FC_RightHaymakerRECEIVER = Instance.new("Animation")
 	FC_RightHaymakerRECEIVER.Name = "FC_RightHaymakerRECEIVER"
 	FC_RightHaymakerRECEIVER.AnimationId = "rbxassetid://17231536892"
 	FC_RightHaymakerRECEIVER:SetAttribute("AnimType", 2)
+	FC_RightHaymakerRECEIVER:SetAttribute("EventCategory", "bAttack")
 	FC_RightHaymakerRECEIVER.Parent = plrObjectsFolder
 	
 	
+
 	local FC_SyncBlock1L = Instance.new("Animation")
 	FC_SyncBlock1L.Name = "FC_SyncBlock1L"
 	FC_SyncBlock1L.AnimationId = "rbxassetid://18313294082"
@@ -275,6 +293,7 @@ function ServerInit.InitializePlayer(player)
 	FC_SyncBlock3R2RECEIVER:SetAttribute("AnimDirection", "Right")
 	FC_SyncBlock3R2RECEIVER:SetAttribute("Paired", true)
 	FC_SyncBlock3R2RECEIVER.Parent = plrObjectsFolder
+
 
 
 	local FC_BracingBlockL = Instance.new("Animation")

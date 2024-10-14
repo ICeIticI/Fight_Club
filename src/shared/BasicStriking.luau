@@ -129,11 +129,11 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 						wait()
 					until GameVariables.attackFrames or not GameVariables.isAttacking
 				end
-				print("eee")
+				print(GameVariables.isAttacking)
 				if enemyPlayer and GameVariables.isAttacking then
 					GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false) -- Deal damage to other client.
 					print("We landed an attack on an enemy")
-				end		
+				end
 			end
 		end)
 		GameVariables.humanoid.Died:Connect(function()
@@ -153,7 +153,7 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 
 	-- UserInputService.InputBegan:Connect(function(input)
 
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then -- for testing
+		if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.player.Name == "Player2" then -- for testing
 			warn("2 seconds till attack...")
 			print(GameVariables.isAttacking)
 			wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!

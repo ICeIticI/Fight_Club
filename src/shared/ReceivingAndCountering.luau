@@ -20,9 +20,8 @@ local function receive(currentAttack) -- Local function that manages what "react
 				warn("ParryR")
 				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightParryTRACK
 			end
-			print(currentAttack)
 			local Protocol = "Parry"
-			print("Parried something. Sending to server. Protocol: " .. tostring(Protocol))
+			
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
 		else -- the blockStart track is not playing, therefore its not a parry:
 
@@ -59,14 +58,17 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
     -- should do based on what attack the enemy
     -- did. ]]
 	if not isAI then
+
 		if Protocol == "Receive" then
 			receive(currentAttack)
+
 		elseif Protocol == "AttackStarted" then -- if the enemy is starting an attack, and the player is blocking, perform a synched block.
 			print(sentValue)
 			if GameVariables.isBlocking and GameVariables.canSyncBlock then
 				GameVariables.synchedBlock(sentAnimPair, sentValue)
 				warn("Sync block being performed")
 			end
+
 		elseif Protocol == "HoldingBlock" then
 			GameVariables.isEnemyHoldingBlock = sentValue
 		-- elseif Protocol == "CameraChange" then
@@ -74,6 +76,7 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 		-- 	game.Workspace.Camera.CameraSubject = sentValue.Humanoid
 		-- 	game.Workspace.Camera.CFrame = sentValue.Head.CFrame
 		-- 	print("REACHEDDDD")
+
 		elseif Protocol == "Parry" then
 			warn("Should be playing receiving parry track")
 			-- if the enemy parried the player, then they will do a reaction to what direction the enemy 

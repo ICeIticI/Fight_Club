@@ -34,7 +34,6 @@ Players.PlayerAdded:Connect(function(player)
     local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()
 
     if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.
-        
         print("Char added!")
         ServerInit.InitializeCharacter(player.Character)
         RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], player.Character) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.

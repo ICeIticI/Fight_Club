@@ -5,6 +5,11 @@ local AnimationManager = {}
 local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 	-- every time the player presses attack.
 	local attackEnded = false
+
+	if currentAnim:GetAttribute("EventCategory") == "bAttack" then -- checking if the current animation (not the track) has the 'EventCategory' attribute, with a value of bAttack, which is given to all basic attacks.
+		v.Priority = Enum.AnimationPriority.Action2 -- then we give the current animation track a priority of 2 so it will have higher priority than default.
+		print(tostring(v) .. " has animation priority 2 now.")
+	end
 			
 	local StartOfAttackCONNECT = v:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
 		if not v.Animation:GetAttribute("Paired") then
@@ -133,7 +138,9 @@ local function ReceiveAnimManager(v, currentAnim)
 end
 
 local function MiscAnimManager(v)
+	
 	local MiscIsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function()
+
 		if v.Animation.AnimationId == GameVariables.FC_Block.AnimationId then
 				wait(0.15)
 				while not GameVariables.canSyncBlock do
@@ -145,18 +152,48 @@ local function MiscAnimManager(v)
 			GameVariables.Protocol = "HoldingBlock"
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false) -- letting the enemy know the player is blocking
 
+		elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry animations when they start playing
+		-- Parry started playing
+		if v.IsPlaying == true then
+			-- Parry anim started playing
+			GameVariables.isAttacking = true
+			print("we are attacking cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
+			delay(2, function()
+				warn("isAttacking: " .. tostring(GameVariables.isAttacking))
+			end)
 		end
+		
+		end
+		
 	end)
 	
 	local MiscStopppedCONNECT = v.Stopped:Connect(function()
+
 		if v.Animation.AnimationId == GameVariables.FC_BlockStart.AnimationId and v.TimePosition == v.Length then -- When the block starting animation ends, we want to play the looping version of the blocking animation.
 		GameVariables.FC_BlockTRACK:Play()
 		print("is playing block")
 
-		elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then -- waits for 
-			v:Stop()
+		elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry animations when they stop playing
+		-- Parry stopped playing
+		warn("Parry stopped playing")
+		GameVariables.hitDebounce = false
+		GameVariables.isAttacking = false
+		GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
+		warn("You can attack now after parrying")
+		delay(0.51, function()
+			GameVariables.hitDebounce = false
 			GameVariables.isAttacking = false
+			GameVariables.comboCounter = 0 
+		end)
+
+		elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then -- manages the parry-receiving animations when they stop playing
+			wait(2)
+			warn("Can attack now after getting parried")
+			GameVariables.isAttacking = false
+			GameVariables.hitDebounce = false
+			warn("Plr got parried and the parry receiver anim finished. isAttacking is now false.")
 		end
+
 	end)
 
 	local MiscIsBlockingConnect = v:GetMarkerReachedSignal("isBlocking"):Connect(function()

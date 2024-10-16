@@ -80,6 +80,9 @@ end
 
 local function ReceiveAnimManager(v, currentAnim)
 	local A2IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function()
+
+		GameVariables.isGettingHit = true
+		GameVariables.randAttack:Stop()
 		if currentAnim.AnimationId == GameVariables.FC_RightHaymakerRECEIVER.AnimationId or currentAnim.AnimationId == GameVariables.FC_LeftHaymakerRECEIVER.AnimationId then -- we need to specifically tween specific animations like the rightHaymaker
 			if v.IsPlaying == true then
 				-- tween now that we know that the haymaker anim has started
@@ -105,7 +108,7 @@ local function ReceiveAnimManager(v, currentAnim)
 				local reactTween = game:GetService("TweenService"):Create(tweenPart, Info, tweenGoals)
 				reactTween:Play()
 			end
-		elseif currentAnim.AnimationId == "rbxassetid://125158753103737" or currentAnim.AnimationId == "rbxassetid://81054055418110" then -- These animationIds are the bracing blocks.
+		elseif currentAnim.AnimationId == GameVariables.FC_BracingBlockL.AnimationId or currentAnim.AnimationId == GameVariables.FC_BracingBlockR.AnimationId then -- These animationIds are the bracing blocks.
 			if v.IsPlaying == false then
 				-- Wait a duration of time (like a second or two) before allowing sync blocks again
 				wait(1)
@@ -121,6 +124,7 @@ local function ReceiveAnimManager(v, currentAnim)
 	end)
 	
 	local A2StoppedCONNECT = v.Stopped:Connect(function()
+		GameVariables.isGettingHit = false
 		if v.Animation:GetAttribute("Paired") then
 			GameVariables.pairedPlaying = false
 			GameVariables.humanoid.WalkSpeed = GameVariables.previousWalkSpeed
@@ -156,11 +160,10 @@ local function MiscAnimManager(v)
 		-- Parry started playing
 		if v.IsPlaying == true then
 			-- Parry anim started playing
-			GameVariables.isAttacking = true
-			print("we are attacking cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
-			delay(2, function()
-				warn("isAttacking: " .. tostring(GameVariables.isAttacking))
-			end)
+			GameVariables.isCountering = true -- even though we are parrying, we use the isBlocking attribute for simplicity. isAttacking wasnt working properly when we did it with that attribute.
+			warn("isBlocking: " .. tostring(GameVariables.isBlocking))
+			GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
+			print("we are *blocking* cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
 		end
 		
 		end
@@ -177,18 +180,19 @@ local function MiscAnimManager(v)
 		-- Parry stopped playing
 		warn("Parry stopped playing")
 		GameVariables.hitDebounce = false
-		GameVariables.isAttacking = false
-		GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
+		GameVariables.isCountering = false
+		-- GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
 		warn("You can attack now after parrying")
-		delay(0.51, function()
-			GameVariables.hitDebounce = false
-			GameVariables.isAttacking = false
+		
+		delay(0.51, function() -- the parry receiver animations are 0.51 seconds longer than the parries. If the player parries and hangs around doing nothing, they will lose the ability to do a haymaker riposte.
 			GameVariables.comboCounter = 0 
 		end)
 
 		elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then -- manages the parry-receiving animations when they stop playing
-			wait(2)
+			-- Parry receiver stopped playing
+			wait(0.4)
 			warn("Can attack now after getting parried")
+			GameVariables.comboCounter = 0 -- reset the combo counter because we dont want to continue the attack chain.
 			GameVariables.isAttacking = false
 			GameVariables.hitDebounce = false
 			warn("Plr got parried and the parry receiver anim finished. isAttacking is now false.")

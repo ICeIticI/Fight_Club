@@ -97,8 +97,8 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 end
 
 function ReceivingAndCountering.Block(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.pairedPlaying then -- blocking/dodging  
-		-- GameVariables.isBlocking = true
+	if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering) and not GameVariables.pairedPlaying then -- blocking/dodging  
+		-- GameVariables.isBlocking = true -- work on this. It interferes with parrying.
 		GameVariables.FC_BlockStartTRACK:Play()
 		GameVariables.humanoid.WalkSpeed /= 1.5
 	end

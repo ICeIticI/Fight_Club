@@ -82,7 +82,6 @@ local function attack(followupCombo) -- the local attack function. This is respo
 			GameVariables.currentAttack = GameVariables.randAttack.Animation
 			GameVariables.isAttacking = true
 			GameVariables.randAttack:Play()
-			print("we got a randattackkkk")
 			GameVariables.lastAttack = GameVariables.randAttack
 			GameVariables.comboCounter+=1
 
@@ -97,10 +96,12 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 										hitboxesFolderATTACK folder.]]		
 		local touchedConnection = v.Touched:Connect(function(touchedObject)
 
+			--[[
 			if touchedObject:GetAttribute("ReceiveBox") and GameVariables.comboCounter >= 3 then
 				print(GameVariables.isAttacking)
 				print(GameVariables.hitDebounce)
 			end
+			]]
 			
 			-- warn(touchedObject)
 			if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") and GameVariables.currentAttack then
@@ -129,7 +130,6 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 						wait()
 					until GameVariables.attackFrames or not GameVariables.isAttacking
 				end
-				print(GameVariables.isAttacking)
 				if enemyPlayer and GameVariables.isAttacking then
 					GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false) -- Deal damage to other client.
 					print("We landed an attack on an enemy")
@@ -153,20 +153,20 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 
 	-- UserInputService.InputBegan:Connect(function(input)
 
-		if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.player.Name == "Player2" then -- for testing
+		if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and GameVariables.player.Name == "Player2" then -- for testing
 			warn("2 seconds till attack...")
 			print(GameVariables.isAttacking)
 			wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
 		end
 
+		warn(GameVariables.isBlocking)
 
 		if input.UserInputType == Enum.UserInputType.MouseButton1
-		
 		and GameVariables.lockOnDebounce.Value -- the player is locked on
 		and not GameVariables.waitingToAttack -- the player is not already waiting to attack
 		and GameVariables.pairedChain <= GameVariables.PairedChainMAX -- their current chain of attacks isnt more than the max (3)
-			and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isDodging) -- makes sure they arent attacking, blocking, or dodging
-			and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
+		and GameVariables.boolCheck(nil, GameVariables.isBlocking, GameVariables.isCountering) -- makes sure they arent attacking, blocking, or dodging
+		and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
 																																																																								-- This part in simple terms makes sure the player is less or equal to 4 studs from enemy bfore attacking
 			--[[ When the player presses attack, we want to randomly choose between a series of hooks or jabs
 				for attack level 1. Once combo counter finishes it's 3rd attack, we will transition to level
@@ -183,7 +183,7 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 				print("paired chain added. Num of times: ".. tostring(GameVariables.pairedChain))
 			end
 			
-			if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then -- for the sync block and attack to play simultaneously
+			if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then -- for the sync block and attack to play simultaneously
 				if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 					GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
 					GameVariables.Protocol = "AttackStarted"
@@ -191,7 +191,6 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 				end			
 
 				attack()
-
 			elseif GameVariables.canFollowUp == true then -- the player followed up with their attack.
 			GameVariables.waitingToAttack = true
 				print("waiting on next attack")
@@ -205,6 +204,7 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 						GameVariables.Protocol = "AttackStarted"
 						GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
 					end
+
 					print(GameVariables.pairedChain)
 					attack(GameVariables.pairedChain) -- pairedChain is used for a followup combo, which enables uppercuts.
 				end
@@ -224,10 +224,10 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 				GameVariables.pairedChain, -- less than 3
 				GameVariables.followUpCount, -- less than 1 at first
 				GameVariables.comboCounter, -- should be 0 at first
-				GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging),
+				GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering),
 				GameVariables.isAttacking,
 				GameVariables.isBlocking,
-				GameVariables.isDodging,
+				GameVariables.isCountering,
 			(GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 			} -- alot of the time it wont allow the player to attack no matter what, so this table will print when the player can't attack at all.
 			-- if GameVariables.lockOnDebounce.Value ~= true then
@@ -251,7 +251,7 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 			-- if GameVariables.comboCounter ~= 0 then
 			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
 			-- end
-			-- if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isDodging) ~= true then
+			-- if GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering) ~= true then
 			-- 	table.insert(debuggingAttackTable, GameVariables.lockOnDebounce.Value)
 			-- end
 			

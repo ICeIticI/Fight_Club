@@ -40,6 +40,8 @@ GameVariables.player.CharacterAdded:Connect(function(character)
 	GameVariables.hitDebounce = false
 	GameVariables.isBlocking = false
 	GameVariables.isAttacking = false
+	GameVariables.isCountering = false
+	GameVariables.isGettingHit = false
 	GameVariables.waitingToAttack = false
 	GameVariables.pairedPlaying = false
 	GameVariables.canSyncBlock = true
@@ -217,6 +219,8 @@ GameVariables.lockOnDebounce.Parent = GameVariables.plrObjectsFolder
 GameVariables.hitDebounce = false -- if false, then the player has the ability to deal damage. This is so the player won't hit the enemy multiple times in one attack.
 GameVariables.isBlocking = false -- set to true when the client blocks
 GameVariables.isAttacking = false
+GameVariables.isCountering = false
+GameVariables.isGettingHit = false
 GameVariables.waitingToAttack = false
 GameVariables.pairedPlaying = false -- used to make sure the paired animations don't play while already playing.
 GameVariables.canSyncBlock = true
@@ -254,7 +258,7 @@ GameVariables.areLockedOn = false
 
 GameVariables.animPair = nil
 
-GameVariables.actionTable = {GameVariables.isBlocking, GameVariables.isAttacking, GameVariables.isDodging}
+-- GameVariables.actionTable = {GameVariables.isBlocking, GameVariables.isAttacking, GameVariables.isCountering}
 
 -- GameVariables.rayParams = RaycastParams.new()
 -- GameVariables.rayParams.FilterDescendantsInstances = GameVariables.character:GetChildren()

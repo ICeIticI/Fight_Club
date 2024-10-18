@@ -35,7 +35,7 @@ function LockOnSystem.LockOn()
     GameVariables.FC_IdleTRACK:Play()
 		-- character changes below:
 		GameVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
-		GameVariables.humanoid.WalkSpeed = GameVariables.lockOnSpeed
+		GameVariables.SetSpeed(true)
 		--[[
 		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
 		--]]
@@ -82,7 +82,7 @@ function LockOnSystem.LockOn()
 		GameVariables.stopAnimations()
 		-- character changes below:
 		GameVariables.humanoid.AutoRotate = true
-		GameVariables.humanoid.WalkSpeed = GameVariables.originalWalkSpeed
+		GameVariables.SetSpeed(true)
 		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 		
 		-- camera changes

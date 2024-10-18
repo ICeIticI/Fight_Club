@@ -15,10 +15,11 @@ local function receive(currentAttack) -- Local function that manages what "react
 		if GameVariables.FC_BlockStartTRACK.IsPlaying then -- if the player gets hit while the blockstart track is playing, then they will perform a parry
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then -- perform a left parry animation that will send to the server to damage the enemy slightly, and also make them do an animation in reaction.
 				warn("ParryL")
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftParryTRACK -- If the enemy threw an attack to the left, then we brace right since their left is our right
+				-- The parry direction must be reversed. If the enemy throws a left punch, then the player, facing them, has their left and right swapped. The enemy's left is the player's right, and vice versa. So, these have to be switched. Same goes for receiver parry animations.
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightParryTRACK -- If the enemy threw an attack to the left, then we brace right since their left is our right
 			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
 				warn("ParryR")
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightParryTRACK
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftParryTRACK
 			end
 			local Protocol = "Parry"
 			
@@ -83,9 +84,9 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 			GameVariables.randAttack:Stop()
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then
 				-- if the enemy parried to the left, the player's right hand will repelled, and vice versa.
-				GameVariables.FC_LeftParryRECEIVERTRACK:Play()
-			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
 				GameVariables.FC_RightParryRECEIVERTRACK:Play()
+			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
+				GameVariables.FC_LeftParryRECEIVERTRACK:Play()
 			end
 			
 		end
@@ -97,10 +98,10 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 end
 
 function ReceivingAndCountering.Block(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck(GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering) and not GameVariables.pairedPlaying then -- blocking/dodging  
+	if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering}) and not GameVariables.pairedPlaying then -- blocking/dodging  
 		-- GameVariables.isBlocking = true -- work on this. It interferes with parrying.
 		GameVariables.FC_BlockStartTRACK:Play()
-		GameVariables.humanoid.WalkSpeed /= 1.5
+		GameVariables.humanoid.WalkSpeed /= 1.5 -- add the GameVariables.SetSpeed() function here when ready!!!
 	end
 end
 
@@ -110,7 +111,7 @@ function ReceivingAndCountering.EndBlock(input)
 		GameVariables.isBlocking = false
 		GameVariables.FC_BlockStartTRACK:Stop()
 		GameVariables.FC_BlockTRACK:Stop()
-		GameVariables.humanoid.WalkSpeed *= 1.5
+		GameVariables.SetSpeed(true)
 	end
 end
 

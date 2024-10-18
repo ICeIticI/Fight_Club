@@ -1,4 +1,4 @@
-local TweenService = game:GetService("TweenService")
+-- local TweenService = game:GetService("TweenService")
 local GameVariables = {}
 
 GameVariables.player = game:GetService("Players").LocalPlayer
@@ -258,7 +258,27 @@ GameVariables.areLockedOn = false
 
 GameVariables.animPair = nil
 
--- GameVariables.actionTable = {GameVariables.isBlocking, GameVariables.isAttacking, GameVariables.isCountering}
+--[[
+GameVariables.actionTable = {GameVariables.isBlocking, GameVariables.isAttacking, GameVariables.isCountering,}
+GameVariables.actionTable[2] = false
+print(GameVariables.actionTable)
+
+GameVariables.metaActionTable = {
+	__index = function(table, i) -- runs when I try to access a key that doesnt exist. AKA, reads values
+			return table[i]
+	end,
+
+	__newindex = function(table, i, v) -- runs when I try to assign a value to a key that doesnt exist. AKA, writes values.
+		table[i] = v
+	end	
+}
+
+setmetatable(GameVariables.actionTable, GameVariables.metaActionTable)
+GameVariables.actionTable[2] = true
+print(GameVariables.actionTable)
+print(GameVariables.isBlocking)
+]]
+
 
 -- GameVariables.rayParams = RaycastParams.new()
 -- GameVariables.rayParams.FilterDescendantsInstances = GameVariables.character:GetChildren()
@@ -457,14 +477,38 @@ function GameVariables.stopAnimations() -- add params? Perhaps we could change f
 	GameVariables.FC_IdleTRACK:Stop()
 end
 
-function GameVariables.boolCheck(a, b, c)
-	for _, v in pairs({a,b,c}) do
+function GameVariables.boolCheck(boolTable)
+	for _, v in pairs(boolTable) do
 		if v == true then
 			return false
 		end
 	end
 -- if none of the bools are currently active (true) then the desired action can be completed as it won't interrupt any other action, so we return function as true.
 	return true
+end
+
+function GameVariables.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
+	
+	if bool == true then
+		-- we allow the player the ability to move
+
+		if GameVariables.pairedPlaying == false and GameVariables.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
+
+			if not GameVariables.isBlocking then
+				GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed
+			elseif GameVariables.isBlocking then
+				GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed / 1.5
+			end
+
+			GameVariables.humanoid.WalkSpeed = GameVariables.previousWalkSpeed
+		else
+			GameVariables.humanoid.WalkSpeed = GameVariables.originalWalkSpeed
+		end
+
+	elseif bool == false then
+		-- we take the player's ability to move away
+		GameVariables.humanoid.WalkSpeed = 0
+	end
 end
 
 function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
@@ -556,13 +600,14 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 		
 		GameVariables.pairedPlaying = true
 	
-		if not GameVariables.isBlocking then
-			GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed
-		elseif GameVariables.isBlocking then
-			GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed / 1.5
-		end
+		-- if not GameVariables.isBlocking then
+		-- 	GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed
+		-- elseif GameVariables.isBlocking then
+		-- 	GameVariables.previousWalkSpeed = GameVariables.lockOnSpeed / 1.5
+		-- end
 		
-		GameVariables.humanoid.WalkSpeed = 0
+		-- GameVariables.humanoid.WalkSpeed = 0
+		GameVariables.SetSpeed(false)
 		
 		if GameVariables.isBlocking then
 		print(sentAnimPair)
@@ -608,6 +653,7 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 	end
 end
 
+--[[
 function GameVariables.Set(givenObject, newValue)
     givenObject = newValue
 	GameVariables.LocalBindableEvent:Fire(givenObject, newValue)
@@ -625,5 +671,6 @@ function GameVariables.SetPlayer(givenPlayer)
 	GameVariables.player = givenPlayer
 	warn(tostring(givenPlayer) .. " is the player that has been set for " .. tostring(GameVariables.player))
 end
+]]
 
 return GameVariables

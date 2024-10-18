@@ -8,8 +8,14 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 
 	if currentAnim:GetAttribute("EventCategory") == "bAttack" then -- checking if the current animation (not the track) has the 'EventCategory' attribute, with a value of bAttack, which is given to all basic attacks.
 		v.Priority = Enum.AnimationPriority.Action2 -- then we give the current animation track a priority of 2 so it will have higher priority than default.
-		print(tostring(v) .. " has animation priority 2 now.")
 	end
+
+	local A1IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function() -- Runs when any attack animation begins/stops playing
+		if v.IsPlaying then
+			warn("SETTING SPEEEEDD")
+			GameVariables.SetSpeed(false) -- As soon as an attack animation starts, the player will not be able to move.
+		end
+	end)
 			
 	local StartOfAttackCONNECT = v:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
 		if not v.Animation:GetAttribute("Paired") then
@@ -25,6 +31,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 	
 	local EndOfAttackCONNECT = v:GetMarkerReachedSignal("EndOfAttack"):Connect(function() -- Runs when player can attack cancel
 		GameVariables.isAttacking = false
+		print("endofattack reached")
 		GameVariables.hitDebounce = false
 		GameVariables.canFollowUp = false
 		
@@ -33,7 +40,6 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 		if currentAnim:GetAttribute("AttackLevel") == 2 then
 			GameVariables.comboCounter = 0
 		end
-
 	end)
 	
 	local A1StoppedCONNECT = v.Stopped:Connect(function() -- Runs when the animation stops for any reason
@@ -58,15 +64,15 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 				GameVariables.pairedPlaying = false
 			end)
 			GameVariables.isAttacking = false
-			GameVariables.humanoid.WalkSpeed = GameVariables.previousWalkSpeed
 			-- GameVariables.canFollowUp = true
 		end
 		
 		attackEnded = false
 		GameVariables.attackFrames = false
+		GameVariables.SetSpeed(true)
 	end)
 	
-	local A1Connects = {StartOfAttackCONNECT, Anti_FollowupCONNECT, EndOfAttackCONNECT, A1StoppedCONNECT}
+	local A1Connects = {StartOfAttackCONNECT, Anti_FollowupCONNECT, EndOfAttackCONNECT, A1StoppedCONNECT, A1IsPlayingCONNECT}
 
 	GameVariables.humanoid.Died:Connect(function()
 		for _, connection in pairs(A1Connects) do
@@ -81,8 +87,16 @@ end
 local function ReceiveAnimManager(v, currentAnim)
 	local A2IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function()
 
-		GameVariables.isGettingHit = true
-		GameVariables.randAttack:Stop()
+		if v.IsPlaying then
+			GameVariables.isGettingHit = true
+			GameVariables.SetSpeed(false) -- don't want the player to be able to move while being hit
+			print("We are now getting hit")
+		end
+		
+		if GameVariables.randAttack and GameVariables.randAttack.IsPlaying then
+			GameVariables.randAttack:Stop()
+		end
+		
 		if currentAnim.AnimationId == GameVariables.FC_RightHaymakerRECEIVER.AnimationId or currentAnim.AnimationId == GameVariables.FC_LeftHaymakerRECEIVER.AnimationId then -- we need to specifically tween specific animations like the rightHaymaker
 			if v.IsPlaying == true then
 				-- tween now that we know that the haymaker anim has started
@@ -125,9 +139,12 @@ local function ReceiveAnimManager(v, currentAnim)
 	
 	local A2StoppedCONNECT = v.Stopped:Connect(function()
 		GameVariables.isGettingHit = false
+		print("We are no-longer getting hit.")
 		if v.Animation:GetAttribute("Paired") then
 			GameVariables.pairedPlaying = false
-			GameVariables.humanoid.WalkSpeed = GameVariables.previousWalkSpeed
+			GameVariables.SetSpeed(true)
+		else
+			GameVariables.SetSpeed(true)
 		end
 	end)
 
@@ -221,7 +238,6 @@ end
 function AnimationManager.manageAnimations()
 	wait()
 	for _, v in pairs(GameVariables.AllAnimations) do -- When the player presses an input and attacks (down below in UserInputService), this body of code will manage the player's current combo and their ability to do a followup attack after their first. It's up here so this isn't re-created
-		print(v.Name .. " .. " .. tostring(v.Priority))
 
 		local currentAnim = v.Animation
 		local EndOfAttackExists = false -- for the functions that don't have this event, I want them to run code when the animation has stopped. However, animations that have this marker won't be able to run it.

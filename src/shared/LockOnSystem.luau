@@ -67,15 +67,21 @@ function LockOnSystem.LockOn()
 		GameVariables.Camera.Focus = GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.CFrame
 		]]
 		
-		while GameVariables.lockOnDebounce.Value == true and GameVariables.raycastResult ~= nil do -- constantly keeps the player facing the enemy
+		while GameVariables.lockOnDebounce.Value == true and workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, rayParams) ~= nil do -- constantly keeps the player facing the enemy
 				wait()
-				GameVariables.humanoidRootPart.CFrame = CFrame.lookAt(GameVariables.humanoidRootPart.Position, GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position) -- makes sure the player character is always facing the enemy character.
+				GameVariables.humanoidRootPart.CFrame = CFrame.lookAt(GameVariables.humanoidRootPart.Position, Vector3.new(GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X, GameVariables.humanoidRootPart.Position.Y, GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.Position.Z)) -- makes sure the player character is always facing the enemy character.
 			subject.CFrame = CFrame.new(
 				(GameVariables.humanoidRootPart.Position.X + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X) / 2,
 				subject.CFrame.Y,
 				(GameVariables.humanoidRootPart.Position.Z + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Z) / 2 
 				)
 		end
+
+		if not workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 7, rayParams) then -- When the while loop above ends, we want to check if its because the player got too far. If so, then we want to set the lockOnDebounce to false
+			GameVariables.lockOnDebounce.Value = false
+			print("Too far from enemy.")
+		end
+
 	end
 	
 	if GameVariables.lockOnDebounce.Value == false then

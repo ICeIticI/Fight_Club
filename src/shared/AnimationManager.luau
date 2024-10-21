@@ -12,7 +12,6 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 
 	local A1IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function() -- Runs when any attack animation begins/stops playing
 		if v.IsPlaying then
-			warn("SETTING SPEEEEDD")
 			GameVariables.SetSpeed(false) -- As soon as an attack animation starts, the player will not be able to move.
 		end
 	end)
@@ -34,6 +33,11 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 		print("endofattack reached")
 		GameVariables.hitDebounce = false
 		GameVariables.canFollowUp = false
+
+		if not v.Animation:GetAttribute("Paired") then -- We set the speed of paired attacks in a different :Connect below, so we don't want to manage the paired attack speed here.
+			GameVariables.SetSpeed(true)
+		end
+		
 		
 		EndOfAttackExists = true
 
@@ -61,7 +65,6 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 				GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
 				GameVariables.isAttacking = false
 				GameVariables.hitDebounce = false
-				GameVariables.pairedPlaying = false
 			end)
 			GameVariables.isAttacking = false
 			-- GameVariables.canFollowUp = true
@@ -69,6 +72,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 		
 		attackEnded = false
 		GameVariables.attackFrames = false
+		GameVariables.pairedPlaying = false
 		GameVariables.SetSpeed(true)
 	end)
 	
@@ -78,11 +82,13 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 		for _, connection in pairs(A1Connects) do
 			connection:Disconnect()
 			warn("Connections A1 has been disabled.")
-			
 		end
-		-- warn(#GameVariables.AllAnimations)
 	end)
 end
+
+
+
+
 
 local function ReceiveAnimManager(v, currentAnim)
 	local A2IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function()
@@ -155,8 +161,11 @@ local function ReceiveAnimManager(v, currentAnim)
 			connection:Disconnect()
 		end
 	end)
-	
 end
+
+
+
+
 
 local function MiscAnimManager(v)
 	
@@ -164,12 +173,12 @@ local function MiscAnimManager(v)
 
 		if v.Animation.AnimationId == GameVariables.FC_Block.AnimationId then
 				wait(0.15)
-				while not GameVariables.canSyncBlock do
-					wait()
-					print("Waiting for sync block avaliability " .. tostring(GameVariables.canSyncBlock))
-				end
+			-- 	while not GameVariables.canSyncBlock do
+			-- 		wait()
+			-- 		print("Waiting for sync block avaliability " .. tostring(GameVariables.canSyncBlock))
+			-- 	end
 			
-			warn("Broke out of the for loop...")
+			-- warn("Broke out of the for loop...")
 			GameVariables.Protocol = "HoldingBlock"
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false) -- letting the enemy know the player is blocking
 
@@ -178,7 +187,6 @@ local function MiscAnimManager(v)
 		if v.IsPlaying == true then
 			-- Parry anim started playing
 			GameVariables.isCountering = true -- even though we are parrying, we use the isBlocking attribute for simplicity. isAttacking wasnt working properly when we did it with that attribute.
-			warn("isBlocking: " .. tostring(GameVariables.isBlocking))
 			GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
 			print("we are *blocking* cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
 		end

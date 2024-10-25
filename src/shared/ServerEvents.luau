@@ -47,7 +47,6 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 		function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI) -- For misc. events that are sent for server-sided things such as synced blocks, parrying, countering etc.
 			local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
 			
-			print(Protocol)
 			if Protocol == "SyncedBlock" then
 				attackDamage = syncBlockDamage
 				if plrIsBlocking then

@@ -24,8 +24,6 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Pr
         print("Misc. action reached server. The protocol: " .. tostring(Protocol))
         ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI) -- Will execute misc things such as parrying and sync block damage.
     end
-
-    print(Protocol)
 end)
 
 Players.PlayerAdded:Connect(function(player)

@@ -7,7 +7,9 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 	local attackEnded = false
 
 	if currentAnim:GetAttribute("EventCategory") == "bAttack" then -- checking if the current animation (not the track) has the 'EventCategory' attribute, with a value of bAttack, which is given to all basic attacks.
-		v.Priority = Enum.AnimationPriority.Action2 -- then we give the current animation track a priority of 2 so it will have higher priority than default.
+		v.Priority = Enum.AnimationPriority.Action -- then we give the current animation track a priority of 2 so it will have higher priority than default.
+	elseif currentAnim:GetAttribute("Paired") then	
+		v.Priority = Enum.AnimationPriority.Action2
 	end
 
 	local A1IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function() -- Runs when any attack animation begins/stops playing
@@ -18,6 +20,42 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 				print("Countering")
 				GameVariables.isCountering = true
 			end
+
+		elseif not v.IsPlaying then -- Runs when the animation stops for any reason
+			if v.TimePosition ~= v.Length then -- Runs when the player has canceled an attack
+				attackEnded = true
+		
+			elseif v.TimePosition == v.Length and not attackEnded then -- Runs when full animation is done playing
+				GameVariables.comboCounter = 0
+				GameVariables.followUpCount = 0 -- If this value is more than 1, the player cannot attack	
+			
+			if EndOfAttackExists == false then -- runs for animations that don't have the EndOfAttack attribute, such as the sync blocks.
+					GameVariables.isAttacking = false
+					GameVariables.hitDebounce = false
+					GameVariables.canFollowUp = false
+				end
+
+				if v.Animation:GetAttribute("Counter") == true then
+					print("Stopping counter")
+					GameVariables.isCountering = false
+					GameVariables.isAttacking = false
+				end
+			end
+			
+			if v.Animation:GetAttribute("Paired") == true and v.TimePosition == v.Length then
+				delay(0.5, function()
+					GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
+					GameVariables.isAttacking = false
+					GameVariables.hitDebounce = false
+				end)
+				GameVariables.isAttacking = false
+				-- GameVariables.canFollowUp = true
+			end
+			
+			attackEnded = false
+			GameVariables.attackFrames = false
+			GameVariables.pairedPlaying = false
+			GameVariables.SetSpeed(true)
 		end
 	end)
 			
@@ -51,41 +89,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 		end
 	end)
 	
-	local A1StoppedCONNECT = v.Stopped:Connect(function() -- Runs when the animation stops for any reason
-		if v.TimePosition ~= v.Length then -- Runs when the player has canceled an attack
-			attackEnded = true
-		
-		elseif v.TimePosition == v.Length and not attackEnded then -- Runs when full animation is done playing
-		GameVariables.comboCounter = 0
-		GameVariables.followUpCount = 0 -- If this value is more than 1, the player cannot attack	
-		
-		if EndOfAttackExists == false then -- runs for animations that don't have the EndOfAttack attribute, such as the sync blocks.
-				GameVariables.isAttacking = false
-				GameVariables.hitDebounce = false
-				GameVariables.canFollowUp = false
-			end
-
-			if v.Animation:GetAttribute("Counter") == true then
-				print("Stopping counter")
-				GameVariables.isCountering = false
-				GameVariables.isAttacking = false
-			end
-		end
-		
-		if v.Animation:GetAttribute("Paired") == true and v.TimePosition == v.Length then
-			delay(0.5, function()
-				GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
-				GameVariables.isAttacking = false
-				GameVariables.hitDebounce = false
-			end)
-			GameVariables.isAttacking = false
-			-- GameVariables.canFollowUp = true
-		end
-		
-		attackEnded = false
-		GameVariables.attackFrames = false
-		GameVariables.pairedPlaying = false
-		GameVariables.SetSpeed(true)
+	local A1StoppedCONNECT = v.Stopped:Connect(function()
 	end)
 	
 	local A1Connects = {StartOfAttackCONNECT, Anti_FollowupCONNECT, EndOfAttackCONNECT, A1StoppedCONNECT, A1IsPlayingCONNECT}
@@ -108,7 +112,20 @@ local function ReceiveAnimManager(v, currentAnim)
 		if v.IsPlaying then
 			GameVariables.isGettingHit = true
 			GameVariables.SetSpeed(false) -- don't want the player to be able to move while being hit
+			GameVariables.hitDebounce = false
 			print("We are now getting hit")
+
+		elseif not v.IsPlaying then
+			GameVariables.isGettingHit = false
+			GameVariables.isAttacking = false
+			print("We are no-longer getting hit.")
+			
+			if v.Animation:GetAttribute("Paired") then
+				GameVariables.pairedPlaying = false
+				GameVariables.SetSpeed(true)
+			else
+				GameVariables.SetSpeed(true)
+			end
 		end
 		
 		if GameVariables.randAttack and GameVariables.randAttack.IsPlaying then
@@ -156,19 +173,9 @@ local function ReceiveAnimManager(v, currentAnim)
 			end
 		end
 	end)
-	
-	local A2StoppedCONNECT = v.Stopped:Connect(function()
-		GameVariables.isGettingHit = false
-		print("We are no-longer getting hit.")
-		if v.Animation:GetAttribute("Paired") then
-			GameVariables.pairedPlaying = false
-			GameVariables.SetSpeed(true)
-		else
-			GameVariables.SetSpeed(true)
-		end
-	end)
 
-	local A2Connects = {A2IsPlayingCONNECT, A2StoppedCONNECT}
+
+	local A2Connects = {A2IsPlayingCONNECT}
 
 	GameVariables.humanoid.Died:Connect(function()
 		for _, connection in pairs(A2Connects) do
@@ -179,11 +186,48 @@ end
 
 
 
-
-
 local function MiscAnimManager(v)
 	
 	local MiscIsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function()
+
+		if v.IsPlaying then
+			if v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry and counter animations when they start playing
+				-- Parry anim started playing
+				GameVariables.isCountering = true -- even though we are parrying, we use the isBlocking attribute for simplicity. isAttacking wasnt working properly when we did it with that attribute.
+				GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
+				print("we are *blocking* cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
+			end
+
+		elseif not v.IsPlaying then
+			if v.Animation.AnimationId == GameVariables.FC_BlockStart.AnimationId and v.TimePosition == v.Length then -- When the block starting animation ends, we want to play the looping version of the blocking animation.
+				GameVariables.FC_BlockTRACK:Play()
+				print("is playing block")
+
+			elseif v.Animation.AnimationId == v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry animations when they stop playing
+			-- Parry stopped playing
+			warn("Parry stopped playing")
+			GameVariables.isCountering = false
+			-- GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
+			warn("You can attack now after parrying")
+			
+			delay(0.51, function() -- the parry receiver animations are 0.51 seconds longer than the parries. If the player parries and hangs around doing nothing, they will lose the ability to do a haymaker riposte.
+				GameVariables.comboCounter = 0 
+			end)
+
+			elseif (v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId) or (v:GetAttribute("Counter")) then -- manages the parry/counter-receiving animations when they stop playing
+				-- INSTEAD OF LISTING EVERY ANIMATION, ADD ATTRIBUTES TO SIMPLIFY!!!
+			-- Parry receiver stopped playing
+				wait(0.4)
+				warn("Can attack now after getting parried")
+				GameVariables.comboCounter = 0 -- reset the combo counter because we dont want to continue the attack chain.
+				GameVariables.isAttacking = false
+				GameVariables.hitDebounce = false
+				warn("Plr got parried and the parry receiver anim finished. isAttacking is now false.")
+			end
+
+			GameVariables.isAttacking = false
+			GameVariables.hitDebounce = false
+		end
 
 		if v.Animation.AnimationId == GameVariables.FC_Block.AnimationId then
 				wait(0.15)
@@ -195,47 +239,7 @@ local function MiscAnimManager(v)
 			-- warn("Broke out of the for loop...")
 			GameVariables.Protocol = "HoldingBlock"
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false) -- letting the enemy know the player is blocking
-
-		elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry and counter animations when they start playing
-		-- Parry/counter started playing
-			if v.IsPlaying == true then
-				-- Parry anim started playing
-				GameVariables.isCountering = true -- even though we are parrying, we use the isBlocking attribute for simplicity. isAttacking wasnt working properly when we did it with that attribute.
-				GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
-				print("we are *blocking* cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
-			end
 		end
-	end)
-	
-	local MiscStopppedCONNECT = v.Stopped:Connect(function()
-
-		if v.Animation.AnimationId == GameVariables.FC_BlockStart.AnimationId and v.TimePosition == v.Length then -- When the block starting animation ends, we want to play the looping version of the blocking animation.
-		GameVariables.FC_BlockTRACK:Play()
-		print("is playing block")
-
-		elseif v.Animation.AnimationId == v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry animations when they stop playing
-		-- Parry stopped playing
-		warn("Parry stopped playing")
-		GameVariables.hitDebounce = false
-		GameVariables.isCountering = false
-		-- GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
-		warn("You can attack now after parrying")
-		
-		delay(0.51, function() -- the parry receiver animations are 0.51 seconds longer than the parries. If the player parries and hangs around doing nothing, they will lose the ability to do a haymaker riposte.
-			GameVariables.comboCounter = 0 
-		end)
-
-		elseif (v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId) or (v:GetAttribute("Counter")) then -- manages the parry/counter-receiving animations when they stop playing
-			-- INSTEAD OF LISTING EVERY ANIMATION, ADD ATTRIBUTES TO SIMPLIFY!!!
-		-- Parry receiver stopped playing
-			wait(0.4)
-			warn("Can attack now after getting parried")
-			GameVariables.comboCounter = 0 -- reset the combo counter because we dont want to continue the attack chain.
-			GameVariables.isAttacking = false
-			GameVariables.hitDebounce = false
-			warn("Plr got parried and the parry receiver anim finished. isAttacking is now false.")
-		end
-
 	end)
 
 	local MiscIsBlockingConnect = v:GetMarkerReachedSignal("isBlocking"):Connect(function()
@@ -243,7 +247,7 @@ local function MiscAnimManager(v)
 		print("player is now blocking...!")
 	end)
 
-	local MiscConnects = {MiscIsPlayingCONNECT, MiscStopppedCONNECT, MiscIsBlockingConnect}
+	local MiscConnects = {MiscIsPlayingCONNECT, MiscIsBlockingConnect}
 
 	GameVariables.humanoid.Died:Connect(function()
 		for _, connection in pairs(MiscConnects) do

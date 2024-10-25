@@ -294,6 +294,7 @@ AnimationInstances.FC_RightCounter1:SetAttribute("Paired", true)
 AnimationInstances.FC_RightCounter1:SetAttribute("Counter", true) -- Counter is given to countering animations, including the receiving ones to distinguish our animations
 AnimationInstances.FC_RightCounter1:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_RightCounter1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_RightCounter1:SetAttribute("AnimDirection", "Right")
 
 AnimationInstances.FC_RightCounter1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_RightCounter1RECEIVER.Name = "FC_RightCounter1RECEIVER"
@@ -309,6 +310,7 @@ AnimationInstances.FC_LeftCounter1:SetAttribute("Paired", true)
 AnimationInstances.FC_LeftCounter1:SetAttribute("Counter", true)
 AnimationInstances.FC_LeftCounter1:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_LeftCounter1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_LeftCounter1:SetAttribute("AnimDirection", "Left")
 
 AnimationInstances.FC_LeftCounter1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_LeftCounter1RECEIVER.Name = "FC_LeftCounter1RECEIVER"

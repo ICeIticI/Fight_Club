@@ -13,6 +13,11 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 	local A1IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function() -- Runs when any attack animation begins/stops playing
 		if v.IsPlaying then
 			GameVariables.SetSpeed(false) -- As soon as an attack animation starts, the player will not be able to move.
+		
+			if v.Animation:GetAttribute("Counter") == true then
+				print("Countering")
+				GameVariables.isCountering = true
+			end
 		end
 	end)
 			
@@ -53,10 +58,17 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 		elseif v.TimePosition == v.Length and not attackEnded then -- Runs when full animation is done playing
 		GameVariables.comboCounter = 0
 		GameVariables.followUpCount = 0 -- If this value is more than 1, the player cannot attack	
+		
 		if EndOfAttackExists == false then -- runs for animations that don't have the EndOfAttack attribute, such as the sync blocks.
 				GameVariables.isAttacking = false
 				GameVariables.hitDebounce = false
 				GameVariables.canFollowUp = false
+			end
+
+			if v.Animation:GetAttribute("Counter") == true then
+				print("Stopping counter")
+				GameVariables.isCountering = false
+				GameVariables.isAttacking = false
 			end
 		end
 		
@@ -184,16 +196,14 @@ local function MiscAnimManager(v)
 			GameVariables.Protocol = "HoldingBlock"
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false) -- letting the enemy know the player is blocking
 
-		elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_LeftCounter1.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightCounter1.AnimationId then -- manages the parry and counter animations when they start playing
+		elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry and counter animations when they start playing
 		-- Parry/counter started playing
-		if v.IsPlaying == true then
-			-- Parry anim started playing
-			GameVariables.isCountering = true -- even though we are parrying, we use the isBlocking attribute for simplicity. isAttacking wasnt working properly when we did it with that attribute.
-			if v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- we only want to set comboCounter to 3 if its a parry, not a counter as we want a haymaker after a parry and not necessairly after a counter.
+			if v.IsPlaying == true then
+				-- Parry anim started playing
+				GameVariables.isCountering = true -- even though we are parrying, we use the isBlocking attribute for simplicity. isAttacking wasnt working properly when we did it with that attribute.
 				GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
+				print("we are *blocking* cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
 			end
-			print("we are *blocking* cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
-		end
 		end
 	end)
 	
@@ -203,7 +213,7 @@ local function MiscAnimManager(v)
 		GameVariables.FC_BlockTRACK:Play()
 		print("is playing block")
 
-		elseif v.Animation.AnimationId == v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_LeftCounter1.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightCounter1.AnimationId then -- manages the parry animations when they stop playing
+		elseif v.Animation.AnimationId == v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry animations when they stop playing
 		-- Parry stopped playing
 		warn("Parry stopped playing")
 		GameVariables.hitDebounce = false
@@ -215,7 +225,7 @@ local function MiscAnimManager(v)
 			GameVariables.comboCounter = 0 
 		end)
 
-		elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_LeftCounter1RECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightCounter1RECEIVER.AnimationId  then -- manages the parry/counter-receiving animations when they stop playing
+		elseif (v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId) or (v:GetAttribute("Counter")) then -- manages the parry/counter-receiving animations when they stop playing
 			-- INSTEAD OF LISTING EVERY ANIMATION, ADD ATTRIBUTES TO SIMPLIFY!!!
 		-- Parry receiver stopped playing
 			wait(0.4)

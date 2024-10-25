@@ -291,20 +291,30 @@ AnimationInstances.FC_RightCounter1 = Instance.new("Animation")
 AnimationInstances.FC_RightCounter1.Name = "FC_RightCounter1"
 AnimationInstances.FC_RightCounter1.AnimationId = "rbxassetid://134051879952221"
 AnimationInstances.FC_RightCounter1:SetAttribute("Paired", true)
+AnimationInstances.FC_RightCounter1:SetAttribute("Counter", true) -- Counter is given to countering animations, including the receiving ones to distinguish our animations
+AnimationInstances.FC_RightCounter1:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_RightCounter1:SetAttribute("AnimType", 1)
 
 AnimationInstances.FC_RightCounter1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_RightCounter1RECEIVER.Name = "FC_RightCounter1RECEIVER"
 AnimationInstances.FC_RightCounter1RECEIVER.AnimationId = "rbxassetid://102062393002467"
 AnimationInstances.FC_RightCounter1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_RightCounter1RECEIVER:SetAttribute("Counter", true)
+AnimationInstances.FC_RightCounter1RECEIVER:SetAttribute("AnimType", 2)
 
 AnimationInstances.FC_LeftCounter1 = Instance.new("Animation")
 AnimationInstances.FC_LeftCounter1.Name = "FC_LeftCounter1"
 AnimationInstances.FC_LeftCounter1.AnimationId = "rbxassetid://87128106022021"
 AnimationInstances.FC_LeftCounter1:SetAttribute("Paired", true)
+AnimationInstances.FC_LeftCounter1:SetAttribute("Counter", true)
+AnimationInstances.FC_LeftCounter1:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_LeftCounter1:SetAttribute("AnimType", 1)
 
 AnimationInstances.FC_LeftCounter1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_LeftCounter1RECEIVER.Name = "FC_LeftCounter1RECEIVER"
 AnimationInstances.FC_LeftCounter1RECEIVER.AnimationId = "rbxassetid://103327338913216"
 AnimationInstances.FC_LeftCounter1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_LeftCounter1RECEIVER:SetAttribute("Counter", true)
+AnimationInstances.FC_LeftCounter1RECEIVER:SetAttribute("AnimType", 2)
 
 return AnimationInstances

@@ -120,6 +120,11 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_LeftParryRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftParryRECEIVER)
 	GameVariables.FC_RightParryTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightParry)
 	GameVariables.FC_RightParryRECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightParryRECEIVER)
+	GameVariables.FC_RightCounter1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightCounter1)
+	GameVariables.FC_RightCounter1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightCounter1RECEIVER)
+	GameVariables.FC_LeftCounter1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftCounter1)
+	GameVariables.FC_LeftCounter1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftCounter1RECEIVER)
+
 
 	-- *Animation track tables*
 	GameVariables.AllAnimations = { -- Table for managing all animation TRACKS.
@@ -141,7 +146,9 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_SyncBlock3R2TRACK, GameVariables.FC_SyncBlock3R2RECEIVERTRACK,
 	GameVariables.FC_BracingBlockLTRACK, GameVariables.FC_BracingBlockRTRACK,
 	GameVariables.FC_LeftParryTRACK, GameVariables.FC_LeftParryRECEIVERTRACK,
-	GameVariables.FC_RightParryTRACK, GameVariables.FC_RightParryRECEIVERTRACK
+	GameVariables.FC_RightParryTRACK, GameVariables.FC_RightParryRECEIVERTRACK,
+	GameVariables.FC_RightCounter1TRACK, GameVariables.FC_RightCounter1RECEIVERTRACK,
+	GameVariables.FC_LeftCounter1TRACK, GameVariables.FC_LeftCounter1RECEIVERTRACK
 	}
 
 	GameVariables.attack1Table = {}
@@ -255,6 +262,10 @@ GameVariables.FC_LeftParry = GameVariables.plrObjectsFolder:WaitForChild("FC_Lef
 GameVariables.FC_LeftParryRECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftParryRECEIVER")
 GameVariables.FC_RightParry = GameVariables.plrObjectsFolder:WaitForChild("FC_RightParry")
 GameVariables.FC_RightParryRECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_RightParryRECEIVER")
+GameVariables.FC_RightCounter1 = GameVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1")
+GameVariables.FC_RightCounter1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1RECEIVER")
+GameVariables.FC_LeftCounter1 = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1")
+GameVariables.FC_LeftCounter1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1RECEIVER")
 
 GameVariables.walkingSpeed = 12
 GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.

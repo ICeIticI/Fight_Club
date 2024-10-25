@@ -60,14 +60,18 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 						elseif hitCharacter then -- Then its not a player we're attacking, but an AI
 						GlobalRemoteEvent:FireClient(sendingPlayer, nil, Protocol, animPair, sentValue, isAI)
 					end
-					elseif Protocol == "Parry" then
-						print("Protocol is indeed parry, by server!")
-						attackDamage = attackDamage/2
-						hitCharacter.Humanoid.Health -= attackDamage
-						warn(tostring(hitPlayer) .. " has been parried!")
-						GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
-					end
-					attackDamage = nil
+				elseif Protocol == "Parry" then
+					print("Protocol is indeed parry, by server!")
+					attackDamage = attackDamage/2
+					hitCharacter.Humanoid.Health -= attackDamage
+					warn(tostring(hitPlayer) .. " has been parried!")
+					GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
+				
+				elseif Protocol == "Counter" then
+					print("Somebody got countered ooooohhhh")
+					GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
+				end
+				attackDamage = nil
 					-- end)
 				end
 				

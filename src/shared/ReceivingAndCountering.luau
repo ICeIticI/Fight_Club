@@ -1,4 +1,3 @@
-local UserInputService = game:GetService("UserInputService")
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
 local ReceivingAndCountering = {}
@@ -24,6 +23,19 @@ local function receive(currentAttack) -- Local function that manages what "react
 			local Protocol = "Parry"
 			
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
+
+		elseif GameVariables.randAttack and GameVariables.randAttack.IsPlaying and not GameVariables.attackFrames then -- if the player is just starting an attack before the attack frames come in and gets hit by an enemy, then they will counter them.
+			warn("We are countering the other dude!")
+
+			if currentAttack:GetAttribute("AnimDirection") == "Left" then -- Left counter
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftCounter1TRACK
+			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then -- Right counter
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK
+			end
+
+			local Protocol = "Counter"
+			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
+
 		else -- the blockStart track is not playing, therefore its not a parry:
 
 			if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
@@ -89,6 +101,15 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 				GameVariables.FC_LeftParryRECEIVERTRACK:Play()
 			end
 			
+		elseif Protocol == "Counter" then
+			GameVariables.randAttack:Stop()
+
+			if currentAttack:GetAttribute("AnimDirection") == "Left" then
+				-- if the enemy countered to the left, the player's right hand will be countered on, and vice versa.
+				GameVariables.FC_RightCounter1RECEIVERTRACK:Play()
+			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
+				GameVariables.FC_LeftCounter1RECEIVERTRACK:Play()
+			end
 		end
 	--elseif isAI == true then
 		

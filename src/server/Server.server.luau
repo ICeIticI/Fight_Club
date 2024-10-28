@@ -28,7 +28,7 @@ end)
 
 Players.PlayerAdded:Connect(function(player)
     print("player added")
-    ServerInit.InitializePlayer(player)
+    ServerInit.InitializePlayer(player) -- initializes player's public objects
     local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()
 
     if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.

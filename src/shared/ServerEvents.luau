@@ -8,6 +8,7 @@ local ServerEvents = {}
 local A1Damage = 5 -- default damage for lvl 1 attacks
 local A2Damage = 11 -- default damage for lvl 2 attacks
 local syncBlockDamage = 2.5 -- damage for sync blocks
+local counterAttackDamage = 8
 local attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
 
 function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, _, _, plrIsBlocking, isAI) -- bAttack stands for basic attack. This function is for the events of a player damaging another with a basic strike.
@@ -69,6 +70,9 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 				elseif Protocol == "Counter" then
 					print("Somebody got countered ooooohhhh")
 					GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
+				elseif Protocol == "CounterAttack" then
+					hitCharacter.Humanoid.Health -= counterAttackDamage
+					print("Counter attack dmg!")
 				end
 				attackDamage = nil
 					-- end)

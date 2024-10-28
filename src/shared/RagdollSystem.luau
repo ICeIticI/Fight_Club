@@ -14,7 +14,7 @@
 
 local RagdollSystem = {}
 -- Services
-local Players = game:GetService("Players") -- to be able to ragdoll players who join the game
+-- local Players = game:GetService("Players") -- to be able to ragdoll players who join the game
 
 -- Variables
 local jointsCache = {} -- assigns values to keys, like a dictionary. We can define keys such as jointsCache[character] = defined value. 

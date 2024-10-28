@@ -127,6 +127,8 @@ local function ReceiveAnimManager(v, currentAnim)
 				GameVariables.SetSpeed(true)
 			end
 		end
+		-- Down below are changes that happen regardless if the receiving animation plays or stops:
+		GameVariables.comboCounter = 0
 		
 		if GameVariables.randAttack and GameVariables.randAttack.IsPlaying then
 			GameVariables.randAttack:Stop()
@@ -214,9 +216,9 @@ local function MiscAnimManager(v)
 				GameVariables.comboCounter = 0 
 			end)
 
-			elseif (v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId) or (v:GetAttribute("Counter")) then -- manages the parry/counter-receiving animations when they stop playing
+			elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then -- manages the parry-receiving animations when they stop playing
 				-- INSTEAD OF LISTING EVERY ANIMATION, ADD ATTRIBUTES TO SIMPLIFY!!!
-			-- Parry receiver stopped playing
+				-- Parry receiver stopped playing
 				wait(0.4)
 				warn("Can attack now after getting parried")
 				GameVariables.comboCounter = 0 -- reset the combo counter because we dont want to continue the attack chain.

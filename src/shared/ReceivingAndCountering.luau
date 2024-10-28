@@ -3,7 +3,7 @@ local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 local ReceivingAndCountering = {}
 
 local function receive(currentAttack) -- Local function that manages what "reaction" the player would do based on the attack/circumstances.
-	local currentAttackID = currentAttack.AnimationId -- currentAttack is what the enemy is throwing
+	local currentAttackID = currentAttack.AnimationId -- currentAttack is what the enemy is throwing. It's an animation, not a animationTrack
 	
 	if GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying then
 		GameVariables.currentReceiveAnimTRACK:Stop()
@@ -24,7 +24,8 @@ local function receive(currentAttack) -- Local function that manages what "react
 			
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
 
-		elseif GameVariables.randAttack and GameVariables.randAttack.IsPlaying and not GameVariables.attackFrames then -- if the player is just starting an attack before the attack frames come in and gets hit by an enemy, then they will counter them.
+		elseif GameVariables.randAttack and GameVariables.randAttack.IsPlaying and not GameVariables.isCountering and not GameVariables.canFollowUp and not GameVariables.attackFrames then -- if the player is just starting an attack before the attack frames come in and gets hit by an enemy, then they will counter them.
+			-- We also only want the player to be able to counter when they're not doing a followup attack.
 			warn("We are countering the other dude!")
 			GameVariables.randAttack:Stop()
 			
@@ -33,6 +34,8 @@ local function receive(currentAttack) -- Local function that manages what "react
 			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then -- Right counter
 				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK
 			end
+			warn("Old currentattack: " .. tostring(currentAttack))
+			GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
 
 			local Protocol = "Counter"
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)

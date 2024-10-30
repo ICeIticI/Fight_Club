@@ -19,6 +19,9 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 			if v.Animation:GetAttribute("Counter") == true then
 				print("Countering")
 				GameVariables.isCountering = true
+				-- GameVariables.randAttack = GameVariables.currentReceiveAnimTRACK
+				GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
+	
 			end
 
 		elseif not v.IsPlaying then -- Runs when the animation stops for any reason

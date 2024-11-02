@@ -15,13 +15,17 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 	local A1IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function() -- Runs when any attack animation begins/stops playing
 		if v.IsPlaying then
 			GameVariables.SetSpeed(false) -- As soon as an attack animation starts, the player will not be able to move.
-		
+
 			if v.Animation:GetAttribute("Counter") == true then
 				print("Countering")
 				GameVariables.isCountering = true
 				-- GameVariables.randAttack = GameVariables.currentReceiveAnimTRACK
 				GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
 	
+			end
+			
+			if v.Animation:GetAttribute("Paired") then
+				GameVariables.isAttacking = true
 			end
 
 		elseif not v.IsPlaying then -- Runs when the animation stops for any reason
@@ -47,11 +51,14 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 			
 			if v.Animation:GetAttribute("Paired") == true and v.TimePosition == v.Length then
 				delay(0.5, function()
-					GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
-					GameVariables.isAttacking = false
+					
+					
+					-- GameVariables.isAttacking = false
 					GameVariables.hitDebounce = false
 				end)
 				GameVariables.isAttacking = false
+				GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
+				GameVariables.comboCounter = 0
 				-- GameVariables.canFollowUp = true
 			end
 			
@@ -75,6 +82,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 	end)
 	
 	local EndOfAttackCONNECT = v:GetMarkerReachedSignal("EndOfAttack"):Connect(function() -- Runs when player can attack cancel
+		
 		GameVariables.isAttacking = false
 		print("endofattack reached")
 		GameVariables.hitDebounce = false
@@ -206,9 +214,8 @@ local function MiscAnimManager(v)
 		elseif not v.IsPlaying then
 			if v.Animation.AnimationId == GameVariables.FC_BlockStart.AnimationId and v.TimePosition == v.Length then -- When the block starting animation ends, we want to play the looping version of the blocking animation.
 				GameVariables.FC_BlockTRACK:Play()
-				print("is playing block")
 
-			elseif v.Animation.AnimationId == v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry animations when they stop playing
+			elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry animations when they stop playing
 			-- Parry stopped playing
 			warn("Parry stopped playing")
 			GameVariables.isCountering = false
@@ -249,7 +256,6 @@ local function MiscAnimManager(v)
 
 	local MiscIsBlockingConnect = v:GetMarkerReachedSignal("isBlocking"):Connect(function()
 		GameVariables.isBlocking = true
-		print("player is now blocking...!")
 	end)
 
 	local MiscConnects = {MiscIsPlayingCONNECT, MiscIsBlockingConnect}

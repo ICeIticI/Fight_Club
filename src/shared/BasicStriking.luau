@@ -119,25 +119,24 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 				-- end
 				warn(tostring(GameVariables.FC_RightCounter1:GetAttribute("AttackLevel")) .. " " .. tostring(GameVariables.currentAttack:GetAttribute("AttackLevel")))
 				warn(tostring(GameVariables.FC_RightCounter1) .. " " .. tostring(GameVariables.currentAttack))
-				
-				if not (GameVariables.currentAttack:GetAttribute("Counter") and GameVariables.currentReceiveAnimTRACK.IsPlaying) then
+
+				if GameVariables.isCountering or (GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("AttackLevel") == 3) then
 					
+					if GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Paired") and GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") then
+						GameVariables.Protocol = "CounterAttack"
+						print("this condition for counterattack has been met.")
+					end
+
+				elseif not GameVariables.isCountering then
+
 					if GameVariables.currentAttack:GetAttribute("AttackLevel") == 1 then
 						print("CONDITIOBN MET")
 						GameVariables.Protocol = "Hook" -- Protocol is used to determine what function in the server to perform when a RemoteEvent is used. A "Hook" Protocol will do more damage than a "Jab" Protocol for example.
 					elseif GameVariables.currentAttack:GetAttribute("AttackLevel") == 2 then
 						GameVariables.Protocol = "Haymaker"
-					elseif GameVariables.currentAttack:GetAttribute("Paired") and not GameVariables.currentAttack:GetAttribute("Finisher") and not GameVariables.currentAttack:GetAttribute("Counter") then -- if its paired and not a finisher or counter, then it must be a synced block.
+					elseif GameVariables.currentAttack:GetAttribute("Paired") and not (GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Finisher")) and not (GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Counter")) then -- if its paired and not a finisher or counter, then it must be a synced block.
 						GameVariables.Protocol = "SyncedBlock"
 					end
-
-				elseif GameVariables.currentAttack:GetAttribute("Counter") and GameVariables.currentReceiveAnimTRACK.IsPlaying then
-					
-					if GameVariables.currentAttack:GetAttribute("Paired") and GameVariables.currentAttack:GetAttribute("Counter") then
-						GameVariables.Protocol = "CounterAttack"
-						print("this condition for counterattack has been met.")
-					end
-				
 				end
 				
 				
@@ -218,6 +217,7 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 					end
 
 					attack(GameVariables.pairedChain) -- pairedChain is used for a followup combo, which enables uppercuts.
+					print("followupattackfff")
 				end
 				GameVariables.waitingToAttack = false
 			end

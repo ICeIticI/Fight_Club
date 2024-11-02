@@ -30,9 +30,9 @@ local function receive(currentAttack) -- Local function that manages what "react
 			GameVariables.randAttack:Stop()
 			
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then -- Left counter
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftCounter1TRACK
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftCounter1TRACK -- Make a 'Left Counters' table and randomize the left countering tracks to get a left counter.
 			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then -- Right counter
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK -- Make a 'Right Counters' table, containing all the right counter tracks and randomize when countering from the right here.
 			end
 			warn("Old currentattack: " .. tostring(currentAttack))
 			-- GameVariables.randAttack = GameVariables.currentReceiveAnimTRACK
@@ -41,7 +41,7 @@ local function receive(currentAttack) -- Local function that manages what "react
 			local Protocol = "Counter"
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
 
-		else -- the blockStart track is not playing, therefore its not a parry:
+		elseif not GameVariables.isCountering then  -- the blockStart track is not playing, therefore its not a parry:
 
 			if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
 				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
@@ -133,7 +133,6 @@ end
 
 function ReceivingAndCountering.EndBlock(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton2 and (GameVariables.FC_BlockStartTRACK.IsPlaying or GameVariables.FC_BlockTRACK.IsPlaying) and not GameVariables.pairedPlaying then
-		print("Ending block")
 		GameVariables.isBlocking = false
 		GameVariables.FC_BlockStartTRACK:Stop()
 		GameVariables.FC_BlockTRACK:Stop()

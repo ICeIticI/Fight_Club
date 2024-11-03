@@ -9,14 +9,16 @@ local A1Damage = 5 -- default damage for lvl 1 attacks
 local A2Damage = 11 -- default damage for lvl 2 attacks
 local syncBlockDamage = 2.5 -- damage for sync blocks
 local counterAttackDamage = 8
+local sentAttackTrack = nil
 local attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
 
 local function isCounterTrackPlaying(animator)
 	--[[Function used to check if a counter animation track is playing. If it is, then we don't want the player taking damage after they counter someone.]]
+	warn(true)
 	local playingTracks = animator:GetPlayingAnimationTracks()
 	warn("Checking for counter tracks...")
 	for _, v in pairs(playingTracks) do
-		print(v.Animation:GetAttribute("Counter"))
+		print(v.Animation)
 		print(v.Animation:GetAttribute("AttackLevel"))
 		if v.Animation:GetAttribute("Counter") and v.Animation:GetAttribute("AttackLevel") == 3 then
 			print("Enemy is countering. NO damage allowed guys.")
@@ -38,19 +40,21 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 			attackDamage = A2Damage
 		end
 		
-	if Protocol == "Hook" or Protocol == "Haymaker" and not isCounterTrackPlaying(hitCharacter:WaitForChild("Humanoid"):WaitForChild("charAnimator")) then
-		local otherProtocol = "Receive"
-		if hitPlayer then
-			GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, otherProtocol)
-		elseif hitCharacter then
-			isAI = true
-			GlobalRemoteEvent:FireClient(sendingPlayer, currentAttack, otherProtocol, nil, nil, isAI)
-		end
+	if Protocol == "Hook" or Protocol == "Haymaker" then
+		if not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
+			local otherProtocol = "Receive"
+			if hitPlayer then
+				GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, otherProtocol)
+			elseif hitCharacter then
+				isAI = true
+				GlobalRemoteEvent:FireClient(sendingPlayer, currentAttack, otherProtocol, nil, nil, isAI)
+			end
 
-		if plrIsBlocking then
-			attackDamage = attackDamage/2
+			if plrIsBlocking then
+				attackDamage = attackDamage/2
+			end
+			hitPlayer.Character.Humanoid.Health -= attackDamage
 		end
-		hitPlayer.Character.Humanoid.Health -= attackDamage
 	end
 end
 
@@ -65,6 +69,11 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 		end
 		hitCharacter.Humanoid.Health -= attackDamage
 	elseif Protocol == "AttackStarted" or Protocol == "HoldingBlock" then
+
+		if currentAttack then
+			sentAttackTrack = currentAttack
+		end
+
 		if hitPlayer then
 			GlobalRemoteEvent:FireClient(hitPlayer, nil, Protocol, animPair, sentValue, isAI)
 			elseif hitCharacter then -- Then its not a player we're attacking, but an AI

@@ -69,9 +69,14 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 		end
 	end)
 			
-	local StartOfAttackCONNECT = v:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
+	local StartOfAttackCONNECT = v:GetMarkerReachedSignal("StartOfAttack"):Connect(function() -- runs when the animation reaches a point where it can do damage.
 		if not v.Animation:GetAttribute("Paired") then
 			GameVariables.canFollowUp = true
+
+			-- GameVariables.Protocol = "AttackEnded"
+			print("AttackEnded sent")
+			GameVariables.GlobalRemoteEvent:FireServer(nil, "AttackEnded", nil, nil, nil, nil, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
+
 		end
 		GameVariables.attackFrames = true
 	end)

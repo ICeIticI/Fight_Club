@@ -14,7 +14,7 @@ local function newPlayer(plr)
 	local self = {}
 
 	self.Name = plr.Name .. "_Instance"
-	self.currentAttackTrack = nil
+	self.currentAttack = nil
 
 	print("Instance for " .. tostring(plr.Name) .. " has been created.")
 	return self

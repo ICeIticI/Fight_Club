@@ -4,6 +4,8 @@ local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent
 
 local ServerEvents = {}
 
+local ServerInit = require(game.ReplicatedStorage.Shared.ServerInit) -- we need to access playerInstances, which is defined in ServerInit, so we can use it here for specific playerInstances.
+
 -- Damage types:
 local A1Damage = 5 -- default damage for lvl 1 attacks
 local A2Damage = 11 -- default damage for lvl 2 attacks
@@ -29,10 +31,25 @@ local function isCounterTrackPlaying(animator)
 	return false
 end
 
+local function getPlayerInstance(plr)
+	for _, v in pairs(ServerInit.playerInstances) do
+		print(v.Name)
+		print(v.Name)
+		if v.Name == plr.Name .. "_Instance" then
+			warn(tostring(v.Name) .. " has been found. Adding them to playerInstance")
+			return v
+		end
+	end
+	print("No such player found ::((")
+end
+
 function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, _, _, plrIsBlocking, isAI) -- bAttack stands for basic attack. This function is for the events of a player damaging another with a basic strike.
 	-- GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
-	print(hitCharacter:WaitForChild("Humanoid"):WaitForChild("charAnimator"))
+	local enemyInstance = getPlayerInstance(hitPlayer) -- table that holds public variables for the server to see and use
+	print(ServerInit.playerInstances)
+	print(enemyInstance)
+	print(enemyInstance.currentAttackTrack)
 	
 	if currentAttack and currentAttack:GetAttribute("AttackLevel") == 1 then
 		attackDamage = A1Damage
@@ -40,7 +57,7 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 			attackDamage = A2Damage
 		end
 		
-	if Protocol == "Hook" or Protocol == "Haymaker" then
+	if (Protocol == "Hook" or Protocol == "Haymaker") and not (enemyInstance.currentAttackTrack and enemyInstance.currentAttackTrack.IsPlaying and enemyInstance.currentAttackTrack.Animation:GetAttribute("Counter")) then -- We're basically making sure the enemy is not countering the player here. enemyInstance is a table that includes the enemy's current attacking animation track. We don't want them taking damage if they are countering.
 		if not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
 			local otherProtocol = "Receive"
 			if hitPlayer then
@@ -61,6 +78,7 @@ end
 
 function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI) -- For misc. events that are sent for server-sided things such as synced blocks, parrying, countering etc.
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
+	local playerInstance = getPlayerInstance(sendingPlayer) -- table that holds public variables for the server to see and use
 	
 	if Protocol == "SyncedBlock" then
 		attackDamage = syncBlockDamage
@@ -71,7 +89,7 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 	elseif Protocol == "AttackStarted" or Protocol == "HoldingBlock" then
 
 		if currentAttack then
-			sentAttackTrack = currentAttack
+			playerInstance.currentAttackTrack = currentAttack -- We send the current animation track the player is doing to check if its a counter so the player wont be damaged
 		end
 
 		if hitPlayer then

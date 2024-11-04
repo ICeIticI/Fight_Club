@@ -6,7 +6,26 @@ GlobalRemoteEvent.Name = "GlobalRemoteEvent"
 GlobalRemoteEvent.Parent = game.ReplicatedStorage
 local ServerInit = {}
 
+ServerInit.playerInstances = {} -- Making this a module variable so ServerEvents can access this when it needs to get playerInstances
+
+local function newPlayer(plr)
+	--[[Function that holds public variables for the player, that the server will be able to see and check when it
+		needs.]]
+	local self = {}
+
+	self.Name = plr.Name .. "_Instance"
+	self.currentAttackTrack = nil
+
+	print("Instance for " .. tostring(plr.Name) .. " has been created.")
+	return self
+end
+
 function ServerInit.InitializePlayer(player)
+	local playerInstance = newPlayer(player)
+	table.insert(ServerInit.playerInstances, playerInstance)
+	print(playerInstance)
+	print(playerInstance.Name)
+
 	local plrObjectsFolder = Instance.new("Folder")
 	plrObjectsFolder.Name = player.Name .. "_GameObjects"
 	plrObjectsFolder.Parent = player

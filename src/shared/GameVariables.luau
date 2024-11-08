@@ -66,6 +66,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.distanceBetween = nil
 	GameVariables.enemyHumanoid = nil -- pre-defined enemy Humanoid because the script hates global variables. Used for the enemy.
 	GameVariables.enemyChar = nil
+	-- GameVariables.enemyCurrentAttack = nil -- used when the enemy would start an attack via the AttackStarted protocol that gets sent when one starts
 	GameVariables.randLvl1Type = nil --[[ Used to determine what lvl 1 attacks
 						the player will use for said combo ]]
 	GameVariables.animPair = nil

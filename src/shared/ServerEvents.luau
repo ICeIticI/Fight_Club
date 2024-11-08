@@ -44,20 +44,20 @@ end
 function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, _, _, plrIsBlocking, isAI) -- bAttack stands for basic attack. This function is for the events of a player damaging another with a basic strike.
 	-- GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
-	local enemyInstance = getPlayerInstance(hitPlayer) -- table that holds public variables for the server to see and use
-	print(ServerInit.playerInstances)
-	print(enemyInstance)
-	print(enemyInstance.currentAttack)
-	
+
 	if currentAttack and currentAttack:GetAttribute("AttackLevel") == 1 then
 		attackDamage = A1Damage
 		elseif currentAttack and currentAttack:GetAttribute("AttackLevel") == 2 then
 			attackDamage = A2Damage
 		end
 		print("uhhhh" .. tostring(Protocol))
-	if (Protocol == "Hook" or Protocol == "Haymaker") and not enemyInstance.currentAttack then -- We're basically making sure the enemy is not countering the player here. enemyInstance is a table that includes the enemy's current attacking animation track. We don't want them taking damage if they are countering.
+
+	if Protocol == "Hook" or Protocol == "Haymaker" then -- We're basically making sure the enemy is not countering the player here. enemyInstance is a table that includes the enemy's current attacking animation track. We don't want them taking damage if they are countering.
+	
+		local enemyInstance = getPlayerInstance(hitPlayer) -- table that holds public variables for the server to see and use
+		-- if not enemyInstance.currentAttack then
 		warn(true)
-		if not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
+		if not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) or not enemyInstance.currentAttack then
 		warn(false)
 		local otherProtocol = "Receive"
 			if hitPlayer then
@@ -67,13 +67,19 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 				GlobalRemoteEvent:FireClient(sendingPlayer, currentAttack, otherProtocol, nil, nil, isAI)
 			end
 
+			wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
+			enemyInstance = getPlayerInstance(hitPlayer) -- table that holds public variables for the server to see and use
+			print(ServerInit.playerInstances)
+			print(enemyInstance)
+			print(enemyInstance.currentAttack)
+
 			if plrIsBlocking then
 				attackDamage = attackDamage/2
 			end
+			if not enemyInstance.currentAttack and not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
 			hitPlayer.Character.Humanoid.Health -= attackDamage
+			end
 		end
-	else
-		print(enemyInstance.currentAttack)
 	end
 end
 
@@ -95,7 +101,7 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 			warn(playerInstance.currentAttack)
 		end
 
-		if hitPlayer then
+		if hitPlayer then -- then we are attacking a player, not an AI.
 			GlobalRemoteEvent:FireClient(hitPlayer, nil, Protocol, animPair, sentValue, isAI)
 			elseif hitCharacter then -- Then its not a player we're attacking, but an AI
 			GlobalRemoteEvent:FireClient(sendingPlayer, nil, Protocol, animPair, sentValue, isAI)

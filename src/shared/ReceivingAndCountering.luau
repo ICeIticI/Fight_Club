@@ -85,6 +85,8 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 			if GameVariables.isBlocking and GameVariables.canSyncBlock then
 				GameVariables.synchedBlock(sentAnimPair, sentValue)
 				warn("Sync block being performed")
+			-- else
+			-- 	GameVariables.enemyCurrentAttack = currentAttack
 			end
 
 		elseif Protocol == "HoldingBlock" then

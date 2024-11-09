@@ -50,7 +50,7 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 		elseif currentAttack and currentAttack:GetAttribute("AttackLevel") == 2 then
 			attackDamage = A2Damage
 		end
-		print("uhhhh" .. tostring(Protocol))
+		print("uhhhh " .. tostring(Protocol))
 
 	if Protocol == "Hook" or Protocol == "Haymaker" then -- We're basically making sure the enemy is not countering the player here. enemyInstance is a table that includes the enemy's current attacking animation track. We don't want them taking damage if they are countering.
 	
@@ -76,7 +76,7 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 			if plrIsBlocking then
 				attackDamage = attackDamage/2
 			end
-			if not enemyInstance.currentAttack and not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
+			if attackDamage and not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
 			hitPlayer.Character.Humanoid.Health -= attackDamage
 			end
 		end
@@ -87,7 +87,8 @@ end
 function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI) -- For misc. events that are sent for server-sided things such as synced blocks, parrying, countering etc.
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
 	local playerInstance = getPlayerInstance(sendingPlayer) -- table that holds public variables for the server to see and use
-	
+	print(Protocol)
+
 	if Protocol == "SyncedBlock" then
 		attackDamage = syncBlockDamage
 		if plrIsBlocking then

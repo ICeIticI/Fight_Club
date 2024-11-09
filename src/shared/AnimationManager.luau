@@ -18,6 +18,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 
 			if v.Animation:GetAttribute("Counter") == true then
 				print("Countering")
+				GameVariables.Protocol = "Counter"
 				GameVariables.isCountering = true
 				-- GameVariables.randAttack = GameVariables.currentReceiveAnimTRACK
 				GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
@@ -31,6 +32,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 		elseif not v.IsPlaying then -- Runs when the animation stops for any reason
 			if v.TimePosition ~= v.Length then -- Runs when the player has canceled an attack
 				attackEnded = true
+				GameVariables.Protocol = nil -- resets the protocol. This is because the protocol needs to be checked in countering before being allowed to counter. If the plr is throwing a hook already, then we don't want to counter.
 		
 			elseif v.TimePosition == v.Length and not attackEnded then -- Runs when full animation is done playing
 				GameVariables.comboCounter = 0
@@ -127,6 +129,7 @@ local function ReceiveAnimManager(v, currentAnim)
 
 		if v.IsPlaying then
 			GameVariables.isGettingHit = true
+			GameVariables.canFollowUp = false
 			GameVariables.SetSpeed(false) -- don't want the player to be able to move while being hit
 			GameVariables.hitDebounce = false
 			print("We are now getting hit")
@@ -138,6 +141,7 @@ local function ReceiveAnimManager(v, currentAnim)
 			
 			if v.Animation:GetAttribute("Paired") then
 				GameVariables.pairedPlaying = false
+				GameVariables.hitDebounce = false
 				GameVariables.SetSpeed(true)
 			else
 				GameVariables.SetSpeed(true)
@@ -234,6 +238,7 @@ local function MiscAnimManager(v)
 			elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then -- manages the parry-receiving animations when they stop playing
 				-- INSTEAD OF LISTING EVERY ANIMATION, ADD ATTRIBUTES TO SIMPLIFY!!!
 				-- Parry receiver stopped playing
+				GameVariables.canFollowUp = false
 				wait(0.4)
 				warn("Can attack now after getting parried")
 				GameVariables.comboCounter = 0 -- reset the combo counter because we dont want to continue the attack chain.

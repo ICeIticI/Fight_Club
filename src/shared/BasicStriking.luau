@@ -105,10 +105,13 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 			end
 			]]
 			
-			-- warn(touchedObject)
+			-- warn(GameVariables.isAttacking)
+			-- warn(GameVariables.hitDebounce)
+			-- warn(GameVariables.currentAttack)
 			if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") and GameVariables.currentAttack then
 				GameVariables.hitDebounce = true
-				
+				warn("We hit someone with attack hitboxes.")
+
 				local enemyCharacter = touchedObject.Parent.Parent
 				local enemyPlayer = game.Players:GetPlayerFromCharacter(enemyCharacter)
 
@@ -128,7 +131,9 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 					end
 
 				elseif not GameVariables.isCountering then
+					print("We attack someone with hitboxes, and are not countering")
 
+					print(GameVariables.Protocol)
 					if GameVariables.currentAttack:GetAttribute("AttackLevel") == 1 then
 						print("CONDITIOBN MET")
 						GameVariables.Protocol = "Hook" -- Protocol is used to determine what function in the server to perform when a RemoteEvent is used. A "Hook" Protocol will do more damage than a "Jab" Protocol for example.
@@ -145,9 +150,10 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 						wait()
 					until GameVariables.attackFrames or not GameVariables.isAttacking
 				end
-				if enemyPlayer and GameVariables.isAttacking then
+				if enemyPlayer and GameVariables.isAttacking and GameVariables.attackFrames then
 					warn(GameVariables.Protocol)
 					GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false) -- Deal damage to other client.
+					warn("Hitbox touched something. Firing to server.")
 				end
 			end
 		end)

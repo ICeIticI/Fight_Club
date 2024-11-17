@@ -68,6 +68,12 @@ local function receive(currentAttack) -- Local function that manages what "react
 	
 	if GameVariables.currentReceiveAnimTRACK then
 		GameVariables.currentReceiveAnimTRACK:Play()
+
+		if GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (GameVariables.currentReceiveAnimTRACK == GameVariables.FC_RightParryTRACK or GameVariables.currentReceiveAnimTRACK == GameVariables.FC_LeftParryTRACK) then -- Makes sure this is a counter animation and not a parry animation
+			-- When countering, we want to change the position of the player character to be a fixed amount of studs away from the enemy
+			warn("CFrame moving")
+			GameVariables.character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(GameVariables.enemyChar:WaitForChild("HumanoidRootPart").Position + GameVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3)
+		end
 	end
 	
 	

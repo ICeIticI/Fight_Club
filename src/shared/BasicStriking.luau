@@ -4,7 +4,6 @@ wait()
 -- local UserInputService = game:GetService("UserInputService")
 -- local Players = game:GetService("Players")
 
-print(GameVariables)
 
 local BasicStriking = {}
 
@@ -13,10 +12,8 @@ local BasicStriking = {}
 local function attack(followupCombo) -- the local attack function. This is responsible for the mechanics of the attack.
 
 	if GameVariables.isEnemyHoldingBlock and not GameVariables.isGettingHit then -- Runs for sync blocks. We also want to make sure we aren't already getting hit before performing a sync block.
-		GameVariables.isAttacking = true
-		print(GameVariables)
+		-- GameVariables.isAttacking = true
 		GameVariables.synchedBlock(nil, followupCombo) -- followupCombo will be nil the first time, as the attack() parameter will be empty, but afterwards it will have value.
-		warn("Sync attack thrown")
 	elseif GameVariables.isGettingHit then -- If the player attacked while already getting attacked, we want nothing to happen
 		return false
 	else
@@ -69,7 +66,7 @@ local function attack(followupCombo) -- the local attack function. This is respo
 			
 			GameVariables.currentAttack = GameVariables.randAttack.Animation
 			
-			GameVariables.isAttacking = true
+			-- GameVariables.isAttacking = true
 			GameVariables.randAttack:Play()
 			GameVariables.lastAttack = GameVariables.randAttack
 			GameVariables.comboCounter += 1
@@ -82,7 +79,7 @@ local function attack(followupCombo) -- the local attack function. This is respo
 			end
 			
 			GameVariables.currentAttack = GameVariables.randAttack.Animation
-			GameVariables.isAttacking = true
+			-- GameVariables.isAttacking = true
 			GameVariables.randAttack:Play()
 			GameVariables.lastAttack = GameVariables.randAttack
 			GameVariables.comboCounter+=1
@@ -110,32 +107,29 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 			-- warn(GameVariables.currentAttack)
 			if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") and GameVariables.currentAttack then
 				GameVariables.hitDebounce = true
-				warn("We hit someone with attack hitboxes.")
-
+				print("We attacked an enemy")
+				
 				local enemyCharacter = touchedObject.Parent.Parent
+				-- local localProtocol = nil -- The CounterAttack and Counter protocol interfere with eachother, and are used across scripts. So in the case of the CounterAttack protocol, I don't want the rest of the local scripts to know about it, so thats what this is used for.
 				local enemyPlayer = game.Players:GetPlayerFromCharacter(enemyCharacter)
-
+				
 				-- for _, v in pairs(enemyCharacter.Humanoid.charAnimator:GetPlayingAnimationTracks()) do
 				-- 	if v.Animation.AnimationId == "rbxassetid://18266066281" or v.Animation.AnimationId == "rbxassetid://16976697757" then
 				-- 		GameVariables.isEnemyHoldingBlock = true
 				-- 	end
 				-- end
-				warn(tostring(GameVariables.FC_RightCounter1:GetAttribute("AttackLevel")) .. " " .. tostring(GameVariables.currentAttack:GetAttribute("AttackLevel")))
-				warn(tostring(GameVariables.FC_RightCounter1) .. " " .. tostring(GameVariables.currentAttack))
-
-				if GameVariables.isCountering then
+				-- warn(true)
+				-- if GameVariables.isCountering or GameVariables.Protocol == "Counter" then
+					-- print("We are countering..")
+					-- if GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Paired") and GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") then
+					-- 	-- localProtocol = "CounterAttack"
+					-- 	warn("Goes through")
+					-- else
+					-- 	warn("WOW doesnt go through")
+					-- end
 					
-					if GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Paired") and GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") then
-						GameVariables.Protocol = "CounterAttack"
-						print("this condition for counterattack has been met.")
-					end
-
-				elseif not GameVariables.isCountering then
-					print("We attack someone with hitboxes, and are not countering")
-
-					print(GameVariables.Protocol)
+				if not GameVariables.isCountering then
 					if GameVariables.currentAttack:GetAttribute("AttackLevel") == 1 then
-						print("CONDITIOBN MET")
 						GameVariables.Protocol = "Hook" -- Protocol is used to determine what function in the server to perform when a RemoteEvent is used. A "Hook" Protocol will do more damage than a "Jab" Protocol for example.
 					elseif GameVariables.currentAttack:GetAttribute("AttackLevel") == 2 then
 						GameVariables.Protocol = "Haymaker"
@@ -143,18 +137,20 @@ function BasicStriking.manageHitboxes() -- Manages the attack hitboxes of the pl
 						GameVariables.Protocol = "SyncedBlock"
 					end
 				end
-				
-				
+					
+					
 				if not GameVariables.attackFrames then
 					repeat
 						wait()
 					until GameVariables.attackFrames or not GameVariables.isAttacking
 				end
+
 				if enemyPlayer and GameVariables.isAttacking and GameVariables.attackFrames then
-					warn(GameVariables.Protocol)
 					GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false) -- Deal damage to other client.
-					warn("Hitbox touched something. Firing to server.")
+				else
+					warn({enemyPlayer, GameVariables.isAttacking, GameVariables.attackFrames})
 				end
+
 			end
 		end)
 		GameVariables.humanoid.Died:Connect(function()
@@ -205,7 +201,6 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 				if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 					GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
 					GameVariables.Protocol = "AttackStarted"
-					print(GameVariables.currentAttack)
 					GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.animPair, GameVariables.pairedChain, nil, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
 				end			
 
@@ -224,7 +219,6 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 					end
 
 					attack(GameVariables.pairedChain) -- pairedChain is used for a followup combo, which enables uppercuts.
-					print("followupattackfff")
 				end
 				GameVariables.waitingToAttack = false
 			end

@@ -24,22 +24,25 @@ local function receive(currentAttack) -- Local function that manages what "react
 			
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
 
-		elseif GameVariables.randAttack and GameVariables.randAttack.IsPlaying and not GameVariables.currentAttack:GetAttribute("Counter") and not GameVariables.isCountering and not GameVariables.canFollowUp and not GameVariables.attackFrames and not GameVariables.isGettingHit and not (GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying) then -- if the player is just starting an attack before the attack frames come in and gets hit by an enemy, then they will counter them.
+		elseif GameVariables.Protocol ~= "Counter" and GameVariables.randAttack and GameVariables.randAttack.IsPlaying and not GameVariables.currentAttack:GetAttribute("Counter") and not GameVariables.isCountering and not GameVariables.canFollowUp and not GameVariables.attackFrames and not GameVariables.isGettingHit then -- if the player is just starting an attack before the attack frames come in and gets hit by an enemy, then they will counter them.
 			-- We also only want the player to be able to counter when they're not doing a followup attack.
-			warn("We are countering the other dude!")
-			GameVariables.randAttack:Stop()
 			
-			if currentAttack:GetAttribute("AnimDirection") == "Left" then -- Left counter
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftCounter1TRACK -- Make a 'Left Counters' table and randomize the left countering tracks to get a left counter.
-			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then -- Right counter
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK -- Make a 'Right Counters' table, containing all the right counter tracks and randomize when countering from the right here.
+			wait()
+			if not (GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying) then				
+				
+				warn(GameVariables.isCountering)
+				GameVariables.isCountering = true
+				GameVariables.randAttack:Stop()
+				
+				if currentAttack:GetAttribute("AnimDirection") == "Left" then -- Left counter
+					GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftCounter1TRACK -- Make a 'Left Counters' table and randomize the left countering tracks to get a left counter.
+				elseif currentAttack:GetAttribute("AnimDirection") == "Right" then -- Right counter
+					GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK -- Make a 'Right Counters' table, containing all the right counter tracks and randomize when countering from the right here.
+				end
+				-- GameVariables.randAttack = GameVariables.currentReceiveAnimTRACK
+				-- GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
+				
 			end
-			warn("Old currentattack: " .. tostring(currentAttack))
-			-- GameVariables.randAttack = GameVariables.currentReceiveAnimTRACK
-			-- GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
-
-			GameVariables.Protocol = "Counter"
-			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, currentAttack)
 
 		elseif not GameVariables.isCountering then  -- the blockStart track is not playing, therefore its not a parry:
 
@@ -71,8 +74,7 @@ local function receive(currentAttack) -- Local function that manages what "react
 
 		if GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (GameVariables.currentReceiveAnimTRACK == GameVariables.FC_RightParryTRACK or GameVariables.currentReceiveAnimTRACK == GameVariables.FC_LeftParryTRACK) then -- Makes sure this is a counter animation and not a parry animation
 			-- When countering, we want to change the position of the player character to be a fixed amount of studs away from the enemy
-			warn("CFrame moving")
-			GameVariables.character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(GameVariables.enemyChar:WaitForChild("HumanoidRootPart").Position + GameVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3)
+			GameVariables.character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(GameVariables.enemyChar:WaitForChild("HumanoidRootPart").Position + GameVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 , GameVariables.enemyChar.HumanoidRootPart.Position) -- The comma turns the CFrame.New() function into a Positional function AND a Orientational function, by setting the position and also using CFrame.LookAt() with the comma.
 		end
 	end
 	
@@ -116,7 +118,7 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 				GameVariables.FC_LeftParryRECEIVERTRACK:Play()
 			end
 			
-		elseif Protocol == "Counter" then
+		elseif Protocol == "Counter" and not (GameVariables.FC_LeftCounter1RECEIVERTRACK.IsPlaying or GameVariables.FC_RightCounter1RECEIVERTRACK.IsPlaying) then
 			GameVariables.randAttack:Stop()
 
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then

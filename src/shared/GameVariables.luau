@@ -7,7 +7,6 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	
 	GameVariables.character = GameVariables.player.Character or GameVariables.player.CharacterAdded:Wait()
 	GameVariables.humanoid = GameVariables.character:WaitForChild("Humanoid")
-	print(GameVariables.humanoid)
 	GameVariables.previousHealth = GameVariables.humanoid.Health -- This var is used to determine how much damage the character takes.
 	GameVariables.charAnimator = GameVariables.character:WaitForChild("Humanoid"):WaitForChild("charAnimator")
 	GameVariables.humanoidRootPart = GameVariables.character:WaitForChild("HumanoidRootPart")
@@ -37,7 +36,6 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 		GameVariables.lockOnDebounce = Instance.new("BoolValue") -- shouldn't this be initialized by the server for more security?
 		GameVariables.lockOnDebounce.Name = "lockOnDebounce"
 		GameVariables.lockOnDebounce.Parent = GameVariables.plrObjectsFolder
-		print("lockOnDebounce created.")
 	end
 
 	GameVariables.hitDebounce = false -- if false, then the player has the ability to deal damage. This is so the player won't hit the enemy multiple times in one attack.
@@ -300,7 +298,6 @@ end
 
 while not GameVariables.humanoid do -- will wait until the humanoid exists.
 	wait()
-	print("Waiting for humanoid to become a thing...")
 end
 
  GameVariables.humanoid.Died:Connect(function()
@@ -345,7 +342,6 @@ function GameVariables.SetSpeed(bool) -- Function that manages the character spe
 			GameVariables.humanoid.WalkSpeed = GameVariables.previousWalkSpeed
 		else
 			GameVariables.humanoid.WalkSpeed = GameVariables.originalWalkSpeed
-			print(GameVariables.originalWalkSpeed)
 		end
 
 	elseif bool == false then
@@ -362,7 +358,6 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 			warn("Are you somehow in here?")
 			if GameVariables.pairedAttack and GameVariables.pairedAttack.IsPlaying then -- runs for the attacker
 			GameVariables.pairedAttack:Stop()
-			print("Are we good pleaseeeE?")
 			if followupCombo == 3 then
 				if GameVariables.animPair and GameVariables.animPair[1] == 1 then
 					if GameVariables.animPair and GameVariables.animPair[2] == 1 then
@@ -453,7 +448,6 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 		GameVariables.SetSpeed(false)
 		
 		if GameVariables.isBlocking then
-		print(sentAnimPair)
 			GameVariables.pairedBlock:Play()
 		
 		elseif GameVariables.isAttacking and GameVariables.pairedAttack then -- Script breaks if pairedAttack doesn't exist, so we need to add it in as a check.

@@ -15,6 +15,7 @@ local function newPlayer(plr)
 
 	self.Name = plr.Name .. "_Instance"
 	self.currentAttack = nil
+	self.isGettingHit = false
 
 	print("Instance for " .. tostring(plr.Name) .. " has been created.")
 	return self

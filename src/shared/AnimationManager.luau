@@ -14,22 +14,23 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 
 	local A1IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function() -- Runs when any attack animation begins/stops playing
 		if v.IsPlaying then
+			GameVariables.isAttacking = true
 			GameVariables.SetSpeed(false) -- As soon as an attack animation starts, the player will not be able to move.
 
 			if v.Animation:GetAttribute("Counter") == true then
-				print("Countering")
-				GameVariables.Protocol = "Counter"
 				GameVariables.isCountering = true
-				-- GameVariables.randAttack = GameVariables.currentReceiveAnimTRACK
-				GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
-	
-			end
-			
-			if v.Animation:GetAttribute("Paired") then
 				GameVariables.isAttacking = true
+				GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
+				
+				GameVariables.Protocol = "Counter"
+				warn("sending Counter")
+				GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack)
+				GameVariables.Protocol = nil
+			
 			end
 
 		elseif not v.IsPlaying then -- Runs when the animation stops for any reason
+			
 			if v.TimePosition ~= v.Length then -- Runs when the player has canceled an attack
 				attackEnded = true
 				GameVariables.Protocol = nil -- resets the protocol. This is because the protocol needs to be checked in countering before being allowed to counter. If the plr is throwing a hook already, then we don't want to counter.
@@ -38,18 +39,19 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 				GameVariables.comboCounter = 0
 				GameVariables.followUpCount = 0 -- If this value is more than 1, the player cannot attack	
 			
-			if EndOfAttackExists == false then -- runs for animations that don't have the EndOfAttack attribute, such as the sync blocks.
+				if EndOfAttackExists == false then -- runs for animations that don't have the EndOfAttack attribute, such as the sync blocks.
 					GameVariables.isAttacking = false
 					GameVariables.hitDebounce = false
+					print("EndOfAttackExists if statement set the hitDebounce to false")
 					GameVariables.canFollowUp = false
 				end
 
 				if v.Animation:GetAttribute("Counter") == true then
-					print("Stopping counter")
 					GameVariables.isCountering = false
 					GameVariables.isAttacking = false
 				end
 			end
+			-- GameVariables.hitDebounce = false
 			
 			if v.Animation:GetAttribute("Paired") == true and v.TimePosition == v.Length then
 				delay(0.5, function()
@@ -72,29 +74,28 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 	end)
 			
 	local StartOfAttackCONNECT = v:GetMarkerReachedSignal("StartOfAttack"):Connect(function() -- runs when the animation reaches a point where it can do damage.
-		if not v.Animation:GetAttribute("Paired") then
+		GameVariables.attackFrames = true
+		if v.Animation:GetAttribute("Paired") and v.Animation:GetAttribute("Counter") then
+			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, "CounterAttack", GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false) -- Deal damage to other client.
+		else
 			GameVariables.canFollowUp = true
 
 			-- GameVariables.Protocol = "AttackEnded"
-			print("AttackEnded sent")
-			GameVariables.GlobalRemoteEvent:FireServer(nil, "AttackEnded", nil, nil, nil, nil, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
-
+			GameVariables.GlobalRemoteEvent:FireServer(nil, "AttackFrames", nil, nil, nil, nil, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
 		end
-		GameVariables.attackFrames = true
 	end)
-
+	
 	local Anti_FollowupCONNECT = v:GetMarkerReachedSignal("Anti_Followup"):Connect(function()
 		GameVariables.canFollowUp = false
-		warn("anti frame reached")
 	end)
 	
 	local EndOfAttackCONNECT = v:GetMarkerReachedSignal("EndOfAttack"):Connect(function() -- Runs when player can attack cancel
 		
 		GameVariables.isAttacking = false
-		print("endofattack reached")
 		GameVariables.hitDebounce = false
 		GameVariables.canFollowUp = false
-
+		GameVariables.GlobalRemoteEvent:FireServer(nil, "AttackEnded", nil, nil, nil, nil, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
+		
 		if not v.Animation:GetAttribute("Paired") then -- We set the speed of paired attacks in a different :Connect below, so we don't want to manage the paired attack speed here.
 			GameVariables.SetSpeed(true)
 		end
@@ -132,12 +133,10 @@ local function ReceiveAnimManager(v, currentAnim)
 			GameVariables.canFollowUp = false
 			GameVariables.SetSpeed(false) -- don't want the player to be able to move while being hit
 			GameVariables.hitDebounce = false
-			print("We are now getting hit")
 
 		elseif not v.IsPlaying then
 			GameVariables.isGettingHit = false
 			GameVariables.isAttacking = false
-			print("We are no-longer getting hit.")
 			
 			if v.Animation:GetAttribute("Paired") then
 				GameVariables.pairedPlaying = false
@@ -186,12 +185,10 @@ local function ReceiveAnimManager(v, currentAnim)
 				wait(1)
 				if not GameVariables.FC_BracingBlockLTRACK.IsPlaying or not GameVariables.FC_BracingBlockRTRACK.IsPlaying then -- the last sync block played should set the canSyncBlock variable to true once it finishes.
 					GameVariables.canSyncBlock = true
-					print("Sync blocks are now possible again")
 				end
 			elseif v.IsPlaying then
 				GameVariables.isBlocking = true
 				GameVariables.canSyncBlock = false
-				print("Sync blocks are now not allowed.")
 			end
 		end
 	end)
@@ -217,7 +214,6 @@ local function MiscAnimManager(v)
 				-- Parry anim started playing
 				GameVariables.isCountering = true -- even though we are parrying, we use the isBlocking attribute for simplicity. isAttacking wasnt working properly when we did it with that attribute.
 				GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
-				print("we are *blocking* cuz we are parrying. isAttacking: " .. tostring(GameVariables.isAttacking))
 			end
 
 		elseif not v.IsPlaying then
@@ -226,10 +222,8 @@ local function MiscAnimManager(v)
 
 			elseif v.Animation.AnimationId == GameVariables.FC_LeftParry.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParry.AnimationId then -- manages the parry animations when they stop playing
 			-- Parry stopped playing
-			warn("Parry stopped playing")
 			GameVariables.isCountering = false
 			-- GameVariables.comboCounter = 3 -- when the player parries someone, they will be able to do a haymaker attack following
-			warn("You can attack now after parrying")
 			
 			delay(0.51, function() -- the parry receiver animations are 0.51 seconds longer than the parries. If the player parries and hangs around doing nothing, they will lose the ability to do a haymaker riposte.
 				GameVariables.comboCounter = 0 
@@ -240,11 +234,9 @@ local function MiscAnimManager(v)
 				-- Parry receiver stopped playing
 				GameVariables.canFollowUp = false
 				wait(0.4)
-				warn("Can attack now after getting parried")
 				GameVariables.comboCounter = 0 -- reset the combo counter because we dont want to continue the attack chain.
 				GameVariables.isAttacking = false
 				GameVariables.hitDebounce = false
-				warn("Plr got parried and the parry receiver anim finished. isAttacking is now false.")
 			end
 
 			GameVariables.isAttacking = false
@@ -258,7 +250,6 @@ local function MiscAnimManager(v)
 			-- 		print("Waiting for sync block avaliability " .. tostring(GameVariables.canSyncBlock))
 			-- 	end
 			
-			-- warn("Broke out of the for loop...")
 			GameVariables.Protocol = "HoldingBlock"
 			GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false) -- letting the enemy know the player is blocking
 		end

@@ -15,7 +15,6 @@ function LockOnSystem.LockOn()
 			GameVariables.enemyHumanoid = GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
 			GameVariables.enemyChar = GameVariables.enemyHumanoid.Parent
 			GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
-			print(game.Players:GetPlayerFromCharacter(GameVariables.enemyChar))
 			
 			if not game.Players:GetPlayerFromCharacter(GameVariables.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
 				if GameVariables.enemyChar.Name == "TestDummy" then

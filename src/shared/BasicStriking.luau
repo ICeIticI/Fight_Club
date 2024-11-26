@@ -17,7 +17,7 @@ local function attack(followupCombo) -- the local attack function. This is respo
 	elseif GameVariables.isGettingHit then -- If the player attacked while already getting attacked, we want nothing to happen
 		return false
 	else
-		local randAttackTABLE = {}
+		-- local randAttackTABLE = {}
 
 		if GameVariables.comboCounter == 0 then
 			local randNumber
@@ -40,23 +40,27 @@ local function attack(followupCombo) -- the local attack function. This is respo
 		if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid.Health > 10 then -- Will only throw lvl 1 attacks
 			
 			if not GameVariables.randAttack then -- This will run if the player hasn't started a combo yet
-				for _, v in pairs(GameVariables.attack1Table) do -- This will get all attacks that are in the given attackSeries and puts them in a table, then randomly selects one of them by index number.
-					if v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
-						table.insert(randAttackTABLE, v)
-					end
-				end
-				GameVariables.randAttack = randAttackTABLE[math.random(1,#randAttackTABLE)]
+				-- for _, v in pairs(GameVariables.attack1Table) do -- This will get all attacks that are in the given attackSeries and puts them in a table, then randomly selects one of them by index number.
+				-- 	if v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
+				-- 		table.insert(randAttackTABLE, v)
+				-- 	end
+				-- end
+
+				GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.attack1Table, "AttackSeries", GameVariables.randLvl1Type)
 				
 			else -- The player has thrown an attack before.
 				
 				local sameAttackChance = math.random(1,100)
 				if sameAttackChance > 10 or GameVariables.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
-					for _, v in pairs(GameVariables.attack1Table) do
-						if v ~= GameVariables.randAttack and v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
-							GameVariables.randAttack = v
-							break
-						end
-					end
+					-- for _, v in pairs(GameVariables.attack1Table) do
+					-- 	if v ~= GameVariables.randAttack and v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
+					-- 		GameVariables.randAttack = v
+					-- 		break
+					-- 	end
+					-- end
+
+				GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.attack1Table, "AttackSeries", GameVariables.randLvl1Type)
+
 				end
 			end
 			-- warn(true)

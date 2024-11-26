@@ -319,4 +319,36 @@ AnimationInstances.FC_LeftCounter1RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_LeftCounter1RECEIVER:SetAttribute("Counter", true)
 AnimationInstances.FC_LeftCounter1RECEIVER:SetAttribute("AnimType", 2)
 
+AnimationInstances.FC_LeftCounter2 = Instance.new("Animation")
+AnimationInstances.FC_LeftCounter2.Name = "FC_LeftCounter2"
+AnimationInstances.FC_LeftCounter2.AnimationId = "rbxassetid://109432180394178"
+AnimationInstances.FC_LeftCounter2:SetAttribute("Paired", true)
+AnimationInstances.FC_LeftCounter2:SetAttribute("Counter", true)
+AnimationInstances.FC_LeftCounter2:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_LeftCounter2:SetAttribute("AnimType", 1)
+AnimationInstances.FC_LeftCounter2:SetAttribute("AnimDirection", "Left")
+
+AnimationInstances.FC_LeftCounter2RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_LeftCounter2RECEIVER.Name = "FC_LeftCounter2RECEIVER"
+AnimationInstances.FC_LeftCounter2RECEIVER.AnimationId = "rbxassetid://75035751289008"
+AnimationInstances.FC_LeftCounter2RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_LeftCounter2RECEIVER:SetAttribute("Counter", true)
+AnimationInstances.FC_LeftCounter2RECEIVER:SetAttribute("AnimType", 2)
+
+AnimationInstances.FC_RightCounter2 = Instance.new("Animation")
+AnimationInstances.FC_RightCounter2.Name = "FC_RightCounter2"
+AnimationInstances.FC_RightCounter2.AnimationId = "rbxassetid://123756150096819"
+AnimationInstances.FC_RightCounter2:SetAttribute("Paired", true)
+AnimationInstances.FC_RightCounter2:SetAttribute("Counter", true)
+AnimationInstances.FC_RightCounter2:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_RightCounter2:SetAttribute("AnimType", 1)
+AnimationInstances.FC_RightCounter2:SetAttribute("AnimDirection", "Right")
+
+AnimationInstances.FC_RightCounter2RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_RightCounter2RECEIVER.Name = "FC_RightCounter2RECEIVER"
+AnimationInstances.FC_RightCounter2RECEIVER.AnimationId = "rbxassetid://126502997166113"
+AnimationInstances.FC_RightCounter2RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_RightCounter2RECEIVER:SetAttribute("Counter", true)
+AnimationInstances.FC_RightCounter2RECEIVER:SetAttribute("AnimType", 2)
+
 return AnimationInstances

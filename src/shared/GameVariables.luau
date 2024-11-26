@@ -123,6 +123,12 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_RightCounter1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightCounter1RECEIVER)
 	GameVariables.FC_LeftCounter1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftCounter1)
 	GameVariables.FC_LeftCounter1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftCounter1RECEIVER)
+	
+	GameVariables.FC_RightCounter2TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightCounter2)
+	GameVariables.FC_RightCounter2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightCounter2RECEIVER)
+	GameVariables.FC_LeftCounter2TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftCounter2)
+	GameVariables.FC_LeftCounter2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftCounter2RECEIVER)
+
 
 
 	-- *Animation track tables*
@@ -147,12 +153,17 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_LeftParryTRACK, GameVariables.FC_LeftParryRECEIVERTRACK,
 	GameVariables.FC_RightParryTRACK, GameVariables.FC_RightParryRECEIVERTRACK,
 	GameVariables.FC_RightCounter1TRACK, GameVariables.FC_RightCounter1RECEIVERTRACK,
-	GameVariables.FC_LeftCounter1TRACK, GameVariables.FC_LeftCounter1RECEIVERTRACK
+	GameVariables.FC_LeftCounter1TRACK, GameVariables.FC_LeftCounter1RECEIVERTRACK,
+	GameVariables.FC_RightCounter2TRACK, GameVariables.FC_RightCounter2RECEIVERTRACK,
+	GameVariables.FC_LeftCounter2TRACK, GameVariables.FC_LeftCounter2RECEIVERTRACK
 	}
 
 	GameVariables.attack1Table = {}
 	GameVariables.attack2Table = {}
 
+	GameVariables.pairedAttacksTable = {} -- the for loop below will fill this with all of the attacking paired animations
+	GameVariables.pairedBlocksTable = {} -- same above except for receiving animations.
+	
 	for _, v in pairs(GameVariables.AllAnimations) do -- this for loop fills in the attack1 and attack2Table based off attributes
 		if v.Animation:GetAttribute("AttackSeries") then -- standard attacks have the "AttackSeries" attribute so its how we define it as a stnadard attack
 			if v.Animation:GetAttribute("AttackLevel") == 1 then -- level 1's will be added to the attack1Table
@@ -160,14 +171,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 			elseif v.Animation:GetAttribute("AttackLevel") == 2 then -- level 2's will be added to the attack2Table
 				table.insert(GameVariables.attack2Table, v)
 			end
-		end
-	end
-
-	GameVariables.pairedAttacksTable = {} -- the for loop below will fill this with all of the attacking paired animations
-	GameVariables.pairedBlocksTable = {} -- same above except for receiving animations.
-
-	for _, v in pairs(GameVariables.AllAnimations) do
-		if v.Animation:GetAttribute("Paired") then
+		elseif v.Animation:GetAttribute("Paired") then -- adds paired animations into either pairedAttacks or pairedBlocks
 			if v.Animation:GetAttribute("AnimType") == 1 then
 				table.insert(GameVariables.pairedAttacksTable, v)
 			elseif v.Animation:GetAttribute("AnimType") == 2 then
@@ -175,6 +179,16 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 			end
 		end
 	end
+
+	-- for _, v in pairs(GameVariables.AllAnimations) do
+	-- 	if v.Animation:GetAttribute("Paired") then
+	-- 		if v.Animation:GetAttribute("AnimType") == 1 then
+	-- 			table.insert(GameVariables.pairedAttacksTable, v)
+	-- 		elseif v.Animation:GetAttribute("AnimType") == 2 then
+	-- 			table.insert(GameVariables.pairedBlocksTable, v)
+	-- 		end
+	-- 	end
+	-- end
 
 	GameVariables.pairedAttack = nil -- the variable for which paired attack the attacker is doing
 	GameVariables.pairedBlock = nil -- the variable for which paired block the attacker is doing
@@ -193,27 +207,6 @@ GameVariables.LocalBindableEvent.Name = "LocalBindableEvent"
 GameVariables.LocalBindableEvent.Parent = game.ReplicatedStorage
 
 GameVariables.walkingSpeed = 12
-
---[[
-GameVariables.actionTable = {GameVariables.isBlocking, GameVariables.isAttacking, GameVariables.isCountering,}
-GameVariables.actionTable[2] = false
-print(GameVariables.actionTable)
-
-GameVariables.metaActionTable = {
-	__index = function(table, i) -- runs when I try to access a key that doesnt exist. AKA, reads values
-			return table[i]
-	end,
-
-	__newindex = function(table, i, v) -- runs when I try to assign a value to a key that doesnt exist. AKA, writes values.
-		table[i] = v
-	end	
-}
-
-setmetatable(GameVariables.actionTable, GameVariables.metaActionTable)
-GameVariables.actionTable[2] = true
-print(GameVariables.actionTable)
-print(GameVariables.isBlocking)
-]]
 
 -- NOTE*: Perhaps instead of creating a bunch of animations, we make a single animation then when the player needs to animate, load the animId into the animation. Id's would prob be in a table.
 
@@ -265,6 +258,11 @@ GameVariables.FC_RightCounter1 = GameVariables.plrObjectsFolder:WaitForChild("FC
 GameVariables.FC_RightCounter1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1RECEIVER")
 GameVariables.FC_LeftCounter1 = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1")
 GameVariables.FC_LeftCounter1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1RECEIVER")
+GameVariables.FC_RightCounter2 = GameVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2")
+GameVariables.FC_RightCounter2RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2RECEIVER")
+GameVariables.FC_LeftCounter2 = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2")
+GameVariables.FC_LeftCounter2RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2RECEIVER")
+
 
 GameVariables.walkingSpeed = 12
 GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
@@ -348,6 +346,22 @@ function GameVariables.SetSpeed(bool) -- Function that manages the character spe
 		-- we take the player's ability to move away
 		GameVariables.humanoid.WalkSpeed = 0
 	end
+end
+
+function GameVariables.randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value)
+	local randAttackTbl = {}
+
+	for _, v in pairs(aTrackTbl) do
+		if
+		(attribute1 == nil or (a1Value ~= nil and v.Animation:GetAttribute(attribute1) == a1Value) or (v.Animation:GetAttribute(attribute1) and a1Value == nil)) 
+		and 
+		(attribute2 == nil or (a2Value ~= nil and v.Animation:GetAttribute(attribute2) == a2Value) or (v.Animation:GetAttribute(attribute2) and a2Value == nil)) 
+		then
+			table.insert(randAttackTbl, v)
+		end
+	end
+
+	return randAttackTbl[math.random(1, #randAttackTbl)]
 end
 
 function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver

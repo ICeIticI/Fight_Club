@@ -36,6 +36,7 @@ local function receive(currentAttack) -- Local function that manages what "react
 				
 				if currentAttack:GetAttribute("AnimDirection") == "Left" then -- Left counter
 					GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftCounter1TRACK -- Make a 'Left Counters' table and randomize the left countering tracks to get a left counter.
+					GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack()
 				elseif currentAttack:GetAttribute("AnimDirection") == "Right" then -- Right counter
 					GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK -- Make a 'Right Counters' table, containing all the right counter tracks and randomize when countering from the right here.
 				end

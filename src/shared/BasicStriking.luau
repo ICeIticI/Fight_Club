@@ -10,9 +10,9 @@ local BasicStriking = {}
 -- GameVariables.SetPlayer(Players.LocalPlayer)
 
 local function attack(followupCombo) -- the local attack function. This is responsible for the mechanics of the attack.
-
+	print("Attacking in some way")
 	if GameVariables.isEnemyHoldingBlock and not GameVariables.isGettingHit then -- Runs for sync blocks. We also want to make sure we aren't already getting hit before performing a sync block.
-		-- GameVariables.isAttacking = true
+		print("Sync blocking")
 		GameVariables.synchedBlock(nil, followupCombo) -- followupCombo will be nil the first time, as the attack() parameter will be empty, but afterwards it will have value.
 	elseif GameVariables.isGettingHit then -- If the player attacked while already getting attacked, we want nothing to happen
 		return false
@@ -52,15 +52,13 @@ local function attack(followupCombo) -- the local attack function. This is respo
 				
 				local sameAttackChance = math.random(1,100)
 				if sameAttackChance > 10 or GameVariables.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
-					-- for _, v in pairs(GameVariables.attack1Table) do
-					-- 	if v ~= GameVariables.randAttack and v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
-					-- 		GameVariables.randAttack = v
-					-- 		break
-					-- 	end
-					-- end
-
-				GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.attack1Table, "AttackSeries", GameVariables.randLvl1Type)
-
+					for _, v in pairs(GameVariables.attack1Table) do
+						if v ~= GameVariables.randAttack and v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
+							GameVariables.randAttack = v
+							break
+						end
+					end
+				
 				end
 			end
 			-- warn(true)
@@ -181,8 +179,8 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 
 
 		if input.UserInputType == Enum.UserInputType.MouseButton1
-		and GameVariables.lockOnDebounce.Value -- the player is locked on
 		and not GameVariables.waitingToAttack -- the player is not already waiting to attack
+		and GameVariables.lockOnDebounce.Value -- the player is locked on
 		and GameVariables.pairedChain <= GameVariables.PairedChainMAX -- their current chain of attacks isnt more than the max (3)
 		and GameVariables.boolCheck({nil, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) -- makes sure they arent attacking, blocking, or dodging
 		and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 then -- atacking
@@ -192,7 +190,6 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 				2 attacks (haymakers).]]
 
 			
-			
 			GameVariables.followUpCount += 1
 			GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 			
@@ -201,6 +198,7 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 				print("paired chain added. Num of times: ".. tostring(GameVariables.pairedChain))
 			end
 			
+			print({GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) , not GameVariables.waitingToAttack , not GameVariables.canFollowUp , not GameVariables.pairedPlaying})
 			if GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then -- for the sync block and attack to play simultaneously
 				if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
 					GameVariables.animPair = {math.random(1,2), math.random(1,2)} -- first index will determine if its left or right. Second index will tell which specific animation will play, given the direction. Both are randomly selected.
@@ -241,9 +239,7 @@ function BasicStriking.Attack(input) --[[ this will run through a series of chec
 				GameVariables.followUpCount, -- less than 1 at first
 				GameVariables.comboCounter, -- should be 0 at first
 				GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}),
-				GameVariables.isAttacking,
-				GameVariables.isBlocking,
-				GameVariables.isCountering,
+				{GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering},
 				GameVariables.isGettingHit,
 			(GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 			} -- alot of the time it wont allow the player to attack no matter what, so this table will print when the player can't attack at all.

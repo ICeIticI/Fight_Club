@@ -348,6 +348,40 @@ function GameVariables.SetSpeed(bool) -- Function that manages the character spe
 	end
 end
 
+function GameVariables.reset()
+	--[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back. ]]--
+	GameVariables.isDodging = false
+	GameVariables.isCountering = false
+	GameVariables.isGettingHit = false
+	
+	GameVariables.canFollowUp = false
+	GameVariables.hitDebounce = false
+	GameVariables.attackFrames = false
+	GameVariables.waitingToAttack = false
+	
+	
+	if (GameVariables.randAttack and not GameVariables.randAttack.IsPlaying) or (GameVariables.pairedAttack and not GameVariables.pairedAttack.IsPlaying) then
+		warn("Not attacking so we can do a full reset-ish")
+			GameVariables.randAttack = nil
+			GameVariables.currentAttack = nil
+			GameVariables.followUpCount = 0
+			GameVariables.comboCounter = 0
+			GameVariables.isAttacking = false
+			GameVariables.canSyncBlock = true
+			GameVariables.pairedPlaying = false
+	end
+	if GameVariables.currentReceiveAnimTRACK and not GameVariables.currentReceiveAnimTRACK.IsPlaying then
+		GameVariables.currentReceiveAnimTRACK = nil
+		GameVariables.pairedChain = 0
+	end
+	-- GameVariables.animPair = nil
+
+
+	GameVariables.SetSpeed(true)
+	warn("Reseted")
+
+end
+
 function GameVariables.randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value)
 	local randAttackTbl = {}
 
@@ -367,19 +401,23 @@ end
 function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
 	warn(followupCombo)
 	if GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.canSyncBlock then
-		
 		if followupCombo and followupCombo > 1 or (GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying) then -- For followup attacks
 			warn("Are you somehow in here?")
 			if GameVariables.pairedAttack and GameVariables.pairedAttack.IsPlaying then -- runs for the attacker
 			GameVariables.pairedAttack:Stop()
+			warn("Stopping current paired attack")
+			warn(GameVariables.animPair)
 			if followupCombo == 3 then
+				warn("Third")
 				if GameVariables.animPair and GameVariables.animPair[1] == 1 then
+					warn("Followup")
 					if GameVariables.animPair and GameVariables.animPair[2] == 1 then
 						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3L1TRACK
 					elseif GameVariables.animPair and GameVariables.animPair[2] == 2 then
 						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3L2TRACK
 					end
 				elseif GameVariables.animPair and GameVariables.animPair[1] == 2 then
+					warn("Attack")
 					if GameVariables.animPair and GameVariables.animPair[2] == 1 then
 						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3R1TRACK
 					elseif GameVariables.animPair and GameVariables.animPair[2] == 2 then
@@ -460,12 +498,10 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 		
 		-- GameVariables.humanoid.WalkSpeed = 0
 		GameVariables.SetSpeed(false)
-		
 		if GameVariables.isBlocking then
 			GameVariables.pairedBlock:Play()
 		
-		elseif GameVariables.isAttacking and GameVariables.pairedAttack then -- Script breaks if pairedAttack doesn't exist, so we need to add it in as a check.
-		
+		elseif GameVariables.pairedAttack and not GameVariables.isBlocking then -- Script breaks if pairedAttack doesn't exist, so we need to add it in as a check.
 			GameVariables.currentAttack = GameVariables.pairedAttack.Animation
 			
 			if GameVariables.distanceBetween ~= 3 then -- we want the sync to happen at three studs ideally

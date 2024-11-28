@@ -35,10 +35,11 @@ local function receive(currentAttack) -- Local function that manages what "react
 				GameVariables.randAttack:Stop()
 				
 				if currentAttack:GetAttribute("AnimDirection") == "Left" then -- Left counter
-					GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftCounter1TRACK -- Make a 'Left Counters' table and randomize the left countering tracks to get a left counter.
-					GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack()
+					--GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftCounter1TRACK -- Make a 'Left Counters' table and randomize the left countering tracks to get a left counter.
+					GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Left", "Counter", true)
 				elseif currentAttack:GetAttribute("AnimDirection") == "Right" then -- Right counter
-					GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK -- Make a 'Right Counters' table, containing all the right counter tracks and randomize when countering from the right here.
+					-- GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightCounter1TRACK -- Make a 'Right Counters' table, containing all the right counter tracks and randomize when countering from the right here.
+					GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Right", "Counter", true)
 				end
 				-- GameVariables.randAttack = GameVariables.currentReceiveAnimTRACK
 				-- GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
@@ -124,9 +125,17 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then
 				-- if the enemy countered to the left, the player's right hand will be countered on, and vice versa.
-				GameVariables.FC_LeftCounter1RECEIVERTRACK:Play()
+				if currentAttack.AnimationId == GameVariables.FC_LeftCounter1.AnimationId then
+					GameVariables.FC_LeftCounter1RECEIVERTRACK:Play()
+				elseif currentAttack.AnimationId == GameVariables.FC_LeftCounter2.AnimationId then
+					GameVariables.FC_LeftCounter2RECEIVERTRACK:Play()
+				end
 			elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
-				GameVariables.FC_RightCounter1RECEIVERTRACK:Play()
+				if currentAttack.AnimationId == GameVariables.FC_RightCounter1.AnimationId then
+					GameVariables.FC_RightCounter1RECEIVERTRACK:Play()
+				elseif currentAttack.AnimationId == GameVariables.FC_RightCounter2.AnimationId then
+					GameVariables.FC_RightCounter2RECEIVERTRACK:Play()
+				end
 			end
 		end
 	--elseif isAI == true then

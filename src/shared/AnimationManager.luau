@@ -36,20 +36,22 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 				GameVariables.Protocol = nil -- resets the protocol. This is because the protocol needs to be checked in countering before being allowed to counter. If the plr is throwing a hook already, then we don't want to counter.
 		
 			elseif v.TimePosition == v.Length and not attackEnded then -- Runs when full animation is done playing
-				GameVariables.comboCounter = 0
-				GameVariables.followUpCount = 0 -- If this value is more than 1, the player cannot attack	
+				-- GameVariables.comboCounter = 0
+				-- GameVariables.followUpCount = 0 -- If this value is more than 1, the player cannot attack	
 			
-				if EndOfAttackExists == false then -- runs for animations that don't have the EndOfAttack attribute, such as the sync blocks.
-					GameVariables.isAttacking = false
-					GameVariables.hitDebounce = false
-					print("EndOfAttackExists if statement set the hitDebounce to false")
-					GameVariables.canFollowUp = false
-				end
+				-- if EndOfAttackExists == false then -- runs for animations that don't have the EndOfAttack attribute, such as the sync blocks.
+				-- 	GameVariables.isAttacking = false
+				-- 	GameVariables.hitDebounce = false
+				-- 	print("EndOfAttackExists if statement set the hitDebounce to false")
+				-- 	GameVariables.canFollowUp = false
+				-- end
 
-				if v.Animation:GetAttribute("Counter") == true then
-					GameVariables.isCountering = false
-					GameVariables.isAttacking = false
-				end
+				-- if v.Animation:GetAttribute("Counter") == true then
+				-- 	GameVariables.isCountering = false
+				-- 	GameVariables.isAttacking = false
+				-- end
+				GameVariables.reset()
+
 			end
 			-- GameVariables.hitDebounce = false
 			
@@ -64,6 +66,8 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 				GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
 				GameVariables.comboCounter = 0
 				-- GameVariables.canFollowUp = true
+			else
+				GameVariables.pairedChain = 0
 			end
 			
 			attackEnded = false
@@ -127,7 +131,12 @@ end
 
 local function ReceiveAnimManager(v, currentAnim)
 	local A2IsPlayingCONNECT = v:GetPropertyChangedSignal("IsPlaying"):Connect(function()
-
+		
+		if not v.IsPlaying and v.Animation:GetAttribute("Counter") then
+			wait(0.5) -- Delay the receiver after getting countered so the enemy can ensure a punish without the receiver being able to do anything.
+			print("can now do stuff")
+			GameVariables.isGettingHit = false
+		end
 		if v.IsPlaying then
 			GameVariables.isGettingHit = true
 			GameVariables.canFollowUp = false
@@ -135,16 +144,18 @@ local function ReceiveAnimManager(v, currentAnim)
 			GameVariables.hitDebounce = false
 
 		elseif not v.IsPlaying then
-			GameVariables.isGettingHit = false
-			GameVariables.isAttacking = false
+
+			-- GameVariables.isGettingHit = false
+			-- GameVariables.isAttacking = false
 			
-			if v.Animation:GetAttribute("Paired") then
-				GameVariables.pairedPlaying = false
-				GameVariables.hitDebounce = false
-				GameVariables.SetSpeed(true)
-			else
-				GameVariables.SetSpeed(true)
-			end
+			-- if v.Animation:GetAttribute("Paired") then
+			-- 	GameVariables.pairedPlaying = false
+			-- 	GameVariables.hitDebounce = false
+			-- 	GameVariables.SetSpeed(true)
+			-- else
+			-- 	GameVariables.SetSpeed(true)
+			-- end
+			GameVariables.reset()
 		end
 		-- Down below are changes that happen regardless if the receiving animation plays or stops:
 		GameVariables.comboCounter = 0

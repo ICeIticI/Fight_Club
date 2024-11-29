@@ -130,6 +130,10 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_LeftCounter2RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftCounter2RECEIVER)
 
 
+	-- *animation tracks (dodges)*
+	GameVariables.FC_LeftDodgeTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftDodge)
+	GameVariables.FC_RightDodgeTRACK = GameVariables.character:LoadAnimation(GameVariables.FC_RightDodge)
+
 
 	-- *Animation track tables*
 	GameVariables.AllAnimations = { -- Table for managing all animation TRACKS.
@@ -155,7 +159,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_RightCounter1TRACK, GameVariables.FC_RightCounter1RECEIVERTRACK,
 	GameVariables.FC_LeftCounter1TRACK, GameVariables.FC_LeftCounter1RECEIVERTRACK,
 	GameVariables.FC_RightCounter2TRACK, GameVariables.FC_RightCounter2RECEIVERTRACK,
-	GameVariables.FC_LeftCounter2TRACK, GameVariables.FC_LeftCounter2RECEIVERTRACK
+	GameVariables.FC_LeftCounter2TRACK, GameVariables.FC_LeftCounter2RECEIVERTRACK,
+	GameVariables.FC_LeftDodgeTRACK, GameVariables.FC_RightDodgeTRACK
 	}
 
 	GameVariables.attack1Table = {}
@@ -263,6 +268,10 @@ GameVariables.FC_RightCounter2RECEIVER = GameVariables.plrObjectsFolder:WaitForC
 GameVariables.FC_LeftCounter2 = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2")
 GameVariables.FC_LeftCounter2RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2RECEIVER")
 
+-- *animations (dodges)*
+GameVariables.FC_LeftDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftDodge")
+GameVariables.FC_RightDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_RightDodge")
+
 
 GameVariables.walkingSpeed = 12
 GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
@@ -361,7 +370,6 @@ function GameVariables.reset()
 	
 	
 	if (GameVariables.randAttack and not GameVariables.randAttack.IsPlaying) or (GameVariables.pairedAttack and not GameVariables.pairedAttack.IsPlaying) then
-		warn("Not attacking so we can do a full reset-ish")
 			GameVariables.randAttack = nil
 			GameVariables.currentAttack = nil
 			GameVariables.followUpCount = 0
@@ -369,6 +377,7 @@ function GameVariables.reset()
 			GameVariables.isAttacking = false
 			GameVariables.canSyncBlock = true
 			GameVariables.pairedPlaying = false
+			GameVariables.pairedChain = 0
 	end
 	if GameVariables.currentReceiveAnimTRACK and not GameVariables.currentReceiveAnimTRACK.IsPlaying then
 		GameVariables.currentReceiveAnimTRACK = nil
@@ -402,29 +411,22 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 	warn(followupCombo)
 	if GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.canSyncBlock then
 		if followupCombo and followupCombo > 1 or (GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying) then -- For followup attacks
-			warn("Are you somehow in here?")
 			if GameVariables.pairedAttack and GameVariables.pairedAttack.IsPlaying then -- runs for the attacker
 			GameVariables.pairedAttack:Stop()
-			warn("Stopping current paired attack")
-			warn(GameVariables.animPair)
 			if followupCombo == 3 then
-				warn("Third")
 				if GameVariables.animPair and GameVariables.animPair[1] == 1 then
-					warn("Followup")
 					if GameVariables.animPair and GameVariables.animPair[2] == 1 then
 						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3L1TRACK
 					elseif GameVariables.animPair and GameVariables.animPair[2] == 2 then
 						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3L2TRACK
 					end
 				elseif GameVariables.animPair and GameVariables.animPair[1] == 2 then
-					warn("Attack")
 					if GameVariables.animPair and GameVariables.animPair[2] == 1 then
 						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3R1TRACK
 					elseif GameVariables.animPair and GameVariables.animPair[2] == 2 then
 						GameVariables.pairedAttack = GameVariables.FC_SyncBlock3R2TRACK
 					end
 				end
-				warn(GameVariables.pairedAttack)
 			else
 				if GameVariables.pairedAttack == GameVariables.FC_SyncBlock1LTRACK then
 					GameVariables.pairedAttack = GameVariables.FC_SyncBlock1RTRACK

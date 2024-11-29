@@ -351,4 +351,19 @@ AnimationInstances.FC_RightCounter2RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_RightCounter2RECEIVER:SetAttribute("Counter", true)
 AnimationInstances.FC_RightCounter2RECEIVER:SetAttribute("AnimType", 2)
 
+
+
+AnimationInstances.FC_LeftDodge = Instance.new("Animation")
+AnimationInstances.FC_LeftDodge.Name = "FC_LeftDodge"
+AnimationInstances.FC_LeftDodge.AnimationId = "rbxassetid://117027123930220"
+
+AnimationInstances.FC_RightDodge = Instance.new("Animation")
+AnimationInstances.FC_RightDodge.Name = "FC_RightDodge"
+AnimationInstances.FC_RightDodge.AnimationId = "rbxassetid://134531579306048"
+
+AnimationInstances.FC_BackDodge = Instance.new("Animation")
+AnimationInstances.FC_BackDodge.Name = "FC_BackDodge"
+AnimationInstances.FC_BackDodge.AnimationId = "rbxassetid://103495259681812"
+
+
 return AnimationInstances

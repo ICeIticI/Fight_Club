@@ -30,7 +30,6 @@ local function receive(currentAttack) -- Local function that manages what "react
 			wait()
 			if not (GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying) then				
 				
-				warn(GameVariables.isCountering)
 				GameVariables.isCountering = true
 				GameVariables.randAttack:Stop()
 				
@@ -96,7 +95,6 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 			print(sentValue)
 			if GameVariables.isBlocking and GameVariables.canSyncBlock then
 				GameVariables.synchedBlock(sentAnimPair, sentValue)
-				warn("Sync block being performed")
 			-- else
 			-- 	GameVariables.enemyCurrentAttack = currentAttack
 			end
@@ -110,7 +108,6 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 		-- 	print("REACHEDDDD")
 
 		elseif Protocol == "Parry" then
-			warn("Should be playing receiving parry track")
 			-- if the enemy parried the player, then they will do a reaction to what direction the enemy 
 			GameVariables.randAttack:Stop()
 			if currentAttack:GetAttribute("AnimDirection") == "Left" then

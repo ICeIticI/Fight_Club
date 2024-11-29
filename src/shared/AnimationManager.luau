@@ -23,7 +23,6 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 				GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation -- we also want to classify the counter as a currentattack so the basicStriking module will see it as an attack and be able to send to the server for damage.
 				
 				GameVariables.Protocol = "Counter"
-				warn("sending Counter")
 				GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack)
 				GameVariables.Protocol = nil
 			
@@ -63,11 +62,13 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 					GameVariables.hitDebounce = false
 				end)
 				GameVariables.isAttacking = false
-				GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
-				GameVariables.comboCounter = 0
+				--GameVariables.pairedChain = 0 -- If this value is more than 2, the player cannot attack
+				-- warn("Paired chain set to " .. tostring(GameVariables.pairedChain))
+				--GameVariables.comboCounter = 0
 				-- GameVariables.canFollowUp = true
 			else
-				GameVariables.pairedChain = 0
+				-- GameVariables.pairedChain = 0
+				-- warn("Paired chain set to " .. tostring(GameVariables.pairedChain))
 			end
 			
 			attackEnded = false
@@ -238,6 +239,7 @@ local function MiscAnimManager(v)
 			
 			delay(0.51, function() -- the parry receiver animations are 0.51 seconds longer than the parries. If the player parries and hangs around doing nothing, they will lose the ability to do a haymaker riposte.
 				GameVariables.comboCounter = 0 
+				print("Combo counter is now 0")
 			end)
 
 			elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then -- manages the parry-receiving animations when they stop playing

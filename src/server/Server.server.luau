@@ -36,5 +36,4 @@ Players.PlayerAdded:Connect(function(player)
         ServerInit.InitializeCharacter(char)
         RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], char) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
     end)
-
 end)

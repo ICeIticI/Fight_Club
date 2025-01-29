@@ -2,6 +2,22 @@ local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
 local ReceivingAndCountering = {}
 
+local function getHit(currentAttackID)
+	if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
+			elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
+			elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
+			elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
+			elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
+			elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
+				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
+			end
+end
+
 local function receive(currentAttack) -- Local function that manages what "reaction" the player would do based on the attack/circumstances.
 	local currentAttackID = currentAttack.AnimationId -- currentAttack is what the enemy is throwing. It's an animation, not a animationTrack
 
@@ -47,27 +63,19 @@ local function receive(currentAttack) -- Local function that manages what "react
 
 		elseif not GameVariables.isCountering then  -- the blockStart track is not playing, therefore its not a parry:
 
-			if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
-			elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
-			elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
-			elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
-			elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
-			elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
-			end
+			getHit(currentAttackID)
+			
 		end
+
 	elseif GameVariables.isBlocking then -- Bracing block
+		
 		GameVariables.canSyncBlock = false -- Trying to get this to dictate if receiving plr can sync block
 		if currentAttack:GetAttribute("AnimDirection") == "Left" then
 			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockRTRACK -- If the enemy threw an attack to the left, then we brace right since their left is our right
 		elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
 			GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockLTRACK
 		end
+
 	end
 	
 	if GameVariables.currentReceiveAnimTRACK then
@@ -93,10 +101,13 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 
 		elseif Protocol == "AttackStarted" then -- if the enemy is starting an attack, and the player is blocking, perform a synched block.
 			print(sentValue)
-			if GameVariables.isBlocking and GameVariables.canSyncBlock then
+			if GameVariables.isBlocking and GameVariables.canSyncBlock and GameVariables.humanoid.MoveDirection.Magnitude > 0 then -- the player is moving
+				-- If the player is moving and HOLDING block, they can dodge the incoming enemy attack
+
+				print("can dodge")
+			
+			elseif GameVariables.isBlocking and GameVariables.canSyncBlock then -- the player is not moving and will perform a sync block.
 				GameVariables.synchedBlock(sentAnimPair, sentValue)
-			-- else
-			-- 	GameVariables.enemyCurrentAttack = currentAttack
 			end
 
 		elseif Protocol == "HoldingBlock" then
@@ -143,7 +154,10 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 end
 
 function ReceivingAndCountering.Block(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton2 and GameVariables.lockOnDebounce.Value and GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering}) and not GameVariables.pairedPlaying then -- blocking/dodging  
+	if input.UserInputType == Enum.UserInputType.MouseButton2 
+	and GameVariables.lockOnDebounce.Value 
+	and GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering}) 
+	and not GameVariables.pairedPlaying then -- blocking/dodging  
 		-- GameVariables.isBlocking = true -- work on this. It interferes with parrying.
 		GameVariables.FC_BlockStartTRACK:Play()
 		GameVariables.humanoid.WalkSpeed /= 1.5 -- add the GameVariables.SetSpeed() function here when ready!!!

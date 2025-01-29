@@ -1,4 +1,6 @@
--- local Players = game.Players
+--[[  ]]
+
+
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
 
 local GlobalRemoteEvent = Instance.new("RemoteEvent")
@@ -9,8 +11,9 @@ local ServerInit = {}
 ServerInit.playerInstances = {} -- Making this a module variable so ServerEvents can access this when it needs to get playerInstances
 
 local function newPlayer(plr)
-	--[[Function that holds public variables for the player, that the server will be able to see and check when it
-		needs.]]
+	--[[Function that holds public variables for the player, that the server
+	    will be able to see and check when it needs.]]
+		
 	local self = {}
 
 	self.Name = plr.Name .. "_Instance"
@@ -21,13 +24,54 @@ local function newPlayer(plr)
 	return self
 end
 
+local function createHitbox(player, bodyPart) --[[ Function that will create a hitbox of a given part for a given player ]]
+
+	local character = player.Character
+
+	local hitbox = Instance.new("Part")
+	hitbox.Name = player.Name.."_hitbox" .. bodyPart.Name:gsub(" ", "") -- Find any spaces in the part name and get rid of them. Say a part like 'Right Leg', it will turn into 'RightLeg'
+	hitbox.Position = bodyPart.Position
+	hitbox.CanCollide = false
+	hitbox.Transparency = 0.5
+	hitbox:SetAttribute("AttackDirection", "Right")
+	hitbox:SetAttribute("ReceiveBox", true)
+	-- hitbox.Parent = character:WaitForChild(hbFolder.Name)
+	local hitbox_Weld = Instance.new("Weld")
+	hitbox_Weld.Part0  = hitbox
+	hitbox_Weld.Part1 = bodyPart
+	hitbox_Weld.Parent = character
+	
+	if bodyPart.Name == "Head" then
+		hitbox.Size = Vector3.new(1.2,1.22,1.2)
+		hitbox:SetAttribute("ReceiveBox", true)
+	elseif bodyPart.Name == "Torso" then
+		hitbox.Size = Vector3.new(2,2,1)
+		hitbox:SetAttribute("ReceiveBox", true)
+	elseif bodyPart.Name == "Left Arm" then
+		hitbox.Size = Vector3.new(1,2,1)
+		hitbox:SetAttribute("AttackDirection", "Left")
+		hitbox:SetAttribute("ReceiveBox", true) -- while the left and right arm hitboxes are attackboxes, they are used in sync blocking where the enemy attacks it, so its in some cases a receivebox.
+	elseif bodyPart.Name == "Right Arm" then
+		hitbox.Size = Vector3.new(1,2,1)
+		hitbox:SetAttribute("AttackDirection", "Right")
+		hitbox:SetAttribute("ReceiveBox", true)
+	elseif bodyPart.Name == "Left Leg" or bodyPart.Name == "Right Leg" then
+		hitbox.Size = Vector3.new(1,2,1)
+		hitbox:SetAttribute("AttackDirection", "forward")
+	end
+
+	return hitbox
+end
+
 function ServerInit.InitializePlayer(player)
-	local playerInstance = newPlayer(player)
-	table.insert(ServerInit.playerInstances, playerInstance)
+	--[[ Initializes a player when one joins the game ]]
+
+	local playerInstance = newPlayer(player) -- newPlayer() is returned a table of public variables of the player
+	table.insert(ServerInit.playerInstances, playerInstance) -- add the specific playerInstance table to the rest of the public playerInstance tables
 	print(playerInstance)
 	print(playerInstance.Name)
 
-	local plrObjectsFolder = Instance.new("Folder")
+	local plrObjectsFolder = Instance.new("Folder") -- folder containing the public objects of the player
 	plrObjectsFolder.Name = player.Name .. "_GameObjects"
 	plrObjectsFolder.Parent = player
 
@@ -43,6 +87,9 @@ function ServerInit.InitializePlayer(player)
 end
 
 function ServerInit.InitializeCharacter(character)
+	--[[ Sets up various things for the specific player character such as hitboxes, 
+	     the player animator ]]
+
 	local player = game.Players:GetPlayerFromCharacter(character)
 		
 	local charAnimator = Instance.new("Animator")
@@ -50,97 +97,28 @@ function ServerInit.InitializeCharacter(character)
 	charAnimator.Parent = character:WaitForChild("Humanoid")
 	
 	-- Defining the hitboxes when character spawns
-	local hbFolder = Instance.new("Folder") --[[ folder to store hitboxes to prevent false referances of player
-	   objects.
-	]]
+	local hbFolder = Instance.new("Folder") --[[ folder to store hitboxes to prevent false 
+	   referances of player objects. ]]
 	hbFolder.Name = player.Name.."_hitboxesFolder"
 	hbFolder.Parent = character
 	
-	-- ADD ATTRIBUTES to hitboxes to let client know it's a hitbox for when the player hits an enemy.
-	local hitboxHead = Instance.new("Part")
-	hitboxHead.Name = player.Name.."_hitboxHead"
-	hitboxHead.Position = character:WaitForChild("Head").Position
-	
-	hitboxHead.Size = Vector3.new(1.2,1.22,1.2)
-	hitboxHead.CanCollide = false
-	hitboxHead.Transparency = 0.5 -- Set to fully transparent when ready to launch
-	hitboxHead:SetAttribute("ReceiveBox", true)
+	local hitboxHead = createHitbox(player, character:WaitForChild("Head"))
 	hitboxHead.Parent = character:WaitForChild(hbFolder.Name)
-	local headWeld = Instance.new("Weld")
-	headWeld.Part0 = hitboxHead
-	headWeld.Part1 = character.Head
-	headWeld.Parent = hitboxHead
 	
-	
-	local hitboxLeftArm = Instance.new("Part")
-	hitboxLeftArm.Name = player.Name.."_hitboxLeftArm"
-	hitboxLeftArm.Position = character:WaitForChild("Left Arm").Position
-	
-	hitboxLeftArm.Size = Vector3.new(1,2,1)
-	hitboxLeftArm.CanCollide = false
-	hitboxLeftArm.Transparency = 0.5 -- Set to fully transparent when ready to launch
-	hitboxLeftArm:SetAttribute("AttackDirection", "Left")
-	hitboxLeftArm:SetAttribute("ReceiveBox", true) -- while the left and right arm hitboxes are attackboxes, they are used in sync blocking where the enemy attacks it, so its in some cases a receivebox.
+	local hitboxLeftArm = createHitbox(player, character:WaitForChild("Left Arm"))
 	hitboxLeftArm.Parent = character:WaitForChild(hbFolder.Name)
-	local lftArmHB_Weld = Instance.new("Weld")
-	lftArmHB_Weld.Part0 = hitboxLeftArm
-	lftArmHB_Weld.Part1 = character:WaitForChild("Left Arm")
-	lftArmHB_Weld.Parent = hitboxLeftArm
 	
-	
-	local hitboxRightArm = Instance.new("Part")
-	hitboxRightArm.Name = player.Name.."_hitboxRightArm"
-	hitboxRightArm.Position = character:WaitForChild("Right Arm").Position
-	hitboxRightArm.Size = Vector3.new(1,2,1)
-	hitboxRightArm.CanCollide = false
-	hitboxRightArm.Transparency = 0.5
-	hitboxRightArm:SetAttribute("AttackDirection", "Right")
-	hitboxRightArm:SetAttribute("ReceiveBox", true)
+	local hitboxRightArm = createHitbox(player, character:WaitForChild("Right Arm"))
 	hitboxRightArm.Parent = character:WaitForChild(hbFolder.Name)
-	local rghtArm_Weld = Instance.new("Weld")
-	rghtArm_Weld.Part0  = hitboxRightArm
-	rghtArm_Weld.Part1 = character:WaitForChild("Right Arm")
-	rghtArm_Weld.Parent = character
 	
-	local hitboxLeftLeg = Instance.new("Part")
-	hitboxLeftLeg.Name = player.Name.."_hitboxLeftLeg"
-	hitboxLeftLeg.Position = character:WaitForChild("Left Leg").Position
-	hitboxLeftLeg.Size = Vector3.new(1,2,1)
-	hitboxLeftLeg.CanCollide = false
-	hitboxLeftLeg.Transparency = 0.5 -- This will soon have to be set to 1 for launch
-	hitboxLeftLeg:SetAttribute("AttackDirection", "forward")
+	local hitboxLeftLeg = createHitbox(player, character:WaitForChild("Left Leg"))
 	hitboxLeftLeg.Parent = character:WaitForChild(hbFolder.Name)
-	local lftLeg_Weld = Instance.new("Weld")
-	lftLeg_Weld.Part0 = hitboxLeftLeg
-	lftLeg_Weld.Part1 = character:WaitForChild("Left Leg")
-	lftLeg_Weld.Parent = character
 	
-	
-	local hitboxRightLeg = Instance.new("Part")
-	hitboxRightLeg.Name = player.Name.."_hitboxRightLeg"
-	hitboxRightLeg.Position = character:WaitForChild("Right Leg").Position
-	hitboxRightLeg.Size = Vector3.new(1,2,1)
-	hitboxRightLeg.CanCollide = false
-	hitboxRightLeg.Transparency = 0.5 -- Set to 1 when ready for project to launch
-	hitboxRightLeg:SetAttribute("AttackDirection", "forward")
+	local hitboxRightLeg = createHitbox(player, character:WaitForChild("Right Leg"))
 	hitboxRightLeg.Parent = character:WaitForChild(hbFolder.Name)
-	local rghtLeg_Weld = Instance.new("Weld")
-	rghtLeg_Weld.Part0 = hitboxRightLeg
-	rghtLeg_Weld.Part1 = character:WaitForChild("Right Leg")
-	rghtLeg_Weld.Parent = character
 	
-	local hitboxTorso = Instance.new("Part")
-	hitboxTorso.Name = player.Name.."_hitboxTorso"
-	hitboxTorso.Position = character:WaitForChild("Torso").Position
-	hitboxTorso.Size = Vector3.new(2,2,1)
-	hitboxTorso.CanCollide = false
-	hitboxTorso.Transparency = 0.5
-	hitboxTorso:SetAttribute("ReceiveBox", true)
+	local hitboxTorso = createHitbox(player, character:WaitForChild("Torso"))
 	hitboxTorso.Parent = character:WaitForChild(hbFolder.Name)
-	local trso_Weld = Instance.new("Weld")
-	trso_Weld.Part0 = hitboxTorso
-	trso_Weld.Part1 = character:WaitForChild("Torso")
-	trso_Weld.Parent = character		
 end
 
 return ServerInit

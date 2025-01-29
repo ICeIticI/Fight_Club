@@ -22,6 +22,8 @@ local jointsCache = {} -- assigns values to keys, like a dictionary. We can defi
 
 -- Functions
 local function GetMotor6Ds(givenChar)
+	--[[ Finds & returns all Motor6Ds in a character in a table format ]]
+
 	local Motor6DsTable = {}
 	
 	for _, v in pairs(givenChar:GetDescendants()) do
@@ -32,7 +34,9 @@ local function GetMotor6Ds(givenChar)
 	return Motor6DsTable
 end
 
-local function Ragdoll(givenChar) -- this will be the function that.. well.. ragdolls the character
+local function Ragdoll(givenChar)
+	--[[this will be the function that.. well.. ragdolls the character ]]
+	
 	-- givenChar:WaitForChild("HumanoidRootPart").CFrame = givenChar.HumanoidRootPart.CFrame
 	-- 		givenChar.Parent = game.Workspace
 	-- 		local Protocol = "CameraChange"
@@ -77,15 +81,20 @@ local function Ragdoll(givenChar) -- this will be the function that.. well.. rag
 end
 
 -- Connects
-function RagdollSystem.InitializePlayer() -- When a player joins the game, we want to set up two instances: Linear and Angular velocities that will be given a parent of the current character of the player. The function will return these, so it can be used when initializing the plr char.
+function RagdollSystem.InitializePlayer()
+	--[[ When a player joins the game, we want to set up two instances:
+	     Linear and Angular velocities that will be given a parent of
+		 the current character of the player. The function will return
+		 these, so it can be used when initializing the plr char. ]]
+		 
 -- Players.PlayerAdded:Connect(function(plr) -- for joining players
 	
 	-- local charClone = nil
 
-		local linearVelocity = Instance.new("LinearVelocity")
-		local angularVelocity = Instance.new("AngularVelocity")
+	local linearVelocity = Instance.new("LinearVelocity")
+	local angularVelocity = Instance.new("AngularVelocity")
 
-		return {linearVelocity, angularVelocity}
+	return {linearVelocity, angularVelocity}
 
 end
 
@@ -119,8 +128,11 @@ function RagdollSystem.InitializeCharacter(linearVelocity, angularVelocity, char
 		humanoid.BreakJointsOnDeath = false -- so the player's body parts don't fall apart.
 		-- char.Archivable = true
         --charClone = char:Clone() -- We do the ragdoll physics on a clone since we can't add velocity to a dead player's character
+		
 		humanoid.Died:Connect(function() -- to ragdoll the character on death
-			
+			--[[ The player will ragdoll on death, as well as making the player corpse move
+			     via angular and linear velocities. ]]
+
 			--charClone:WaitForChild("HumanoidRootPart").CFrame = charCFrame
 			-- local Protocol = "CameraChange"
 			-- print(char.HumanoidRootPart.Position)
@@ -129,6 +141,8 @@ function RagdollSystem.InitializeCharacter(linearVelocity, angularVelocity, char
 			--print(charClone.HumanoidRootPart.Position)
 			--GlobalRemoteEvent:FireClient(plr, nil, Protocol, nil, charClone) -- sending a remote event so we can parent the player's camera to the new clone
             Ragdoll(char)
+
+			-- giving the character random velocity when on ragdoll:
 			linearVelocity.Enabled = true
 			linearVelocity.VectorVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
 			

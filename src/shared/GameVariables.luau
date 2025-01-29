@@ -132,7 +132,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 
 	-- *animation tracks (dodges)*
 	GameVariables.FC_LeftDodgeTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftDodge)
-	GameVariables.FC_RightDodgeTRACK = GameVariables.character:LoadAnimation(GameVariables.FC_RightDodge)
+	GameVariables.FC_RightDodgeTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightDodge)
 
 
 	-- *Animation track tables*

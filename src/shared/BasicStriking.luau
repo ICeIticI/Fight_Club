@@ -9,7 +9,9 @@ local BasicStriking = {}
 
 -- GameVariables.SetPlayer(Players.LocalPlayer)
 
-local function attack(followupCombo) -- the local attack function. This is responsible for the mechanics of the attack.
+local function attack(followupCombo) 
+	--[[ the local attack function. This is responsible for the mechanics of the attack. ]]
+	
 	print("Attacking in some way")
 	if GameVariables.isEnemyHoldingBlock and not GameVariables.isGettingHit then -- Runs for sync blocks. We also want to make sure we aren't already getting hit before performing a sync block.
 		print("Sync blocking")

@@ -4,25 +4,55 @@ local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 -- GameVariables.Sync()
 local LockOnSystem = {}
 
+local function faceEnemy(subject)
+	GameVariables.humanoidRootPart.CFrame = CFrame.lookAt(GameVariables.humanoidRootPart.Position, Vector3.new(GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X, GameVariables.humanoidRootPart.Position.Y, GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.Position.Z)) -- makes sure the player character is always facing the enemy character.
+	subject.CFrame = CFrame.new(
+		(GameVariables.humanoidRootPart.Position.X + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X) / 2,
+		subject.CFrame.Y,
+		(GameVariables.humanoidRootPart.Position.Z + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Z) / 2)
+
+end
+
+local function createSubject(subject) --[[Creates a invisible part (subject) between the player and the enemy that the camera will be focused on]]
+	subject.Name = "subject"
+			subject.Size = Vector3.new(0.1, 0.1, 0.1)
+			subject.Transparency = 0.75
+			subject.CanCollide = false
+			subject.Anchored = true
+			subject.CFrame = CFrame.new(
+				GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X,
+				GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Y / 2,
+				(GameVariables.humanoidRootPart.Position.Z + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Z) / 2)
+			subject.Parent = GameVariables.character
+end
+
+
 function LockOnSystem.LockOn()
 
 	local rayParams = RaycastParams.new()
 		rayParams.FilterDescendantsInstances = GameVariables.character:GetChildren()
 		rayParams.FilterType = Enum.RaycastFilterType.Exclude
 		
-		GameVariables.raycastResult = workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, rayParams)
+		GameVariables.raycastResult =
+		workspace:Raycast(GameVariables.humanoidRootPart.Position,
+						  GameVariables.humanoidRootPart.CFrame.LookVector * 8,
+						  rayParams) -- Raycast in front of player to find an enemy
+						  
+
 		if GameVariables.raycastResult and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto.
 			GameVariables.enemyHumanoid = GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
 			GameVariables.enemyChar = GameVariables.enemyHumanoid.Parent
+			
 			GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
 			
-			if not game.Players:GetPlayerFromCharacter(GameVariables.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
+			
+		if not game.Players:GetPlayerFromCharacter(GameVariables.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
 				if GameVariables.enemyChar.Name == "TestDummy" then
 					GameVariables.LocalBindableEvent:Fire(GameVariables.lockOnDebounce)
 				end
 			end
-				
-		elseif GameVariables.raycastResult == nil and GameVariables.lockOnDebounce.Value == true then
+			
+		elseif GameVariables.raycastResult == nil and GameVariables.lockOnDebounce.Value == true then -- no enemy detected by raycast
 			GameVariables.lockOnDebounce.Value = false
 			
 		end
@@ -45,17 +75,7 @@ function LockOnSystem.LockOn()
 		
 		if GameVariables.character:FindFirstChild("subject") == nil then --[[ Creates a subject if it's not created yet on
 		it's first lock on.]]
-			subject.Name = "subject"
-			subject.Size = Vector3.new(0.1, 0.1, 0.1)
-			subject.Transparency = 0.75
-			subject.CanCollide = false
-			subject.Anchored = true
-			subject.CFrame = CFrame.new(
-				GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X,
-				GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Y / 2,
-				(GameVariables.humanoidRootPart.Position.Z + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Z) / 2 
-			)
-			subject.Parent = GameVariables.character
+			createSubject(subject)
 		end
 		
 		-- camera changes:
@@ -67,13 +87,10 @@ function LockOnSystem.LockOn()
 		]]
 		
 		while GameVariables.lockOnDebounce.Value == true and workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, rayParams) ~= nil do -- constantly keeps the player facing the enemy
-				wait()
-				GameVariables.humanoidRootPart.CFrame = CFrame.lookAt(GameVariables.humanoidRootPart.Position, Vector3.new(GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X, GameVariables.humanoidRootPart.Position.Y, GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.Position.Z)) -- makes sure the player character is always facing the enemy character.
-			subject.CFrame = CFrame.new(
-				(GameVariables.humanoidRootPart.Position.X + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X) / 2,
-				subject.CFrame.Y,
-				(GameVariables.humanoidRootPart.Position.Z + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Z) / 2 
-				)
+			-- Constantly having the player face the enemy when locked on
+
+			wait()
+			faceEnemy(subject)
 		end
 
 		if not workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 7, rayParams) then -- When the while loop above ends, we want to check if its because the player got too far. If so, then we want to set the lockOnDebounce to false
@@ -84,6 +101,8 @@ function LockOnSystem.LockOn()
 	end
 	
 	if GameVariables.lockOnDebounce.Value == false then
+		-- Stop locking onto enemy
+		
 		GameVariables.stopAnimations()
 		-- character changes below:
 		GameVariables.humanoid.AutoRotate = true

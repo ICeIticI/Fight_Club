@@ -11,6 +11,7 @@
 ]]
 
 local Dodge = {}
+Dodge.__index = Dodge
 
 function Dodge:left() --[[ Method that will cause the character to dodge to the left ]]
     

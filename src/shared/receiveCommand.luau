@@ -1,0 +1,3 @@
+local ReceiveCommand = {}
+
+return ReceiveCommand

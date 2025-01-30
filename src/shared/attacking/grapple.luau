@@ -20,5 +20,6 @@ first.
 ]]
 
 local Grapple = {}
+Grapple.__index = Grapple
 
 return Grapple

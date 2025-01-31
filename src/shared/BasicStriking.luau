@@ -21,7 +21,7 @@ local function attack(followupCombo)
 	else
 		-- local randAttackTABLE = {}
 
-		if GameVariables.comboCounter == 0 then
+		if GameVariables.comboCounter == 0 then -- If the player hasn't started an attack yet, we will either do jabs or hooks
 			local randNumber
 			GameVariables.randAttack = nil
 			if followupCombo then -- players will be possibly able to do uppercuts if they are doing a followup combo from a past combo

@@ -14,7 +14,8 @@ local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAn
 
 -- New Modules:
 
-local attackCommand = require(game.ReplicatedStorage.Shared.attackCommand)
+local attackCommand = require(game.ReplicatedStorage.Shared.attackCommand) -- Module that gets fired every time attack is inputted. Will go through a series of checks before allowing the player to actually attack, which will then sent to another module for the actual attack process.
+local receiveCommand = require(game.ReplicatedStorage.Shared.receiveCommand) -- Module
 
 GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
     -- Manages the remote events the client receives.
@@ -41,8 +42,7 @@ UserInputService.InputBegan:Connect(function(input)
     elseif GameVariables.AttackInputs[input.UserInputType] or GameVariables.AttackInputs[input.KeyCode] then -- AttackInputs is a table of input types that are allowed in this context. The indexes of that table are actually the input types that we allow, so we can referance an index in that table by what the player inputed.
         -- The player will throw an attack
         BasicStriking.Attack(input)
-
-        attackCommand:Call()
+        -- attackCommand:Call() -- Will replace BasicStriking.Attack()
 
     elseif GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
         -- The player will block

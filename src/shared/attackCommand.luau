@@ -24,13 +24,13 @@ AttackCommand.__index = AttackCommand
 
 -- local functions:
 
-local function getLevel1Type() -- This local function basically fires when a character is starting a new combo, and need to find the type of lvl 1 attack they will use for the combo (such as jabs, hooks, or uppercuts)
+local function getLevel1Type(followup) -- This local function basically fires when a character is starting a new combo, and need to find the type of lvl 1 attack they will use for the combo (such as jabs, hooks, or uppercuts)
 	local randNumber
 	local level1Type = nil -- what will be returned. Should equal a string like "Jabs" or "Hooks" as a Level1Type
 	GameVariables.randAttack = nil
-	if GameVariables.pairedChain then -- players will be possibly able to do uppercuts if they are doing a followup combo from a past combo
+	if followup then -- players will be possibly able to do uppercuts if they are doing a followup combo from a past combo
 		randNumber = math.random(2, 3)
-	elseif not GameVariables.pairedChain then
+	elseif not followup then
 		randNumber = math.random(1, 2) -- on a new combo without a followup, they can do only jabs or hooks on lvl 1's
 	end
 	-- a random number will be generated from above
@@ -49,7 +49,6 @@ local function sendAttackStartSignal() -- function used to send the "AttackStart
 	GameVariables.Protocol = "AttackStarted"
 	GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.animPair, GameVariables.pairedChain, nil, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
 end
-
 
 -- module methods/functions:
 
@@ -81,62 +80,25 @@ function AttackCommand:Call() --[[ Whenever the player presses attack, this func
 				GameVariables.randLvl1Type = getLevel1Type()
 			end
 
+			
 			if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid.Health > 10 then -- Will only throw lvl 1 attacks
-			
-				if not GameVariables.randAttack then -- This will run if the player hasn't started a combo yet
-					-- for _, v in pairs(GameVariables.attack1Table) do -- This will get all attacks that are in the given attackSeries and puts them in a table, then randomly selects one of them by index number.
-					-- 	if v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
-					-- 		table.insert(randAttackTABLE, v)
-					-- 	end
-					-- end
 
-					GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.attack1Table, "AttackSeries", GameVariables.randLvl1Type)
-					
-				else -- The player has thrown an attack before.
-					
-					local sameAttackChance = math.random(1,100)
-					if sameAttackChance > 10 or GameVariables.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
-						for _, v in pairs(GameVariables.attack1Table) do
-							if v ~= GameVariables.randAttack and v.Animation:GetAttribute("AttackSeries") == GameVariables.randLvl1Type then
-								GameVariables.randAttack = v
-								break
-							end
-						end
-					
-					end
-				end
-				-- warn(true)
-				if GameVariables.lastAttack and GameVariables.lastAttack.IsPlaying and not GameVariables.isAttacking then
-					GameVariables.lastAttack:Stop()
-				end
-			
-				GameVariables.currentAttack = GameVariables.randAttack.Animation
-				
-				-- GameVariables.isAttacking = true
-				GameVariables.randAttack:Play()
-				GameVariables.lastAttack = GameVariables.randAttack
-				GameVariables.comboCounter += 1
+				attackInstance = strike:getLevel1()
+				attackInstance.Attack()
 			
 			elseif GameVariables.comboCounter >= 3 or GameVariables.enemyHumanoid.Health <= 10 then -- Will throw only haymakers
-				GameVariables.randAttack = GameVariables.attack2Table[math.random(1, #GameVariables.attack2Table)]
 
-				if GameVariables.lastAttack and GameVariables.lastAttack.IsPlaying and not GameVariables.isAttacking then
-					GameVariables.lastAttack:Stop()
-				end
-				
-				GameVariables.currentAttack = GameVariables.randAttack.Animation
-				-- GameVariables.isAttacking = true
-				GameVariables.randAttack:Play()
-				GameVariables.lastAttack = GameVariables.randAttack
-				GameVariables.comboCounter+=1
+				attackInstance = strike:getLevel2()
+				attackInstance.Attack()
 
 			end
 		end
 
 	elseif GameVariables.canFollowUp == true then -- the player followed up with their attack.
+		
 		GameVariables.waitingToAttack = true
 		while GameVariables.isAttacking do
-			wait()
+			task.wait()
 		end
 		if GameVariables.followUpCount > 1 then -- For followup attacks
 
@@ -146,7 +108,12 @@ function AttackCommand:Call() --[[ Whenever the player presses attack, this func
 				GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false) -- Every time the player attacks, it will send to the other player for blocking mechanisms and countering
 			end
 
-			attack(GameVariables.pairedChain) -- pairedChain is used for a followup combo, which enables uppercuts.
+			if GameVariables.comboCounter == 0 then -- If the player hasn't started an attack yet, we will either do jabs or hooks
+				getLevel1Type(true) -- true represents that we are doing some sort of followup
+			end
+
+			attackInstance = strike:getLevel1()
+			attackInstance:Attack()
 		end
 		GameVariables.waitingToAttack = false
 	end

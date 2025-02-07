@@ -65,6 +65,13 @@ local function handleDodges()
 		print("left dodge")
 		GameVariables.FC_LeftDodgeTRACK:Play()
 		GameVariables.SetSpeed(false)
+        
+
+        GameVariables.iFrames = true
+        task.wait(0.2) -- The window of iFrames until it ends
+        GameVariables.iFrames = false
+        print("no iFrames")
+        
 
 		GameVariables.FC_LeftDodgeTRACK.Stopped:Wait()
 		GameVariables.SetSpeed(true)

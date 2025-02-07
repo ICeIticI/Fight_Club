@@ -50,6 +50,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.previousWalkSpeed = nil
 
 	GameVariables.attackFrames = false -- when the StartOfAttack marker fires in attack anims, this allows damage to pass
+	GameVariables.iFrames = false -- when true, the character cannot be hit. Used when dodging or any time they shouldnt get hit/damaged when hit.
 
 	GameVariables.isDodging = false
 	GameVariables.canFollowUp = false -- The status of whether a player is able to do a followup attack. If its true, then that means they are able to do one. 

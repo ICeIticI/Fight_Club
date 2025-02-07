@@ -357,6 +357,10 @@ function GameVariables.SetSpeed(bool) -- Function that manages the character spe
 	end
 end
 
+function GameVariables.canDoStuff() --[[ When the player does any action such as an attack or block, we want to make sure they can't do anything else until that action ends. So with this function, we can set their ability to do other things with either 'true' or false as a passed bool. ]]
+	
+end
+
 function GameVariables.reset()
 	--[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back. ]]--
 	GameVariables.isDodging = false

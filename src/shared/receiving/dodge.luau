@@ -10,15 +10,19 @@
 
 ]]
 
+local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
+
+
+
 local Dodge = {}
 Dodge.__index = Dodge
 
 function Dodge:left() --[[ Method that will cause the character to dodge to the left ]]
-    
+    GameVariables.FC_LeftDodgeTRACK:Play()
 end
 
 function Dodge:right() --[[ Method that will cause the character to dodge to the right ]]
-    
+    GameVariables.FC_RightDodgeTRACK:Play()
 end
 
 function Dodge:back() --[[ Method that will cause the character to dodge backwards ]]

@@ -19,7 +19,8 @@ local receiveCommand = require(game.ReplicatedStorage.Shared.receiveCommand) -- 
 
 GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
     -- Manages the remote events the client receives.
-    ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
+    -- ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
+    receiveCommand:CallReceive(currentAttack, Protocol, sentAnimPair, sentValue)
 end)
 
 if game.Players.LocalPlayer.Character then -- The player may load faster than the script, so this will ensure the player won't skip initializing
@@ -41,16 +42,18 @@ UserInputService.InputBegan:Connect(function(input)
     
     elseif GameVariables.AttackInputs[input.UserInputType] or GameVariables.AttackInputs[input.KeyCode] then -- AttackInputs is a table of input types that are allowed in this context. The indexes of that table are actually the input types that we allow, so we can referance an index in that table by what the player inputed.
         -- The player will throw an attack
-        BasicStriking.Attack(input)
-        -- attackCommand:Call() -- Will replace BasicStriking.Attack()
+        -- BasicStriking.Attack(input)
+        attackCommand:Call() -- Will replace BasicStriking.Attack()
 
     elseif GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
         -- The player will block
-        ReceivingAndCountering.Block(input)
+        -- ReceivingAndCountering.Block(input)
+        receiveCommand:CallBlock(input)
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     -- The player will stop blocking
-    ReceivingAndCountering.EndBlock(input)
+    -- ReceivingAndCountering.EndBlock(input)
+    receiveCommand:CallEndBlock(input)
 end)

@@ -62,6 +62,7 @@ function Strike:getLevel1() --[[ Method that will make the character throw a lev
 		GameVariables.randAttack:Play()
 		GameVariables.lastAttack = GameVariables.randAttack
 		GameVariables.comboCounter += 1
+		print(GameVariables.comboCounter)
 	end
 
 	return attackInstance

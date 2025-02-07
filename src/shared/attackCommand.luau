@@ -11,6 +11,7 @@ Local Script
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
 local strike = require(game.ReplicatedStorage.Shared.attacking.strike)
+local block = require(game.ReplicatedStorage.Shared.receiving.block)
 
 
 -- Variables:
@@ -63,7 +64,6 @@ function AttackCommand:Call() --[[ Whenever the player presses attack, this func
 		print("paired chain added. Num of times: ".. tostring(GameVariables.pairedChain))
 	end
 	
-	print({GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) , not GameVariables.waitingToAttack , not GameVariables.canFollowUp , not GameVariables.pairedPlaying})
 	if GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then -- for the sync block and attack to play simultaneously
 		
 		if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
@@ -72,7 +72,7 @@ function AttackCommand:Call() --[[ Whenever the player presses attack, this func
 
 		if GameVariables.isEnemyHoldingBlock and not GameVariables.isGettingHit then -- Runs for sync blocks. We also want to make sure we aren't already getting hit before performing a sync block.
 			print("Sync blocking")
-			GameVariables.synchedBlock(nil, GameVariables.pairedChain) -- followupCombo will be nil the first time, as the attack() parameter will be empty, but afterwards it will have value.
+			block:sync(nil, GameVariables.pairedChain) -- followupCombo will be nil the first time, as the attack() parameter will be empty, but afterwards it will have value.
 		elseif GameVariables.isGettingHit then -- If the player attacked while already getting attacked, we want nothing to happen
 			return false
 		else
@@ -109,7 +109,7 @@ function AttackCommand:Call() --[[ Whenever the player presses attack, this func
 			end
 
 			if GameVariables.comboCounter == 0 then -- If the player hasn't started an attack yet, we will either do jabs or hooks
-				getLevel1Type(true) -- true represents that we are doing some sort of followup
+				GameVariables.randLvl1Type = getLevel1Type(true) -- true represents that we are doing some sort of followup
 			end
 
 			attackInstance = strike:getLevel1()

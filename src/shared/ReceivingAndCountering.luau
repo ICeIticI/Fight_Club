@@ -4,18 +4,18 @@ local ReceivingAndCountering = {}
 
 local function getHit(currentAttackID)
 	if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then -- left reaction, should check for other lvl 1 lefts
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
-			elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
-			elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
-			elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
-			elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
-			elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
-				GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
-			end
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
+	elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then -- right reaction, same above for rights here
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
+	elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
+	elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
+	elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
+	elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
+		GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
+	end
 end
 
 local function receive(currentAttack) -- Local function that manages what "reaction" the player would do based on the attack/circumstances.
@@ -91,9 +91,7 @@ local function receive(currentAttack) -- Local function that manages what "react
 end
 
 function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
--- GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI) --[[Used to find out what reaction the player
-    -- should do based on what attack the enemy
-    -- did. ]]
+-- GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
 	if not isAI then
 
 		if Protocol == "Receive" then

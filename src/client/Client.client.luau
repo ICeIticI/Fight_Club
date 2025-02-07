@@ -43,6 +43,12 @@ UserInputService.InputBegan:Connect(function(input)
     elseif GameVariables.AttackInputs[input.UserInputType] or GameVariables.AttackInputs[input.KeyCode] then -- AttackInputs is a table of input types that are allowed in this context. The indexes of that table are actually the input types that we allow, so we can referance an index in that table by what the player inputed.
         -- The player will throw an attack
         -- BasicStriking.Attack(input)
+
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and GameVariables.player.Name == "Player2" then -- for testing
+			warn("2 seconds till attack...")
+			wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
+		end
+
         attackCommand:Call() -- Will replace BasicStriking.Attack()
 
     elseif GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then

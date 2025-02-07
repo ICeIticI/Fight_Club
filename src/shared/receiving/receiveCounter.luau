@@ -9,12 +9,13 @@
 
 ]]
 
-local GameVariables = game.ReplicatedStorage.Shared.GameVariables
+local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
 local ReceiveCounter = {}
 ReceiveCounter.__index = ReceiveCounter
 
 function ReceiveCounter:left(currentAttack) --[[ Method that controls what happens to the character after getting countered to the left ]]
+  print(GameVariables.FC_LeftCounter1)
   if currentAttack.AnimationId == GameVariables.FC_LeftCounter1.AnimationId then
     GameVariables.FC_LeftCounter1RECEIVERTRACK:Play()
   elseif currentAttack.AnimationId == GameVariables.FC_LeftCounter2.AnimationId then
@@ -23,6 +24,7 @@ function ReceiveCounter:left(currentAttack) --[[ Method that controls what happe
 end
 
 function ReceiveCounter:right(currentAttack) --[[ Method that controls what happens to the character after getting countered to the right ]]
+  print(GameVariables.FC_RightCounter1)
   if currentAttack.AnimationId == GameVariables.FC_RightCounter1.AnimationId then
     GameVariables.FC_RightCounter1RECEIVERTRACK:Play()
   elseif currentAttack.AnimationId == GameVariables.FC_RightCounter2.AnimationId then

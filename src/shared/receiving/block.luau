@@ -11,7 +11,7 @@
 
 ]]
 
-local GameVariables = game.ReplicatedStorage.Shared.GameVariables
+local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
 local Block = {}
 Block.__index = Block
@@ -35,13 +35,13 @@ end
 
 local function getReceiverSyncBlockLevel1()
   if GameVariables.pairedBlock == GameVariables.FC_SyncBlock1LRECEIVERTRACK then
-    GameVariables.pairedBlock = GameVariables.FC_SyncBlock1RRECEIVERTRACK
+    return GameVariables.FC_SyncBlock1RRECEIVERTRACK
   elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock1RRECEIVERTRACK then
-    GameVariables.pairedBlock = GameVariables.FC_SyncBlock1LRECEIVERTRACK
+    return GameVariables.FC_SyncBlock1LRECEIVERTRACK
   elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock2LRECEIVERTRACK then
-    GameVariables.pairedBlock = GameVariables.FC_SyncBlock2RRECEIVERTRACK
+    return GameVariables.FC_SyncBlock2RRECEIVERTRACK
   elseif GameVariables.pairedBlock == GameVariables.FC_SyncBlock2RRECEIVERTRACK then
-    GameVariables.pairedBlock = GameVariables.FC_SyncBlock2LRECEIVERTRACK
+    return GameVariables.FC_SyncBlock2LRECEIVERTRACK
   end
 end
 

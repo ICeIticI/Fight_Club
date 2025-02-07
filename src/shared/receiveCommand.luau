@@ -112,12 +112,14 @@ function ReceiveCommand:CallReceive(currentAttack, Protocol, sentAnimPair, sentV
 				--elseif forwardDotProduct > 0 then -- character is moving forwards
 					-- I dont know if we will have a "foward" dodge, but it's here if we want to add it.
 				else
-					local rightVector = GameVariables.character.humanoidRootPart.CFrame.RightVector -- the right side of where the character's facing
+					local rightVector = GameVariables.character.HumanoidRootPart.CFrame.RightVector -- the right side of where the character's facing
 					local rightDotProduct = GameVariables.humanoid.MoveDirection:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
 
 					if rightDotProduct > 0 then -- character is moving right
-					dodge:right()
+						print("right dodge")
+						dodge:right()
 					elseif rightDotProduct < 0 then -- character is moving left
+						print("left dodge")
 						dodge:left()
 					end
 				end

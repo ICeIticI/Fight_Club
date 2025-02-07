@@ -81,12 +81,12 @@ function AttackCommand:Call() --[[ Whenever the player presses attack, this func
 			end
 
 			
-			if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid.Health > 10 then -- Will only throw lvl 1 attacks
+			if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid and GameVariables.enemyHumanoid.Health > 10 then -- Will only throw lvl 1 attacks
 
 				attackInstance = strike:getLevel1()
 				attackInstance.Attack()
 			
-			elseif GameVariables.comboCounter >= 3 or GameVariables.enemyHumanoid.Health <= 10 then -- Will throw only haymakers
+			elseif GameVariables.comboCounter >= 3 or (GameVariables.enemyHumanoid and GameVariables.enemyHumanoid.Health <= 10) then -- Will throw only haymakers
 
 				attackInstance = strike:getLevel2()
 				attackInstance.Attack()
@@ -111,9 +111,17 @@ function AttackCommand:Call() --[[ Whenever the player presses attack, this func
 			if GameVariables.comboCounter == 0 then -- If the player hasn't started an attack yet, we will either do jabs or hooks
 				GameVariables.randLvl1Type = getLevel1Type(true) -- true represents that we are doing some sort of followup
 			end
+			
+			-- Finding out what level attack we do before actually attacking
+			if GameVariables.comboCounter <=2 and GameVariables.enemyHumanoid.Health > 10 then -- Will only throw lvl 1 attacks
+				attackInstance = strike:getLevel1()
+			elseif GameVariables.comboCounter >= 3 or GameVariables.enemyHumanoid.Health <= 10 then -- Will throw only haymakers
+				attackInstance = strike:getLevel2()
+			end
 
-			attackInstance = strike:getLevel1()
-			attackInstance:Attack()
+			if not GameVariables.isAttacking then
+				attackInstance.Attack()
+			end
 		end
 		GameVariables.waitingToAttack = false
 	end

@@ -1,5 +1,6 @@
 -- local TweenService = game:GetService("TweenService")
 local GameVariables = {}
+GameVariables.__index = GameVariables
 
 GameVariables.player = game:GetService("Players").LocalPlayer
 

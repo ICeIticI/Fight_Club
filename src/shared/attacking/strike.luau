@@ -58,7 +58,7 @@ function Strike:getLevel1() --[[ Method that will make the character throw a lev
 
 	
 	function attackInstance.Attack() --[[ Remember that Strike:get{level} returns an instance, so here we're just defining functions for that instance, which is attackInstance, a nested instance similar to this module. ]]
-		
+		GameVariables.isAttacking = true
 		GameVariables.randAttack:Play()
 		GameVariables.lastAttack = GameVariables.randAttack
 		GameVariables.comboCounter += 1

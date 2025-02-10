@@ -207,6 +207,8 @@ GameVariables.plrObjectsFolder = GameVariables.player:WaitForChild(GameVariables
 
 -- Global Remote Event - Because each player having their own remote event is redundant.
 GameVariables.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
+-- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
+GameVariables.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
 GameVariables.LocalBindableEvent = Instance.new("BindableEvent")
 GameVariables.LocalBindableEvent.Name = "LocalBindableEvent"
@@ -545,6 +547,11 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 		-- player will play their part of the synched block while the enemy does theirs.
 		end
 	end
+end
+
+function GameVariables.getPublicPlayerInstance() --[[ Function that will fetch from the server the public playerInstance values in a single table, replicating the playerInstance, so the client can use it for checks. ]]
+    local protocol = "getPlayerInstance"
+    return GameVariables.GlobalRemoteFunction:InvokeServer(protocol)
 end
 
 --[[

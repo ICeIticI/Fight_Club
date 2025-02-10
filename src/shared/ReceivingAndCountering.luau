@@ -54,21 +54,36 @@ local function handleDodges()
 	local rightVector = GameVariables.character.HumanoidRootPart.CFrame.RightVector -- the right side of where the character's facing
 	local rightDotProduct = GameVariables.humanoid.MoveDirection:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
 
+    local dodgeTrack -- Will be what animation the player dodges with after some checks
+
 	if rightDotProduct > 0 then -- character is moving right
 		print("right dodge")
-		GameVariables.FC_RightDodgeTRACK:Play()
-		GameVariables.SetSpeed(false)
-
-		GameVariables.FC_RightDodgeTRACK.Stopped:Wait()
-		GameVariables.SetSpeed(true)
+        dodgeTrack = GameVariables.FC_RightDodgeTRACK
 	elseif rightDotProduct < 0 then -- character is moving left
 		print("left dodge")
-		GameVariables.FC_LeftDodgeTRACK:Play()
-		GameVariables.SetSpeed(false)
-
-		GameVariables.FC_LeftDodgeTRACK.Stopped:Wait()
-		GameVariables.SetSpeed(true)
+        dodgeTrack = GameVariables.FC_LeftDodgeTRACK
 	end
+
+    if dodgeTrack then
+        local protocol = "changePlayerVariable"
+        GameVariables.GlobalRemoteEvent:FireServer("iFrames", protocol, true)
+        dodgeTrack:Play()
+        GameVariables.SetSpeed(false)
+
+        task.wait(0.2)
+        protocol = "changePlayerVariable"
+        GameVariables.GlobalRemoteEvent:FireServer("iFrames", protocol, false)
+
+        dodgeTrack.Stopped:Wait()
+
+        if dodgeTrack.TimePosition == dodgeTrack.Length then -- character did a dodge through the entire animation. Send to server so we can not allow the enemy to attack for a short bit for a dodge attack to play out.
+            local Protocol = "dodge"
+            GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol)
+        end
+        
+        GameVariables.SetSpeed(true)
+    end
+
 end
 
 -- Function to handle receiving an attack
@@ -120,7 +135,7 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
 
 				handleDodges()
 
-            elseif GameVariables.isBlocking and GameVariables.canSyncBlock then
+            elseif GameVariables.isBlocking and GameVariables.canSyncBlock and GameVariables.humanoid.MoveDirection.Magnitude == 0 then
                 -- The player is not moving and will perform a sync block
                 GameVariables.synchedBlock(sentAnimPair, sentValue)
             end

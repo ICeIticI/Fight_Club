@@ -11,6 +11,7 @@ local ServerEvents = require(game.ReplicatedStorage.Shared.ServerEvents)
 local RagdollSystem = require(game.ReplicatedStorage.Shared.RagdollSystem)
 
 local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
+local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
 
 GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
@@ -21,6 +22,10 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Pr
         ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI) -- Will execute misc things such as parrying and sync block damage.
     end
 end)
+
+GlobalRemoteFunction.OnServerInvoke = function(sendingPlayer, Protocol)
+    return ServerEvents.RFInvokes(sendingPlayer, Protocol)
+end
 
 Players.PlayerAdded:Connect(function(player)
     ServerInit.InitializePlayer(player) -- initializes player's public objects

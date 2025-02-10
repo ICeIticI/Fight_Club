@@ -3,9 +3,14 @@
 
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
 
-local GlobalRemoteEvent = Instance.new("RemoteEvent")
+local GlobalRemoteEvent = Instance.new("RemoteEvent") -- used by each client in a server for communication with server-client or client to server
 GlobalRemoteEvent.Name = "GlobalRemoteEvent"
 GlobalRemoteEvent.Parent = game.ReplicatedStorage
+
+local GlobalRemoteFunction = Instance.new("RemoteFunction") -- used for similar reasons as the GlobalRemoteEvent, but used when we want something returned
+GlobalRemoteFunction.Name = "GlobalRemoteFunction"
+GlobalRemoteFunction.Parent = game.ReplicatedStorage
+
 local ServerInit = {}
 
 ServerInit.playerInstances = {} -- Making this a module variable so ServerEvents can access this when it needs to get playerInstances
@@ -17,8 +22,10 @@ local function newPlayer(plr)
 	local self = {}
 
 	self.Name = plr.Name .. "_Instance"
-	self.currentAttack = nil
-	self.isGettingHit = false
+	self.currentAttack = nil -- the current attack is the animation (not the track) of what the player's currently doing in the attack
+	self.iFrames = false -- Bool that determines whether or not the player can be damaged
+	self.isGettingHit = false -- Bool that gets set to true when the player is currently under an attack
+	self.canAttack = true -- Bool that is true when the player is allowed to attack. Useful to disable when the player is not allowed to attack on their next attack
 
 	print("Instance for " .. tostring(plr.Name) .. " has been created.")
 	return self

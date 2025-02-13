@@ -356,14 +356,32 @@ AnimationInstances.FC_RightCounter2RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_LeftDodge = Instance.new("Animation")
 AnimationInstances.FC_LeftDodge.Name = "FC_LeftDodge"
 AnimationInstances.FC_LeftDodge.AnimationId = "rbxassetid://117027123930220"
+AnimationInstances.FC_LeftDodge:SetAttribute("AnimDirection", "Left")
 
 AnimationInstances.FC_RightDodge = Instance.new("Animation")
 AnimationInstances.FC_RightDodge.Name = "FC_RightDodge"
 AnimationInstances.FC_RightDodge.AnimationId = "rbxassetid://134531579306048"
+AnimationInstances.FC_RightDodge:SetAttribute("AnimDirection", "Right")
 
 AnimationInstances.FC_BackDodge = Instance.new("Animation")
 AnimationInstances.FC_BackDodge.Name = "FC_BackDodge"
 AnimationInstances.FC_BackDodge.AnimationId = "rbxassetid://103495259681812"
+AnimationInstances.FC_BackDodge:SetAttribute("AnimDirection", "Back")
 
+AnimationInstances.FC_LDodgeAttack1 = Instance.new("Animation")
+AnimationInstances.FC_LDodgeAttack1.Name = "FC_LDodgeAttack1"
+AnimationInstances.FC_LDodgeAttack1.AnimationId = "rbxassetid://93110825889179"
+AnimationInstances.FC_LDodgeAttack1:SetAttribute("Paired", true)
+AnimationInstances.FC_LDodgeAttack1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_LDodgeAttack1:SetAttribute("DodgeAttack", true)
+AnimationInstances.FC_LDodgeAttack1:SetAttribute("AnimDirection", "Left")
+
+AnimationInstances.FC_LDodgeAttack1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_LDodgeAttack1RECEIVER.Name = "FC_LDodgeAttack1RECEIVER"
+AnimationInstances.FC_LDodgeAttack1RECEIVER.AnimationId = "rbxassetid://90092961450366"
+AnimationInstances.FC_LDodgeAttack1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_LDodgeAttack1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_LDodgeAttack1RECEIVER:SetAttribute("DodgeAttack", true) -- even receiving, this animation falls under the dodge attack animation category
+AnimationInstances.FC_LDodgeAttack1RECEIVER:SetAttribute("AnimDirection", "Left") -- even receiving, this animation falls under the dodge attack animation category
 
 return AnimationInstances

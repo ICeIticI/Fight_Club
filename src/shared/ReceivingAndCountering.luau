@@ -51,36 +51,45 @@ local function handleCounter(currentAttack)
 end
 
 local function handleDodges()
-	local rightVector = GameVariables.character.HumanoidRootPart.CFrame.RightVector -- the right side of where the character's facing
+	local frontVector = GameVariables.character.HumanoidRootPart.CFrame.LookVector
+    local frontDotProduct = GameVariables.humanoid.MoveDirection:Dot(frontVector)
+    local rightVector = GameVariables.character.HumanoidRootPart.CFrame.RightVector -- the right side of where the character's facing
 	local rightDotProduct = GameVariables.humanoid.MoveDirection:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
 
-    local dodgeTrack -- Will be what animation the player dodges with after some checks
+    GameVariables.dodgeTrack = nil -- Will be what animation the player dodges with after some checks
+        print(rightDotProduct, frontDotProduct)
 
-	if rightDotProduct > 0 then -- character is moving right
-		print("right dodge")
-        dodgeTrack = GameVariables.FC_RightDodgeTRACK
-	elseif rightDotProduct < 0 then -- character is moving left
-		print("left dodge")
-        dodgeTrack = GameVariables.FC_LeftDodgeTRACK
-	end
+            if rightDotProduct > 0 and frontDotProduct > -0.5 then -- character is moving right
+            print("right dodge")
+            GameVariables.dodgeTrack = GameVariables.FC_RightDodgeTRACK
+            elseif rightDotProduct < 0 and frontDotProduct > -0.5 then -- character is moving left
+                print("left dodge")
+                GameVariables.dodgeTrack = GameVariables.FC_LeftDodgeTRACK
+            else
+                if frontDotProduct < 0 then -- character is moving backwards
+                    print("back dodge")
+                    GameVariables.dodgeTrack = GameVariables.FC_BackDodgeTRACK
+                end
+            end
+        
+        
 
-    if dodgeTrack then
-        local protocol = "changePlayerVariable"
-        GameVariables.GlobalRemoteEvent:FireServer("iFrames", protocol, true)
-        dodgeTrack:Play()
+    
+
+    if GameVariables.dodgeTrack then
+        GameVariables.setPublicPlayerVariable("iFrames", true)
+        GameVariables.dodgeTrack:Play()
         GameVariables.SetSpeed(false)
+        GameVariables.setPublicPlayerVariable("isDodging", true)
 
         task.wait(0.2)
-        protocol = "changePlayerVariable"
-        GameVariables.GlobalRemoteEvent:FireServer("iFrames", protocol, false)
-
-        dodgeTrack.Stopped:Wait()
-
-        if dodgeTrack.TimePosition == dodgeTrack.Length then -- character did a dodge through the entire animation. Send to server so we can not allow the enemy to attack for a short bit for a dodge attack to play out.
-            local Protocol = "dodge"
-            GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol)
-        end
+        GameVariables.setPublicPlayerVariable("iFrames", false)
         
+        GameVariables.dodgeTrack.Stopped:Wait()
+        if GameVariables.dodgeTrack.TimePosition >= GameVariables.dodgeTrack.Length then
+            task.wait(0.2) -- give the dodger a bit of time to do an attack before the dodge ends after doing a successful dodge without getting hit when the dodge animation finishes.
+        end
+        GameVariables.setPublicPlayerVariable("isDodging", false) -- any reaon at all the animation stops, they are no longer dodging.
         GameVariables.SetSpeed(true)
     end
 
@@ -98,7 +107,15 @@ local function receive(currentAttack)
         if GameVariables.FC_BlockStartTRACK.IsPlaying then
             -- If the player gets hit while the blockstart track is playing, then they will perform a parry
             handleBlocking(currentAttack)
-        elseif GameVariables.Protocol ~= "Counter" and GameVariables.randAttack and GameVariables.randAttack.IsPlaying and not GameVariables.currentAttack:GetAttribute("Counter") and not GameVariables.isCountering and not GameVariables.canFollowUp and not GameVariables.attackFrames and not GameVariables.isGettingHit then
+        elseif GameVariables.Protocol ~= "Counter" 
+        and GameVariables.randAttack 
+        and GameVariables.randAttack.IsPlaying 
+        and not GameVariables.currentAttack:GetAttribute("Counter") 
+        and not GameVariables.isCountering 
+        and not GameVariables.canFollowUp 
+        and not GameVariables.attackFrames 
+        and not GameVariables.isGettingHit 
+        then
             -- If the player is just starting an attack and gets hit, they will counter
             handleCounter(currentAttack)
         elseif not GameVariables.isCountering then

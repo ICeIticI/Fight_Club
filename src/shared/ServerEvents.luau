@@ -26,15 +26,16 @@ local function isCounterTrackPlaying(animator) --[[Function used to check if a c
 	return false
 end
 
-local function getPlayerInstance(plr)
+local function getPlayerInstance(plrName)
 	--[[ Returns the playerInstance of a given player ]]
 
 	for _, v in pairs(ServerInit.playerInstances) do
-		if v.Name == plr.Name .. "_Instance" then
+		if v.Name == plrName .. "_Instance" then
 			return v
 		end
 	end
 	print("No such player found ::((")
+	return nil
 end
 
 -- bAttack function handlers:
@@ -53,7 +54,7 @@ local function attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBl
 		end
 
 		task.wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
-		enemyInstance = getPlayerInstance(hitPlayer) -- table that holds public variables for the server to see and use
+		enemyInstance = getPlayerInstance(hitPlayer.Name) -- table that holds public variables for the server to see and use
 
 		if plrIsBlocking then
 			attackDamage = attackDamage/2
@@ -111,7 +112,7 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 
 	-- GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
-	local enemyInstance = getPlayerInstance(hitPlayer) -- table that holds public variables for the server to see and use
+	local enemyInstance = getPlayerInstance(hitPlayer.Name) -- table that holds public variables for the server to see and use
 
 	if currentAttack and currentAttack:GetAttribute("AttackLevel") == 1 then
 		attackDamage = A1Damage
@@ -130,12 +131,12 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 	      synced blocks, parrying, countering etc. ]]
 	local hitPlayer -- the player which was struck. If it was sent then the 'if' statement below will identify them
 
-	local playerInstance = getPlayerInstance(sendingPlayer) -- table that holds public variables for the server to see and use
+	local playerInstance = getPlayerInstance(sendingPlayer.Name) -- table that holds public variables for the server to see and use
 	local enemyInstance
 
 	if typeof(hitCharacter) == "Instance" then -- making sure hitCharacter is an object before passing it on to find a player match
 		hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
-		enemyInstance = getPlayerInstance(hitPlayer)
+		enemyInstance = getPlayerInstance(hitPlayer.Name)
 	end	  
 	
 
@@ -166,7 +167,7 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 		warn(Protocol)
 		hitCharacter.Humanoid.Health -= counterAttackDamage
 
-	elseif Protocol == "changePlayerVariable" then
+	elseif Protocol == "setPlayerVariable" then
 		changeVariableHandler(hitCharacter, currentAttack, playerInstance)
 
 	elseif Protocol == "dodge" then
@@ -186,9 +187,11 @@ end
 
 
 
-function ServerEvents.RFInvokes(sendingPlayer, Protocol)
+function ServerEvents.RFInvokes(sendingPlayer, Protocol, object1)
 	if Protocol == "getPlayerInstance" then
-        return getPlayerInstance(sendingPlayer)
+		local plrName = object1
+        print(sendingPlayer, Protocol, object1)
+		return getPlayerInstance(plrName)
     end
 end
 

@@ -121,7 +121,7 @@ local function ReceiveAnimManager(v, currentAnim)
     local function onAnimationPlaying()
         if not v.IsPlaying and v.Animation:GetAttribute("Counter") then
             -- Delay the receiver after getting countered to ensure a punish
-            task.wait(0.5)
+            task.wait(0.15)
             print("can now do stuff")
             GameVariables.isGettingHit = false
         end

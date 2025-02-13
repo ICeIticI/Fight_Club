@@ -134,7 +134,10 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	-- *animation tracks (dodges)*
 	GameVariables.FC_LeftDodgeTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LeftDodge)
 	GameVariables.FC_RightDodgeTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RightDodge)
+	GameVariables.FC_BackDodgeTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_BackDodge)
 
+	-- *animation tracks (dodge attacks)*
+	GameVariables.FC_LDodgeAttack1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LDodgeAttack1)
 
 	-- *Animation track tables*
 	GameVariables.AllAnimations = { -- Table for managing all animation TRACKS.
@@ -161,7 +164,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_LeftCounter1TRACK, GameVariables.FC_LeftCounter1RECEIVERTRACK,
 	GameVariables.FC_RightCounter2TRACK, GameVariables.FC_RightCounter2RECEIVERTRACK,
 	GameVariables.FC_LeftCounter2TRACK, GameVariables.FC_LeftCounter2RECEIVERTRACK,
-	GameVariables.FC_LeftDodgeTRACK, GameVariables.FC_RightDodgeTRACK
+	GameVariables.FC_LeftDodgeTRACK, GameVariables.FC_RightDodgeTRACK,
+	GameVariables.FC_LDodgeAttack1TRACK
 	}
 
 	GameVariables.attack1Table = {}
@@ -274,7 +278,10 @@ GameVariables.FC_LeftCounter2RECEIVER = GameVariables.plrObjectsFolder:WaitForCh
 -- *animations (dodges)*
 GameVariables.FC_LeftDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftDodge")
 GameVariables.FC_RightDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_RightDodge")
+GameVariables.FC_BackDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_BackDodge")
 
+-- *animations (dodge attacks)*
+GameVariables.FC_LDodgeAttack1 = GameVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1")
 
 GameVariables.walkingSpeed = 12
 GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
@@ -549,9 +556,15 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 	end
 end
 
-function GameVariables.getPublicPlayerInstance() --[[ Function that will fetch from the server the public playerInstance values in a single table, replicating the playerInstance, so the client can use it for checks. ]]
-    local protocol = "getPlayerInstance"
-    return GameVariables.GlobalRemoteFunction:InvokeServer(protocol)
+function GameVariables.getPublicPlayerInstance(plrName) --[[ Function that will fetch from the server the public playerInstance values in a single table, replicating the playerInstance, so the client can use it for checks. Will return nil if there is no such player in the game.]]
+    print(plrName)
+	local protocol = "getPlayerInstance"
+    return GameVariables.GlobalRemoteFunction:InvokeServer(protocol, plrName)
+end
+
+function GameVariables.setPublicPlayerVariable(variable, value) --[[ Function that will change a given public variable to a given value from the local player's playerInstance located on the server. If the variable doesn't exist, then it will create a new public variable. ]]
+	local protocol = "setPlayerVariable"
+	GameVariables.GlobalRemoteEvent:FireServer(variable, protocol, value)
 end
 
 --[[

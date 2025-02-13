@@ -23,8 +23,8 @@ GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Pr
     end
 end)
 
-GlobalRemoteFunction.OnServerInvoke = function(sendingPlayer, Protocol)
-    return ServerEvents.RFInvokes(sendingPlayer, Protocol)
+GlobalRemoteFunction.OnServerInvoke = function(sendingPlayer, Protocol, object1)
+    return ServerEvents.RFInvokes(sendingPlayer, Protocol, object1)
 end
 
 Players.PlayerAdded:Connect(function(player)

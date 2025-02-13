@@ -25,7 +25,8 @@ local function newPlayer(plr)
 	self.currentAttack = nil -- the current attack is the animation (not the track) of what the player's currently doing in the attack
 	self.iFrames = false -- Bool that determines whether or not the player can be damaged
 	self.isGettingHit = false -- Bool that gets set to true when the player is currently under an attack
-	self.canAttack = true -- Bool that is true when the player is allowed to attack. Useful to disable when the player is not allowed to attack on their next attack
+	self.isDodging = false -- Bool that is set to true when the player is dodging. So when an enemy attacks, and tries to attack again at the player, and if they're dodging, they won't be able to.
+	-- self.canAttack = true -- Bool that is true when the player is allowed to attack. Useful to disable when the player is not allowed to attack on their next attack
 
 	print("Instance for " .. tostring(plr.Name) .. " has been created.")
 	return self

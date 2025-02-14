@@ -56,9 +56,10 @@ local function handleHaymakerAttack() --[[ Will initiate a level2 attack as well
 end
 
 local function attack(followupCombo)
-    if GameVariables.getPublicPlayerInstance(GameVariables.enemyChar.Name)["isDodging"] == true then
-        -- GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack:GetAttribute("AnimDirection"))
-    elseif GameVariables.isEnemyHoldingBlock and not GameVariables.isGettingHit and GameVariables.enemyChar.Humanoid.MoveDirection.Magnitude == 0 then
+    -- if GameVariables.getPublicPlayerInstance(GameVariables.enemyChar.Name)["isDodging"] == true then
+    --     GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack:GetAttribute("AnimDirection"))
+    --     GameVariables.randAttack:Play()
+    if GameVariables.isEnemyHoldingBlock and not GameVariables.isGettingHit and GameVariables.enemyChar.Humanoid.MoveDirection.Magnitude == 0 then
         GameVariables.synchedBlock(nil, followupCombo)
     elseif GameVariables.isGettingHit then
         return false
@@ -75,6 +76,13 @@ local function attack(followupCombo)
     else
         warn("Attack call failed! :(")
     end
+end
+
+local function dodgeAttack() --[[ Function that will execute a dodge attack between a character and enemy ]]
+    -- GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack:GetAttribute("AnimDirection"))
+    GameVariables.FC_LDodgeAttack1TRACK:Play()
+    local reason = "dodgeAttack"
+    GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, reason, GameVariables.FC_LDodgeAttack1TRACK.Animation)
 end
 
 
@@ -120,13 +128,18 @@ function BasicStriking.manageHitboxes()
 end
 
 local function handleAttackInput(input) --[[ When user presses attack then this will run through the code to make it happen, unless they cant currently do one ]]
-    
-    if GameVariables.getPublicPlayerInstance(GameVariables.player)["isDodging"] == true then
-        -- do a dodge attack
-    elseif  then
+    warn("ATTKINPT")
 
+    -- before attacking, check if we're currently dodging so we can do a dodge attack:
+    if GameVariables.getPublicPlayerInstance(GameVariables.player.Name)["isDodging"] then
+        while GameVariables.dodgeTrack.IsPlaying do -- wait for entire dodge attack to end
+            task.wait()
+            print("waiting for dodge to end..")
+        end
+        -- do the dodge attack:
+        dodgeAttack()
     end
---
+
     GameVariables.followUpCount += 1
     GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 
@@ -139,19 +152,19 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
         if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
             GameVariables.animPair = {math.random(1, 2), math.random(1, 2)}
             GameVariables.Protocol = "AttackStarted"
-            warn(GameVariables.Protocol)
             GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.animPair, GameVariables.pairedChain, nil, false)
         end
         attack()
     elseif GameVariables.canFollowUp then
         GameVariables.waitingToAttack = true
         while GameVariables.isAttacking do
-            task.wait()
+            wait()
         end
         if GameVariables.followUpCount > 1 then
             if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
                 GameVariables.animPair = {math.random(1, 2), math.random(1, 2)}
                 GameVariables.Protocol = "AttackStarted"
+                warn(GameVariables.Protocol)
                 GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false)
             end
             attack(GameVariables.pairedChain)
@@ -168,7 +181,7 @@ function BasicStriking.Attack(input)
     and GameVariables.pairedChain <= GameVariables.PairedChainMAX 
     and GameVariables.boolCheck({nil, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) 
     and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 
-    and GameVariables.getPublicPlayerInstance(GameVariables.enemyChar.Name)["isDodging"] ~= true -- gets the public isDodging of the player and makes sure its false before attacking
+    and GameVariables.getPublicPlayerInstance(GameVariables.enemyChar.Name)["isDodging"] ~= true -- gets the public canAttack of the player and makes sure its true before attacking
     then
         handleAttackInput(input)
     end

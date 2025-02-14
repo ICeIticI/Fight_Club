@@ -159,7 +159,7 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 		warn(tostring(hitPlayer) .. " has been parried!")
 		GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
 					
-	elseif Protocol == "Counter" then
+	elseif Protocol == "Counter" or Protocol == "dodgeAttack" then
 		warn(tostring(Protocol) .. " by " .. tostring(sendingPlayer))
 		GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
 	
@@ -180,7 +180,6 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 			task.wait(3)
 			enemyInstance.canAttack = true
 		end
-
 	end
 	attackDamage = nil
 end
@@ -190,7 +189,7 @@ end
 function ServerEvents.RFInvokes(sendingPlayer, Protocol, object1)
 	if Protocol == "getPlayerInstance" then
 		local plrName = object1
-        print(sendingPlayer, Protocol, object1)
+        -- print(sendingPlayer, Protocol, object1)
 		return getPlayerInstance(plrName)
     end
 end

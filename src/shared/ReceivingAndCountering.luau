@@ -180,6 +180,11 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
                     GameVariables.FC_RightCounter2RECEIVERTRACK:Play()
                 end
             end
+        elseif Protocol == "dodgeAttack" then
+            if currentAttack:GetAttribute("AnimDirection") == "Left" then
+                GameVariables.FC_LDodgeAttack1RECEIVERTRACK:Play()
+            elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
+            end
         end
     end
 end

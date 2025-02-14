@@ -138,6 +138,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 
 	-- *animation tracks (dodge attacks)*
 	GameVariables.FC_LDodgeAttack1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LDodgeAttack1)
+	GameVariables.FC_LDodgeAttack1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LDodgeAttack1RECEIVER)
 
 	-- *Animation track tables*
 	GameVariables.AllAnimations = { -- Table for managing all animation TRACKS.
@@ -165,7 +166,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_RightCounter2TRACK, GameVariables.FC_RightCounter2RECEIVERTRACK,
 	GameVariables.FC_LeftCounter2TRACK, GameVariables.FC_LeftCounter2RECEIVERTRACK,
 	GameVariables.FC_LeftDodgeTRACK, GameVariables.FC_RightDodgeTRACK,
-	GameVariables.FC_LDodgeAttack1TRACK
+	GameVariables.FC_LDodgeAttack1TRACK, GameVariables.FC_LDodgeAttack1RECEIVERTRACK
 	}
 
 	GameVariables.attack1Table = {}
@@ -282,6 +283,7 @@ GameVariables.FC_BackDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_Bac
 
 -- *animations (dodge attacks)*
 GameVariables.FC_LDodgeAttack1 = GameVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1")
+GameVariables.FC_LDodgeAttack1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1RECEIVER")
 
 GameVariables.walkingSpeed = 12
 GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
@@ -401,7 +403,6 @@ function GameVariables.reset()
 
 
 	GameVariables.SetSpeed(true)
-	warn("Reseted")
 
 end
 
@@ -557,7 +558,7 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 end
 
 function GameVariables.getPublicPlayerInstance(plrName) --[[ Function that will fetch from the server the public playerInstance values in a single table, replicating the playerInstance, so the client can use it for checks. Will return nil if there is no such player in the game.]]
-    print(plrName)
+    -- print(plrName)
 	local protocol = "getPlayerInstance"
     return GameVariables.GlobalRemoteFunction:InvokeServer(protocol, plrName)
 end

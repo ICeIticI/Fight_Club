@@ -120,6 +120,13 @@ function BasicStriking.manageHitboxes()
 end
 
 local function handleAttackInput(input) --[[ When user presses attack then this will run through the code to make it happen, unless they cant currently do one ]]
+    
+    if GameVariables.getPublicPlayerInstance(GameVariables.player)["isDodging"] == true then
+        -- do a dodge attack
+    elseif  then
+
+    end
+--
     GameVariables.followUpCount += 1
     GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
 
@@ -139,13 +146,12 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
     elseif GameVariables.canFollowUp then
         GameVariables.waitingToAttack = true
         while GameVariables.isAttacking do
-            wait()
+            task.wait()
         end
         if GameVariables.followUpCount > 1 then
             if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
                 GameVariables.animPair = {math.random(1, 2), math.random(1, 2)}
                 GameVariables.Protocol = "AttackStarted"
-                warn(GameVariables.Protocol)
                 GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false)
             end
             attack(GameVariables.pairedChain)
@@ -162,7 +168,7 @@ function BasicStriking.Attack(input)
     and GameVariables.pairedChain <= GameVariables.PairedChainMAX 
     and GameVariables.boolCheck({nil, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) 
     and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 
-    and GameVariables.getPublicPlayerInstance(GameVariables.enemyChar.Name)["isDodging"] ~= true -- gets the public canAttack of the player and makes sure its true before attacking
+    and GameVariables.getPublicPlayerInstance(GameVariables.enemyChar.Name)["isDodging"] ~= true -- gets the public isDodging of the player and makes sure its false before attacking
     then
         handleAttackInput(input)
     end

@@ -80,7 +80,11 @@ end
 
 local function dodgeAttack() --[[ Function that will execute a dodge attack between a character and enemy ]]
     -- GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack:GetAttribute("AnimDirection"))
+    
     GameVariables.FC_LDodgeAttack1TRACK:Play()
+    GameVariables.randomAnimationTrack(GameVariables.AllAnimations, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack:GetAttribute("AnimDirection")):Play()
+
+    GameVariables.waitingToAttack = false
     local reason = "dodgeAttack"
     GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, reason, GameVariables.FC_LDodgeAttack1TRACK.Animation)
 end
@@ -92,7 +96,6 @@ function BasicStriking.manageHitboxes()
         local touchedConnection = v.Touched:Connect(function(touchedObject)
             if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") and GameVariables.currentAttack then
                 GameVariables.hitDebounce = true
-                print("We attacked an enemy")
                 local enemyCharacter = touchedObject.Parent.Parent
                 local enemyPlayer = game.Players:GetPlayerFromCharacter(enemyCharacter)
 
@@ -114,8 +117,8 @@ function BasicStriking.manageHitboxes()
 
                 if enemyPlayer and GameVariables.isAttacking and GameVariables.attackFrames then
                     GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false)
-                else
-                    warn({enemyPlayer, GameVariables.isAttacking, GameVariables.attackFrames})
+                -- else
+                --     warn({enemyPlayer, GameVariables.isAttacking, GameVariables.attackFrames})
                 end
             end
         end)
@@ -128,53 +131,55 @@ function BasicStriking.manageHitboxes()
 end
 
 local function handleAttackInput(input) --[[ When user presses attack then this will run through the code to make it happen, unless they cant currently do one ]]
-    warn("ATTKINPT")
 
     -- before attacking, check if we're currently dodging so we can do a dodge attack:
-    if GameVariables.getPublicPlayerInstance(GameVariables.player.Name)["isDodging"] then
-        while GameVariables.dodgeTrack.IsPlaying do -- wait for entire dodge attack to end
-            task.wait()
-            print("waiting for dodge to end..")
+    if GameVariables.getPublicPlayerInstance(GameVariables.player.Name)["isDodging"] == true then
+        if not GameVariables.waitingToAttack then
+            GameVariables.waitingToAttack = true
+            while GameVariables.dodgeTrack.IsPlaying do -- wait for entire dodge attack to end
+                task.wait()
+                print("waiting for dodge to end..")
+            end
+            -- do the dodge attack:
+            dodgeAttack()
         end
-        -- do the dodge attack:
-        dodgeAttack()
-    end
-
-    GameVariables.followUpCount += 1
-    GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
-
-    if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then
-        GameVariables.pairedChain += 1
-        print("paired chain added. Num of times: " .. tostring(GameVariables.pairedChain))
-    end
-
-    if GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then
-        if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
-            GameVariables.animPair = {math.random(1, 2), math.random(1, 2)}
-            GameVariables.Protocol = "AttackStarted"
-            GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.animPair, GameVariables.pairedChain, nil, false)
+    else
+        GameVariables.followUpCount += 1
+        GameVariables.distanceBetween = (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude
+        
+        if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then
+            GameVariables.pairedChain += 1
+            print("paired chain added. Num of times: " .. tostring(GameVariables.pairedChain))
         end
-        attack()
-    elseif GameVariables.canFollowUp then
-        GameVariables.waitingToAttack = true
-        while GameVariables.isAttacking do
-            wait()
-        end
-        if GameVariables.followUpCount > 1 then
+        
+        if GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then
             if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
                 GameVariables.animPair = {math.random(1, 2), math.random(1, 2)}
                 GameVariables.Protocol = "AttackStarted"
-                warn(GameVariables.Protocol)
-                GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false)
+                GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.animPair, GameVariables.pairedChain, nil, false)
             end
-            attack(GameVariables.pairedChain)
+            attack()
+            elseif GameVariables.canFollowUp then
+                GameVariables.waitingToAttack = true
+                while GameVariables.isAttacking do
+                    wait()
+                end
+                if GameVariables.followUpCount > 1 then
+                    if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
+                        GameVariables.animPair = {math.random(1, 2), math.random(1, 2)}
+                        GameVariables.Protocol = "AttackStarted"
+                        GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false)
+                    end
+                    attack(GameVariables.pairedChain)
+                end
+                GameVariables.waitingToAttack = false
+            end
         end
-        GameVariables.waitingToAttack = false
     end
-end
-
+    
+        
 function BasicStriking.Attack(input)
-
+    
     if input.UserInputType == Enum.UserInputType.MouseButton1 
     and not GameVariables.waitingToAttack 
     and GameVariables.lockOnDebounce.Value 

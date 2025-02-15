@@ -19,7 +19,6 @@ local function isCounterTrackPlaying(animator) --[[Function used to check if a c
 	local playingTracks = animator:GetPlayingAnimationTracks()
 	for _, v in pairs(playingTracks) do
 		if v.Animation:GetAttribute("Counter") and v.Animation:GetAttribute("AttackLevel") == 3 then
-			print("Enemy is countering. NO damage allowed guys.")
 			return true
 		end
 	end
@@ -92,11 +91,7 @@ local function attackStartHoldBlockHandler(sendingPlayer, hitCharacter, Protocol
 	end
 end
 
-local function changeVariableHandler(hitCharacter, currentAttack, playerInstance)
-	warn("changing a var")
-		--[[ This protocol means we want to change a variable in the player's 
-		playerInstance table because its lives in the server and is not accessible to 
-		the client ]]
+local function changeVariableHandler(hitCharacter, currentAttack, playerInstance) --[[ This protocol means we want to change a variable in the player's playerInstance table because its lives in the server and is not accessible to the client ]]
 
 		local desiredVariableName = hitCharacter --[[ We pass the variable name in the 
 		hitCharacter spot so we dont have a million parameters and save space. But in 
@@ -148,34 +143,27 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 
 	elseif Protocol == "AttackFrames" then
 		playerInstance.isGettingHit = true
-		print(playerInstance.isGettingHit)
 	elseif Protocol == "AttackEnded" then
 		playerInstance.currentAttack = nil -- When the attack ends, we want the currentAttack to be nothing so the player can be damaged again after being able to counter, as the counter window finished and they cant no more.
 		playerInstance.isGettingHit = false
-		print(playerInstance.isGettingHit)
 	elseif Protocol == "Parry" then
 		attackDamage = attackDamage/2
 		hitCharacter.Humanoid.Health -= attackDamage
-		warn(tostring(hitPlayer) .. " has been parried!")
 		GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
 					
 	elseif Protocol == "Counter" or Protocol == "dodgeAttack" then
-		warn(tostring(Protocol) .. " by " .. tostring(sendingPlayer))
 		GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
 	
 	elseif Protocol == "CounterAttack" then
-		warn(Protocol)
 		hitCharacter.Humanoid.Health -= counterAttackDamage
 
 	elseif Protocol == "setPlayerVariable" then
 		changeVariableHandler(hitCharacter, currentAttack, playerInstance)
 
 	elseif Protocol == "dodge" then
-		print("dodging")
 		--[[ When a character dodges another, make sure they cant do anything for a 
 			 short period so a dodge attack can happen, if desired. ]]
 		if enemyInstance then
-			warn("Enemy Instance!")
 			enemyInstance.canAttack = false
 			task.wait(3)
 			enemyInstance.canAttack = true

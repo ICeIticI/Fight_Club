@@ -301,7 +301,6 @@ GameVariables.player.CharacterAdded:Connect(function()
 	if canInit then
 		Init()
 		canInit = false
-		print("plr spawned via .CharacterAdded")
 	end
 end)
 
@@ -311,7 +310,6 @@ end)
 	if canInit then
 		Init()
 		canInit = false
-		print("plr spawned via 'if player.Character'")
 	end
 end
 
@@ -346,7 +344,6 @@ function GameVariables.boolCheck(boolTable)
 end
 
 function GameVariables.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
-	
 	if bool == true then
 		-- we allow the player the ability to move
 
@@ -419,11 +416,10 @@ function GameVariables.randomAnimationTrack(aTrackTbl, attribute1, a1Value, attr
 		end
 	end
 
-	return randAttackTbl[math.random(1, #randAttackTbl)]
+	return randAttackTbl[math.random(1, #randAttackTbl)] -- returns the randomly-selected animation track
 end
 
 function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
-	warn(followupCombo)
 	if GameVariables.pairedChain <= GameVariables.PairedChainMAX and GameVariables.canSyncBlock then
 		if followupCombo and followupCombo > 1 or (GameVariables.pairedBlock and GameVariables.pairedBlock.IsPlaying) then -- For followup attacks
 			if GameVariables.pairedAttack and GameVariables.pairedAttack.IsPlaying then -- runs for the attacker
@@ -563,9 +559,10 @@ function GameVariables.getPublicPlayerInstance(plrName) --[[ Function that will 
     return GameVariables.GlobalRemoteFunction:InvokeServer(protocol, plrName)
 end
 
-function GameVariables.setPublicPlayerVariable(variable, value) --[[ Function that will change a given public variable to a given value from the local player's playerInstance located on the server. If the variable doesn't exist, then it will create a new public variable. ]]
+function GameVariables.setPublicPlayerVariable(var, value) --[[ Function that will change a given public variable to a given value from the local player's playerInstance located on the server. If the variable doesn't exist, then it will create a new public variable. ]]
+	
 	local protocol = "setPlayerVariable"
-	GameVariables.GlobalRemoteEvent:FireServer(variable, protocol, value)
+	GameVariables.GlobalRemoteEvent:FireServer(var, protocol, value)
 end
 
 --[[

@@ -21,6 +21,18 @@ local function getHit(currentAttackID)
     end
 end
 
+local function block(bool) --[[ Function that will take a boolean value to determine if the player is blocking or not. If the player is blocking, then the player will block. If the player is not blocking, then the player will stop blocking. ]]
+    if bool == true then
+        GameVariables.FC_BlockStartTRACK:Play()
+        GameVariables.humanoid.WalkSpeed /= 1.5
+    else
+        GameVariables.isBlocking = false
+        GameVariables.FC_BlockStartTRACK:Stop()
+        GameVariables.FC_BlockTRACK:Stop()
+        GameVariables.SetSpeed(true)
+    end
+end
+
 -- Function to handle blocking and parrying
 local function handleBlocking(currentAttack)
     if currentAttack:GetAttribute("AnimDirection") == "Left" then
@@ -57,32 +69,31 @@ local function handleDodges()
 	local rightDotProduct = GameVariables.humanoid.MoveDirection:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
 
     GameVariables.dodgeTrack = nil -- Will be what animation the player dodges with after some checks
-        print(rightDotProduct, frontDotProduct)
 
-            if rightDotProduct > 0 and frontDotProduct > -0.5 then -- character is moving right
-            print("right dodge")
-            GameVariables.dodgeTrack = GameVariables.FC_RightDodgeTRACK
-            elseif rightDotProduct < 0 and frontDotProduct > -0.5 then -- character is moving left
-                print("left dodge")
-                GameVariables.dodgeTrack = GameVariables.FC_LeftDodgeTRACK
-            else
-                if frontDotProduct < 0 then -- character is moving backwards
-                    print("back dodge")
-                    GameVariables.dodgeTrack = GameVariables.FC_BackDodgeTRACK
-                end
-            end
-        
-        
+    if rightDotProduct > 0 and frontDotProduct > -0.5 then -- character is moving right
+    print("right dodge")
+    GameVariables.dodgeTrack = GameVariables.FC_RightDodgeTRACK
+    elseif rightDotProduct < 0 and frontDotProduct > -0.5 then -- character is moving left
+        print("left dodge")
+        GameVariables.dodgeTrack = GameVariables.FC_LeftDodgeTRACK
+    else
+        if frontDotProduct < 0 then -- character is moving backwards
+            print("back dodge")
+            GameVariables.dodgeTrack = GameVariables.FC_BackDodgeTRACK
+        end
+    end
+
 
     
 
     if GameVariables.dodgeTrack then
         GameVariables.setPublicPlayerVariable("iFrames", true)
+        block(false) -- stop blocking on dodge
         GameVariables.dodgeTrack:Play()
         GameVariables.SetSpeed(false)
         GameVariables.setPublicPlayerVariable("isDodging", true)
-
-        task.wait(0.2)
+        
+        task.wait(0.4) -- The amount of time the player has iFrames for dodging
         GameVariables.setPublicPlayerVariable("iFrames", false)
         
         GameVariables.dodgeTrack.Stopped:Wait()
@@ -90,9 +101,10 @@ local function handleDodges()
             task.wait(0.2) -- give the dodger a bit of time to do an attack before the dodge ends after doing a successful dodge without getting hit when the dodge animation finishes.
         end
         GameVariables.setPublicPlayerVariable("isDodging", false) -- any reaon at all the animation stops, they are no longer dodging.
-        GameVariables.SetSpeed(true)
+        if not GameVariables.isAttacking or not GameVariables.waitingToAttack then
+            GameVariables.SetSpeed(true)
+        end
     end
-
 end
 
 -- Function to handle receiving an attack
@@ -145,10 +157,8 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
             receive(currentAttack)
         elseif Protocol == "AttackStarted" then
             -- If the enemy is starting an attack, and the player is blocking, perform a synched block
-            print(sentValue)
             if GameVariables.isBlocking and GameVariables.canSyncBlock and GameVariables.humanoid.MoveDirection.Magnitude > 0 then
                 -- The player is moving
-                print("can dodge")
 
 				handleDodges()
 
@@ -195,18 +205,23 @@ function ReceivingAndCountering.Block(input)
     and GameVariables.lockOnDebounce.Value 
     and GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering}) 
     and not GameVariables.pairedPlaying then
-        GameVariables.FC_BlockStartTRACK:Play()
-        GameVariables.humanoid.WalkSpeed /= 1.5
+        block(true)
     end
 end
 
 -- Function to handle end of blocking input
 function ReceivingAndCountering.EndBlock(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 and (GameVariables.FC_BlockStartTRACK.IsPlaying or GameVariables.FC_BlockTRACK.IsPlaying) and not GameVariables.pairedPlaying then
-        GameVariables.isBlocking = false
-        GameVariables.FC_BlockStartTRACK:Stop()
-        GameVariables.FC_BlockTRACK:Stop()
-        GameVariables.SetSpeed(true)
+    if input.UserInputType == Enum.UserInputType.MouseButton2
+    and 
+    (GameVariables.FC_BlockStartTRACK.IsPlaying 
+    or 
+    GameVariables.FC_BlockTRACK.IsPlaying) 
+    and not GameVariables.pairedPlaying
+    and not GameVariables.waitingToAttack 
+	and not GameVariables.isAttacking 
+	and not GameVariables.getPublicPlayerInstance(GameVariables.player.Name)["isDodging"]
+    then
+        block(false)
     end
 end
 

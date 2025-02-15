@@ -1,12 +1,7 @@
 -- local Players = game:GetService("Players")
 local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
+
 local AnimationManager = {}
-
-local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
-
-local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
-
-local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 
 -- Function to manage attack animations
 local function AttackAnimManager(v, currentAnim, EndOfAttackExists)

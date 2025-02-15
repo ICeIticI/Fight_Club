@@ -76,8 +76,6 @@ function ServerInit.InitializePlayer(player)
 
 	local playerInstance = newPlayer(player) -- newPlayer() is returned a table of public variables of the player
 	table.insert(ServerInit.playerInstances, playerInstance) -- add the specific playerInstance table to the rest of the public playerInstance tables
-	print(playerInstance)
-	print(playerInstance.Name)
 
 	local plrObjectsFolder = Instance.new("Folder") -- folder containing the public objects of the player
 	plrObjectsFolder.Name = player.Name .. "_GameObjects"

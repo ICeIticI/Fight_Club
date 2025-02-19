@@ -79,10 +79,12 @@ local function attack(followupCombo)
 end
 
 local function dodgeAttack() --[[ Function that will execute a dodge attack between a character and enemy ]]
-    -- GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack:GetAttribute("AnimDirection"))
-    
-    GameVariables.FC_LDodgeAttack1TRACK:Play()
-    GameVariables.randomAnimationTrack(GameVariables.AllAnimations, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack:GetAttribute("AnimDirection")):Play()
+    GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack.Animation:GetAttribute("AnimDirection"))
+    GameVariables.repositionInFrontOfEnemy()
+
+    -- GameVariables.dodgeAttackTrack:Play()
+    GameVariables.randAttack:Play()
+    print(GameVariables.randAttack, GameVariables.dodgeTrack)
 
     GameVariables.waitingToAttack = false
     local reason = "dodgeAttack"
@@ -140,8 +142,10 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
                 task.wait()
                 print("waiting for dodge to end..")
             end
-            -- do the dodge attack:
-            dodgeAttack()
+            -- do the dodge attack (if not already):
+            if not GameVariables.isAttacking then
+                dodgeAttack()
+            end
         end
     else
         GameVariables.followUpCount += 1

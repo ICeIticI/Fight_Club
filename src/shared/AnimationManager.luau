@@ -24,7 +24,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
             if v.Animation:GetAttribute("Counter") == true then
                 GameVariables.isCountering = true
                 GameVariables.isAttacking = true
-                GameVariables.currentAttack = GameVariables.currentReceiveAnimTRACK.Animation
+                GameVariables.currentAttack = v.Animation
                 GameVariables.Protocol = "Counter"
                 GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack)
                 GameVariables.Protocol = nil
@@ -53,6 +53,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 
     -- Function to handle the start of the attack animation
     local function onStartOfAttack()
+        print("starting attack")
         GameVariables.attackFrames = true
         if v.Animation:GetAttribute("Paired") and v.Animation:GetAttribute("Counter") then
             GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, "CounterAttack", GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false)

@@ -73,9 +73,16 @@ local function handleDodges()
     if rightDotProduct > 0 and frontDotProduct > -0.5 then -- character is moving right
     print("right dodge")
     GameVariables.dodgeTrack = GameVariables.FC_RightDodgeTRACK
+
+    -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
+    -- GameVariables.dodgeAttackTrack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Right", "DodgeAttack", true)
+    
     elseif rightDotProduct < 0 and frontDotProduct > -0.5 then -- character is moving left
         print("left dodge")
         GameVariables.dodgeTrack = GameVariables.FC_LeftDodgeTRACK
+
+        -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
+        -- GameVariables.dodgeAttackTrack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Left", "DodgeAttack", true)
     else
         if frontDotProduct < 0 then -- character is moving backwards
             print("back dodge")
@@ -142,10 +149,12 @@ local function receive(currentAttack)
         end
     end
 
-    if GameVariables.currentReceiveAnimTRACK then
+    if GameVariables.currentReceiveAnimTRACK then -- play receive animation
         GameVariables.currentReceiveAnimTRACK:Play()
+
+        -- reposition the player to face the enemy if they counter them (not a parry)
         if GameVariables.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (GameVariables.currentReceiveAnimTRACK == GameVariables.FC_RightParryTRACK or GameVariables.currentReceiveAnimTRACK == GameVariables.FC_LeftParryTRACK) then
-            GameVariables.character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(GameVariables.enemyChar:WaitForChild("HumanoidRootPart").Position + GameVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 , GameVariables.enemyChar.HumanoidRootPart.Position)
+            GameVariables.repositionInFrontOfEnemy()
         end
     end
 end

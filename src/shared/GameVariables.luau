@@ -69,6 +69,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.randLvl1Type = nil --[[ Used to determine what lvl 1 attacks
 						the player will use for said combo ]]
 	GameVariables.animPair = nil
+	GameVariables.dodgeAttackTrack = nil
 
 	-- New Variables that are replacing old:
 	GameVariables.canAttack = false
@@ -139,6 +140,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	-- *animation tracks (dodge attacks)*
 	GameVariables.FC_LDodgeAttack1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LDodgeAttack1)
 	GameVariables.FC_LDodgeAttack1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LDodgeAttack1RECEIVER)
+	GameVariables.FC_RDodgeAttack1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RDodgeAttack1)
+	GameVariables.FC_RDodgeAttack1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RDodgeAttack1RECEIVER)
 
 	-- *Animation track tables*
 	GameVariables.AllAnimations = { -- Table for managing all animation TRACKS.
@@ -166,7 +169,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_RightCounter2TRACK, GameVariables.FC_RightCounter2RECEIVERTRACK,
 	GameVariables.FC_LeftCounter2TRACK, GameVariables.FC_LeftCounter2RECEIVERTRACK,
 	GameVariables.FC_LeftDodgeTRACK, GameVariables.FC_RightDodgeTRACK,
-	GameVariables.FC_LDodgeAttack1TRACK, GameVariables.FC_LDodgeAttack1RECEIVERTRACK
+	GameVariables.FC_LDodgeAttack1TRACK, GameVariables.FC_LDodgeAttack1RECEIVERTRACK,
+	GameVariables.FC_RDodgeAttack1TRACK, GameVariables.FC_RDodgeAttack1RECEIVERTRACK
 	}
 
 	GameVariables.attack1Table = {}
@@ -276,6 +280,7 @@ GameVariables.FC_RightCounter2RECEIVER = GameVariables.plrObjectsFolder:WaitForC
 GameVariables.FC_LeftCounter2 = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2")
 GameVariables.FC_LeftCounter2RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2RECEIVER")
 
+
 -- *animations (dodges)*
 GameVariables.FC_LeftDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_LeftDodge")
 GameVariables.FC_RightDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_RightDodge")
@@ -284,6 +289,8 @@ GameVariables.FC_BackDodge = GameVariables.plrObjectsFolder:WaitForChild("FC_Bac
 -- *animations (dodge attacks)*
 GameVariables.FC_LDodgeAttack1 = GameVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1")
 GameVariables.FC_LDodgeAttack1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1RECEIVER")
+GameVariables.FC_RDodgeAttack1 = GameVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1")
+GameVariables.FC_RDodgeAttack1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1RECEIVER")
 
 GameVariables.walkingSpeed = 12
 GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
@@ -400,6 +407,15 @@ function GameVariables.reset()
 
 
 	GameVariables.SetSpeed(true)
+
+end
+
+function GameVariables.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. ]]
+
+	GameVariables.character:WaitForChild("HumanoidRootPart").CFrame = 
+	CFrame.new(GameVariables.enemyChar:WaitForChild("HumanoidRootPart").Position 
+				+ GameVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 
+				, GameVariables.enemyChar.HumanoidRootPart.Position)
 
 end
 

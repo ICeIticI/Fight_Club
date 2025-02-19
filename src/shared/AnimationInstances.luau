@@ -373,6 +373,7 @@ AnimationInstances.FC_LDodgeAttack1.Name = "FC_LDodgeAttack1"
 AnimationInstances.FC_LDodgeAttack1.AnimationId = "rbxassetid://93110825889179"
 AnimationInstances.FC_LDodgeAttack1:SetAttribute("Paired", true)
 AnimationInstances.FC_LDodgeAttack1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_LDodgeAttack1:SetAttribute("Counter", true)
 AnimationInstances.FC_LDodgeAttack1:SetAttribute("DodgeAttack", true)
 AnimationInstances.FC_LDodgeAttack1:SetAttribute("AnimDirection", "Left")
 
@@ -383,5 +384,22 @@ AnimationInstances.FC_LDodgeAttack1RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_LDodgeAttack1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_LDodgeAttack1RECEIVER:SetAttribute("DodgeAttack", true) -- even receiving, this animation falls under the dodge attack animation category
 AnimationInstances.FC_LDodgeAttack1RECEIVER:SetAttribute("AnimDirection", "Left") -- even receiving, this animation falls under the dodge attack animation category
+
+AnimationInstances.FC_RDodgeAttack1 = Instance.new("Animation")
+AnimationInstances.FC_RDodgeAttack1.Name = "FC_RDodgeAttack1"
+AnimationInstances.FC_RDodgeAttack1.AnimationId = "rbxassetid://115517810366402"
+AnimationInstances.FC_RDodgeAttack1:SetAttribute("Paired", true)
+AnimationInstances.FC_RDodgeAttack1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_RDodgeAttack1:SetAttribute("Counter", true)
+AnimationInstances.FC_RDodgeAttack1:SetAttribute("DodgeAttack", true)
+AnimationInstances.FC_RDodgeAttack1:SetAttribute("AnimDirection", "Right")
+
+AnimationInstances.FC_RDodgeAttack1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_RDodgeAttack1RECEIVER.Name = "FC_RDodgeAttack1RECEIVER"
+AnimationInstances.FC_RDodgeAttack1RECEIVER.AnimationId = "rbxassetid://90880663701721"
+AnimationInstances.FC_RDodgeAttack1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_RDodgeAttack1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_RDodgeAttack1RECEIVER:SetAttribute("DodgeAttack", true)
+AnimationInstances.FC_RDodgeAttack1RECEIVER:SetAttribute("AnimDirection", "Right")
 
 return AnimationInstances

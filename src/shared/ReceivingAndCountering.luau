@@ -69,9 +69,15 @@ local function handleDodges()
 	local rightDotProduct = GameVariables.humanoid.MoveDirection:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
 
     GameVariables.dodgeTrack = nil -- Will be what animation the player dodges with after some checks
+    local distanceToTravel = 0 -- The distance the player will travel when dodging. This will be used to calculate vectorVelocity.
+    local animTime = 0 -- The time the dodge animation will play for. Used for calculating vectorVelocity.
+    local vectorVelocity = Vector3.zero -- When dodging, we obviously want the player to move, so this will be the moving part of the dodge. Depending on the dodge, this will equal a vector3 value.
 
     if rightDotProduct > 0 and frontDotProduct > -0.5 then -- character is moving right
     print("right dodge")
+    distanceToTravel = 2
+    animTime = 0.53
+    vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
     GameVariables.dodgeTrack = GameVariables.FC_RightDodgeTRACK
 
     -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
@@ -79,6 +85,9 @@ local function handleDodges()
     
     elseif rightDotProduct < 0 and frontDotProduct > -0.5 then -- character is moving left
         print("left dodge")
+        distanceToTravel = -2
+        animTime = 0.53 
+        vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
         GameVariables.dodgeTrack = GameVariables.FC_LeftDodgeTRACK
 
         -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
@@ -86,17 +95,21 @@ local function handleDodges()
     else
         if frontDotProduct < 0 then -- character is moving backwards
             print("back dodge")
+            distanceToTravel = 2
+            animTime = 0.23
+            vectorVelocity = Vector3.new(0, 0, distanceToTravel / animTime)
             GameVariables.dodgeTrack = GameVariables.FC_BackDodgeTRACK
         end
     end
 
-
+ 
     
 
     if GameVariables.dodgeTrack then
         GameVariables.setPublicPlayerVariable("iFrames", true)
         block(false) -- stop blocking on dodge
         GameVariables.dodgeTrack:Play()
+        GameVariables.setLinearVelocity(vectorVelocity, animTime)
         GameVariables.SetSpeed(false)
         GameVariables.setPublicPlayerVariable("isDodging", true)
         
@@ -104,6 +117,7 @@ local function handleDodges()
         GameVariables.setPublicPlayerVariable("iFrames", false)
         
         GameVariables.dodgeTrack.Stopped:Wait()
+
         if GameVariables.dodgeTrack.TimePosition >= GameVariables.dodgeTrack.Length then
             task.wait(0.2) -- give the dodger a bit of time to do an attack before the dodge ends after doing a successful dodge without getting hit when the dodge animation finishes.
         end

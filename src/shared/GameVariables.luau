@@ -65,6 +65,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.distanceBetween = nil
 	GameVariables.enemyHumanoid = nil -- pre-defined enemy Humanoid because the script hates global variables. Used for the enemy.
 	GameVariables.enemyChar = nil
+
+	GameVariables.attackerCFrame = nil -- When the character gets struck, this variable will equal the CFrame of the attacker's HumanoidRootPart so we can move the character a direction if the hit is significant
 	-- GameVariables.enemyCurrentAttack = nil -- used when the enemy would start an attack via the AttackStarted protocol that gets sent when one starts
 	GameVariables.randLvl1Type = nil --[[ Used to determine what lvl 1 attacks
 						the player will use for said combo ]]
@@ -142,6 +144,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_LDodgeAttack1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_LDodgeAttack1RECEIVER)
 	GameVariables.FC_RDodgeAttack1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RDodgeAttack1)
 	GameVariables.FC_RDodgeAttack1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_RDodgeAttack1RECEIVER)
+	GameVariables.FC_BDodgeAttack1TRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_BDodgeAttack1)
+	GameVariables.FC_BDodgeAttack1RECEIVERTRACK = GameVariables.charAnimator:LoadAnimation(GameVariables.FC_BDodgeAttack1RECEIVER)
 
 	-- *Animation track tables*
 	GameVariables.AllAnimations = { -- Table for managing all animation TRACKS.
@@ -170,7 +174,9 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.FC_LeftCounter2TRACK, GameVariables.FC_LeftCounter2RECEIVERTRACK,
 	GameVariables.FC_LeftDodgeTRACK, GameVariables.FC_RightDodgeTRACK,
 	GameVariables.FC_LDodgeAttack1TRACK, GameVariables.FC_LDodgeAttack1RECEIVERTRACK,
-	GameVariables.FC_RDodgeAttack1TRACK, GameVariables.FC_RDodgeAttack1RECEIVERTRACK
+	GameVariables.FC_RDodgeAttack1TRACK, GameVariables.FC_RDodgeAttack1RECEIVERTRACK,
+	GameVariables.FC_BDodgeAttack1TRACK, GameVariables.FC_BDodgeAttack1RECEIVERTRACK
+	
 	}
 
 	GameVariables.attack1Table = {}
@@ -179,6 +185,9 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.pairedAttacksTable = {} -- the for loop below will fill this with all of the attacking paired animations
 	GameVariables.pairedBlocksTable = {} -- same above except for receiving animations.
 	
+	GameVariables.counterAttacksTable = {}
+	GameVariables.dodgeAttacksTable = {}
+
 	for _, v in pairs(GameVariables.AllAnimations) do -- this for loop fills in the attack1 and attack2Table based off attributes
 		if v.Animation:GetAttribute("AttackSeries") then -- standard attacks have the "AttackSeries" attribute so its how we define it as a stnadard attack
 			if v.Animation:GetAttribute("AttackLevel") == 1 then -- level 1's will be added to the attack1Table
@@ -188,7 +197,16 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 			end
 		elseif v.Animation:GetAttribute("Paired") then -- adds paired animations into either pairedAttacks or pairedBlocks
 			if v.Animation:GetAttribute("AnimType") == 1 then
+
+				if v.Animation:GetAttribute("Counter") and not v.Animation:GetAttribute("DodgeAttack") then
+					-- is a counter attack
+					table.insert(GameVariables.counterAttacksTable, v)
+				elseif v.Animation:GetAttribute("DodgeAttack") then
+					-- is a dodge attack
+					table.insert(GameVariables.dodgeAttacksTable, v)
+				end
 				table.insert(GameVariables.pairedAttacksTable, v)
+
 			elseif v.Animation:GetAttribute("AnimType") == 2 then
 				table.insert(GameVariables.pairedBlocksTable, v)
 			end
@@ -291,6 +309,8 @@ GameVariables.FC_LDodgeAttack1 = GameVariables.plrObjectsFolder:WaitForChild("FC
 GameVariables.FC_LDodgeAttack1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1RECEIVER")
 GameVariables.FC_RDodgeAttack1 = GameVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1")
 GameVariables.FC_RDodgeAttack1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1RECEIVER")
+GameVariables.FC_BDodgeAttack1 = GameVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1")
+GameVariables.FC_BDodgeAttack1RECEIVER = GameVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1RECEIVER")
 
 GameVariables.walkingSpeed = 12
 GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
@@ -424,9 +444,20 @@ function GameVariables.randomAnimationTrack(aTrackTbl, attribute1, a1Value, attr
 
 	for _, v in pairs(aTrackTbl) do
 		if
-		(attribute1 == nil or (a1Value ~= nil and v.Animation:GetAttribute(attribute1) == a1Value) or (v.Animation:GetAttribute(attribute1) and a1Value == nil)) 
-		and 
-		(attribute2 == nil or (a2Value ~= nil and v.Animation:GetAttribute(attribute2) == a2Value) or (v.Animation:GetAttribute(attribute2) and a2Value == nil)) 
+		(
+			attribute1 == nil 
+			or (a1Value ~= nil 
+			and v.Animation:GetAttribute(attribute1) == a1Value) 
+			or (v.Animation:GetAttribute(attribute1) 
+			and a1Value == nil)) 
+			and 
+			(attribute2 == nil 
+			or (a2Value ~= nil 
+			and v.Animation:GetAttribute(attribute2) == a2Value) 
+			or (v.Animation:GetAttribute(attribute2) 
+			and a2Value == nil)
+		) 
+
 		then
 			table.insert(randAttackTbl, v)
 		end
@@ -579,6 +610,11 @@ function GameVariables.setPublicPlayerVariable(var, value) --[[ Function that wi
 	
 	local protocol = "setPlayerVariable"
 	GameVariables.GlobalRemoteEvent:FireServer(var, protocol, value)
+end
+
+function GameVariables.setLinearVelocity(velocity, durationOfVelocity) --[[ Function that will set the VectorForce of the player's character to the given Vector3. ]]
+	local protocol = "SetLinearVelocity"
+	GameVariables.GlobalRemoteEvent:FireServer(velocity, protocol, durationOfVelocity)
 end
 
 --[[

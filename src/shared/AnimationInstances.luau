@@ -402,4 +402,21 @@ AnimationInstances.FC_RDodgeAttack1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_RDodgeAttack1RECEIVER:SetAttribute("DodgeAttack", true)
 AnimationInstances.FC_RDodgeAttack1RECEIVER:SetAttribute("AnimDirection", "Right")
 
+AnimationInstances.FC_BDodgeAttack1 = Instance.new("Animation")
+AnimationInstances.FC_BDodgeAttack1.Name = "FC_BDodgeAttack1"
+AnimationInstances.FC_BDodgeAttack1.AnimationId = "rbxassetid://113674522948281"
+AnimationInstances.FC_BDodgeAttack1:SetAttribute("Paired", true)
+AnimationInstances.FC_BDodgeAttack1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_BDodgeAttack1:SetAttribute("Counter", true)
+AnimationInstances.FC_BDodgeAttack1:SetAttribute("DodgeAttack", true)
+AnimationInstances.FC_BDodgeAttack1:SetAttribute("AnimDirection", "Back")
+
+AnimationInstances.FC_BDodgeAttack1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_BDodgeAttack1RECEIVER.Name = "FC_BDodgeAttack1RECEIVER"
+AnimationInstances.FC_BDodgeAttack1RECEIVER.AnimationId = "rbxassetid://111445875078566"
+AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("DodgeAttack", true)
+AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("AnimDirection", "Back")
+
 return AnimationInstances

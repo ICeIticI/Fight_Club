@@ -141,11 +141,18 @@ local function ReceiveAnimManager(v, currentAnim)
         if currentAnim.AnimationId == GameVariables.FC_RightHaymakerRECEIVER.AnimationId or currentAnim.AnimationId == GameVariables.FC_LeftHaymakerRECEIVER.AnimationId then
             -- Tween specific animations like the rightHaymaker
             if v.IsPlaying then
+                --[[
                 local tweenPart = GameVariables.character:WaitForChild("HumanoidRootPart")
                 local Info = TweenInfo.new(v.Length, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, 0)
                 local tweenGoals = { CFrame = tweenPart.CFrame * CFrame.new(0, 0, 2) }
                 local reactTween = game:GetService("TweenService"):Create(tweenPart, Info, tweenGoals)
                 reactTween:Play()
+                ]]
+                local enemyCFrame = GameVariables.getPublicPlayerInstance(GameVariables.player.Name).enemyCFrame
+                local linearForce = GameVariables.humanoidRootPart.CFrame:VectorToObjectSpace(enemyCFrame.LookVector.Unit * 3)
+
+                GameVariables.setLinearVelocity(linearForce, 0.63)
+
             end
         elseif currentAnim.AnimationId == GameVariables.FC_BracingBlockL.AnimationId or currentAnim.AnimationId == GameVariables.FC_BracingBlockR.AnimationId then
             -- Handle bracing blocks

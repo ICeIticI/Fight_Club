@@ -68,6 +68,17 @@ local function attack(followupCombo)
             setAttackType(followupCombo)
         end
 
+        -- also if they are even further than 3 studs then we can implement a running-ish punch (like in RDR2)
+        -- move character closer to enemy if they are a bit too far
+        if GameVariables.distanceBetween > 3 then
+            -- local speedUnit = 2500 -- 1 speed unit is 1 stud per second
+            local distanceToTravel = GameVariables.distanceBetween - 3 -- we want to be 3 studs away from the enemy
+            local timeToArrive = 0.55
+            local speed = -(distanceToTravel / timeToArrive)
+
+            GameVariables.setLinearVelocity(Vector3.new(0, 0, speed), timeToArrive)
+        end
+
         if GameVariables.comboCounter <= 2 and GameVariables.enemyHumanoid.Health > 10 then
             handleLevel1Attack()
         elseif GameVariables.comboCounter >= 3 or GameVariables.enemyHumanoid.Health <= 10 then
@@ -79,7 +90,7 @@ local function attack(followupCombo)
 end
 
 local function dodgeAttack() --[[ Function that will execute a dodge attack between a character and enemy ]]
-    GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack.Animation:GetAttribute("AnimDirection"))
+    GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.dodgeAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack.Animation:GetAttribute("AnimDirection"))
     GameVariables.repositionInFrontOfEnemy()
 
     -- GameVariables.dodgeAttackTrack:Play()
@@ -88,7 +99,7 @@ local function dodgeAttack() --[[ Function that will execute a dodge attack betw
 
     GameVariables.waitingToAttack = false
     local reason = "dodgeAttack"
-    GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, reason, GameVariables.FC_LDodgeAttack1TRACK.Animation)
+    GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, reason, GameVariables.randAttack.Animation)
 end
 
 
@@ -118,7 +129,7 @@ function BasicStriking.manageHitboxes()
                 end
 
                 if enemyPlayer and GameVariables.isAttacking and GameVariables.attackFrames then
-                    GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false)
+                    GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.character.HumanoidRootPart.CFrame, nil, GameVariables.isEnemyHoldingBlock, false)
                 -- else
                 --     warn({enemyPlayer, GameVariables.isAttacking, GameVariables.attackFrames})
                 end
@@ -189,7 +200,7 @@ function BasicStriking.Attack(input)
     and GameVariables.lockOnDebounce.Value 
     and GameVariables.pairedChain <= GameVariables.PairedChainMAX 
     and GameVariables.boolCheck({nil, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) 
-    and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 4.25 
+    and (GameVariables.raycastResult.Instance.Position - GameVariables.humanoidRootPart.Position).Magnitude <= 7
     and GameVariables.getPublicPlayerInstance(GameVariables.enemyChar.Name)["isDodging"] ~= true -- gets the public canAttack of the player and makes sure its true before attacking
     then
         handleAttackInput(input)

@@ -55,9 +55,9 @@ local function handleCounter(currentAttack)
         GameVariables.isCountering = true
         GameVariables.randAttack:Stop()
         if currentAttack:GetAttribute("AnimDirection") == "Left" then
-            GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Left", "Counter", true)
+            GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack(GameVariables.counterAttacksTable, "AnimDirection", "Left", "Counter", true)
         elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
-            GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Right", "Counter", true)
+            GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack(GameVariables.counterAttacksTable, "AnimDirection", "Right", "Counter", true)
         end
     end
 end
@@ -199,10 +199,18 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
                     GameVariables.FC_RightCounter2RECEIVERTRACK:Play()
                 end
             end
-        elseif Protocol == "dodgeAttack" then
+        elseif Protocol == "dodgeAttack" then -- Will need to change this later as we add more dodge attacks
+            
+            if GameVariables.randAttack then -- stop any attack that's playing
+                GameVariables.randAttack:Stop() 
+            end
+            
             if currentAttack:GetAttribute("AnimDirection") == "Left" then
                 GameVariables.FC_LDodgeAttack1RECEIVERTRACK:Play()
             elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
+                GameVariables.FC_RDodgeAttack1RECEIVERTRACK:Play()
+            elseif currentAttack:GetAttribute("AnimDirection") == "Back" then
+                GameVariables.FC_BDodgeAttack1RECEIVERTRACK:Play()
             end
         end
     end

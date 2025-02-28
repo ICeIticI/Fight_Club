@@ -14,6 +14,15 @@ local counterAttackDamage = 8
 local sentAttackTrack = nil
 local attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
 
+local sound1, sound2, sound3 = 
+	"rbxassetid://9118617342",
+	"rbxassetid://82209688846366",
+	"rbxassetid://5507815764"
+
+local tempHitSFXTable = {
+	sound1, sound2, sound3
+}
+
 local function isCounterTrackPlaying(animator) --[[Function used to check if a counter animation track is playing. If it is, then we don't want the player taking damage after they counter someone.]]
 
 	local playingTracks = animator:GetPlayingAnimationTracks()
@@ -42,6 +51,7 @@ end
 local function attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBlocking, enemyInstance, isAI) --[[ handles when a character lands an attack ]]
 	
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
+	local hitSFX = sendingPlayer.Character.Torso:FindFirstChild("hitSFX")
 
 	if not enemyInstance.iFrames and (not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) or not enemyInstance.currentAttack) then
 		local otherProtocol = "Receive"
@@ -54,12 +64,15 @@ local function attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBl
 
 		task.wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
 		enemyInstance = getPlayerInstance(hitPlayer.Name) -- table that holds public variables for the server to see and use
+		enemyInstance.enemyCFrame = sendingPlayer.Character.HumanoidRootPart.CFrame -- We want to know where the enemy is when they hit us so we can repel the opposite direction
 
 		if plrIsBlocking then
 			attackDamage = attackDamage/2
 		end
 		if attackDamage and not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
-			hitPlayer.Character.Humanoid.Health -= attackDamage
+			-- hitPlayer.Character.Humanoid.Health -= attackDamage
+			hitPlayer.Character.Humanoid:TakeDamage(attackDamage)
+			hitSFX:Play()
 		end
 	end
 end
@@ -102,8 +115,21 @@ local function changeVariableHandler(hitCharacter, currentAttack, playerInstance
 end
 
 
-function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, _, _, plrIsBlocking, isAI) -- bAttack stands for basic attack.
+function ServerEvents.bAttackEvents(object1, object2, object3, object4, _, _, object5, object6) -- bAttack stands for basic attack.
 	--[[This function is for the events of a player damaging another with a basic strike.]]
+	local sendingPlayer = object1
+	local hitCharacter = object2
+	local Protocol = object3
+	local currentAttack = object4
+	local plrIsBlocking = object5
+	local enemyCFrame = object6
+
+	local hitSFX = sendingPlayer.Character.Torso:FindFirstChild("hitSFX")
+	if not hitSFX then
+		hitSFX = Instance.new("Sound")
+		hitSFX.Name = "hitSFX"
+	end
+	hitSFX.Parent = sendingPlayer.Character.Torso
 
 	-- GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
@@ -111,19 +137,41 @@ function ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, curre
 
 	if currentAttack and currentAttack:GetAttribute("AttackLevel") == 1 then
 		attackDamage = A1Damage
+		hitSFX.SoundId = tempHitSFXTable[math.random(1, #tempHitSFXTable)]
 		elseif currentAttack and currentAttack:GetAttribute("AttackLevel") == 2 then
 			attackDamage = A2Damage
+			hitSFX.SoundId = "rbxassetid://112444846023457"
 		end
 
 	if Protocol == "Hook" or Protocol == "Haymaker" then -- We're basically making sure the enemy is not countering the player here. enemyInstance is a table that includes the enemy's current attacking animation track. We don't want them taking damage if they are countering.
-		attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBlocking, enemyInstance, isAI)
+		attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBlocking, enemyInstance, enemyCFrame)
 	end
 end
 
 
-function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
+function ServerEvents.miscEvents(object1, object2, object3, object4, object5, object6, object7, object8)
 	 --[[ For misc. events that are sent for server-sided things such as
 	      synced blocks, parrying, countering etc. ]]
+	local sendingPlayer = object1
+	local hitCharacter = object2
+	local Protocol = object3
+	local currentAttack = object4
+	local animPair = object5
+	local sentValue = object6
+	local plrIsBlocking = object7
+	local isAI = object8
+
+	local hitSFX = sendingPlayer.Character.Torso:FindFirstChild("hitSFX")
+	if Protocol == "Parry" or Protocol == "CounterAttack"  then
+		
+		if not hitSFX then
+			hitSFX = Instance.new("Sound")
+			hitSFX.Name = "hitSFX"
+			hitSFX.SoundId = math.random(1, #tempHitSFXTable)
+			task.wait()
+		end
+	end
+
 	local hitPlayer -- the player which was struck. If it was sent then the 'if' statement below will identify them
 
 	local playerInstance = getPlayerInstance(sendingPlayer.Name) -- table that holds public variables for the server to see and use
@@ -148,15 +196,18 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 		playerInstance.isGettingHit = false
 	elseif Protocol == "Parry" then
 		attackDamage = attackDamage/2
-		hitCharacter.Humanoid.Health -= attackDamage
+		-- hitCharacter.Humanoid.Health -= attackDamage
+		hitCharacter.Humanoid:TakeDamage(attackDamage)
+		hitSFX:Play()
 		GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
 					
 	elseif Protocol == "Counter" or Protocol == "dodgeAttack" then
 		GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, Protocol)
 	
 	elseif Protocol == "CounterAttack" then
-		hitCharacter.Humanoid.Health -= counterAttackDamage
-
+		-- hitCharacter.Humanoid.Health -= counterAttackDamage
+		hitCharacter.Humanoid:TakeDamage(counterAttackDamage)
+		hitSFX:Play()
 	elseif Protocol == "setPlayerVariable" then
 		changeVariableHandler(hitCharacter, currentAttack, playerInstance)
 
@@ -168,15 +219,43 @@ function ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentA
 			task.wait(3)
 			enemyInstance.canAttack = true
 		end
+	elseif Protocol == "SetLinearVelocity" then
+		-- sentForce is a number
+		local sentVelocity = hitCharacter -- takes the place of hitCharacter to save argument space
+		local sentDuration = currentAttack
+
+		-- turning player character's body parts massless so the force can move them
+		for _, v in pairs(sendingPlayer.Character:GetChildren()) do
+			if v:IsA("BasePart") then
+				v.Massless = true
+			end
+		end
+		
+		sendingPlayer.Character.HumanoidRootPart:WaitForChild("FC_LinearVelocity").VectorVelocity = sentVelocity
+		sendingPlayer.Character.HumanoidRootPart.FC_LinearVelocity.Enabled = true
+		task.wait(sentDuration) -- Character will be under said force till duration ends.
+
+		-- for _, v in pairs(sendingPlayer.Character:GetChildren()) do
+		-- 	if v:IsA("BasePart") then
+		-- 		v.Massless = false
+		-- 	end
+		-- end
+
+		sendingPlayer.Character.HumanoidRootPart.FC_LinearVelocity.VectorVelocity = Vector3.zero
+		sendingPlayer.Character.HumanoidRootPart.FC_LinearVelocity.Enabled = false
+
 	end
 	attackDamage = nil
 end
 
 
 
-function ServerEvents.RFInvokes(sendingPlayer, Protocol, object1)
+function ServerEvents.RFInvokes(object1, object2, object3)
+	local sendingPlayer = object1
+	local Protocol = object2
+
 	if Protocol == "getPlayerInstance" then
-		local plrName = object1
+		local plrName = object3
         -- print(sendingPlayer, Protocol, object1)
 		return getPlayerInstance(plrName)
     end

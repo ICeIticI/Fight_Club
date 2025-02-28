@@ -22,11 +22,12 @@ local function newPlayer(plr)
 	local self = {}
 
 	self.Name = plr.Name .. "_Instance"
-	self.currentAttack = nil -- the current attack is the animation (not the track) of what the player's currently doing in the attack
+	self.currentAttack = "" -- the current attack is the animation (not the track) of what the player's currently doing in the attack
 	self.iFrames = false -- Bool that determines whether or not the player can be damaged
 	self.isGettingHit = false -- Bool that gets set to true when the player is currently under an attack
 	self.isDodging = false -- Bool that is set to true when the player is dodging. So when an enemy attacks, and tries to attack again at the player, and if they're dodging, they won't be able to.
 	-- self.canAttack = true -- Bool that is true when the player is allowed to attack. Useful to disable when the player is not allowed to attack on their next attack
+	self.enemyCFrame = 0 -- The CFrame of the enemy when the enemy attacks the player
 
 	print("Instance for " .. tostring(plr.Name) .. " has been created.")
 	return self
@@ -97,7 +98,27 @@ function ServerInit.InitializeCharacter(character)
 	     the player animator ]]
 
 	local player = game.Players:GetPlayerFromCharacter(character)
+
+	local linearVelocity = Instance.new("LinearVelocity")
+	linearVelocity.Enabled = false
+	linearVelocity.Name = "FC_LinearVelocity"
+	linearVelocity.Visible = false
+	linearVelocity.VectorVelocity = Vector3.new(0,0,0)
+	linearVelocity.ForceLimitsEnabled = true
+	linearVelocity.ForceLimitMode = Enum.ForceLimitMode.PerAxis
+	linearVelocity.MaxAxesForce = Vector3.new(math.huge, 0, math.huge)
+	linearVelocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
+	linearVelocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+	linearVelocity.Parent = character.HumanoidRootPart
+	
+	local lvAttachment = Instance.new("Attachment")
+	lvAttachment.Name = "lvAttachment"
+	-- lvAttachment.CFrame = CFrame.Angles(0, math.rad(90), 0)
+	lvAttachment.Parent = character.HumanoidRootPart
+
+	linearVelocity.Attachment0 = lvAttachment
 		
+
 	local charAnimator = Instance.new("Animator")
 	charAnimator.Name = "charAnimator"
 	charAnimator.Parent = character:WaitForChild("Humanoid")

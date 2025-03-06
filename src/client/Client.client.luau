@@ -36,22 +36,22 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char
 end)
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Q then -- May have lock on inputs for each system.
+    if GameVariables.LockOnInputs[input.KeyCode] then -- May have lock on inputs for each system.
         -- Locks the player onto the enemy
         LockOnSystem.LockOn()
     
     elseif GameVariables.AttackInputs[input.UserInputType] or GameVariables.AttackInputs[input.KeyCode] then -- AttackInputs is a table of input types that are allowed in this context. The indexes of that table are actually the input types that we allow, so we can referance an index in that table by what the player inputed.
     
-    if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and GameVariables.player.Name == "Player2" then -- for testing
-        warn("2 seconds till attack...")
-        wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
-    end
-       
-    -- The player will throw an attack
-    BasicStriking.Attack(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and GameVariables.player.Name == "Player2" then -- for testing
+            warn("2 seconds till attack...")
+            wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
+        end
+        
+        -- The player will throw an attack
+        BasicStriking.Attack(input)
 
 
-    -- attackCommand:Call() -- Will replace BasicStriking.Attack()
+        -- attackCommand:Call() -- Will replace BasicStriking.Attack()
 
     elseif GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
         -- The player will block
@@ -61,7 +61,9 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-    -- The player will stop blocking
-    ReceivingAndCountering.EndBlock(input)
-    -- receiveCommand:CallEndBlock(input)
+    if GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
+        -- The player will stop blocking
+        ReceivingAndCountering.EndBlock(input)
+        -- receiveCommand:CallEndBlock(input)
+    end
 end)

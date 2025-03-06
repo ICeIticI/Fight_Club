@@ -21,18 +21,6 @@ local function getHit(currentAttackID)
     end
 end
 
-local function block(bool) --[[ Function that will take a boolean value to determine if the player is blocking or not. If the player is blocking, then the player will block. If the player is not blocking, then the player will stop blocking. ]]
-    if bool == true then
-        GameVariables.FC_BlockStartTRACK:Play()
-        GameVariables.humanoid.WalkSpeed /= 1.5
-    else
-        GameVariables.isBlocking = false
-        GameVariables.FC_BlockStartTRACK:Stop()
-        GameVariables.FC_BlockTRACK:Stop()
-        GameVariables.SetSpeed(true)
-    end
-end
-
 -- Function to handle blocking and parrying
 local function handleBlocking(currentAttack)
     if currentAttack:GetAttribute("AnimDirection") == "Left" then
@@ -107,7 +95,7 @@ local function handleDodges()
 
     if GameVariables.dodgeTrack then
         GameVariables.setPublicPlayerVariable("iFrames", true)
-        block(false) -- stop blocking on dodge
+        GameVariables.block(false) -- stop blocking on dodge
         GameVariables.dodgeTrack:Play()
         GameVariables.setLinearVelocity(vectorVelocity, animTime)
         GameVariables.SetSpeed(false)
@@ -155,6 +143,7 @@ local function receive(currentAttack)
             getHit(currentAttackID)
         end
     elseif GameVariables.isBlocking then
+        warn("We is blocking")
         GameVariables.canSyncBlock = false
         if currentAttack:GetAttribute("AnimDirection") == "Left" then
             GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockRTRACK
@@ -162,6 +151,7 @@ local function receive(currentAttack)
             GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockLTRACK
         end
     end
+    print(GameVariables.isBlocking)
 
     if GameVariables.currentReceiveAnimTRACK then -- play receive animation
         GameVariables.currentReceiveAnimTRACK:Play()
@@ -180,7 +170,7 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
             receive(currentAttack)
         elseif Protocol == "AttackStarted" then
             -- If the enemy is starting an attack, and the player is blocking, perform a synched block
-            if GameVariables.isBlocking and GameVariables.canSyncBlock and GameVariables.humanoid.MoveDirection.Magnitude > 0 then
+            if GameVariables.isBlocking and GameVariables.humanoid.MoveDirection.Magnitude > 0 then
                 -- The player is moving
 
 				handleDodges()
@@ -199,7 +189,11 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
                 GameVariables.FC_LeftParryRECEIVERTRACK:Play()
             end
         elseif Protocol == "Counter" and not (GameVariables.FC_LeftCounter1RECEIVERTRACK.IsPlaying or GameVariables.FC_RightCounter1RECEIVERTRACK.IsPlaying) then
-            GameVariables.randAttack:Stop()
+            -- GameVariables.repositionInFrontOfEnemy()
+            if GameVariables.randAttack and GameVariables.randAttack.IsPlaying then
+                GameVariables.randAttack:Stop() -- stop an attack if its playing
+            end
+
             if currentAttack:GetAttribute("AnimDirection") == "Left" then
                 if currentAttack.AnimationId == GameVariables.FC_LeftCounter1.AnimationId then
                     GameVariables.FC_LeftCounter1RECEIVERTRACK:Play()
@@ -232,18 +226,27 @@ end
 
 -- Function to handle blocking input
 function ReceivingAndCountering.Block(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 
-    and GameVariables.lockOnDebounce.Value 
+
+    -- If the player is holding the block button, we store that as a variable:
+    if GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
+        GameVariables.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
+    end
+
+    if GameVariables.lockOnDebounce.Value 
     and GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering}) 
     and not GameVariables.pairedPlaying then
-        block(true)
+        GameVariables.block(true)
     end
 end
 
 -- Function to handle end of blocking input
 function ReceivingAndCountering.EndBlock(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2
-    and 
+    -- If the player is holding the block button, we store that as a variable:
+    if GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
+        GameVariables.isBlockBeingPressed = false
+    end
+
+    if 
     (GameVariables.FC_BlockStartTRACK.IsPlaying 
     or 
     GameVariables.FC_BlockTRACK.IsPlaying) 
@@ -252,7 +255,7 @@ function ReceivingAndCountering.EndBlock(input)
 	and not GameVariables.isAttacking 
 	and not GameVariables.getPublicPlayerInstance(GameVariables.player.Name)["isDodging"]
     then
-        block(false)
+        GameVariables.block(false)
     end
 end
 

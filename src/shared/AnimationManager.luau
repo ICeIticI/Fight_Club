@@ -53,7 +53,6 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
 
     -- Function to handle the start of the attack animation
     local function onStartOfAttack()
-        print("starting attack")
         GameVariables.attackFrames = true
         if v.Animation:GetAttribute("Paired") and v.Animation:GetAttribute("Counter") then
             GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, "CounterAttack", GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false)
@@ -129,6 +128,9 @@ local function ReceiveAnimManager(v, currentAnim)
             GameVariables.hitDebounce = false
         elseif not v.IsPlaying then
             GameVariables.reset()
+            if not GameVariables.isBlockBeingPressed and GameVariables.isBlocking then
+                GameVariables.block(false)
+            end
         end
 
         -- Changes that happen regardless if the receiving animation plays or stops
@@ -157,7 +159,6 @@ local function ReceiveAnimManager(v, currentAnim)
         elseif currentAnim.AnimationId == GameVariables.FC_BracingBlockL.AnimationId or currentAnim.AnimationId == GameVariables.FC_BracingBlockR.AnimationId then
             -- Handle bracing blocks
             if not v.IsPlaying then
-                GameVariables.isBlocking = false
                 -- Wait before allowing sync blocks again
                 task.wait(1)
                 if not GameVariables.FC_BracingBlockLTRACK.IsPlaying or not GameVariables.FC_BracingBlockRTRACK.IsPlaying then
@@ -221,7 +222,10 @@ local function MiscAnimManager(v)
         end
 
         if v.Animation.AnimationId == GameVariables.FC_Block.AnimationId then
-            task.wait(0.15)
+            if v.IsPlaying then
+                task.wait(0.5) -- only add a wait for sync blocks if they start blocking. If they let go, then no sync block should happen as soon as the guard drops
+            end
+
             GameVariables.Protocol = "HoldingBlock"
             GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, nil, GameVariables.isBlocking, nil, false)
         end

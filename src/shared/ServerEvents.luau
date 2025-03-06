@@ -11,7 +11,6 @@ local A1Damage = 5 -- default damage for lvl 1 attacks
 local A2Damage = 11 -- default damage for lvl 2 attacks
 local syncBlockDamage = 2.5 -- damage for sync blocks
 local counterAttackDamage = 8
-local sentAttackTrack = nil
 local attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
 
 local sound1, sound2, sound3 = 
@@ -81,12 +80,17 @@ end
 
 -- miscEvent function handlers:
 
-local function syncBlockHandler(hitCharacter, plrIsBlocking)
+local function syncBlockHandler(hitCharacter, plrIsBlocking, sentSFX)
 	attackDamage = syncBlockDamage
 	if plrIsBlocking then
 		attackDamage = attackDamage/2
 	end
 	hitCharacter.Humanoid.Health -= attackDamage
+	if sentSFX then
+		sentSFX:Play()
+		print("Playing SFX")
+		sentSFX.SoundId = ""
+	end
 end
 
 local function attackStartHoldBlockHandler(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, isAI, playerInstance)
@@ -162,9 +166,9 @@ function ServerEvents.miscEvents(object1, object2, object3, object4, object5, ob
 	local isAI = object8
 
 	local hitSFX = sendingPlayer.Character.Torso:FindFirstChild("hitSFX")
-	if Protocol == "Parry" or Protocol == "CounterAttack"  then
+	if Protocol == "Parry" or Protocol == "CounterAttack" or Protocol == "SyncedBlock" then
 		
-		if not hitSFX then
+		if not hitSFX or not hitSFX.SoundId then
 			hitSFX = Instance.new("Sound")
 			hitSFX.Name = "hitSFX"
 			hitSFX.SoundId = math.random(1, #tempHitSFXTable)
@@ -184,7 +188,7 @@ function ServerEvents.miscEvents(object1, object2, object3, object4, object5, ob
 	
 
 	if Protocol == "SyncedBlock" then
-		syncBlockHandler(hitCharacter, plrIsBlocking)
+		syncBlockHandler(hitCharacter, plrIsBlocking, hitSFX)
 	
 	elseif Protocol == "AttackStarted" or Protocol == "HoldingBlock" then
 		attackStartHoldBlockHandler(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, isAI, playerInstance)
@@ -223,27 +227,19 @@ function ServerEvents.miscEvents(object1, object2, object3, object4, object5, ob
 		-- sentForce is a number
 		local sentVelocity = hitCharacter -- takes the place of hitCharacter to save argument space
 		local sentDuration = currentAttack
-
-		-- turning player character's body parts massless so the force can move them
-		for _, v in pairs(sendingPlayer.Character:GetChildren()) do
-			if v:IsA("BasePart") then
-				v.Massless = true
-			end
-		end
 		
 		sendingPlayer.Character.HumanoidRootPart:WaitForChild("FC_LinearVelocity").VectorVelocity = sentVelocity
 		sendingPlayer.Character.HumanoidRootPart.FC_LinearVelocity.Enabled = true
 		task.wait(sentDuration) -- Character will be under said force till duration ends.
 
-		-- for _, v in pairs(sendingPlayer.Character:GetChildren()) do
-		-- 	if v:IsA("BasePart") then
-		-- 		v.Massless = false
-		-- 	end
-		-- end
-
 		sendingPlayer.Character.HumanoidRootPart.FC_LinearVelocity.VectorVelocity = Vector3.zero
 		sendingPlayer.Character.HumanoidRootPart.FC_LinearVelocity.Enabled = false
 
+	elseif Protocol == "setCharacterCFrame" then
+		local sentHRP = hitCharacter:WaitForChild("HumanoidRootPart")
+		local sentCFrame = currentAttack
+
+		sentHRP.CFrame = sentCFrame
 	end
 	attackDamage = nil
 end

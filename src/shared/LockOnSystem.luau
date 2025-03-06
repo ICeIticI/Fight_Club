@@ -21,11 +21,16 @@ local function createSubject(subject) --[[Creates a invisible part (subject) bet
 			subject.Anchored = true
 			subject.CFrame = CFrame.new(
 				GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X,
-				GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Y / 2,
+				GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Y,
 				(GameVariables.humanoidRootPart.Position.Z + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.Z) / 2)
 			subject.Parent = GameVariables.character
 end
 
+
+-- function LockOnSystem.Init() --[[ Function that should be ran as soon as the playe joins the game to control mouse behavior ]]
+-- 	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+
+-- end
 
 function LockOnSystem.LockOn()
 
@@ -65,9 +70,7 @@ function LockOnSystem.LockOn()
 		-- character changes below:
 		GameVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
 		GameVariables.SetSpeed(true)
-		--[[
 		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
-		--]]
 		
 		-- camera subject part
 		local subject = GameVariables.character:FindFirstChild("subject") or Instance.new("Part") --[[ Subject is the point
@@ -79,12 +82,10 @@ function LockOnSystem.LockOn()
 		end
 		
 		-- camera changes:
-		--[[ -- Roblox is having some camera-related issues as of now. Once they fix it I intend to re-enable this.
-		GameVariables.Camera.CameraType = Enum.CameraType.Orbital
+		-- GameVariables.Camera.CameraType = Enum.CameraType.Orbital
 		GameVariables.Camera.CameraSubject = subject
-		--Camera.CameraSubject = raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart")
-		GameVariables.Camera.Focus = GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.CFrame
-		]]
+		GameVariables.Camera.Focus = GameVariables.raycastResult.Instance.Parent:WaitForChild("HumanoidRootPart").CFrame
+		
 		
 		while GameVariables.lockOnDebounce.Value == true and workspace:Raycast(GameVariables.humanoidRootPart.Position, GameVariables.humanoidRootPart.CFrame.LookVector * 8, rayParams) ~= nil do -- constantly keeps the player facing the enemy
 			-- Constantly having the player face the enemy when locked on
@@ -110,11 +111,9 @@ function LockOnSystem.LockOn()
 		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 		
 		-- camera changes
-		--[[ -- Roblox is having some camera-related issues as of now. Once they fix it I intend to re-enable this.
 		GameVariables.Camera.Focus = GameVariables.originalCamFocus
 		GameVariables.Camera.CameraSubject = GameVariables.originalCamSubject
 		GameVariables.Camera.CameraType = Enum.CameraType.Custom
-		]]
 	end
 
 

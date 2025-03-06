@@ -34,59 +34,85 @@ local function GetMotor6Ds(givenChar)
 	return Motor6DsTable
 end
 
-local function Ragdoll(givenChar)
-	--[[this will be the function that.. well.. ragdolls the character ]]
-	
-	-- givenChar:WaitForChild("HumanoidRootPart").CFrame = givenChar.HumanoidRootPart.CFrame
-	-- 		givenChar.Parent = game.Workspace
-	-- 		local Protocol = "CameraChange"
-	-- 		GlobalRemoteEvent:FireClient(plr, nil, Protocol, nil, charClone) -- sending a remote event so we can parent the player's camera to the new clone
-	-- 		char:Destroy()
-	
-	local givenCharsHumanoid = givenChar.Humanoid
-	
-	givenCharsHumanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true) -- Will help the script run better. In other words, it will not be able to apply it's own physical force on other objects so long as the .Physics state is enabled.
-	
-	for _, v in pairs(jointsCache[givenChar]) do -- going through all of the given player's motor6d's and replacing them with BallSocketConstraints
-		v.Enabled = false -- v is each Motor6D in the table. Because we are replacing the motor6ds, we wont need them active.
-		
-		local attachment0, attachment1 = Instance.new("Attachment"), Instance.new("Attachment") -- creating two attachments that will tell the ballsocketconstraints where to joint things together
-		attachment0.CFrame = v.C0 -- C0 is a CFrame of the first basepart that is attached to the given Motor6D.
-		attachment0.Parent = v.Part0 -- part0 is the first basepart
-		
-		attachment1.CFrame = v.C1
-		attachment1.Parent = v.Part1
-		
-		local socket = Instance.new("BallSocketConstraint")
-		socket.Attachment0 = attachment0 -- Attachment0 is like Part0 of a Motor6D
-		socket.Attachment1 = attachment1
-		
-		
-		-- now with this, we have enabled ragodolling. However, with this alone, the player's head will bobble around like crazy which will shake the camera like an earthquake.
-		-- So to prevent this, we will limit the amount of "twistiness" the socket can do for the head, or particularly, the neck motor6d.
-		
-		if v.Name == "Neck" then
-			socket.LimitsEnabled = true -- limits the amount of roation for the socket
-			socket.TwistLimitsEnabled = true -- Limits the twist of the socket based on an upper angle and a lower angle
-			socket.UpperAngle = 10 -- the range of twist the socket is limited to, or how big of an angle the socket can rotate.
-			
+local function solidifyBodyParts(char, sentBool) -- Function that will make sure each body part of a given char is solid so it doesn't go through the ground and stuff when ragdolling
+	if sentBool == true then -- for ragdolls
+		for _, child in pairs(char:GetChildren()) do
+			if child:IsA("BasePart") then -- we found a body part
+				task.wait()
+				print(char.Name, child)
+				child.CanCollide = sentBool
+			end
 		end
-		
-		socket.Parent = v.Parent -- setting the parent last is best practice, because if we set the parent earlier, it will have to load everything about the socket, THEN re-assign values.
-		
+	elseif sentBool == false then -- for un-ragdolling..
+		for _, child in pairs(char:GetChildren()) do
+			if child:IsA("BasePart") then -- we found a body part
+				if child.Name == "Torso" or child.Name == "Head" then
+					child.CanCollide = true
+					warn(child)
+				else
+					child.CanCollide = false
+				end
+				task.wait()
+				print(char.Name, child)
+				child.CanCollide = sentBool
+			end
+		end
 	end
-
-
-	jointsCache[givenChar] = nil -- to clean up the given character's portion of the cache since they died.
 end
 
--- Connects
-function RagdollSystem.InitializePlayer()
-	--[[ When a player joins the game, we want to set up two instances:
-	     Linear and Angular velocities that will be given a parent of
-		 the current character of the player. The function will return
-		 these, so it can be used when initializing the plr char. ]]
-		 
+local function Ragdoll(givenChar, sentBool) --[[this will be the function that.. well.. ragdolls the character ]]
+	local givenCharsHumanoid = givenChar.Humanoid
+
+	if sentBool == true then
+		givenCharsHumanoid.PlatformStand = true
+		givenCharsHumanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+		for _, v in pairs(jointsCache[givenChar]) do
+			v.Enabled = false
+
+			local attachment0, attachment1 = Instance.new("Attachment"), Instance.new("Attachment")
+			attachment0.Name = "ragdoll_attachment0"
+			attachment0.CFrame = v.C0
+			attachment0.Parent = v.Part0
+			
+			attachment1.Name = "ragdoll_attachment1"
+			attachment1.CFrame = v.C1
+			attachment1.Parent = v.Part1
+			
+			local socket = Instance.new("BallSocketConstraint")
+			socket.Name = "ragdoll_socket"
+			socket.Attachment0 = attachment0
+			socket.Attachment1 = attachment1
+			
+			if v.Name == "Neck" then
+				socket.LimitsEnabled = true
+				socket.TwistLimitsEnabled = true
+				socket.UpperAngle = 10
+			end
+			
+			socket.Parent = v.Parent
+		end
+	else
+		givenCharsHumanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+		for _, v in pairs(jointsCache[givenChar]) do
+			v.Enabled = true
+
+			for _, child in pairs(v.Parent:GetChildren()) do
+				if child:IsA("BallSocketConstraint") or (child:IsA("Attachment") and string.find(child.Name, "ragdoll_attachment")) then
+					child:Destroy()
+				end
+			end
+		end
+		givenCharsHumanoid.PlatformStand = false
+	end
+
+	-- givenCharsHumanoid.PlatformStand = not sentBool
+	solidifyBodyParts(givenChar, sentBool)
+end
+
+-- Connects:
+
+function RagdollSystem.InitializePlayer() --[[ When a player joins the game, we want to set up two instances: Linear and Angular velocities that will be given a parent of the current character of the player. The function will return these, so it can be used when initializing the plr char. ]]
+
 -- Players.PlayerAdded:Connect(function(plr) -- for joining players
 	
 	-- local charClone = nil
@@ -140,7 +166,7 @@ function RagdollSystem.InitializeCharacter(linearVelocity, angularVelocity, char
 			--charClone.Parent = game.Workspace
 			--print(charClone.HumanoidRootPart.Position)
 			--GlobalRemoteEvent:FireClient(plr, nil, Protocol, nil, charClone) -- sending a remote event so we can parent the player's camera to the new clone
-            Ragdoll(char)
+            Ragdoll(char, true)
 
 			-- giving the character random velocity when on ragdoll:
 			linearVelocity.Enabled = true
@@ -152,10 +178,41 @@ function RagdollSystem.InitializeCharacter(linearVelocity, angularVelocity, char
 
 			-- charClone.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
 			-- charClone.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
-			
+			jointsCache[char] = nil -- to clean up the given character's portion of the cache since they died.
 		end)
 		
 		jointsCache[char] = GetMotor6Ds(char) -- getting the Motor6Ds of the given player and storing it in as it's own key in this table.
+
+		-- Not ready yet..:
+		--[[
+			local FC_LinearVelocity = char.HumanoidRootPart:WaitForChild("FC_LinearVelocity")
+		local LeftLegHitbox = char[char.Name .. "_hitboxesFolder"]:WaitForChild(char.Name .. "_hitboxLeftLeg")
+		local RightLegHitbox = char[char.Name .. "_hitboxesFolder"]:WaitForChild(char.Name .. "_hitboxRightLeg")
+		
+		local legHitboxesTable = {
+			LeftLegHitbox,
+			RightLegHitbox
+		}
+		
+		for _, hitbox in pairs(legHitboxesTable) do
+			hitbox.Touched:Connect(function()
+				if FC_LinearVelocity.VectorVelocity.Magnitude > 0.1 then
+					Ragdoll(char, true)
+					wait(2)
+					Ragdoll(char, false)
+				end
+				print(FC_LinearVelocity.VectorVelocity.Magnitude)
+			end)
+		end
+		]]
+		
+
+		--testing:
+		-- task.wait(3)
+		-- Ragdoll(char, true)
+		-- print("ragdolled the char")
+		-- task.wait(3)
+		-- Ragdoll(char, false)
 -- end)
 end
 

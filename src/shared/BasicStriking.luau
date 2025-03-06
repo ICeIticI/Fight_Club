@@ -59,7 +59,7 @@ local function attack(followupCombo)
     -- if GameVariables.getPublicPlayerInstance(GameVariables.enemyChar.Name)["isDodging"] == true then
     --     GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack:GetAttribute("AnimDirection"))
     --     GameVariables.randAttack:Play()
-    if GameVariables.isEnemyHoldingBlock and not GameVariables.isGettingHit and GameVariables.enemyChar.Humanoid.MoveDirection.Magnitude == 0 then
+    if GameVariables.isEnemyHoldingBlock and not GameVariables.isGettingHit and GameVariables.enemyChar.Humanoid.MoveDirection.Magnitude == 0 and GameVariables.comboCounter == 0 then
         GameVariables.synchedBlock(nil, followupCombo)
     elseif GameVariables.isGettingHit then
         return false
@@ -91,7 +91,27 @@ end
 
 local function dodgeAttack() --[[ Function that will execute a dodge attack between a character and enemy ]]
     GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.dodgeAttacksTable, "DodgeAttack", true, "AnimDirection", GameVariables.dodgeTrack.Animation:GetAttribute("AnimDirection"))
-    GameVariables.repositionInFrontOfEnemy()
+    
+    if GameVariables.randAttack.Animation.AnimationId ~= GameVariables.FC_LDodgeAttack1.AnimationId then
+        GameVariables.repositionInFrontOfEnemy() -- We dont reposition for left dodge attack cause it makes it not as cool for some reason
+    end
+    
+    if GameVariables.randAttack.Animation.AnimationId == GameVariables.FC_LDodgeAttack1.AnimationId then
+        
+        GameVariables.setCharacterCFrame(GameVariables.character, GameVariables.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0))
+        
+        local moveDistanceX = -3
+        local moveDistanceZ = -3
+        local travelTime = 0.14/0.60
+        GameVariables.setLinearVelocity(Vector3.new(moveDistanceX/travelTime, 0, moveDistanceZ/travelTime), travelTime)
+    
+    elseif GameVariables.randAttack.Animation.AnimationId == GameVariables.FC_RDodgeAttack1.AnimationId then
+    
+        local moveDistance = 2.5
+        local travelTime = 0.26/0.60
+        GameVariables.setLinearVelocity(Vector3.new(moveDistance/travelTime, 0, 0), travelTime)
+    end
+    
 
     -- GameVariables.dodgeAttackTrack:Play()
     GameVariables.randAttack:Play()
@@ -164,7 +184,6 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
         
         if GameVariables.isEnemyHoldingBlock and GameVariables.pairedChain <= GameVariables.PairedChainMAX then
             GameVariables.pairedChain += 1
-            print("paired chain added. Num of times: " .. tostring(GameVariables.pairedChain))
         end
         
         if GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) and not GameVariables.waitingToAttack and not GameVariables.canFollowUp and not GameVariables.pairedPlaying then
@@ -195,8 +214,7 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
         
 function BasicStriking.Attack(input)
     
-    if input.UserInputType == Enum.UserInputType.MouseButton1 
-    and not GameVariables.waitingToAttack 
+    if not GameVariables.waitingToAttack 
     and GameVariables.lockOnDebounce.Value 
     and GameVariables.pairedChain <= GameVariables.PairedChainMAX 
     and GameVariables.boolCheck({nil, GameVariables.isBlocking, GameVariables.isCountering, GameVariables.isGettingHit}) 

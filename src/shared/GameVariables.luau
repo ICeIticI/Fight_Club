@@ -319,7 +319,7 @@ GameVariables.PairedChainMAX = 3 -- The max value for pairedChain.
 GameVariables.AttackInputs = {[Enum.UserInputType.MouseButton1] = true, [Enum.UserInputType.Touch] = true, [Enum.KeyCode.ButtonB] = true} -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
 GameVariables.BlockInputs = {[Enum.UserInputType.MouseButton2] = true, [Enum.KeyCode.ButtonX] = true}
 GameVariables.GrappleInputs = {[Enum.KeyCode.R] = true, [Enum.KeyCode.ButtonY] = true}
--- GameVariables.LockOnInputs = {Enum.KeyCode} -- May have LockOnInputs for each system
+GameVariables.LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -- May have LockOnInputs for each system
 
 --GameVariables.humanoid = nil -- we need this here because the script doesn't know what is connected to the .Died event until the .Init() function runs, but this :Connect will begin checking as soon as the script reaches it, so we need it to at least exist as a variable before using it in a built-in event.
 local canInit = true -- local variable that dictates when the script is able to initialize the Init() function. We don't want it running twice, as that will just be creating unnecessairy load times.
@@ -391,10 +391,6 @@ function GameVariables.SetSpeed(bool) -- Function that manages the character spe
 		-- we take the player's ability to move away
 		GameVariables.humanoid.WalkSpeed = 0
 	end
-end
-
-function GameVariables.canDoStuff() --[[ When the player does any action such as an attack or block, we want to make sure they can't do anything else until that action ends. So with this function, we can set their ability to do other things with either 'true' or false as a passed bool. ]]
-	
 end
 
 function GameVariables.reset()
@@ -600,6 +596,19 @@ function GameVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the 
 	end
 end
 
+function GameVariables.block(bool)
+	if bool == true then
+		GameVariables.FC_BlockStartTRACK:Play()
+		GameVariables.humanoid.WalkSpeed /= 1.5
+	else
+		GameVariables.isBlocking = false
+		-- GameVariables.canSyncBlock = false
+		GameVariables.FC_BlockStartTRACK:Stop()
+		GameVariables.FC_BlockTRACK:Stop()
+		GameVariables.SetSpeed(true)
+	end
+end
+
 function GameVariables.getPublicPlayerInstance(plrName) --[[ Function that will fetch from the server the public playerInstance values in a single table, replicating the playerInstance, so the client can use it for checks. Will return nil if there is no such player in the game.]]
     -- print(plrName)
 	local protocol = "getPlayerInstance"
@@ -615,6 +624,12 @@ end
 function GameVariables.setLinearVelocity(velocity, durationOfVelocity) --[[ Function that will set the VectorForce of the player's character to the given Vector3. ]]
 	local protocol = "SetLinearVelocity"
 	GameVariables.GlobalRemoteEvent:FireServer(velocity, protocol, durationOfVelocity)
+end
+
+function GameVariables.setCharacterCFrame(char, newCFrame) --[[ Will set the character position on the server so it's changes will more accurately reflect across the server. ]]
+	local HRP = char:WaitForChild("HumanoidRootPart")
+	local protocol = "setCharacterCFrame"
+	GameVariables.GlobalRemoteEvent:FireServer(char, protocol, newCFrame)
 end
 
 --[[

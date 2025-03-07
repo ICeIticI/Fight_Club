@@ -41,7 +41,7 @@ local function createHitbox(player, bodyPart) --[[ Function that will create a h
 	hitbox.Name = player.Name.."_hitbox" .. bodyPart.Name:gsub(" ", "") -- Find any spaces in the part name and get rid of them. Say a part like 'Right Leg', it will turn into 'RightLeg'
 	hitbox.Position = bodyPart.Position
 	hitbox.CanCollide = false
-	hitbox.Transparency = 0.5
+	hitbox.Transparency = 1
 	hitbox:SetAttribute("AttackDirection", "Right")
 	hitbox:SetAttribute("ReceiveBox", true)
 	-- hitbox.Parent = character:WaitForChild(hbFolder.Name)
@@ -68,8 +68,16 @@ local function createHitbox(player, bodyPart) --[[ Function that will create a h
 		hitbox.Size = Vector3.new(1,2,1)
 		hitbox:SetAttribute("AttackDirection", "forward")
 	end
-
+	task.wait()
 	return hitbox
+end
+
+local function disableDefaultTouchDetections(givenChar) --[[ This function will go through the given character and disable the .Touched connections for their baseparts such as their head, arms, etc. Without doing this, the hitboxes maually added wont work well.]]
+	for _, child in pairs(givenChar:GetChildren()) do
+		if child:IsA("BasePart") then
+			child.CanTouch = false
+		end
+	end
 end
 
 function ServerInit.InitializePlayer(player)
@@ -128,6 +136,8 @@ function ServerInit.InitializeCharacter(character)
 	   referances of player objects. ]]
 	hbFolder.Name = player.Name.."_hitboxesFolder"
 	hbFolder.Parent = character
+
+	disableDefaultTouchDetections(character)
 	
 	local hitboxHead = createHitbox(player, character:WaitForChild("Head"))
 	hitboxHead.Parent = character:WaitForChild(hbFolder.Name)

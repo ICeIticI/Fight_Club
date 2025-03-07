@@ -48,31 +48,34 @@ end
 -- bAttack function handlers:
 
 local function attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBlocking, enemyInstance, isAI) --[[ handles when a character lands an attack ]]
-	
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
 	local hitSFX = sendingPlayer.Character.Torso:FindFirstChild("hitSFX")
-
+	
 	if not enemyInstance.iFrames and (not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) or not enemyInstance.currentAttack) then
 		local otherProtocol = "Receive"
+		
 		if hitPlayer then
 			GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, otherProtocol)
 		elseif hitCharacter then
 			isAI = true
 			GlobalRemoteEvent:FireClient(sendingPlayer, currentAttack, otherProtocol, nil, nil, isAI)
 		end
-
+			
 		task.wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
 		enemyInstance = getPlayerInstance(hitPlayer.Name) -- table that holds public variables for the server to see and use
 		enemyInstance.enemyCFrame = sendingPlayer.Character.HumanoidRootPart.CFrame -- We want to know where the enemy is when they hit us so we can repel the opposite direction
-
+			
 		if plrIsBlocking then
 			attackDamage = attackDamage/2
 		end
+		print("Yoyo attack damage?", attackDamage)
 		if attackDamage and not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
+			print(attackDamage)
 			-- hitPlayer.Character.Humanoid.Health -= attackDamage
 			hitPlayer.Character.Humanoid:TakeDamage(attackDamage)
 			hitSFX:Play()
 		end
+
 	end
 end
 
@@ -148,6 +151,7 @@ function ServerEvents.bAttackEvents(object1, object2, object3, object4, _, _, ob
 		end
 
 	if Protocol == "Hook" or Protocol == "Haymaker" then -- We're basically making sure the enemy is not countering the player here. enemyInstance is a table that includes the enemy's current attacking animation track. We don't want them taking damage if they are countering.
+		print(Protocol)
 		attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBlocking, enemyInstance, enemyCFrame)
 	end
 end
@@ -241,7 +245,7 @@ function ServerEvents.miscEvents(object1, object2, object3, object4, object5, ob
 
 		sentHRP.CFrame = sentCFrame
 	end
-	attackDamage = nil
+	-- attackDamage = nil
 end
 
 

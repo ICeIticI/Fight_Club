@@ -5,7 +5,14 @@ local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables)
 local LockOnSystem = {}
 
 local function faceEnemy(subject)
-	GameVariables.humanoidRootPart.CFrame = CFrame.lookAt(GameVariables.humanoidRootPart.Position, Vector3.new(GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X, GameVariables.humanoidRootPart.Position.Y, GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.Position.Z)) -- makes sure the player character is always facing the enemy character.
+	
+	GameVariables.humanoidRootPart.CFrame = CFrame.lookAt(
+		GameVariables.humanoidRootPart.Position, 
+		Vector3.new(GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X, 
+		GameVariables.humanoidRootPart.Position.Y, 
+		GameVariables.raycastResult.Instance.Parent.HumanoidRootPart.Position.Z)
+	) -- makes sure the player character is always facing the enemy character.
+	
 	subject.CFrame = CFrame.new(
 		(GameVariables.humanoidRootPart.Position.X + GameVariables.raycastResult.Instance.Parent:FindFirstChild("HumanoidRootPart").Position.X) / 2,
 		subject.CFrame.Y,
@@ -44,7 +51,7 @@ function LockOnSystem.LockOn()
 						  rayParams) -- Raycast in front of player to find an enemy
 						  
 
-		if GameVariables.raycastResult and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto.
+		if GameVariables.raycastResult and not GameVariables.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto (thats not the tavern keeper).
 			GameVariables.enemyHumanoid = GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
 			GameVariables.enemyChar = GameVariables.enemyHumanoid.Parent
 			

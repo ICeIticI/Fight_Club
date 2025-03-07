@@ -127,7 +127,7 @@ function BasicStriking.manageHitboxes()
     task.wait()
     for _, v in pairs(GameVariables.hitboxesFolderATTACK) do
         local touchedConnection = v.Touched:Connect(function(touchedObject)
-            if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") and GameVariables.currentAttack then
+            if GameVariables.isAttacking and not GameVariables.hitDebounce and touchedObject:GetAttribute("ReceiveBox") and touchedObject.Parent.Parent:FindFirstChild("Humanoid") and GameVariables.currentAttack and not touchedObject:IsAncestorOf(GameVariables.character) then
                 GameVariables.hitDebounce = true
                 local enemyCharacter = touchedObject.Parent.Parent
                 local enemyPlayer = game.Players:GetPlayerFromCharacter(enemyCharacter)
@@ -149,6 +149,7 @@ function BasicStriking.manageHitboxes()
                 end
 
                 if enemyPlayer and GameVariables.isAttacking and GameVariables.attackFrames then
+                    warn(GameVariables.Protocol)
                     GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.character.HumanoidRootPart.CFrame, nil, GameVariables.isEnemyHoldingBlock, false)
                 -- else
                 --     warn({enemyPlayer, GameVariables.isAttacking, GameVariables.attackFrames})

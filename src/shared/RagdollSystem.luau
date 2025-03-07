@@ -39,7 +39,6 @@ local function solidifyBodyParts(char, sentBool) -- Function that will make sure
 		for _, child in pairs(char:GetChildren()) do
 			if child:IsA("BasePart") then -- we found a body part
 				task.wait()
-				print(char.Name, child)
 				child.CanCollide = sentBool
 			end
 		end
@@ -53,7 +52,6 @@ local function solidifyBodyParts(char, sentBool) -- Function that will make sure
 					child.CanCollide = false
 				end
 				task.wait()
-				print(char.Name, child)
 				child.CanCollide = sentBool
 			end
 		end

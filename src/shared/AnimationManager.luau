@@ -255,7 +255,10 @@ end
 
 function AnimationManager.manageAnimations()
 	task.wait()
-	for _, v in pairs(GameVariables.AllAnimations) do -- When the player presses an input and attacks (down below in UserInputService), this body of code will manage the player's current combo and their ability to do a followup attack after their first. It's up here so this isn't re-created
+   
+    while not GameVariables.AllAnimations do task.wait() end
+	
+    for _, v in pairs(GameVariables.AllAnimations) do -- When the player presses an input and attacks (down below in UserInputService), this body of code will manage the player's current combo and their ability to do a followup attack after their first. It's up here so this isn't re-created
 
 		local currentAnim = v.Animation
 		local EndOfAttackExists = false -- for the functions that don't have this event, I want them to run code when the animation has stopped. However, animations that have this marker won't be able to run it.

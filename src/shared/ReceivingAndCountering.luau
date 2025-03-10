@@ -234,7 +234,8 @@ function ReceivingAndCountering.Block(input)
 
     if GameVariables.lockOnDebounce.Value 
     and GameVariables.boolCheck({GameVariables.isAttacking, GameVariables.isBlocking, GameVariables.isCountering}) 
-    and not GameVariables.pairedPlaying then
+    and not GameVariables.pairedPlaying
+    and GameVariables.stamina and GameVariables.stamina > 0 then
         GameVariables.block(true)
     end
 end

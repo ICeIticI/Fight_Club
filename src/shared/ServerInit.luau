@@ -107,6 +107,9 @@ function ServerInit.InitializeCharacter(character)
 
 	local player = game.Players:GetPlayerFromCharacter(character)
 
+	character.Humanoid.WalkSpeed = 12
+	character.Humanoid.JumpPower = 0
+
 	local linearVelocity = Instance.new("LinearVelocity")
 	linearVelocity.Enabled = false
 	linearVelocity.Name = "FC_LinearVelocity"

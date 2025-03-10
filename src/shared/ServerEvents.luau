@@ -68,10 +68,8 @@ local function attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBl
 		if plrIsBlocking then
 			attackDamage = attackDamage/2
 		end
-		print("Yoyo attack damage?", attackDamage)
+
 		if attackDamage and not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
-			print(attackDamage)
-			-- hitPlayer.Character.Humanoid.Health -= attackDamage
 			hitPlayer.Character.Humanoid:TakeDamage(attackDamage)
 			hitSFX:Play()
 		end

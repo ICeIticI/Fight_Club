@@ -255,6 +255,7 @@ end
 
 function AnimationManager.manageAnimations()
 	task.wait()
+    warn("Now gonna manage aniamtions:")
    
     while not GameVariables.AllAnimations do task.wait() end
 	

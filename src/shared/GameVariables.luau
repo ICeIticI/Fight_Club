@@ -3,6 +3,7 @@ local GameVariables = {}
 GameVariables.__index = GameVariables
 
 GameVariables.player = game:GetService("Players").LocalPlayer
+GameVariables.initialized = false
 
 local function Init() -- The .CharacterAdded event doesn't always track when a player character is added. Sometimes the character spawns and beats the event. So just in case, this function was created to initialize (or reinitialize) variables that are crutial for the game to work.
 	
@@ -27,7 +28,6 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.hitboxesFolderRECEIVE = {GameVariables.hitboxHead, GameVariables.hitboxTorso}
 
 	GameVariables.Protocol = nil
-	GameVariables.humanoid.WalkSpeed = GameVariables.walkingSpeed
 	GameVariables.humanoid.JumpPower = 0
 
 	-- Bools and Values:
@@ -227,6 +227,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	GameVariables.pairedBlock = nil -- the variable for which paired block the attacker is doing
 	GameVariables.pairedChain = 0 -- The tracker of the character's sync block attack chain. They can only do as many as the max allows
 
+	GameVariables.initialized = true
+	return print("Initialized the client variables")
 end
 
 GameVariables.Camera = game.Workspace.CurrentCamera
@@ -241,7 +243,6 @@ GameVariables.LocalBindableEvent = Instance.new("BindableEvent")
 GameVariables.LocalBindableEvent.Name = "LocalBindableEvent"
 GameVariables.LocalBindableEvent.Parent = game.ReplicatedStorage
 
-GameVariables.walkingSpeed = 12
 
 -- NOTE*: Perhaps instead of creating a bunch of animations, we make a single animation then when the player needs to animate, load the animId into the animation. Id's would prob be in a table.
 
@@ -323,12 +324,22 @@ GameVariables.LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] =
 
 --GameVariables.humanoid = nil -- we need this here because the script doesn't know what is connected to the .Died event until the .Init() function runs, but this :Connect will begin checking as soon as the script reaches it, so we need it to at least exist as a variable before using it in a built-in event.
 local canInit = true -- local variable that dictates when the script is able to initialize the Init() function. We don't want it running twice, as that will just be creating unnecessairy load times.
+local humanoidDiedConnect -- the :Connect() event for when the player's current humanoid dies.
 
 GameVariables.player.CharacterAdded:Connect(function()
 	if canInit then
 		Init()
 		canInit = false
 	end
+
+	humanoidDiedConnect = GameVariables.humanoid.Died:Connect(function()
+		canInit = true
+		GameVariables.initialized = false
+		
+		-- Disconnect the .Died event so we don't have .Died connects of the player's past dead humanoids running, which will be re-initialized on next player character spawn:
+		humanoidDiedConnect:Disconnect()
+	 end)
+
 end)
 
  -- find a way to make sure these two Init() functions don't both run. Only one Init() should run when the player character spawns in.
@@ -338,15 +349,17 @@ end)
 		Init()
 		canInit = false
 	end
+
+	GameVariables.humanoid.Died:Connect(function()
+		canInit = true
+		GameVariables.initialized = false
+	 end)
+
 end
 
 while not GameVariables.humanoid do -- will wait until the humanoid exists.
 	wait()
 end
-
- GameVariables.humanoid.Died:Connect(function()
-	canInit = true
- end)
 
 -- origins
 GameVariables.originalWalkSpeed = GameVariables.humanoid.WalkSpeed

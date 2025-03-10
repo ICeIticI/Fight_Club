@@ -11,6 +11,7 @@ local Animation_Manager = require(game.ReplicatedStorage.Shared.AnimationManager
 local LockOnSystem = require(game.ReplicatedStorage.Shared.LockOnSystem) -- Holds the mechanics for locking onto enemies
 local BasicStriking = require(game.ReplicatedStorage.Shared.BasicStriking)
 local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAndCountering)
+local UIManager = require(game.ReplicatedStorage.Shared.UIManager)
 
 -- -- New Modules:
 
@@ -19,23 +20,37 @@ local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAn
 
 GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
     -- Manages the remote events the client receives.
+
+    while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+    
     ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
     -- receiveCommand:CallReceive(currentAttack, Protocol, sentAnimPair, sentValue)
 end)
 
 if game.Players.LocalPlayer.Character then -- The player may load faster than the script, so this will ensure the player won't skip initializing
     -- Initializes the player
+
+    while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+
     Animation_Manager.manageAnimations() --We want to manage the animations of the player as soon as they spawn in.
     BasicStriking.manageHitboxes() -- We also want to manage the plr char's attack hitboxes when they spawn as well.
+    UIManager.Init()
 end
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
     -- Initializes the player
+
+    while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+
     Animation_Manager.manageAnimations() --We want to manage the animations of the player as soon as they spawn in.
     BasicStriking.manageHitboxes() -- We also want to manage the plr char's attack hitboxes when they spawn as well.
+    UIManager.Init()
 end)
 
 UserInputService.InputBegan:Connect(function(input)
+
+    while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+
     if GameVariables.LockOnInputs[input.KeyCode] then -- May have lock on inputs for each system.
         -- Locks the player onto the enemy
         LockOnSystem.LockOn()
@@ -61,6 +76,9 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 UserInputService.InputEnded:Connect(function(input)
+    
+    while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+    
     if GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
         -- The player will stop blocking
         ReceivingAndCountering.EndBlock(input)

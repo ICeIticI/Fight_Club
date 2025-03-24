@@ -110,8 +110,9 @@ local function handleDodges()
             task.wait(0.2) -- give the dodger a bit of time to do an attack before the dodge ends after doing a successful dodge without getting hit when the dodge animation finishes.
         end
         GameVariables.setPublicPlayerVariable("isDodging", false) -- any reaon at all the animation stops, they are no longer dodging.
-        if not GameVariables.isAttacking or not GameVariables.waitingToAttack then
+        if not GameVariables.isAttacking and not GameVariables.waitingToAttack then
             GameVariables.SetSpeed(true)
+            warn(" fsaqfas")
         end
     end
 end

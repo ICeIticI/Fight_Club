@@ -28,6 +28,7 @@ local function newPlayer(plr)
 	self.isDodging = false -- Bool that is set to true when the player is dodging. So when an enemy attacks, and tries to attack again at the player, and if they're dodging, they won't be able to.
 	-- self.canAttack = true -- Bool that is true when the player is allowed to attack. Useful to disable when the player is not allowed to attack on their next attack
 	self.enemyCFrame = 0 -- The CFrame of the enemy when the enemy attacks the player
+	self.canCounter = false -- bool that determines if a player will counter the next attack done by an enemy.
 
 	print("Instance for " .. tostring(plr.Name) .. " has been created.")
 	return self

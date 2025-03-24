@@ -385,6 +385,7 @@ end
 
 function GameVariables.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
 	if bool == true then
+		print("giving back speed")
 		-- we allow the player the ability to move
 
 		if GameVariables.pairedPlaying == false and GameVariables.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
@@ -401,6 +402,7 @@ function GameVariables.SetSpeed(bool) -- Function that manages the character spe
 		end
 
 	elseif bool == false then
+		print("taking away speed")
 		-- we take the player's ability to move away
 		GameVariables.humanoid.WalkSpeed = 0
 	end
@@ -618,7 +620,9 @@ function GameVariables.block(bool)
 		-- GameVariables.canSyncBlock = false
 		GameVariables.FC_BlockStartTRACK:Stop()
 		GameVariables.FC_BlockTRACK:Stop()
-		GameVariables.SetSpeed(true)
+		if not GameVariables.isGettingHit then
+			GameVariables.SetSpeed(true)
+		end
 	end
 end
 

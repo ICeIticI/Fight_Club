@@ -51,7 +51,7 @@ local function attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBl
 	local hitPlayer = game.Players:GetPlayerFromCharacter(hitCharacter)
 	local hitSFX = sendingPlayer.Character.Torso:FindFirstChild("hitSFX")
 	
-	if not enemyInstance.iFrames and (not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) or not enemyInstance.currentAttack) then
+	if not enemyInstance.iFrames and (not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator)) then
 		local otherProtocol = "Receive"
 		
 		if hitPlayer then
@@ -69,7 +69,7 @@ local function attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBl
 			attackDamage = attackDamage/2
 		end
 
-		if attackDamage and not isCounterTrackPlaying(hitCharacter.Humanoid.charAnimator) then
+		if attackDamage and not enemyInstance.canCounter then
 			hitPlayer.Character.Humanoid:TakeDamage(attackDamage)
 			hitSFX:Play()
 		end
@@ -212,6 +212,7 @@ function ServerEvents.miscEvents(object1, object2, object3, object4, object5, ob
 	
 	elseif Protocol == "CounterAttack" then
 		-- hitCharacter.Humanoid.Health -= counterAttackDamage
+		
 		hitCharacter.Humanoid:TakeDamage(counterAttackDamage)
 		hitSFX:Play()
 	elseif Protocol == "setPlayerVariable" then

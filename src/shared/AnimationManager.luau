@@ -20,8 +20,10 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
         if v.IsPlaying then
             GameVariables.isAttacking = true
             GameVariables.SetSpeed(false)
+            warn("taking away speed")
 
             if v.Animation:GetAttribute("Counter") == true then
+                GameVariables.setPublicPlayerVariable("canCounter", true)
                 GameVariables.isCountering = true
                 GameVariables.isAttacking = true
                 GameVariables.currentAttack = v.Animation
@@ -55,6 +57,7 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
     local function onStartOfAttack()
         GameVariables.attackFrames = true
         if v.Animation:GetAttribute("Paired") and v.Animation:GetAttribute("Counter") then
+            GameVariables.setPublicPlayerVariable("canCounter", false)
             GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, "CounterAttack", GameVariables.currentAttack, nil, nil, GameVariables.isEnemyHoldingBlock, false)
         else
             GameVariables.canFollowUp = true
@@ -116,7 +119,7 @@ local function ReceiveAnimManager(v, currentAnim)
     local function onAnimationPlaying()
         if not v.IsPlaying and v.Animation:GetAttribute("Counter") then
             -- Delay the receiver after getting countered to ensure a punish
-            task.wait(0.15)
+            task.wait(0.4)
             print("can now do stuff")
             GameVariables.isGettingHit = false
         end

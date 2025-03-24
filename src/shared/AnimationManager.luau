@@ -20,7 +20,6 @@ local function AttackAnimManager(v, currentAnim, EndOfAttackExists)
         if v.IsPlaying then
             GameVariables.isAttacking = true
             GameVariables.SetSpeed(false)
-            warn("taking away speed")
 
             if v.Animation:GetAttribute("Counter") == true then
                 GameVariables.setPublicPlayerVariable("canCounter", true)

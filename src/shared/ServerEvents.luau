@@ -149,7 +149,6 @@ function ServerEvents.bAttackEvents(object1, object2, object3, object4, _, _, ob
 		end
 
 	if Protocol == "Hook" or Protocol == "Haymaker" then -- We're basically making sure the enemy is not countering the player here. enemyInstance is a table that includes the enemy's current attacking animation track. We don't want them taking damage if they are countering.
-		print(Protocol)
 		attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBlocking, enemyInstance, enemyCFrame)
 	end
 end

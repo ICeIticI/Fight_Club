@@ -62,7 +62,6 @@ local function handleDodges()
     local vectorVelocity = Vector3.zero -- When dodging, we obviously want the player to move, so this will be the moving part of the dodge. Depending on the dodge, this will equal a vector3 value.
 
     if rightDotProduct > 0 and frontDotProduct > -0.5 then -- character is moving right
-    print("right dodge")
     distanceToTravel = 2
     animTime = 0.53
     vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
@@ -72,7 +71,6 @@ local function handleDodges()
     -- GameVariables.dodgeAttackTrack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Right", "DodgeAttack", true)
     
     elseif rightDotProduct < 0 and frontDotProduct > -0.5 then -- character is moving left
-        print("left dodge")
         distanceToTravel = -2
         animTime = 0.53 
         vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
@@ -82,7 +80,6 @@ local function handleDodges()
         -- GameVariables.dodgeAttackTrack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Left", "DodgeAttack", true)
     else
         if frontDotProduct < 0 then -- character is moving backwards
-            print("back dodge")
             distanceToTravel = 2
             animTime = 0.23
             vectorVelocity = Vector3.new(0, 0, distanceToTravel / animTime)
@@ -112,7 +109,6 @@ local function handleDodges()
         GameVariables.setPublicPlayerVariable("isDodging", false) -- any reaon at all the animation stops, they are no longer dodging.
         if not GameVariables.isAttacking and not GameVariables.waitingToAttack then
             GameVariables.SetSpeed(true)
-            warn(" fsaqfas")
         end
     end
 end
@@ -152,7 +148,6 @@ local function receive(currentAttack)
             GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockLTRACK
         end
     end
-    print(GameVariables.isBlocking)
 
     if GameVariables.currentReceiveAnimTRACK then -- play receive animation
         GameVariables.currentReceiveAnimTRACK:Play()

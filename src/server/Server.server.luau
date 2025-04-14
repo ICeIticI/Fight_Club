@@ -13,6 +13,9 @@ local RagdollSystem = require(game.ReplicatedStorage.Shared.RagdollSystem)
 local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
+-- New modules:
+
+local Character = require(game.ReplicatedStorage.Shared.character_class.character)
 
 GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
     if Protocol == "Hook" or Protocol == "Haymaker" then -- Used to check which set of remote events should play. When doing basic striking, no animPair nor sentValue is sent in the parameters, unlike doing other misc. events, which is how we distinguish, splitting the events into two to make the code easier to understand.
@@ -31,14 +34,29 @@ Players.PlayerAdded:Connect(function(player)
     ServerInit.InitializePlayer(player) -- initializes player's public objects
     local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()
 
+    local characterInstance
     if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.
+        
+        characterInstance = Character.new()
+        characterInstance:assignPlayer(player)
+    
         ServerInit.InitializeCharacter(player.Character)
-        RagdollSystem.InitialwalkingSpeedizeCharacter(playerVelocities[1], playerVelocities[2], player.Character) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
+        RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], player.Character) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
+
     end
 
     player.CharacterAdded:Connect(function(char)
         -- Initialize character-related stuff on spawn.
+
+        characterInstance = Character.new()
+        characterInstance:assignPlayer(player)
+        
         ServerInit.InitializeCharacter(char)
         RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], char) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
+    end)
+
+    player.CharacterRemoving:Connect(function()
+        -- We want to delete the instance of the character class from the old character
+        characterInstance:delete()
     end)
 end)

@@ -165,7 +165,7 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
         if Protocol == "Receive" then
             receive(currentAttack)
         elseif Protocol == "AttackStarted" then
-            -- If the enemy is starting an attack, and the player is blocking, perform a synched block
+
             if GameVariables.isBlocking and GameVariables.humanoid.MoveDirection.Magnitude > 0 then
                 -- The player is moving
 
@@ -175,9 +175,10 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
                 -- The player is not moving and will perform a sync block
                 GameVariables.synchedBlock(sentAnimPair, sentValue)
             end
-        elseif Protocol == "HoldingBlock" then
+
+        elseif Protocol == "HoldingBlock" then -- enemy is holding block, meaning they can dodge or sync block
             GameVariables.isEnemyHoldingBlock = sentValue
-        elseif Protocol == "Parry" then
+        elseif Protocol == "Parry" then -- we will get parried
             GameVariables.randAttack:Stop()
             if currentAttack:GetAttribute("AnimDirection") == "Left" then
                 GameVariables.FC_RightParryRECEIVERTRACK:Play()
@@ -185,6 +186,8 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
                 GameVariables.FC_LeftParryRECEIVERTRACK:Play()
             end
         elseif Protocol == "Counter" and not (GameVariables.FC_LeftCounter1RECEIVERTRACK.IsPlaying or GameVariables.FC_RightCounter1RECEIVERTRACK.IsPlaying) then
+            -- We are gonna get countered
+            
             -- GameVariables.repositionInFrontOfEnemy()
             if GameVariables.randAttack and GameVariables.randAttack.IsPlaying then
                 GameVariables.randAttack:Stop() -- stop an attack if its playing
@@ -204,6 +207,7 @@ function ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, s
                 end
             end
         elseif Protocol == "dodgeAttack" then -- Will need to change this later as we add more dodge attacks
+            -- We will get dodge-attacked
             
             if GameVariables.randAttack then -- stop any attack that's playing
                 GameVariables.randAttack:Stop() 

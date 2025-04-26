@@ -11,7 +11,15 @@ local GlobalRemoteFunction = Instance.new("RemoteFunction") -- used for similar 
 GlobalRemoteFunction.Name = "GlobalRemoteFunction"
 GlobalRemoteFunction.Parent = game.ReplicatedStorage
 
+
+-- Creating specific remote events/functions for client-server communication:
+
+local input_check_EVENT = Instance.new("RemoteEvent")
+input_check_EVENT.Name = "input_check_EVENT"
+input_check_EVENT.Parent = game.ReplicatedStorage
+
 local ServerInit = {}
+
 
 ServerInit.playerInstances = {} -- Making this a module variable so ServerEvents can access this when it needs to get playerInstances
 

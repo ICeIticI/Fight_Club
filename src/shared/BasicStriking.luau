@@ -197,7 +197,7 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
             elseif GameVariables.canFollowUp then
                 GameVariables.waitingToAttack = true
                 while GameVariables.isAttacking do
-                    wait()
+                    task.wait()
                 end
                 if GameVariables.followUpCount > 1 then
                     if GameVariables.pairedChain <= GameVariables.PairedChainMAX then

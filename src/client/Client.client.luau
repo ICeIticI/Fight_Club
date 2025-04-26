@@ -13,10 +13,10 @@ local BasicStriking = require(game.ReplicatedStorage.Shared.BasicStriking)
 local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAndCountering)
 local UIManager = require(game.ReplicatedStorage.Shared.UIManager)
 
--- -- New Modules:
+-- New Modules:
 
--- local attackCommand = require(game.ReplicatedStorage.Shared.attackCommand) -- Module that gets fired every time attack is inputted. Will go through a series of checks before allowing the player to actually attack, which will then sent to another module for the actual attack process.
--- local receiveCommand = require(game.ReplicatedStorage.Shared.receiveCommand) -- Module
+local Handle_Input = require(game.ReplicatedStorage.Shared.client_modules.handle_input)
+
 
 GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
     -- Manages the remote events the client receives.
@@ -59,7 +59,7 @@ UserInputService.InputBegan:Connect(function(input)
     
         if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and GameVariables.player.Name == "Player2" then -- for testing
             warn("2 seconds till attack...")
-            wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
+            task.wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
         end
         
         -- The player will throw an attack

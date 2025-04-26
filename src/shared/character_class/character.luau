@@ -29,7 +29,7 @@ function Character:assignPlayer(plr) --[[ Method that associates this character 
     self.player = plr
 end
 
-function Character:delete() --[[ Method that will delete the Character object to free up data and prevent memory leaks. ]]
+function Character:erase() --[[ Method that will delete the Character object to free up data and prevent memory leaks. ]]
     self = nil
 end
 

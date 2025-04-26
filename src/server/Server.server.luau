@@ -57,6 +57,6 @@ Players.PlayerAdded:Connect(function(player)
 
     player.CharacterRemoving:Connect(function()
         -- We want to delete the instance of the character class from the old character
-        characterInstance:delete()
+        characterInstance:erase()
     end)
 end)

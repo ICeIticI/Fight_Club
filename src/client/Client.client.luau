@@ -18,7 +18,7 @@ local UserInputService = game:GetService("UserInputService") -- Gets the user in
 
 -- New Remote Events/Functions:
 
-local input_check_EVENT = game.ReplicatedStorage:WaitForChild("input_check_EVENT")
+local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
 
 -- GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
 --     -- Manages the remote events the client receives.
@@ -69,7 +69,11 @@ UserInputService.InputBegan:Connect(function(input)
     -- or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode]) 
     then
         print(inputTable)
-        input_check_EVENT:FireServer(inputTable)
+        if input_check_FUNCTION:InvokeServer(inputTable) == "LockOnInput" then
+            -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
+            
+            
+        end
     end
 
 

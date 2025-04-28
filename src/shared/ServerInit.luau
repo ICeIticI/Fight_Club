@@ -14,9 +14,9 @@ GlobalRemoteFunction.Parent = game.ReplicatedStorage
 
 -- Creating specific remote events/functions for client-server communication:
 
-local input_check_EVENT = Instance.new("RemoteEvent")
-input_check_EVENT.Name = "input_check_EVENT"
-input_check_EVENT.Parent = game.ReplicatedStorage
+local input_check_FUNCTION = Instance.new("RemoteFunction")
+input_check_FUNCTION.Name = "input_check_EVENT"
+input_check_FUNCTION.Parent = game.ReplicatedStorage
 
 local ServerInit = {}
 

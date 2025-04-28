@@ -17,13 +17,17 @@ local GrappleInputs = {[Enum.KeyCode.R] = true, [Enum.KeyCode.ButtonY] = true}
 local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -- May have LockOnInputs for each system
 
 
-local input_check_EVENT = game.ReplicatedStorage:WaitForChild("input_check_EVENT")
+local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
 
-input_check_EVENT.OnServerEvent:Connect(function(_, input)
+input_check_FUNCTION.OnServerInvoke = function(_, input)
     print(input)
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
+
+        
+
         -- Passed the lock-on check. Activate the lock-on code:
         print("lock-on input")
+        return "LockOnInput"
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
         print("attack input")
         
@@ -33,6 +37,6 @@ input_check_EVENT.OnServerEvent:Connect(function(_, input)
     -- elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
 
     end
-end)
+end
 
 return Input_Check

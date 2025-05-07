@@ -16,12 +16,15 @@ local character_attack = require(game.ReplicatedStorage.Shared.character_class.c
 local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
 local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
 
+local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+
 local Character = {}
 Character.__index = Character
 
 -- constructor function for Character:
 function Character.new() --[[ Constructor function that will create a new instance of a character. ]]
     local self = setmetatable(character_init.init(), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
+    characters[self.id] = self
     return self
 end
 

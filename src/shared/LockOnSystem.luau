@@ -67,9 +67,9 @@ function LockOnSystem.LockOn()
 							  
 	
 			if GameVariables.raycastResult and not GameVariables.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto (thats not the tavern keeper).
+				
 				GameVariables.enemyHumanoid = GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
 				GameVariables.enemyChar = GameVariables.enemyHumanoid.Parent
-				
 				GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
 				
 				
@@ -90,6 +90,8 @@ function LockOnSystem.LockOn()
 		if (GameVariables.lockOnDebounce.Value == true and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")) or (GameVariables.isGettingHit and not GameVariables.lockOnDebounce.Value) then -- Runs when the player locks onto somebody
 		
 			print(GameVariables.originalCamFocus, "Subject:", GameVariables.originalCamSubject)
+			
+			-- setup stuff:
 			
 			GameVariables.enemyHumanoidRootPart = GameVariables.raycastResult.Instance.Parent:WaitForChild("HumanoidRootPart")
 			GameVariables.FC_IdleTRACK:Play()

@@ -2,7 +2,7 @@
 
 * Whenever a client produces input, it will be sent to this server module.
 
-* This script will handle doing the checking on whether or not the client is allowed to do an action.
+* This server script will handle doing the checking on whether or not the client is allowed to do an action.
 
 * If they pass all the checks, then this module will call on another module for doing the desired action.
 
@@ -20,19 +20,25 @@ local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -
 local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
 
 input_check_FUNCTION.OnServerInvoke = function(_, input)
-    print(input)
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
 
-        
+        if not GameVariables.isAttacking 
+        and not GameVariables.isGettingHit 
+        and not GameVariables.pairedPlaying 
+        and not GameVariables.getPublicPlayerInstance(GameVariables.player.Name)["isDodging"] 
+        and not GameVariables.isBlocking 
+        and not GameVariables.waitingToAttack
+        then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
+
 
         -- Passed the lock-on check. Activate the lock-on code:
-        print("lock-on input")
+        -- print("lock-on input")
         return "LockOnInput"
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
-        print("attack input")
+        -- print("attack input")
         
     elseif BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
-        print("block input")
+        -- print("block input")
 
     -- elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
 

@@ -68,7 +68,7 @@ UserInputService.InputBegan:Connect(function(input)
     or (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode])
     -- or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode]) 
     then
-        print(inputTable)
+        -- print(inputTable)
         if input_check_FUNCTION:InvokeServer(inputTable) == "LockOnInput" then
             -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
             

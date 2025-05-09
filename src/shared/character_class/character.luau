@@ -15,7 +15,6 @@ local character_init = require(game.ReplicatedStorage.Shared.character_class.cha
 local character_attack = require(game.ReplicatedStorage.Shared.character_class.character_attack) -- contains the attack functions and what not
 local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
 local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
-local character_lockOn = require(game.ReplicatedStorage.Shared.character_class.character_lockOn)
 
 local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 

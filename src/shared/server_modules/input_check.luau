@@ -8,6 +8,10 @@
 
 ]]
 
+-- Modules:
+
+local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+
 local Input_Check = {}
 
 -- User Input Types
@@ -19,21 +23,23 @@ local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -
 
 local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
 
-input_check_FUNCTION.OnServerInvoke = function(_, input)
+input_check_FUNCTION.OnServerInvoke = function(plr, input)
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
 
-        if not GameVariables.isAttacking 
-        and not GameVariables.isGettingHit 
-        and not GameVariables.pairedPlaying 
-        and not GameVariables.getPublicPlayerInstance(GameVariables.player.Name)["isDodging"] 
-        and not GameVariables.isBlocking 
-        and not GameVariables.waitingToAttack
+        local characterObject = characters:GetCharacterByPlayer(plr)
+        if not characterObject then return end
+
+        if not characterObject.isAttacking 
+        and not characterObject.isGettingHit 
+        and not characterObject.pairedPlaying 
+        and not characterObject.isDodging
+        and not characterObject.isBlocking 
+        and not characterObject.waitingToAttack
         then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
-
-
+        
         -- Passed the lock-on check. Activate the lock-on code:
-        -- print("lock-on input")
-        return "LockOnInput"
+            return "LockOnInput"
+        end
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
         -- print("attack input")
         

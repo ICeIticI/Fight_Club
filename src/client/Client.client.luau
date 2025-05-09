@@ -15,6 +15,7 @@ local UserInputService = game:GetService("UserInputService") -- Gets the user in
 
 -- New Modules:
 
+local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
 
 -- New Remote Events/Functions:
 
@@ -71,7 +72,7 @@ UserInputService.InputBegan:Connect(function(input)
         -- print(inputTable)
         if input_check_FUNCTION:InvokeServer(inputTable) == "LockOnInput" then
             -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
-            
+            lockOn.Lock()
             
         end
     end

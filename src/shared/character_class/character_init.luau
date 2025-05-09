@@ -9,6 +9,8 @@ function Character_Init.init()
     self.id = nil -- the ID is how the server will identify which character this is when we need to retrieve it from the characters table.
     self.player = nil -- If the character is a player, their player object will be stored here.
 
+    
+
     return self
 end
 

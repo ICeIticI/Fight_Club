@@ -43,10 +43,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	if not ClientVariables.lockOnDebounce then
 		ClientVariables.lockOnDebounce = Instance.new("BoolValue") -- shouldn't this be initialized by the server for more security?
 		ClientVariables.lockOnDebounce.Name = "lockOnDebounce"
-		--[[
-		!
 		ClientVariables.lockOnDebounce.Parent = ClientVariables.plrObjectsFolder
-		]]
 	end
 
 	ClientVariables.hitDebounce = false -- if false, then the player has the ability to deal damage. This is so the player won't hit the enemy multiple times in one attack.

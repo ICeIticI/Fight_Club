@@ -6,7 +6,7 @@
 local Players = game.Players
 
 -- Modules
-local ServerInit = require(game.ReplicatedStorage.Shared.ServerInit)
+local ServerInit = require(game.ReplicatedStorage.Shared.server_modules.ServerInit)
 -- local ServerEvents = require(game.ReplicatedStorage.Shared.ServerEvents)
 -- local RagdollSystem = require(game.ReplicatedStorage.Shared.RagdollSystem)
 
@@ -14,7 +14,6 @@ local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent
 local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
 -- New modules:
-local input_check = require(game.ReplicatedStorage.Shared.server_modules.input_check)
 
 local Character = require(game.ReplicatedStorage.Shared.character_class.character)
 
@@ -39,8 +38,7 @@ Players.PlayerAdded:Connect(function(player)
     local characterInstance
     if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.
         
-        characterInstance = Character.new()
-        characterInstance:assignPlayer(player)
+        characterInstance = Character.new(player)
     
         -- ServerInit.InitializeCharacter(player.Character)
         -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], player.Character) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
@@ -51,7 +49,6 @@ Players.PlayerAdded:Connect(function(player)
         -- Initialize character-related stuff on spawn.
 
         characterInstance = Character.new()
-        characterInstance:assignPlayer(player)
         
         -- ServerInit.InitializeCharacter(char)
         -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], char) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.

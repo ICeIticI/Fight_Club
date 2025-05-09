@@ -49,17 +49,18 @@ end
 
 
 -- constructor function for Character:
-function Character.new() --[[ Constructor function that will create a new instance of a character. ]]
+function Character.new(plr) --[[ Constructor function that will create a new instance of a character. ]]
     local self = setmetatable(character_init.init(), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
     self.id = getNextId()
+    self.player = plr
     print(self.id)
     characters[self.id] = self
     return self
 end
 
-function Character:assignPlayer(plr) --[[ Method that associates this character class with an actual player, if applicable. ]]
-    self.player = plr
-end
+-- function Character:assignPlayer(plr) --[[ Method that associates this character class with an actual player, if applicable. ]]
+--     self.player = plr
+-- end
 
 function Character:erase() --[[ Method that will delete the Character object to free up data and prevent memory leaks. ]]
     self = nil

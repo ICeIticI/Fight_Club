@@ -1,12 +1,41 @@
 local Character_Attack = {}
 Character_Attack.__index = Character_Attack
 
+local function playAttackAnimation(self) --[[ Responsible for handling the logic of when an attack ANIMATION starts ]]
+    if self.lastAttack and self.lastAttack.IsPlaying and not self.isAttacking then
+        self.lastAttack:Stop()
+    end
+    self.currentAttack = self.randAttack.Animation
+    self.randAttack:Play()
+    self.lastAttack = self.randAttack
+end
+
+
 function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or hook ]]
     print("lvl 1 attack")
+    if not self.randAttack then
+        self.randAttack = self.randomAnimationTrack(self.attack1Table, "AttackSeries", self.randLvl1Type)
+    else
+        local sameAttackChance = math.random(1, 100)
+        if sameAttackChance > 10 or self.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
+            for _, v in pairs(self.attack1Table) do
+                if v ~= self.randAttack and v.Animation:GetAttribute("AttackSeries") == self.randLvl1Type then
+                    self.randAttack = v
+                    break
+                end
+            end
+            -- GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.attack1Table, "AttackSeries", GameVariables.randLvl1Type)
+        end
+    end
+    playAttackAnimation(self)
+    self.comboCounter += 1
 end
 
 function Character_Attack:level2() --[[ Throw a level 2 attack, such as a haymaker ]]
     print("lvl 2 attack")
+    self.randAttack = self.attack2Table[math.random(1, #self.attack2Table)]
+    playAttackAnimation(self)
+    self.comboCounter += 1
 end
 
 function Character_Attack:level3() --[[ Throw a level 3 attack, or in other words, execute the enemy ]]

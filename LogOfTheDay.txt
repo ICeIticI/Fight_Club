@@ -1,37 +1,33 @@
 - What I did:
 
 
-* Got animations working for server/client, in a more efficient way than ever before. No more creating tracks by individual lines of code.
+* Copied necessary functions & variables from ClientVariables to character_init
 
-* Create character class objects by passing in a character model, not a player model. This ensures we have a character model to associate the object to, and not every character object will be a player.
+* Got movement speed working properly. Wasn't working earlier
 
-* Created an animation_management package for easier dealings with animations. This is used by either the server or client, depending on where the animations get loaded.
+* Split the lockOn module into a .Lock() and .Unlock() function
 
-* Added the counterAttack and dodgeAttack attacks to the character_attack module
+* Moved some functions into character_attack to get attacking to work
 
-* Created a shared module for functions that both the server and client can use. For example, animations. Either the server or client will manage them depending if they're a player or not.
+* Attempted to be able to set charcter speed on the client -> server by a remote event, but data only syned when I originally sent data to lockOn from a remote function (server -> client). This time, I cant do it reverse for security reasons.
+    * Sent a table of public variables to lockOn from the input_check for sync
 
-* Lock-on works with the idle animation again. However it still needs reinforced by the check variables that are not initialized on the server yet.
+* Changed initial lock-on raycast from the client to the server (when you would press the lock-on button) so server can have this data for checks.
 
-* Slightly changed the :GetCharacterByPlayer method as it wasn't working properly before.
+* Lock-on sends a signal to server (input_check) when locking-on, then sent to the client for handling. This is like the one exception where client can handle something. It's too demanding. Then when player presses unlock or moves too far away, that will get sent again to the input_check, but this time they're out of range or locked-off so it will unlock them and then sent to the client script and run the unlock handling.
 
-* Copied a bunch of client variables to character_init
-
-* Much more small changes
 
 - What I need to do:
 
-* Copy functions from client variables into character_init
 
-* Change the faceEnemy() function code from a while loop to a RenderStepped 
+* Work on attack functionality, get that up and running
 
-* Add the functionality of the basic attacks
+* Check in with sync blocking. How can we get that set up? Similar setup? Do a bit of hybrid work between server and client?
 
-* Add sync blocks back in
+* Change the faceEnemy() function code from a while loop to a RenderStepped
 
-* Add blocking in
+* Add the rest of the functionalities into OOP format
 
-* Make sure everything works like it did before (should be better because alot of stuff is now server-ran. Increased security)
-    * This also means hit debounces won't stop on one person and you can hit as many people as your punch lands on.
+* Make sure everything is working like it was before, or better.
 
-* We can get rid of older module scripts once we fully implement our OOP code structure.
+* Get rid of old module scripts we no longer need after completing the switch.

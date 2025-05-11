@@ -3,7 +3,6 @@ Character_Init.__index = Character_Init
 
 local Animation_Init = require(game.ReplicatedStorage.Shared.animation_management.animation_init)
 
-local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
 local function createHitbox(bodyPart) --[[ Function that will create a hitbox of a given part for a given player ]]
 
@@ -59,14 +58,12 @@ function Character_Init.init(charModel)
     
     self.id = nil -- the ID is how the server will identify which character this is when we need to retrieve it from the characters table.
     self.character = charModel
+	self.humanoid = self.character:WaitForChild("Humanoid")
+	self.humanoidRootPart = self.character:WaitForChild("HumanoidRootPart")
     self.player = game.Players:GetPlayerFromCharacter(charModel) -- If the character is a player, their player object will be stored here.
-
-    self.character.Humanoid.WalkSpeed = 12
-	self.character.Humanoid.JumpPower = 0
 
 	self.plrObjectsFolder = self.player:WaitForChild(self.player.Name .. "_GameObjects")
 	
-	self.humanoid = self.character:WaitForChild("Humanoid")
 	self.previousHealth = self.humanoid.Health -- This var is used to determine how much damage the character takes.
 	self.lockOnDebounce = self.plrObjectsFolder:FindFirstChild("lockOnDebounce") -- attemps to find lockOnDebounce. If it doesn't exist, then this var will be nil.
 
@@ -110,11 +107,23 @@ function Character_Init.init(charModel)
 	self.animPair = nil
 	self.dodgeAttackTrack = nil
 
-	-- New Variables that are replacing old:
-	self.canAttack = false
-	self.canGetHit = false
-	self.areLockedOn = false
-	-- Above are new variables that will be replacing old ^
+	-- -- New Variables that are replacing old:
+	-- self.canAttack = false
+	-- self.canGetHit = false
+	-- self.areLockedOn = false
+	-- -- Above are new variables that will be replacing old ^
+
+	self.pairedAttack = nil -- the variable for which paired attack the attacker is doing
+	self.pairedBlock = nil -- the variable for which paired block the attacker is doing
+	self.pairedChain = 0 -- The tracker of the character's sync block attack chain. They can only do as many as the max allows
+	self.PairedChainMAX = 3 -- The max value for pairedChain.
+	
+	self.character.Humanoid.WalkSpeed = 12
+	self.character.Humanoid.JumpPower = 0
+
+	self.previousWalkSpeed = nil -- will be set when we need to know the last known WalkSpeed of the player
+	self.originalWalkSpeed = self.humanoid.WalkSpeed
+	self.lockOnSpeed = self.originalWalkSpeed / 1.85
 
 	local linearVelocity = Instance.new("LinearVelocity")
 	linearVelocity.Enabled = false
@@ -161,9 +170,55 @@ function Character_Init.init(charModel)
 	local hitboxTorso = createHitbox(self.character:WaitForChild("Torso"))
 	hitboxTorso.Parent = self.character:WaitForChild(hbFolder.Name)
 
+	-- Global Remote Event - Because each player having their own remote event is redundant.
+	self.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
+	-- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
+	self.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
+
+	self.LocalBindableEvent = Instance.new("BindableEvent")
+	self.LocalBindableEvent.Name = "LocalBindableEvent"
+	self.LocalBindableEvent.Parent = game.ReplicatedStorage
+
+	function self.setLinearVelocity(velocity, durationOfVelocity) --[[ Function that will set the VectorForce of the player's character to the given Vector3. ]]
+		local protocol = "SetLinearVelocity"
+		self.GlobalRemoteEvent:FireServer(velocity, protocol, durationOfVelocity)
+	end
+
+	function self.setSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
+		if bool == true then
+		-- we allow the player the ability to move
+		
+			if self.pairedPlaying == false and self.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
+			
+				if not self.isBlocking then
+					self.previousWalkSpeed = self.lockOnSpeed
+				elseif self.isBlocking then
+					self.previousWalkSpeed = self.lockOnSpeed / 1.5
+				end
+					
+				self.humanoid.WalkSpeed = self.previousWalkSpeed
+			else
+				self.humanoid.WalkSpeed = self.originalWalkSpeed
+			end
+
+		elseif bool == false then
+			-- we take the player's ability to move away
+			self.humanoid.WalkSpeed = 0
+		end
+	end
+
+	function self.boolCheck(boolTable) --[[ Function that will check the given boolean values. If any of them are true, then this will return false. If none of them are true, then this will return true. ]]
+		for _, v in pairs(boolTable) do
+			if v == true then
+				return false
+			end
+		end
+	-- if none of the bools are currently active (true) then the desired action can be completed as it won't interrupt any other action, so we return function as true.
+		return true
+	end
 	
 	if self.player ~= nil then
-		GlobalRemoteFunction:InvokeClient(self.player, "createAnimationTracks")
+		self.GlobalRemoteFunction:InvokeClient(self.player, "createAnimationTracks")
 	else -- not a player. We wanna create animations on server
 		Animation_Init.initialize_animations(Character_Init)
 	end

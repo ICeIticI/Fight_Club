@@ -69,11 +69,14 @@ UserInputService.InputBegan:Connect(function(input)
     or (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode])
     -- or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode]) 
     then
-        -- print(inputTable)
-        if input_check_FUNCTION:InvokeServer(inputTable) == "LockOnInput" then
+        local protocol, publicVariables = input_check_FUNCTION:InvokeServer(inputTable) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes
+        if protocol == "LockOnInput" then
             -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
-            lockOn.Lock()
-            
+            if publicVariables.lockOnDebounce.Value == true then
+                lockOn.Lock(publicVariables)
+            end
+            input_check_FUNCTION:InvokeServer(inputTable)
+            lockOn.Unlock() -- will run as soon as the player stops qualifying to be able to lock on (such as walking away or pressing Q again)
         end
     end
 

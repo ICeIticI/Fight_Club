@@ -37,12 +37,65 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
         and not characterObject.isBlocking 
         and not characterObject.waitingToAttack
         then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
+            local rayParams = RaycastParams.new()
+            rayParams.FilterDescendantsInstances = characterObject.character:GetChildren()
+            rayParams.FilterType = Enum.RaycastFilterType.Exclude
+            
+            characterObject.raycastResult =
+            workspace:Raycast(characterObject.humanoidRootPart.Position,
+                                characterObject.humanoidRootPart.CFrame.LookVector * 8,
+                                rayParams) -- Raycast in front of player to find an enemy
+                                
+
+            if characterObject.raycastResult and not characterObject.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") and characterObject.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto (thats not the tavern keeper).
+                
+                characterObject.enemyHumanoid = characterObject.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
+                characterObject.enemyChar = characterObject.enemyHumanoid.Parent
+                characterObject.lockOnDebounce.Value = not characterObject.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
+                
+                
+            if not game.Players:GetPlayerFromCharacter(characterObject.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
+                    if characterObject.enemyChar.Name == "TestDummy" then
+                        characterObject.LocalBindableEvent:Fire(characterObject.lockOnDebounce)
+                    end
+                end
+                
+            elseif characterObject.raycastResult == nil and characterObject.lockOnDebounce.Value == true then -- no enemy detected by raycast
+                characterObject.lockOnDebounce.Value = false
+                
+            end
         
-        -- Passed the lock-on check. Activate the lock-on code:
-            return "LockOnInput"
+            -- GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value
+            
+        
+            if (characterObject.lockOnDebounce.Value == true and characterObject.raycastResult.Instance.Parent:FindFirstChild("Humanoid")) 
+            or (characterObject.isGettingHit and not characterObject.lockOnDebounce.Value) 
+            then -- Runs when the player locks onto somebody
+                characterObject.enemyHumanoidRootPart = characterObject.raycastResult.Instance.Parent:WaitForChild("HumanoidRootPart")
+                characterObject.setSpeed(true)
+            -- Passed the lock-on check. Activate the lock-on code:
+                return "LockOnInput", {
+                    lockOnDebounce = characterObject.lockOnDebounce, 
+                    enemyHumanoidRootPart = characterObject.enemyHumanoidRootPart,
+                    enemyHumanoid = characterObject.enemyHumanoid,
+                    rayParams = rayParams
+                }
+            end
+
+            if characterObject.lockOnDebounce.Value == false 
+            or workspace:Raycast(characterObject.humanoidRootPart.Position,
+                                characterObject.humanoidRootPart.CFrame.LookVector * 7,
+                                rayParams) 
+            then
+                characterObject.lockOnDebounce.Value = false
+                characterObject.setSpeed(true)
+                return "LockOnInput", {
+                    lockOnDebounce = characterObject.lockOnDebounce, 
+                }
+            end
         end
+
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
-        -- print("attack input")
 
         if not characterObject.waitingToAttack 
         and characterObject.lockOnDebounce.Value 
@@ -51,7 +104,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
         and (characterObject.raycastResult.Instance.Position - characterObject.humanoidRootPart.Position).Magnitude <= 7
         and characterObject.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
-            
             -- before attacking, check if we're currently dodging so we can do a dodge attack:
             if characterObject.isDodging == true then
                 if not characterObject.waitingToAttack then

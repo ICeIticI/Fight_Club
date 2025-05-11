@@ -78,10 +78,9 @@ function LockOn.Lock()
 			-- setup stuff:
 			
 			ClientVariables.enemyHumanoidRootPart = ClientVariables.raycastResult.Instance.Parent:WaitForChild("HumanoidRootPart")
-			--[[
-            !
+			
             ClientVariables.FC_IdleTRACK:Play()
-            ]]
+            
 			-- character changes below:
 			ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
 			ClientVariables.SetSpeed(true)
@@ -137,10 +136,8 @@ function LockOn.Lock()
 		if ClientVariables.lockOnDebounce.Value == false then
 			-- Stop locking onto enemy
 			
-            --[[
-            !
 			ClientVariables.stopAnimations()
-            ]]
+            
 			-- character changes below:
 			ClientVariables.humanoid.AutoRotate = true
 			ClientVariables.SetSpeed(true)

@@ -49,10 +49,12 @@ end
 
 
 -- constructor function for Character:
-function Character.new(plr) --[[ Constructor function that will create a new instance of a character. ]]
-    local self = setmetatable(character_init.init(), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
+function Character.new(charModel) --[[ Constructor function that will create a new instance of a character. ]]
+    local self = setmetatable(character_init.init(charModel), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
     self.id = getNextId()
-    self.player = plr
+    self.character_attack = character_attack
+    self.character_block = character_block
+    self.character_receive = character_receive
     print(self.id)
     characters[self.id] = self
     return self
@@ -66,7 +68,7 @@ function Character:erase() --[[ Method that will delete the Character object to 
     self = nil
 end
 
-function Character:lockOn()
+function Character:lockOn() --[[ Makes the character lock onto an enemy (Will need to be added to once we start having NPCs and stuff). ]]
     if self.player ~= nil then
         
     else
@@ -74,13 +76,25 @@ function Character:lockOn()
     end
 end
 
-function Character:attack(attack_level) --[[ The character will do some sort of attack ]]
-    if attack_level == 1 then
-        character_attack.level1()
-    elseif attack_level == 2 then
-        character_attack.level2()
-    elseif attack_level == 3 then
-        character_attack.level3()
+function Character:basicAttack(comboCounter) --[[ The character will do some sort of attack ]]
+    if comboCounter <= 2 and self.enemyHumanoid.Health > 10 then
+        -- character_attack.level1()
+        self.character_attack:level1()
+    elseif comboCounter >= 3 or self.enemyHumanoid.Health <= 10 then
+        -- character_attack.level2()
+        self.character_attack:level2()
+        
+    -- elseif comboCounter == 3 then
+    --     -- character_attack.level3()
+    --     self.character_attack:level3()
+    end
+end
+
+function Character:repulseAttack(attack_type)
+    if attack_type == "dodge" then
+        self.character_attack:dodgeAttack()
+    elseif attack_type == "counter" then
+        self.character_attack:counterAttack()
     end
 end
 

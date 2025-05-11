@@ -2,6 +2,8 @@
 local ClientVariables = {}
 ClientVariables.__index = ClientVariables
 
+local Animation_Init = require(game.ReplicatedStorage.Shared.animation_management.animation_init)
+
 ClientVariables.player = game:GetService("Players").LocalPlayer
 ClientVariables.initialized = false
 
@@ -10,11 +12,9 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	ClientVariables.character = ClientVariables.player.Character or ClientVariables.player.CharacterAdded:Wait()
 	ClientVariables.humanoid = ClientVariables.character:WaitForChild("Humanoid")
 	ClientVariables.previousHealth = ClientVariables.humanoid.Health -- This var is used to determine how much damage the character takes.
-	--[[ 
-	Anything with '!' was removed due to server dependencies that no longer existed.
 
-	! ClientVariables.charAnimator = ClientVariables.character:WaitForChild("Humanoid"):WaitForChild("charAnimator")
-	]]
+	ClientVariables.charAnimator = ClientVariables.character:WaitForChild("Humanoid"):WaitForChild("charAnimator")
+	
 	ClientVariables.humanoidRootPart = ClientVariables.character:WaitForChild("HumanoidRootPart")
 
 	-- Hitbox stuff:
@@ -677,5 +677,12 @@ function ClientVariables.SetPlayer(givenPlayer)
 	warn(tostring(givenPlayer) .. " is the player that has been set for " .. tostring(ClientVariables.player))
 end
 ]]
+
+
+ClientVariables.GlobalRemoteFunction.OnClientInvoke = function(protocol)
+	if protocol == "createAnimationTracks" then
+		Animation_Init.initialize_animations(ClientVariables)
+	end
+end
 
 return ClientVariables

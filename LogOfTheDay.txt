@@ -1,0 +1,37 @@
+- What I did:
+
+
+* Got animations working for server/client, in a more efficient way than ever before. No more creating tracks by individual lines of code.
+
+* Create character class objects by passing in a character model, not a player model. This ensures we have a character model to associate the object to, and not every character object will be a player.
+
+* Created an animation_management package for easier dealings with animations. This is used by either the server or client, depending on where the animations get loaded.
+
+* Added the counterAttack and dodgeAttack attacks to the character_attack module
+
+* Created a shared module for functions that both the server and client can use. For example, animations. Either the server or client will manage them depending if they're a player or not.
+
+* Lock-on works with the idle animation again. However it still needs reinforced by the check variables that are not initialized on the server yet.
+
+* Slightly changed the :GetCharacterByPlayer method as it wasn't working properly before.
+
+* Copied a bunch of client variables to character_init
+
+* Much more small changes
+
+- What I need to do:
+
+* Copy functions from client variables into character_init
+
+* Change the faceEnemy() function code from a while loop to a RenderStepped 
+
+* Add the functionality of the basic attacks
+
+* Add sync blocks back in
+
+* Add blocking in
+
+* Make sure everything works like it did before (should be better because alot of stuff is now server-ran. Increased security)
+    * This also means hit debounces won't stop on one person and you can hit as many people as your punch lands on.
+
+* We can get rid of older module scripts once we fully implement our OOP code structure.

@@ -194,23 +194,23 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
                 GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.animPair, GameVariables.pairedChain, nil, false)
             end
             attack()
-            elseif GameVariables.canFollowUp then
-                GameVariables.waitingToAttack = true
-                while GameVariables.isAttacking do
-                    task.wait()
-                end
-                if GameVariables.followUpCount > 1 then
-                    if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
-                        GameVariables.animPair = {math.random(1, 2), math.random(1, 2)}
-                        GameVariables.Protocol = "AttackStarted"
-                        GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false)
-                    end
-                    attack(GameVariables.pairedChain)
-                end
-                GameVariables.waitingToAttack = false
+        elseif GameVariables.canFollowUp then
+            GameVariables.waitingToAttack = true
+            while GameVariables.isAttacking do
+                task.wait()
             end
+            if GameVariables.followUpCount > 1 then
+                if GameVariables.pairedChain <= GameVariables.PairedChainMAX then
+                    GameVariables.animPair = {math.random(1, 2), math.random(1, 2)}
+                    GameVariables.Protocol = "AttackStarted"
+                    GameVariables.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, GameVariables.Protocol, nil, GameVariables.animPair, GameVariables.pairedChain, false)
+                end
+                attack(GameVariables.pairedChain)
+            end
+            GameVariables.waitingToAttack = false
         end
     end
+end
     
         
 function BasicStriking.Attack(input)

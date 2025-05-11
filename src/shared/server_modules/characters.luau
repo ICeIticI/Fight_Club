@@ -10,7 +10,7 @@ local Characters = {}
 
 function Characters:GetCharacterByPlayer(plr) --[[ Method that gets a character based off an assigned player ]]
     for _, char in pairs(self) do
-        if char.player == plr then
+        if type(char) == "table" and char.player == plr then
             return char
         end
     end

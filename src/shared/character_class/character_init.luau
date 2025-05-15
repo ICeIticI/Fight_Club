@@ -1,7 +1,7 @@
 local Character_Init = {}
 Character_Init.__index = Character_Init
 
-local Animation_Init = require(game.ReplicatedStorage.Shared.animation_management.animation_init)
+local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.Animation_Centric)
 
 
 local function createHitbox(bodyPart) --[[ Function that will create a hitbox of a given part for a given player ]]
@@ -220,7 +220,7 @@ function Character_Init.init(charModel)
 	if self.player ~= nil then
 		self.GlobalRemoteFunction:InvokeClient(self.player, "createAnimationTracks")
 	else -- not a player. We wanna create animations on server
-		Animation_Init.initialize_animations(Character_Init)
+	Animation_Centric.initialize_animations(Character_Init)
 	end
 
     return self

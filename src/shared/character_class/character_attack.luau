@@ -10,6 +10,12 @@ local function playAttackAnimation(self) --[[ Responsible for handling the logic
     self.lastAttack = self.randAttack
 end
 
+local function setUpClientAnimation(characterInstance) --[[ Will ready an attack animation on the client ]]
+    if characterInstance.player then
+        characterInstance.GlobalRemoteEvent:FireClient("setUpClientAttackAnimation")
+    end
+end
+
 
 function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or hook ]]
     print("lvl 1 attack")

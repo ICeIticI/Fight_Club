@@ -3,13 +3,13 @@
 * Module that gets called by both the client and server for some things.
 
 * For example, NPC animations are managed on the server, and player one's are
-    manged on the client. The method of initializing the animations is the same
-    on both the server and client, so they need the same function(s) in this case.
+    managed on the client. The method of initializing the animations is the same
+    on both the server and client, so they need the same functions in this case.
 
 ]]
 
-local Animation_Init = {}
-Animation_Init.__index = Animation_Init
+local Animation_Centric = {}
+Animation_Centric.__index = Animation_Centric
 
 -- Modules:
 
@@ -17,7 +17,7 @@ local Attack_Animation_Management = require(game.ReplicatedStorage.Shared.animat
 local Receive_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.receive_animation_manager)
 local Misc_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.misc_animation_manager)
 
-function Animation_Init.initialize_animations(moduleTbl) --[[ Will initialize both the animations and their corresponding tracks ]]
+function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize both the animations and their corresponding tracks ]]
     moduleTbl.AllAnimations = {}
     for _, obj in pairs(moduleTbl.plrObjectsFolder:GetChildren()) do
         if obj:IsA("Animation") then
@@ -79,4 +79,31 @@ function Animation_Init.initialize_animations(moduleTbl) --[[ Will initialize bo
     
 end
 
-return Animation_Init
+function Animation_Centric.randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
+	local randAttackTbl = {}
+
+	for _, v in pairs(aTrackTbl) do
+		if
+		(
+			attribute1 == nil 
+			or (a1Value ~= nil 
+			and v.Animation:GetAttribute(attribute1) == a1Value) 
+			or (v.Animation:GetAttribute(attribute1) 
+			and a1Value == nil)) 
+			and 
+			(attribute2 == nil 
+			or (a2Value ~= nil 
+			and v.Animation:GetAttribute(attribute2) == a2Value) 
+			or (v.Animation:GetAttribute(attribute2) 
+			and a2Value == nil)
+		) 
+
+		then
+			table.insert(randAttackTbl, v)
+		end
+	end
+
+	return randAttackTbl[math.random(1, #randAttackTbl)] -- returns the randomly-selected animation track
+end
+
+return Animation_Centric

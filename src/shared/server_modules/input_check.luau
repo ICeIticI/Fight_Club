@@ -128,10 +128,13 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                 if characterObject.boolCheck({characterObject.isAttacking, characterObject.isBlocking, characterObject.isCountering, characterObject.isGettingHit}) and not characterObject.waitingToAttack and not characterObject.canFollowUp and not characterObject.pairedPlaying then
                     if characterObject.pairedChain <= characterObject.PairedChainMAX then
                         characterObject.animPair = {math.random(1, 2), math.random(1, 2)}
+                        --[[
                         characterObject.Protocol = "AttackStarted"
-                        characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, characterObject.currentAttack, characterObject.animPair, characterObject.pairedChain, nil, false)
+                        characterObject.GlobalRemoteEvent:FireClient(characterObject.enemyChar, characterObject.Protocol, characterObject.currentAttack, characterObject.animPair, characterObject.pairedChain, nil, false)
+                        ]] 
                     end
-                    characterObject.character_attack:basicAttack(characterObject.comboCounter)
+                    warn(characterObject, characterObject.character_attack)
+                    characterObject:basicAttack(characterObject.comboCounter)
                 elseif characterObject.canFollowUp then
                     characterObject.waitingToAttack = true
                     while characterObject.isAttacking do
@@ -140,9 +143,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                     if characterObject.followUpCount > 1 then
                         if characterObject.pairedChain <= characterObject.PairedChainMAX then
                             characterObject.animPair = {math.random(1, 2), math.random(1, 2)}
+                            --[[
                             characterObject.Protocol = "AttackStarted"
                             characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, nil, characterObject.animPair, characterObject.pairedChain, false)
+                            ]]
                         end
+                        warn("we got here with our attack")
                         characterObject.character_attack:basicAttack(characterObject.comboCounter) -- followup attack
                     end
                     characterObject.waitingToAttack = false

@@ -6,7 +6,7 @@
 local UserInputService = game:GetService("UserInputService") -- Gets the user input
 
 -- Modules
--- local GameVariables = require(game.ReplicatedStorage.Shared.GameVariables) -- To have access to the client's variables in this script:
+local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables) -- To have access to the client's variables in this script:
 -- local Animation_Manager = require(game.ReplicatedStorage.Shared.AnimationManager) -- Manages the animations of the character:
 -- local LockOnSystem = require(game.ReplicatedStorage.Shared.LockOnSystem) -- Holds the mechanics for locking onto enemies
 -- local BasicStriking = require(game.ReplicatedStorage.Shared.BasicStriking)
@@ -21,13 +21,13 @@ local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
 
 local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
 
--- GameVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
---     -- Manages the remote events the client receives.
+ClientVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
+    -- Manages the remote events the client receives.
 
---     -- while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+    while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
     
---     -- ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
--- end)
+    -- ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
+end)
 
 if game.Players.LocalPlayer.Character then -- The player may load faster than the script, so this will ensure the player won't skip initializing
     -- Initializes the player

@@ -2,7 +2,7 @@
 local ClientVariables = {}
 ClientVariables.__index = ClientVariables
 
-local Animation_Init = require(game.ReplicatedStorage.Shared.animation_management.animation_init)
+local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.Animation_Centric)
 
 ClientVariables.player = game:GetService("Players").LocalPlayer
 ClientVariables.initialized = false
@@ -459,33 +459,6 @@ function ClientVariables.repositionInFrontOfEnemy() --[[ repositions the charact
 
 end
 
-function ClientVariables.randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value)
-	local randAttackTbl = {}
-
-	for _, v in pairs(aTrackTbl) do
-		if
-		(
-			attribute1 == nil 
-			or (a1Value ~= nil 
-			and v.Animation:GetAttribute(attribute1) == a1Value) 
-			or (v.Animation:GetAttribute(attribute1) 
-			and a1Value == nil)) 
-			and 
-			(attribute2 == nil 
-			or (a2Value ~= nil 
-			and v.Animation:GetAttribute(attribute2) == a2Value) 
-			or (v.Animation:GetAttribute(attribute2) 
-			and a2Value == nil)
-		) 
-
-		then
-			table.insert(randAttackTbl, v)
-		end
-	end
-
-	return randAttackTbl[math.random(1, #randAttackTbl)] -- returns the randomly-selected animation track
-end
-
 function ClientVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
 	if ClientVariables.pairedChain <= ClientVariables.PairedChainMAX and ClientVariables.canSyncBlock then
 		if followupCombo and followupCombo > 1 or (ClientVariables.pairedBlock and ClientVariables.pairedBlock.IsPlaying) then -- For followup attacks
@@ -677,12 +650,5 @@ function ClientVariables.SetPlayer(givenPlayer)
 	warn(tostring(givenPlayer) .. " is the player that has been set for " .. tostring(ClientVariables.player))
 end
 ]]
-
-
-ClientVariables.GlobalRemoteFunction.OnClientInvoke = function(protocol)
-	if protocol == "createAnimationTracks" then
-		Animation_Init.initialize_animations(ClientVariables)
-	end
-end
 
 return ClientVariables

@@ -174,7 +174,6 @@ function Character_Init.init(charModel)
 	self.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 	-- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 	self.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
-	print(self.GlobalRemoteFunction)
 
 	self.LocalBindableEvent = Instance.new("BindableEvent")
 	self.LocalBindableEvent.Name = "LocalBindableEvent"
@@ -217,8 +216,7 @@ function Character_Init.init(charModel)
 	-- if none of the bools are currently active (true) then the desired action can be completed as it won't interrupt any other action, so we return function as true.
 		return true
 	end
-	task.wait(5)
-	print(true)
+
 	if self.player ~= nil then
 		self.GlobalRemoteFunction:InvokeClient(self.player, "createAnimationTracks")
 	else -- not a player. We wanna create animations on server

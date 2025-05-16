@@ -16,6 +16,8 @@ local character_attack = require(game.ReplicatedStorage.Shared.character_class.c
 local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
 local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
 
+local Attack_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.attack_animation_manager)
+
 local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
 local Character = {}
@@ -34,7 +36,7 @@ local function getNextId() --[[ Local function that will get an available ID, re
     local i, charId = next(available_character_id_table)
 
     if charId ~= nil then
-        print(available_character_id_table, charId)
+        print("Table of avaliable IDs.. " .. tostring(available_character_id_table), "Current ID: " .. tostring(charId))
         table.remove(available_character_id_table, i)
         return charId
     else -- The available IDs table somehow ran out of values. This shouldn't happen.
@@ -52,10 +54,22 @@ end
 function Character.new(charModel) --[[ Constructor function that will create a new instance of a character. ]]
     local self = setmetatable(character_init.init(charModel), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
     self.id = getNextId()
-    self.character_attack = character_attack
-    self.character_block = character_block
-    self.character_receive = character_receive
-    print(self.id)
+    self.character_attack = setmetatable({}, { __index = character_attack })
+    self.character_block = setmetatable({}, { __index = character_block })
+    self.character_receive = setmetatable({}, { __index = character_receive })
+    
+    self.attack_animation_management = setmetatable({}, { __index = Attack_Animation_Management})
+
+    -- assign the Character instance to the other modules:
+
+    -- functionalities:
+    self.character_attack.characterInstance = self
+    self.character_block.characterInstance = self
+    self.character_receive.characterInstance = self
+
+    -- animation management:
+    self.attack_animation_management.characterInstance = self
+
     characters[self.id] = self
     return self
 end

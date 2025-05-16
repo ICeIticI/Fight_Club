@@ -245,7 +245,6 @@ ClientVariables.plrObjectsFolder = ClientVariables.player:WaitForChild(ClientVar
 ClientVariables.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 -- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 ClientVariables.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
-print(ClientVariables.GlobalRemoteFunction)
 
 ClientVariables.LocalBindableEvent = Instance.new("BindableEvent")
 ClientVariables.LocalBindableEvent.Name = "LocalBindableEvent"

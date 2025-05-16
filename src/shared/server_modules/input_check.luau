@@ -133,7 +133,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                         characterObject.GlobalRemoteEvent:FireClient(characterObject.enemyChar, characterObject.Protocol, characterObject.currentAttack, characterObject.animPair, characterObject.pairedChain, nil, false)
                         ]] 
                     end
-                    warn(characterObject, characterObject.character_attack)
                     characterObject:basicAttack(characterObject.comboCounter)
                 elseif characterObject.canFollowUp then
                     characterObject.waitingToAttack = true

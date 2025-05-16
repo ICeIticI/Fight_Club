@@ -48,7 +48,6 @@ end
 
 
 function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize both the animations and their corresponding tracks ]]
-    print("reached here init")
     moduleTbl.AllAnimations = {}
     for _, obj in pairs(moduleTbl.plrObjectsFolder:GetChildren()) do
         if obj:IsA("Animation") then
@@ -57,7 +56,6 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
             table.insert(moduleTbl.AllAnimations, moduleTbl[obj.Name .. "TRACK"])
         end
     end
-    print("checkpoint 1")
     -- Sorting all the animations into other animation tables for managing:
 
     moduleTbl.attack1Table = {}
@@ -94,11 +92,14 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
                 table.insert(moduleTbl.pairedBlocksTable, v)
             end
         end
-        print("checkpoint 2")
-        
-		local EndOfAttackExists = false -- for the functions that don't have this event, I want them to run code when the animation has stopped. However, animations that have this marker won't be able to run it.
 
+        -- making the characterInstance accessible from animation_centric:
+        moduleTbl.animation_centric = setmetatable({}, { __index = Animation_Centric})
+        moduleTbl.animation_centric.characterInstance = moduleTbl
+        
         --[[
+		local EndOfAttackExists = false -- for the functions that don't have this event, I want them to run code when the animation has stopped. However, animations that have this marker won't be able to run it.
+        
 		if v.Animation:GetAttribute("AnimType") == 1 then -- anim type 1 is attacks
 			Attack_Animation_Management.manage(moduleTbl, v, v.Animation, EndOfAttackExists)
 			
@@ -117,6 +118,8 @@ end
 
 function Animation_Centric.setupAttackAnimation(moduleTbl, attackLvl) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
                                                 -- AttackTbl would be the table of attacks, such as attack1Tbl or attack2Tbl
+    
+    warn("setting up attack animation track", attackLvl)
     if attackLvl == 1 then
         
         if not moduleTbl.attackTrack  then
@@ -131,6 +134,7 @@ function Animation_Centric.setupAttackAnimation(moduleTbl, attackLvl) --[[ Will 
                     end
                 end
                 moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", moduleTbl.randLvl1Type)
+                warn(moduleTbl.attackTrack)
             end
         end
     
@@ -145,6 +149,7 @@ function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attac
     if moduleTbl.lastAttack and moduleTbl.lastAttack.IsPlaying and not moduleTbl.isAttacking then
         moduleTbl.lastAttack:Stop()
     end
+        print(moduleTbl)
         moduleTbl.currentAttack = moduleTbl.attackTrack.Animation
         moduleTbl.attackTrack:Play()
         moduleTbl.lastAttack = moduleTbl.attackTrack

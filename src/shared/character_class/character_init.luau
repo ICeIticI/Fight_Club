@@ -1,7 +1,7 @@
 local Character_Init = {}
 Character_Init.__index = Character_Init
 
-local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.Animation_Centric)
+local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
 
 
 local function createHitbox(bodyPart) --[[ Function that will create a hitbox of a given part for a given player ]]
@@ -95,7 +95,7 @@ function Character_Init.init(charModel)
 	self.currentAttack = nil										
 	self.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
 	self.attackSeries = nil
-	self.randAttack = nil
+	-- self.randAttack = nil
 	self.distanceBetween = nil
 	self.enemyHumanoid = nil -- pre-defined enemy Humanoid because the script hates global variables. Used for the enemy.
 	self.enemyChar = nil
@@ -174,6 +174,7 @@ function Character_Init.init(charModel)
 	self.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 	-- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 	self.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
+	print(self.GlobalRemoteFunction)
 
 	self.LocalBindableEvent = Instance.new("BindableEvent")
 	self.LocalBindableEvent.Name = "LocalBindableEvent"
@@ -216,11 +217,12 @@ function Character_Init.init(charModel)
 	-- if none of the bools are currently active (true) then the desired action can be completed as it won't interrupt any other action, so we return function as true.
 		return true
 	end
-	
+	task.wait(5)
+	print(true)
 	if self.player ~= nil then
 		self.GlobalRemoteFunction:InvokeClient(self.player, "createAnimationTracks")
 	else -- not a player. We wanna create animations on server
-	Animation_Centric.initialize_animations(Character_Init)
+		Animation_Centric.initialize_animations(Character_Init)
 	end
 
     return self

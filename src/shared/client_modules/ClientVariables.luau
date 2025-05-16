@@ -2,8 +2,6 @@
 local ClientVariables = {}
 ClientVariables.__index = ClientVariables
 
-local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.Animation_Centric)
-
 ClientVariables.player = game:GetService("Players").LocalPlayer
 ClientVariables.initialized = false
 
@@ -68,7 +66,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	ClientVariables.currentAttack = nil										
 	ClientVariables.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
 	ClientVariables.attackSeries = nil
-	ClientVariables.randAttack = nil
+	-- ClientVariables.randAttack = nil
 	ClientVariables.distanceBetween = nil
 	ClientVariables.enemyHumanoid = nil -- pre-defined enemy Humanoid because the script hates global variables. Used for the enemy.
 	ClientVariables.enemyChar = nil
@@ -247,6 +245,7 @@ ClientVariables.plrObjectsFolder = ClientVariables.player:WaitForChild(ClientVar
 ClientVariables.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 -- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 ClientVariables.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
+print(ClientVariables.GlobalRemoteFunction)
 
 ClientVariables.LocalBindableEvent = Instance.new("BindableEvent")
 ClientVariables.LocalBindableEvent.Name = "LocalBindableEvent"
@@ -429,8 +428,8 @@ function ClientVariables.reset()
 	ClientVariables.waitingToAttack = false
 	
 	
-	if (ClientVariables.randAttack and not ClientVariables.randAttack.IsPlaying) or (ClientVariables.pairedAttack and not ClientVariables.pairedAttack.IsPlaying) then
-			ClientVariables.randAttack = nil
+	if (ClientVariables.attackTrack and not ClientVariables.attackTrack.IsPlaying) or (ClientVariables.pairedAttack and not ClientVariables.pairedAttack.IsPlaying) then
+			ClientVariables.attackTrack = nil
 			ClientVariables.currentAttack = nil
 			ClientVariables.followUpCount = 0
 			ClientVariables.comboCounter = 0

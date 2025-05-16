@@ -16,6 +16,7 @@ local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFu
 -- New modules:
 
 local Character = require(game.ReplicatedStorage.Shared.character_class.character)
+local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
 require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check will run on it's own, but we don't need to store it as it will be unused.
 
@@ -58,6 +59,8 @@ Players.PlayerAdded:Connect(function(player)
 
     player.CharacterRemoving:Connect(function()
         -- We want to delete the instance of the character class from the old character
-        characterInstance:erase()
+        if characterInstance then
+            characterInstance:erase()
+        end
     end)
 end)

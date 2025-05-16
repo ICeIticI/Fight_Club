@@ -17,7 +17,38 @@ local Attack_Animation_Management = require(game.ReplicatedStorage.Shared.animat
 local Receive_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.receive_animation_manager)
 local Misc_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.misc_animation_manager)
 
+local function randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
+
+    	local randAttackTbl = {}
+
+	for _, v in pairs(aTrackTbl) do
+		if
+		(
+			attribute1 == nil 
+			or (a1Value ~= nil 
+			and v.Animation:GetAttribute(attribute1) == a1Value) 
+			or (v.Animation:GetAttribute(attribute1) 
+			and a1Value == nil)) 
+			and 
+			(attribute2 == nil 
+			or (a2Value ~= nil 
+			and v.Animation:GetAttribute(attribute2) == a2Value) 
+			or (v.Animation:GetAttribute(attribute2) 
+			and a2Value == nil)
+		) 
+
+		then
+			table.insert(randAttackTbl, v)
+		end
+	end
+
+	return randAttackTbl[math.random(1, #randAttackTbl)] -- returns the randomly-selected animation track
+
+end
+
+
 function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize both the animations and their corresponding tracks ]]
+    print("reached here init")
     moduleTbl.AllAnimations = {}
     for _, obj in pairs(moduleTbl.plrObjectsFolder:GetChildren()) do
         if obj:IsA("Animation") then
@@ -26,7 +57,7 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
             table.insert(moduleTbl.AllAnimations, moduleTbl[obj.Name .. "TRACK"])
         end
     end
-
+    print("checkpoint 1")
     -- Sorting all the animations into other animation tables for managing:
 
     moduleTbl.attack1Table = {}
@@ -37,6 +68,8 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
     
     moduleTbl.counterAttacksTable = {}
     moduleTbl.dodgeAttacksTable = {}
+
+    moduleTbl.attackTrack = nil -- the animation track of the current attack being performed
 
     for _, v in pairs(moduleTbl.AllAnimations) do -- this for loop fills in the attack1 and attack2Table based off attributes
         if v.Animation:GetAttribute("AttackSeries") then -- standard attacks have the "AttackSeries" attribute so its how we define it as a stnadard attack
@@ -61,10 +94,11 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
                 table.insert(moduleTbl.pairedBlocksTable, v)
             end
         end
-
+        print("checkpoint 2")
         
 		local EndOfAttackExists = false -- for the functions that don't have this event, I want them to run code when the animation has stopped. However, animations that have this marker won't be able to run it.
 
+        --[[
 		if v.Animation:GetAttribute("AnimType") == 1 then -- anim type 1 is attacks
 			Attack_Animation_Management.manage(moduleTbl, v, v.Animation, EndOfAttackExists)
 			
@@ -75,35 +109,46 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
 			Misc_Animation_Management.manage(moduleTbl, v)
 			
 		end
+        ]]
+
     end
     
 end
 
-function Animation_Centric.randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
-	local randAttackTbl = {}
+function Animation_Centric.setupAttackAnimation(moduleTbl, attackLvl) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
+                                                -- AttackTbl would be the table of attacks, such as attack1Tbl or attack2Tbl
+    if attackLvl == 1 then
+        
+        if not moduleTbl.attackTrack  then
+            moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", moduleTbl.randLvl1Type)
+        else
+            local sameAttackChance = math.random(1, 100)
+            if sameAttackChance > 10 or moduleTbl.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
+                for _, v in pairs(moduleTbl.attack1Table) do
+                    if v ~= moduleTbl.attackTrack and v.Animation:GetAttribute("AttackSeries") == moduleTbl.randLvl1Type then
+                        moduleTbl.attackTrack = v
+                        break
+                    end
+                end
+                moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", moduleTbl.randLvl1Type)
+            end
+        end
+    
+    elseif attackLvl == 2 then
 
-	for _, v in pairs(aTrackTbl) do
-		if
-		(
-			attribute1 == nil 
-			or (a1Value ~= nil 
-			and v.Animation:GetAttribute(attribute1) == a1Value) 
-			or (v.Animation:GetAttribute(attribute1) 
-			and a1Value == nil)) 
-			and 
-			(attribute2 == nil 
-			or (a2Value ~= nil 
-			and v.Animation:GetAttribute(attribute2) == a2Value) 
-			or (v.Animation:GetAttribute(attribute2) 
-			and a2Value == nil)
-		) 
+        moduleTbl.attackTrack = moduleTbl.attack2Table[math.random(1, #moduleTbl.attack2Table)]
+    end
+end
 
-		then
-			table.insert(randAttackTbl, v)
-		end
-	end
+function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attack animation before (using the .setUpAttackAnimation). This will execute that animation.  ]]
+    
+    if moduleTbl.lastAttack and moduleTbl.lastAttack.IsPlaying and not moduleTbl.isAttacking then
+        moduleTbl.lastAttack:Stop()
+    end
+        moduleTbl.currentAttack = moduleTbl.attackTrack.Animation
+        moduleTbl.attackTrack:Play()
+        moduleTbl.lastAttack = moduleTbl.attackTrack
 
-	return randAttackTbl[math.random(1, #randAttackTbl)] -- returns the randomly-selected animation track
 end
 
 return Animation_Centric

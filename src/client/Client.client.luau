@@ -16,6 +16,7 @@ local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.Cli
 -- New Modules:
 
 local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
+require(game.ReplicatedStorage.Shared.client_modules.REs_RFs).init()
 
 -- New Remote Events/Functions:
 

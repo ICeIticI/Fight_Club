@@ -25,8 +25,8 @@ function Receive_Animation_Management.manage(moduleTbl, track, animation)
         -- Changes that happen regardless if the receiving animation plays or stops
         moduleTbl.comboCounter = 0
 
-        if moduleTbl.randAttack and moduleTbl.randAttack.IsPlaying then
-            moduleTbl.randAttack:Stop()
+        if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
+            moduleTbl.attackTrack:Stop()
         end
 
         if animation.AnimationId == moduleTbl.FC_RightHaymakerRECEIVER.AnimationId or animation.AnimationId == moduleTbl.FC_LeftHaymakerRECEIVER.AnimationId then

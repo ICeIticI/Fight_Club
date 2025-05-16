@@ -1,45 +1,40 @@
 local Character_Attack = {}
 Character_Attack.__index = Character_Attack
 
-local function playAttackAnimation(self) --[[ Responsible for handling the logic of when an attack ANIMATION starts ]]
-    if self.lastAttack and self.lastAttack.IsPlaying and not self.isAttacking then
-        self.lastAttack:Stop()
+local function playAttackAnimation(characterInstance) --[[ Responsible for handling the logic of when an attack ANIMATION starts ]]
+    if characterInstance.player then
+        characterInstance.GlobalRemoteEvent:FireClient("playAttackAnimation")
+    else 
+        -- is an AI. Send directly to animation_centric instead of to the client then to centric.
+
     end
-    self.currentAttack = self.randAttack.Animation
-    self.randAttack:Play()
-    self.lastAttack = self.randAttack
 end
 
-local function setUpClientAnimation(characterInstance) --[[ Will ready an attack animation on the client ]]
+local function setupAttackAnimation(attackLvl, characterInstance) --[[ Will ready an attack animation on the client ]]
     if characterInstance.player then
-        characterInstance.GlobalRemoteEvent:FireClient("setUpClientAttackAnimation")
+        local data = {
+            attackLvl
+        }
+        characterInstance.GlobalRemoteEvent:FireClient("setUpClientAttackAnimation", data)
+    else
+        -- is an AI. Send directly to animation_centric instead of to the client then to centric.
+
     end
 end
 
 
 function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or hook ]]
-    print("lvl 1 attack")
-    if not self.randAttack then
-        self.randAttack = self.randomAnimationTrack(self.attack1Table, "AttackSeries", self.randLvl1Type)
-    else
-        local sameAttackChance = math.random(1, 100)
-        if sameAttackChance > 10 or self.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
-            for _, v in pairs(self.attack1Table) do
-                if v ~= self.randAttack and v.Animation:GetAttribute("AttackSeries") == self.randLvl1Type then
-                    self.randAttack = v
-                    break
-                end
-            end
-            -- GameVariables.randAttack = GameVariables.randomAnimationTrack(GameVariables.attack1Table, "AttackSeries", GameVariables.randLvl1Type)
-        end
-    end
+    -- Getting an animation ready on the client to play:
+    setupAttackAnimation(1, self)
+    -- Playing said animation:
     playAttackAnimation(self)
+    print(self)
     self.comboCounter += 1
 end
 
 function Character_Attack:level2() --[[ Throw a level 2 attack, such as a haymaker ]]
     print("lvl 2 attack")
-    self.randAttack = self.attack2Table[math.random(1, #self.attack2Table)]
+    setupAttackAnimation(2, self)
     playAttackAnimation(self)
     self.comboCounter += 1
 end
@@ -53,13 +48,13 @@ function Character_Attack:counterAttack() --[[ Perform a counter attack, turning
 end
 
 function Character_Attack:dodgeAttack() --[[ Attempt to evade the attack of the enemy, leaving them open. ]]
-    self.randAttack = self.randomAnimationTrack(self.dodgeAttacksTable, "DodgeAttack", true, "AnimDirection", self.dodgeTrack.Animation:GetAttribute("AnimDirection"))
+    self.attackTrack = self.randomAnimationTrack(self.dodgeAttacksTable, "DodgeAttack", true, "AnimDirection", self.dodgeTrack.Animation:GetAttribute("AnimDirection"))
     
-    if self.randAttack.Animation.AnimationId ~= self.FC_LDodgeAttack1.AnimationId then
+    if self.attackTrack.Animation.AnimationId ~= self.FC_LDodgeAttack1.AnimationId then
         self.repositionInFrontOfEnemy() -- We dont reposition for left dodge attack cause it makes it not as cool for some reason
     end
     
-    if self.randAttack.Animation.AnimationId == self.FC_LDodgeAttack1.AnimationId then
+    if self.attackTrack.Animation.AnimationId == self.FC_LDodgeAttack1.AnimationId then
         
         self.setCharacterCFrame(self.character, self.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0))
         
@@ -68,7 +63,7 @@ function Character_Attack:dodgeAttack() --[[ Attempt to evade the attack of the 
         local travelTime = 0.14/0.60
         self.setLinearVelocity(Vector3.new(moveDistanceX/travelTime, 0, moveDistanceZ/travelTime), travelTime)
     
-    elseif self.randAttack.Animation.AnimationId == self.FC_RDodgeAttack1.AnimationId then
+    elseif self.attackTrack.Animation.AnimationId == self.FC_RDodgeAttack1.AnimationId then
     
         local moveDistance = 2.5
         local travelTime = 0.26/0.60
@@ -77,12 +72,12 @@ function Character_Attack:dodgeAttack() --[[ Attempt to evade the attack of the 
     
 
     -- self.dodgeAttackTrack:Play()
-    self.randAttack:Play()
-    print(self.randAttack, self.dodgeTrack)
+    self.attackTrack:Play()
+    print(self.attackTrack, self.dodgeTrack)
 
     self.waitingToAttack = false
     local reason = "dodgeAttack"
-    self.GlobalRemoteEvent:FireServer(self.enemyChar, reason, self.randAttack.Animation)
+    self.GlobalRemoteEvent:FireServer(self.enemyChar, reason, self.attackTrack.Animation)
 
 end
 

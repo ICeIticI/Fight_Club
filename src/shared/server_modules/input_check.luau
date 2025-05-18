@@ -24,11 +24,10 @@ local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -
 local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
 input_check_FUNCTION.OnServerInvoke = function(plr, input)
 
-    local characterObject = characters:GetCharacterByPlayer(plr)
+    local characterObject = characters:GetCharacterObjectByPlayer(plr)
     if not characterObject then return end
 
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
-
 
         if not characterObject.isAttacking 
         and not characterObject.isGettingHit 
@@ -49,8 +48,9 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
 
             if characterObject.raycastResult and not characterObject.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") and characterObject.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto (thats not the tavern keeper).
                 
-                characterObject.enemyHumanoid = characterObject.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
-                characterObject.enemyChar = characterObject.enemyHumanoid.Parent
+            characterObject.enemyChar = characterObject.raycastResult.Instance.Parent
+            characterObject.enemyHumanoid = characterObject.enemyChar:FindFirstChild("Humanoid")
+                characterObject.enemyCharInstance = characters:GetCharacterObjectByCharacter(characterObject.enemyChar)
                 characterObject.lockOnDebounce.Value = not characterObject.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
                 
                 
@@ -71,7 +71,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
             if (characterObject.lockOnDebounce.Value == true and characterObject.raycastResult.Instance.Parent:FindFirstChild("Humanoid")) 
             or (characterObject.isGettingHit and not characterObject.lockOnDebounce.Value) 
             then -- Runs when the player locks onto somebody
-                characterObject.enemyHumanoidRootPart = characterObject.raycastResult.Instance.Parent:WaitForChild("HumanoidRootPart")
+                characterObject.enemyChar = characterObject.raycastResult.Instance.Parent
+                characterObject.enemyHumanoidRootPart = characterObject.enemyChar:WaitForChild("HumanoidRootPart")
                 characterObject.setSpeed(true)
             -- Passed the lock-on check. Activate the lock-on code:
                 return "LockOnInput", {
@@ -97,13 +98,15 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
 
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
 
+        print("checking")
         if not characterObject.waitingToAttack 
         and characterObject.lockOnDebounce.Value 
         and characterObject.pairedChain <= characterObject.PairedChainMAX 
-        and characterObject.boolCheck({nil, characterObject.isBlocking, characterObject.isCountering, characterObject.isGettingHit}) 
+        and characterObject.boolCheck({isBlocking = characterObject.isBlocking, isCountering = characterObject.isCountering, isGettingHit = characterObject.isGettingHit}) 
         and (characterObject.raycastResult.Instance.Position - characterObject.humanoidRootPart.Position).Magnitude <= 7
         and characterObject.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
+            print("clear")
             -- before attacking, check if we're currently dodging so we can do a dodge attack:
             if characterObject.isDodging == true then
                 if not characterObject.waitingToAttack then
@@ -124,8 +127,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                 if characterObject.isEnemyHoldingBlock and characterObject.pairedChain <= characterObject.PairedChainMAX then
                     characterObject.pairedChain += 1
                 end
-                
-                if characterObject.boolCheck({characterObject.isAttacking, characterObject.isBlocking, characterObject.isCountering, characterObject.isGettingHit}) and not characterObject.waitingToAttack and not characterObject.canFollowUp and not characterObject.pairedPlaying then
+                if characterObject.boolCheck({isAttacking = characterObject.isAttacking, isBlocking = characterObject.isBlocking, isCountering = characterObject.isCountering, isGettingHit = characterObject.isGettingHit}) and not characterObject.waitingToAttack and not characterObject.canFollowUp and not characterObject.pairedPlaying then
                     if characterObject.pairedChain <= characterObject.PairedChainMAX then
                         characterObject.animPair = {math.random(1, 2), math.random(1, 2)}
                         --[[
@@ -133,9 +135,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                         characterObject.GlobalRemoteEvent:FireClient(characterObject.enemyChar, characterObject.Protocol, characterObject.currentAttack, characterObject.animPair, characterObject.pairedChain, nil, false)
                         ]] 
                     end
+
+                    print("check 2 cleared")
                     characterObject:basicAttack(characterObject.comboCounter)
-                elseif characterObject.canFollowUp then
+                    elseif characterObject.canFollowUp then
                     characterObject.waitingToAttack = true
+                    characterObject.didFollowUp = true -- when true, the character did a followup attack
                     while characterObject.isAttacking do
                         task.wait()
                     end
@@ -147,8 +152,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                             characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, nil, characterObject.animPair, characterObject.pairedChain, false)
                             ]]
                         end
-                        warn("we got here with our attack")
-                        characterObject.character_attack:basicAttack(characterObject.comboCounter) -- followup attack
+                        characterObject:basicAttack(characterObject.comboCounter) -- followup attack
+                        print(characterObject.followUpCount)
                     end
                     characterObject.waitingToAttack = false
                 end

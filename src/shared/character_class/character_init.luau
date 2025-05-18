@@ -179,11 +179,6 @@ function Character_Init.init(charModel)
 	self.LocalBindableEvent.Name = "LocalBindableEvent"
 	self.LocalBindableEvent.Parent = game.ReplicatedStorage
 
-	function self.setLinearVelocity(velocity, durationOfVelocity) --[[ Function that will set the VectorForce of the player's character to the given Vector3. ]]
-		local protocol = "SetLinearVelocity"
-		self.GlobalRemoteEvent:FireServer(velocity, protocol, durationOfVelocity)
-	end
-
 	function self.setSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
 		if bool == true then
 		-- we allow the player the ability to move
@@ -206,15 +201,92 @@ function Character_Init.init(charModel)
 			self.humanoid.WalkSpeed = 0
 		end
 	end
-
+	
 	function self.boolCheck(boolTable) --[[ Function that will check the given boolean values. If any of them are true, then this will return false. If none of them are true, then this will return true. ]]
-		for _, v in pairs(boolTable) do
+		local trueBoolTbl = {} -- Table that will store bools that are true, which will mean the boolCheck failed
+
+		for i, v in pairs(boolTable) do
 			if v == true then
-				return false
+				table.insert(trueBoolTbl, v)
+				warn("boolCheck failed: ".. tostring(i) .. " is true.")
 			end
 		end
-	-- if none of the bools are currently active (true) then the desired action can be completed as it won't interrupt any other action, so we return function as true.
-		return true
+
+		if next(trueBoolTbl) == nil then -- if we don't find anything in the trueBoolTbl, then all the bools given are false. Therefore, return true
+			-- if none of the bools are currently active (true) then the desired action can be completed as it won't interrupt any other action, so we return function as true.
+			return true
+		else
+			return false
+		end
+
+	end
+
+	function self.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
+		if bool == true then
+			print("giving back speed")
+			-- we allow the player the ability to move
+
+			if self.pairedPlaying == false and self.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
+
+				if not self.isBlocking then
+					self.previousWalkSpeed = self.lockOnSpeed
+				elseif self.isBlocking then
+					self.previousWalkSpeed = self.lockOnSpeed / 1.5
+				end
+
+				self.humanoid.WalkSpeed = self.previousWalkSpeed
+			else
+				self.humanoid.WalkSpeed = self.originalWalkSpeed
+			end
+
+		elseif bool == false then
+			print("taking away speed")
+			-- we take the player's ability to move away
+			self.humanoid.WalkSpeed = 0
+		end
+	end
+
+	function self.reset() --[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back. ]]--
+		self.isDodging = false
+		self.isCountering = false
+		self.isGettingHit = false
+		
+		self.canFollowUp = false
+		self.hitDebounce = false
+		self.attackFrames = false
+		self.waitingToAttack = false
+		
+		
+		if (self.attackTrack and not self.attackTrack.IsPlaying) or (self.pairedAttack and not self.pairedAttack.IsPlaying) then
+			self.attackTrack = nil
+			self.currentAttack = nil
+			self.followUpCount = 0
+			self.comboCounter = 0
+			self.isAttacking = false
+			self.canSyncBlock = true
+			self.pairedPlaying = false
+			self.pairedChain = 0
+		end
+		if self.currentReceiveAnimTRACK and not self.currentReceiveAnimTRACK.IsPlaying then
+			self.currentReceiveAnimTRACK = nil
+			self.pairedChain = 0
+		end
+		-- ClientVariables.animPair = nil
+
+		self.SetSpeed(true)
+
+	end
+
+
+	function self.setLinearVelocity(sentVelocity, sentDuration)
+
+		self.character.HumanoidRootPart:WaitForChild("FC_LinearVelocity").VectorVelocity = sentVelocity
+		self.character.HumanoidRootPart.FC_LinearVelocity.Enabled = true
+		task.wait(sentDuration) -- Character will be under said force till duration ends.
+
+		self.character.HumanoidRootPart.FC_LinearVelocity.VectorVelocity = Vector3.zero
+		self.character.HumanoidRootPart.FC_LinearVelocity.Enabled = false
+
 	end
 
 	if self.player ~= nil then

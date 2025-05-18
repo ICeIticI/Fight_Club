@@ -11,6 +11,7 @@ local function setupTrackData(attackLvl) --[[ Because tracks are played on the c
 
     if attackLvl == 1 or attackLvl == 2 then
         trackData.Counter_Attribute = false
+        trackData.Paired_Attribute = false
     end
     return trackData
 end
@@ -40,6 +41,8 @@ local function playAttackAnimation(characterInstance) --[[ Responsible for handl
     
 end
 
+local attack1WaitTime = 0.5
+local attack2WaitTime = 1
 
 function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or hook ]]
     -- Getting an animation ready on the client to play:
@@ -47,7 +50,11 @@ function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or
     -- Playing said animation:
     playAttackAnimation(self.characterInstance)
     self.characterInstance.comboCounter += 1
-    Attack_Animation_Management.runOnIsPlaying(trackData)
+    trackData.IsPlaying = true
+    self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+    task.wait(attack1WaitTime)
+    trackData.IsPlaying = false
+    self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
 end
 
 function Character_Attack:level2() --[[ Throw a level 2 attack, such as a haymaker ]]
@@ -55,7 +62,8 @@ function Character_Attack:level2() --[[ Throw a level 2 attack, such as a haymak
     local trackData = setupAttackAnimation(2, self.characterInstance)
     playAttackAnimation(self.characterInstance)
     self.characterInstance.comboCounter += 1
-    Attack_Animation_Management.runOnIsPlaying(trackData)
+    trackData.IsPlaying = true
+    self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
 end
 
 function Character_Attack:level3() --[[ Throw a level 3 attack, or in other words, execute the enemy ]]

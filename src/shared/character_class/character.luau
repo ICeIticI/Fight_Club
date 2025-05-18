@@ -16,7 +16,7 @@ local character_attack = require(game.ReplicatedStorage.Shared.character_class.c
 local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
 local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
 
-local Attack_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.attack_animation_manager)
+local Attack_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.attack_animation_manager)
 
 local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
@@ -58,7 +58,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.character_block = setmetatable({}, { __index = character_block })
     self.character_receive = setmetatable({}, { __index = character_receive })
     
-    self.attack_animation_management = setmetatable({}, { __index = Attack_Animation_Management})
+    self.attack_animation_manager = setmetatable({}, { __index = Attack_Animation_Manager})
 
     -- assign the Character instance to the other modules:
 
@@ -68,7 +68,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.character_receive.characterInstance = self
 
     -- animation management:
-    self.attack_animation_management.characterInstance = self
+    self.attack_animation_manager.characterInstance = self
 
     characters[self.id] = self
     return self
@@ -91,12 +91,38 @@ function Character:lockOn() --[[ Makes the character lock onto an enemy (Will ne
 end
 
 function Character:basicAttack(comboCounter) --[[ The character will do some sort of attack ]]
-    if comboCounter <= 2 and self.enemyHumanoid.Health > 10 then
-        -- character_attack.level1()
-        self.character_attack:level1()
-    elseif comboCounter >= 3 or self.enemyHumanoid.Health <= 10 then
-        -- character_attack.level2()
-        self.character_attack:level2()
+    
+    if self.isEnemyHoldingBlock and not self.isGettingHit and self.enemyChar.Humanoid.MoveDirection.Magnitude == 0 and self.comboCounter == 0 then
+        self.synchedBlock(nil, comboCounter)
+    elseif self.isGettingHit then
+        return false
+    elseif characters:GetCharacterObjectByCharacter(self.enemyChar) and characters:GetCharacterObjectByCharacter(self.enemyChar).isDodging ~= true then -- gets the public canAttack of the player and makes sure its true before attacking
+        -- if self.comboCounter == 0 then
+        --     setAttackType(comboCounter)
+        -- end
+
+        -- also if they are even further than 3 studs then we can implement a running-ish punch (like in RDR2)
+        -- move character closer to enemy if they are a bit too far
+        if self.distanceBetween > 3 then
+            -- local speedUnit = 2500 -- 1 speed unit is 1 stud per second
+            local distanceToTravel = self.distanceBetween - 3 -- we want to be 3 studs away from the enemy
+            local timeToArrive = 0.55
+            local speed = -(distanceToTravel / timeToArrive)
+
+            self.setLinearVelocity(Vector3.new(0, 0, speed), timeToArrive)
+        end
+        
+        if comboCounter <= 2 and self.enemyHumanoid.Health > 10 then
+            -- character_attack.level1()
+            self.character_attack:level1()
+        elseif comboCounter >= 3 or self.enemyHumanoid.Health <= 10 then
+            -- character_attack.level2()
+            self.character_attack:level2()
+
+    else
+        warn("Attack call failed! :(")
+    end
+    
         
     -- elseif comboCounter == 3 then
     --     -- character_attack.level3()

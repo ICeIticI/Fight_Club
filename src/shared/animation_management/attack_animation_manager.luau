@@ -108,7 +108,9 @@ local Attack_Animation_Management = {}
 -- end
 
 function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages character data based on when an attack is playing. NOT the animation track itself. That runs on the client. Unless I decided to move it to the server. ]]
+    local attackEnded = false
     if trackData.IsPlaying then
+        print(self)
         self.characterInstance.isAttacking = true
         self.characterInstance.SetSpeed(false)
 
@@ -116,20 +118,19 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             self.characterInstance.setPublicPlayerVariable("canCounter", true)
             self.characterInstance.isCountering = true
             self.characterInstance.isAttacking = true
-            self.characterInstance.currentAttack = track.Animation
             self.characterInstance.Protocol = "Counter"
             self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, self.characterInstance.currentAttack)
             self.characterInstance.Protocol = nil
         end
     elseif not trackData.IsPlaying then
-        if track.TimePosition ~= track.Length then
+        if self.characterInstance.didFollowUp then
             attackEnded = true
             self.characterInstance.Protocol = nil
-        elseif track.TimePosition == track.Length and not attackEnded then
+        elseif not self.characterInstance.didFollowUp and not attackEnded then
             self.characterInstance.reset()
         end
 
-        if track.Animation:GetAttribute("Paired") == true and track.TimePosition == track.Length then
+        if trackData.Paired_Attribute == true and not self.characterInstance.didFollowUp then
             task.delay(0.5, function()
                 self.characterInstance.hitDebounce = false
             end)

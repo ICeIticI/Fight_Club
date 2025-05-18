@@ -8,10 +8,19 @@
 
 local Characters = {}
 
-function Characters:GetCharacterByPlayer(plr) --[[ Method that gets a character based off an assigned player. WIll return nil otherwise. ]]
-    for _, char in pairs(self) do
-        if type(char) == "table" and char.player == plr then
-            return char
+function Characters:GetCharacterObjectByPlayer(plr) --[[ Method that gets a character based off an assigned player. WIll return nil otherwise. ]]
+    for _, charInstance in pairs(self) do
+        if type(charInstance) == "table" and charInstance.player == plr then
+            return charInstance
+        end
+    end
+    return nil
+end
+
+function Characters:GetCharacterObjectByCharacter(char)
+    for _, charInstance in pairs(self) do
+        if type(charInstance) == "table" and charInstance.character == char then
+            return charInstance
         end
     end
     return nil

@@ -390,63 +390,64 @@ function ClientVariables.boolCheck(boolTable)
 	return true
 end
 
-function ClientVariables.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
-	if bool == true then
-		print("giving back speed")
-		-- we allow the player the ability to move
+-- function ClientVariables.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
+-- 	if bool == true then
+-- 		print("giving back speed")
+-- 		-- we allow the player the ability to move
 
-		if ClientVariables.pairedPlaying == false and ClientVariables.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
+-- 		if ClientVariables.pairedPlaying == false and ClientVariables.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
 
-			if not ClientVariables.isBlocking then
-				ClientVariables.previousWalkSpeed = ClientVariables.lockOnSpeed
-			elseif ClientVariables.isBlocking then
-				ClientVariables.previousWalkSpeed = ClientVariables.lockOnSpeed / 1.5
-			end
+-- 			if not ClientVariables.isBlocking then
+-- 				ClientVariables.previousWalkSpeed = ClientVariables.lockOnSpeed
+-- 			elseif ClientVariables.isBlocking then
+-- 				ClientVariables.previousWalkSpeed = ClientVariables.lockOnSpeed / 1.5
+-- 			end
 
-			ClientVariables.humanoid.WalkSpeed = ClientVariables.previousWalkSpeed
-		else
-			ClientVariables.humanoid.WalkSpeed = ClientVariables.originalWalkSpeed
-		end
+-- 			ClientVariables.humanoid.WalkSpeed = ClientVariables.previousWalkSpeed
+-- 		else
+-- 			ClientVariables.humanoid.WalkSpeed = ClientVariables.originalWalkSpeed
+-- 		end
 
-	elseif bool == false then
-		print("taking away speed")
-		-- we take the player's ability to move away
-		ClientVariables.humanoid.WalkSpeed = 0
-	end
-end
+-- 	elseif bool == false then
+-- 		print("taking away speed")
+-- 		-- we take the player's ability to move away
+-- 		ClientVariables.humanoid.WalkSpeed = 0
+-- 	end
+-- end
 
-function ClientVariables.reset()
-	--[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back. ]]--
-	ClientVariables.isDodging = false
-	ClientVariables.isCountering = false
-	ClientVariables.isGettingHit = false
+-- Move this function to the server:
+
+-- function ClientVariables.reset() --[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back. ]]--
+-- 	ClientVariables.isDodging = false
+-- 	ClientVariables.isCountering = false
+-- 	ClientVariables.isGettingHit = false
 	
-	ClientVariables.canFollowUp = false
-	ClientVariables.hitDebounce = false
-	ClientVariables.attackFrames = false
-	ClientVariables.waitingToAttack = false
+-- 	ClientVariables.canFollowUp = false
+-- 	ClientVariables.hitDebounce = false
+-- 	ClientVariables.attackFrames = false
+-- 	ClientVariables.waitingToAttack = false
 	
 	
-	if (ClientVariables.attackTrack and not ClientVariables.attackTrack.IsPlaying) or (ClientVariables.pairedAttack and not ClientVariables.pairedAttack.IsPlaying) then
-			ClientVariables.attackTrack = nil
-			ClientVariables.currentAttack = nil
-			ClientVariables.followUpCount = 0
-			ClientVariables.comboCounter = 0
-			ClientVariables.isAttacking = false
-			ClientVariables.canSyncBlock = true
-			ClientVariables.pairedPlaying = false
-			ClientVariables.pairedChain = 0
-	end
-	if ClientVariables.currentReceiveAnimTRACK and not ClientVariables.currentReceiveAnimTRACK.IsPlaying then
-		ClientVariables.currentReceiveAnimTRACK = nil
-		ClientVariables.pairedChain = 0
-	end
-	-- ClientVariables.animPair = nil
+-- 	if (ClientVariables.attackTrack and not ClientVariables.attackTrack.IsPlaying) or (ClientVariables.pairedAttack and not ClientVariables.pairedAttack.IsPlaying) then
+-- 			ClientVariables.attackTrack = nil
+-- 			ClientVariables.currentAttack = nil
+-- 			ClientVariables.followUpCount = 0
+-- 			ClientVariables.comboCounter = 0
+-- 			ClientVariables.isAttacking = false
+-- 			ClientVariables.canSyncBlock = true
+-- 			ClientVariables.pairedPlaying = false
+-- 			ClientVariables.pairedChain = 0
+-- 	end
+-- 	if ClientVariables.currentReceiveAnimTRACK and not ClientVariables.currentReceiveAnimTRACK.IsPlaying then
+-- 		ClientVariables.currentReceiveAnimTRACK = nil
+-- 		ClientVariables.pairedChain = 0
+-- 	end
+-- 	-- ClientVariables.animPair = nil
 
 
-	ClientVariables.SetSpeed(true)
+-- 	ClientVariables.SetSpeed(true)
 
-end
+-- end
 
 function ClientVariables.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. ]]
 

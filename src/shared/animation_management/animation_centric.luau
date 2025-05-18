@@ -119,7 +119,7 @@ end
 function Animation_Centric.setupAttackAnimation(moduleTbl, attackLvl) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
                                                 -- AttackTbl would be the table of attacks, such as attack1Tbl or attack2Tbl
     
-    warn("setting up attack animation track", attackLvl)
+    print("setting up attack animation track", attackLvl)
     if attackLvl == 1 then
         
         if not moduleTbl.attackTrack  then
@@ -134,7 +134,7 @@ function Animation_Centric.setupAttackAnimation(moduleTbl, attackLvl) --[[ Will 
                     end
                 end
                 moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", moduleTbl.randLvl1Type)
-                warn(moduleTbl.attackTrack)
+                print(moduleTbl.attackTrack)
             end
         end
     

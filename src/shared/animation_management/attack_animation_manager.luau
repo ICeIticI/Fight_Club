@@ -107,9 +107,62 @@ local Attack_Animation_Management = {}
 --     end)
 -- end
 
+-- Damage types:
+local A1Damage = 5 -- default damage for lvl 1 attacks
+local A2Damage = 11 -- default damage for lvl 2 attacks
+local syncBlockDamage = 2.5 -- damage for sync blocks
+local counterAttackDamage = 8
+local attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
+
+
+local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
+    if trackData.Paired_Attribute and trackData.Counter_Attribute then
+        characterInstance.canCounter = false
+        -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
+        characterInstance.hitCharacter.Humanoid:TakeDamage(counterAttackDamage)
+        -- hitSFX:Play()
+    else
+        characterInstance.canFollowUp = true
+        -- self.GlobalRemoteEvent:FireServer(nil, "AttackFrames", nil, nil, nil, nil, false)
+        characterInstance.isGettingHit = true
+    end
+end
+
+local function runOnEndOfAttack(characterInstance, trackData) --[[  ]]
+    characterInstance.isAttacking = false
+    characterInstance.hitDebounce = false
+    characterInstance.canFollowUp = false
+    -- self.GlobalRemoteEvent:FireServer(nil, "AttackEnded", nil, nil, nil, nil, false)
+
+    if not trackData.Paired_Attribute then
+        characterInstance.SetSpeed(true)
+    end
+
+    -- EndOfAttackExists = true
+
+    if trackData.attackLvl == 2 then
+        characterInstance.comboCounter = 0
+    end
+end
+
+local attack1_amountOfTimeBeforeAttackFrames = 0.23 -- the animation marker for StartOfAttack was at 0.14 / 0.60 (1 second).
+local attack1_amountOfTimeBeforeEndOfAttack = 0.45 -- level 1 attacks end 0.45 seconds after the animation begins.
+
 function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages character data based on when an attack is playing. NOT the animation track itself. That runs on the client. Unless I decided to move it to the server. ]]
+    
     local attackEnded = false
     if trackData.IsPlaying then
+
+        -- Schedule a simulation of the AttackFrames marker and handle data accordingly:
+        task.delay(attack1_amountOfTimeBeforeAttackFrames, function()
+            runOnAttackFrames(self.characterInstance, trackData)
+        end)
+
+        -- Schedule a simulation of the EndOfAttack marker:
+        task.delay(attack1_amountOfTimeBeforeEndOfAttack, function()
+            runOnEndOfAttack(self.characterInstance, trackData)
+        end)
+
         print(self)
         self.characterInstance.isAttacking = true
         self.characterInstance.SetSpeed(false)

@@ -41,20 +41,25 @@ local function playAttackAnimation(characterInstance) --[[ Responsible for handl
     
 end
 
-local attack1WaitTime = 0.5
+local attack1_waitTime = 0.5
 local attack2WaitTime = 1
 
 function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or hook ]]
     -- Getting an animation ready on the client to play:
     local trackData = setupAttackAnimation(1, self.characterInstance)
+
     -- Playing said animation:
     playAttackAnimation(self.characterInstance)
-    self.characterInstance.comboCounter += 1
+    -- self.characterInstance.comboCounter += 1
     trackData.IsPlaying = true
     self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
-    task.wait(attack1WaitTime)
-    trackData.IsPlaying = false
-    self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+    
+    task.wait(0.45/0.60)
+    
+    if self.characterInstance.comboCounter == 0 then
+        trackData.IsPlaying = false
+        self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+    end
 end
 
 function Character_Attack:level2() --[[ Throw a level 2 attack, such as a haymaker ]]

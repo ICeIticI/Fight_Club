@@ -97,9 +97,6 @@ function Character:basicAttack(comboCounter) --[[ The character will do some sor
     elseif self.isGettingHit then
         return false
     elseif characters:GetCharacterObjectByCharacter(self.enemyChar) and characters:GetCharacterObjectByCharacter(self.enemyChar).isDodging ~= true then -- gets the public canAttack of the player and makes sure its true before attacking
-        -- if self.comboCounter == 0 then
-        --     setAttackType(comboCounter)
-        -- end
 
         -- also if they are even further than 3 studs then we can implement a running-ish punch (like in RDR2)
         -- move character closer to enemy if they are a bit too far

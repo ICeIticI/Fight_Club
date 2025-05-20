@@ -116,29 +116,33 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
     
 end
 
-function Animation_Centric.setupAttackAnimation(moduleTbl, attackLvl) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
+function Animation_Centric.setupAttackAnimation(moduleTbl, trackData) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
                                                 -- AttackTbl would be the table of attacks, such as attack1Tbl or attack2Tbl
     
-    print("setting up attack animation track", attackLvl)
-    if attackLvl == 1 then
+    print("setting up attack animation track", trackData.attackLvl)
+    if trackData.attackLvl == 1 then
         
         if not moduleTbl.attackTrack  then
-            moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", moduleTbl.randLvl1Type)
+            print("attackTrack doesn't exist. Randomizing animation type...")
+            moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", trackData.attackType)
         else
+            print("attackTrack exists. Getting")
             local sameAttackChance = math.random(1, 100)
             if sameAttackChance > 10 or moduleTbl.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
                 for _, v in pairs(moduleTbl.attack1Table) do
-                    if v ~= moduleTbl.attackTrack and v.Animation:GetAttribute("AttackSeries") == moduleTbl.randLvl1Type then
+                    print(v, moduleTbl.attackTrack, v.Animation:GetAttribute("AttackSeries"), trackData.attackType)
+                    if v ~= moduleTbl.attackTrack and v.Animation:GetAttribute("AttackSeries") == trackData.attackType then
                         moduleTbl.attackTrack = v
+                        warn("Random attack track found.")
                         break
                     end
                 end
-                moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", moduleTbl.randLvl1Type)
-                print(moduleTbl.attackTrack)
+                -- moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", trackData.attackType)
+                -- print(moduleTbl.attackTrack)
             end
         end
     
-    elseif attackLvl == 2 then
+    elseif trackData.attackLvl == 2 then
 
         moduleTbl.attackTrack = moduleTbl.attack2Table[math.random(1, #moduleTbl.attack2Table)]
     end

@@ -16,8 +16,34 @@ local function setupTrackData(attackLvl) --[[ Because tracks are played on the c
     return trackData
 end
 
+local function setRandomAttackType(followupCombo) --[[ Will set the attack type when a new combo starts ]]
+    local randNumber
+    -- moduleTbl.randAttack = nil
+    if followupCombo then
+        randNumber = math.random(2, 3)
+    else
+        randNumber = math.random(1, 2)
+    end
+
+    if randNumber == 1 then
+        return "Jabs"
+    elseif randNumber == 2 then
+        return "Hooks"
+    elseif randNumber == 3 then
+        return "Uppercuts"
+    end
+end
+
 local function setupAttackAnimation(attackLvl, characterInstance) --[[ Will ready an attack animation on the client ]]
     local trackData = setupTrackData(attackLvl)
+
+    if characterInstance.comboCounter == 0 then -- Randomize attackType for a new combo:
+        -- Store the current attackType in characterInstance so it doesn't get forgotten when we attack in the future (for throwing the same type of attack again. If we throw a hook, we wanna followup with another hook):
+        characterInstance.attackType = setRandomAttackType(characterInstance.comboCounter)
+        print(trackData.attackType)
+    end
+    -- Whether or not we are starting a new series of attacks (such as jabs, or hooks) or not, we want our attackType to be what's already stored.
+    trackData.attackType = characterInstance.attackType
     
     if characterInstance.player then
         
@@ -41,25 +67,28 @@ local function playAttackAnimation(characterInstance) --[[ Responsible for handl
     
 end
 
-local attack1_waitTime = 0.5
-local attack2WaitTime = 1
+local attack1_waitTime = 0.45/0.60
+local attack2_waitTime = 1
 
 function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or hook ]]
+    
     -- Getting an animation ready on the client to play:
     local trackData = setupAttackAnimation(1, self.characterInstance)
 
     -- Playing said animation:
     playAttackAnimation(self.characterInstance)
-    -- self.characterInstance.comboCounter += 1
+    if self.characterInstance.comboCounter < 1 then -- For debuggin! Delete after!
+        self.characterInstance.comboCounter += 1
+    end
     trackData.IsPlaying = true
     self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
     
-    task.wait(0.45/0.60)
+    -- task.wait(attack1_waitTime)
     
-    if self.characterInstance.comboCounter == 0 then
-        trackData.IsPlaying = false
-        self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
-    end
+    -- if not self.characterInstance.isAttacking then
+    --     trackData.IsPlaying = false
+    --     self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+    -- end
 end
 
 function Character_Attack:level2() --[[ Throw a level 2 attack, such as a haymaker ]]

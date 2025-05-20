@@ -1,3 +1,9 @@
+--[[ 
+
+* Server module that simulates attacking animation tracks and manages accordingly
+
+]]
+
 local Attack_Animation_Management = {}
 
 -- function Attack_Animation_Management.manage(moduleTbl, track, animation, endOfAttackExists)
@@ -119,16 +125,19 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
     if trackData.Paired_Attribute and trackData.Counter_Attribute then
         characterInstance.canCounter = false
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
+        
+        -- Deal coubter damage:
         characterInstance.hitCharacter.Humanoid:TakeDamage(counterAttackDamage)
+        -- Play a sound effect for hitting the enemy on counter:
         -- hitSFX:Play()
     else
         characterInstance.canFollowUp = true
         -- self.GlobalRemoteEvent:FireServer(nil, "AttackFrames", nil, nil, nil, nil, false)
-        characterInstance.isGettingHit = true
+        -- characterInstance.isGettingHit = true
     end
 end
 
-local function runOnEndOfAttack(characterInstance, trackData) --[[  ]]
+local function runOnEndOfAttack(characterInstance, trackData) --[[ When we simulate the end of an attack, this will run to correctly manage the data ]]
     characterInstance.isAttacking = false
     characterInstance.hitDebounce = false
     characterInstance.canFollowUp = false

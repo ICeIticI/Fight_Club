@@ -156,9 +156,10 @@ end
 
 local attack1_amountOfTimeBeforeAttackFrames = 0.23 -- the animation marker for StartOfAttack was at 0.14 / 0.60 (1 second).
 local attack1_amountOfTimeBeforeEndOfAttack = 0.45 -- level 1 attacks end 0.45 seconds after the animation begins.
+local attack1_amountOfTimeBeforeEndOFAnimation = 0.75
 
 function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages character data based on when an attack is playing. NOT the animation track itself. That runs on the client. Unless I decided to move it to the server. ]]
-    
+    print(self, self.characterInstance)
     local attackEnded = false
     if trackData.IsPlaying then
 
@@ -172,7 +173,12 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             runOnEndOfAttack(self.characterInstance, trackData)
         end)
 
-        print(self)
+        -- Schedule a simulation of the end of the attacking animation:
+        task.delay(attack1_amountOfTimeBeforeEndOFAnimation, function()
+            trackData.IsPlaying = false
+            self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+        end)
+
         self.characterInstance.isAttacking = true
         self.characterInstance.SetSpeed(false)
 
@@ -185,10 +191,14 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             self.characterInstance.Protocol = nil
         end
     elseif not trackData.IsPlaying then
+        print(self.characterInstance.didFollowUp, attackEnded)
         if self.characterInstance.didFollowUp then
+            self.characterInstance.didFollowUp = false
             attackEnded = true
             self.characterInstance.Protocol = nil
-        elseif not self.characterInstance.didFollowUp and not attackEnded then
+
+        elseif not self.characterInstance.isAttacking then
+            warn("Resetting...")
             self.characterInstance.reset()
         end
 

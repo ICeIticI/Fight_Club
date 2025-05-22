@@ -82,6 +82,7 @@ function Character_Init.init(charModel)
 	self.pairedPlaying = false -- used to make sure the paired animations don't play while already playing.
 	self.canSyncBlock = true
 	self.previousWalkSpeed = nil
+	self.didFollowUp = false -- when true, the character did a followup attack
 
 	self.attackFrames = false -- when the StartOfAttack marker fires in attack anims, this allows damage to pass
 
@@ -257,20 +258,20 @@ function Character_Init.init(charModel)
 		self.waitingToAttack = false
 		
 		
-		if (self.attackTrack and not self.attackTrack.IsPlaying) or (self.pairedAttack and not self.pairedAttack.IsPlaying) then
-			self.attackTrack = nil
-			self.currentAttack = nil
-			self.followUpCount = 0
-			self.comboCounter = 0
-			self.isAttacking = false
-			self.canSyncBlock = true
-			self.pairedPlaying = false
-			self.pairedChain = 0
-		end
-		if self.currentReceiveAnimTRACK and not self.currentReceiveAnimTRACK.IsPlaying then
-			self.currentReceiveAnimTRACK = nil
-			self.pairedChain = 0
-		end
+		-- if (self.attackTrack and not self.attackTrack.IsPlaying) or (self.pairedAttack and not self.pairedAttack.IsPlaying) then
+			-- self.attackTrack = nil
+			-- self.currentAttack = nil
+		self.followUpCount = 0
+		self.comboCounter = 0
+		self.isAttacking = false
+		self.canSyncBlock = true
+		self.pairedPlaying = false
+		self.pairedChain = 0
+		-- end
+		-- if self.currentReceiveAnimTRACK and not self.currentReceiveAnimTRACK.IsPlaying then
+		-- 	self.currentReceiveAnimTRACK = nil
+		-- 	self.pairedChain = 0
+		-- end
 		-- ClientVariables.animPair = nil
 
 		self.SetSpeed(true)

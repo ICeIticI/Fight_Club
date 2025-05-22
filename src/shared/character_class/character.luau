@@ -15,6 +15,7 @@ local character_init = require(game.ReplicatedStorage.Shared.character_class.cha
 local character_attack = require(game.ReplicatedStorage.Shared.character_class.character_attack) -- contains the attack functions and what not
 local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
 local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
+local character_hitboxes = require(game.ReplicatedStorage.Shared.character_class.character_hitboxes)
 
 local Attack_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.attack_animation_manager)
 
@@ -59,6 +60,8 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.character_receive = setmetatable({}, { __index = character_receive })
     
     self.attack_animation_manager = setmetatable({}, { __index = Attack_Animation_Manager})
+    
+    self.character_hitboxes = setmetatable({}, { __index = character_hitboxes })
 
     -- assign the Character instance to the other modules:
 
@@ -69,6 +72,9 @@ function Character.new(charModel) --[[ Constructor function that will create a n
 
     -- animation management:
     self.attack_animation_manager.characterInstance = self
+
+    -- everything else:
+    self.hitbox_manager.characterInstance = self
 
     characters[self.id] = self
     return self

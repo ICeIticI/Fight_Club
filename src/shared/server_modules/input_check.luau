@@ -98,7 +98,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
 
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
 
-        print("checking")
         if not characterObject.waitingToAttack 
         and characterObject.lockOnDebounce.Value 
         and characterObject.pairedChain <= characterObject.PairedChainMAX 
@@ -106,7 +105,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
         and (characterObject.raycastResult.Instance.Position - characterObject.humanoidRootPart.Position).Magnitude <= 7
         and characterObject.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
-            print("clear")
             -- before attacking, check if we're currently dodging so we can do a dodge attack:
             if characterObject.isDodging == true then
                 if not characterObject.waitingToAttack then
@@ -136,9 +134,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                         ]] 
                     end
 
-                    print("check 2 cleared")
                     characterObject:basicAttack(characterObject.comboCounter)
-                    elseif characterObject.canFollowUp then
+                elseif characterObject.canFollowUp then
                     characterObject.waitingToAttack = true
                     characterObject.didFollowUp = true -- when true, the character did a followup attack
                     while characterObject.isAttacking do

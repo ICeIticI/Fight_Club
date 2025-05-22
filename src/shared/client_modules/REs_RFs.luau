@@ -14,7 +14,6 @@ local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_manage
 function REs_RFs.init()
     
     ClientVariables.GlobalRemoteFunction.OnClientInvoke = function(protocol)
-        print("passed")
         if protocol == "createAnimationTracks" then -- initializes animations on character creation
             Animation_Centric.initialize_animations(ClientVariables)
         end
@@ -22,7 +21,6 @@ function REs_RFs.init()
     
     ClientVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(protocol, data)
         if protocol == "setUpClientAttackAnimation" then -- Will set up the attack animation for the upcoming attack
-            print(data)
             Animation_Centric.setupAttackAnimation(ClientVariables, data)
         elseif protocol == "playAttackAnimation" then
             Animation_Centric.playAttackAnimation(ClientVariables)

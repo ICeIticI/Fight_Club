@@ -119,21 +119,17 @@ end
 function Animation_Centric.setupAttackAnimation(moduleTbl, trackData) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
                                                 -- AttackTbl would be the table of attacks, such as attack1Tbl or attack2Tbl
     
-    print("setting up attack animation track", trackData.attackLvl)
     if trackData.attackLvl == 1 then
         
         if not moduleTbl.attackTrack  then
-            print("attackTrack doesn't exist. Randomizing animation type...")
             moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", trackData.attackType)
         else
-            print("attackTrack exists. Getting")
             local sameAttackChance = math.random(1, 100)
             if sameAttackChance > 10 or moduleTbl.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
                 for _, v in pairs(moduleTbl.attack1Table) do
-                    print(v, moduleTbl.attackTrack, v.Animation:GetAttribute("AttackSeries"), trackData.attackType)
                     if v ~= moduleTbl.attackTrack and v.Animation:GetAttribute("AttackSeries") == trackData.attackType then
                         moduleTbl.attackTrack = v
-                        warn("Random attack track found.")
+                        -- warn("Random attack track found.")
                         break
                     end
                 end
@@ -153,7 +149,6 @@ function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attac
     if moduleTbl.lastAttack and moduleTbl.lastAttack.IsPlaying and not moduleTbl.isAttacking then
         moduleTbl.lastAttack:Stop()
     end
-        print(moduleTbl)
         moduleTbl.currentAttack = moduleTbl.attackTrack.Animation
         moduleTbl.attackTrack:Play()
         moduleTbl.lastAttack = moduleTbl.attackTrack

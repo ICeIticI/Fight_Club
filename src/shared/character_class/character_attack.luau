@@ -40,14 +40,12 @@ local function setupAttackAnimation(attackLvl, characterInstance) --[[ Will read
     if characterInstance.comboCounter == 0 then -- Randomize attackType for a new combo:
         -- Store the current attackType in characterInstance so it doesn't get forgotten when we attack in the future (for throwing the same type of attack again. If we throw a hook, we wanna followup with another hook):
         characterInstance.attackType = setRandomAttackType(characterInstance.comboCounter)
-        print(trackData.attackType)
     end
     -- Whether or not we are starting a new series of attacks (such as jabs, or hooks) or not, we want our attackType to be what's already stored.
     trackData.attackType = characterInstance.attackType
     
     if characterInstance.player then
         
-        print(trackData)
         characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "setUpClientAttackAnimation", trackData)
     else
         -- is an AI. Send directly to animation_centric instead of to the client then to centric.
@@ -77,9 +75,9 @@ function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or
 
     -- Playing said animation:
     playAttackAnimation(self.characterInstance)
-    if self.characterInstance.comboCounter < 1 then -- For debuggin! Delete after!
+    -- if self.characterInstance.comboCounter < 1 then -- For debuggin! Delete after!
         self.characterInstance.comboCounter += 1
-    end
+    -- end
     trackData.IsPlaying = true
     self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
     
@@ -134,7 +132,6 @@ function Character_Attack:dodgeAttack() --[[ Attempt to evade the attack of the 
 
     -- self.characterInstance.dodgeAttackTrack:Play()
     self.characterInstance.attackTrack:Play()
-    print(self.characterInstance.attackTrack, self.characterInstance.dodgeTrack)
 
     self.characterInstance.waitingToAttack = false
     local reason = "dodgeAttack"

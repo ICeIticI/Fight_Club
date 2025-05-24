@@ -113,21 +113,15 @@ local Attack_Animation_Management = {}
 --     end)
 -- end
 
--- Damage types:
-local A1Damage = 5 -- default damage for lvl 1 attacks
-local A2Damage = 11 -- default damage for lvl 2 attacks
-local syncBlockDamage = 2.5 -- damage for sync blocks
-local counterAttackDamage = 8
-local attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
-
-
 local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
     if trackData.Paired_Attribute and trackData.Counter_Attribute then
         characterInstance.canCounter = false
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
-        -- Deal coubter damage:
-        characterInstance.hitCharacter.Humanoid:TakeDamage(counterAttackDamage)
+        -- All this crap below will be handled in the hitboxes module. Damage and what not do not be dealt via animation manager.
+
+        -- -- Deal coubter damage:
+        -- characterInstance.hitCharacter.Humanoid:TakeDamage(counterAttackDamage)
         -- Play a sound effect for hitting the enemy on counter:
         -- hitSFX:Play()
     else

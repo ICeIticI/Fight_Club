@@ -9,6 +9,11 @@
 local Characters = {}
 
 function Characters:GetCharacterObjectByPlayer(plr) --[[ Method that gets a character based off an assigned player. WIll return nil otherwise. ]]
+    
+    if not plr or not plr:IsA("Player") then
+        return warn("Provide a player object you idiot")
+    end
+
     for _, charInstance in pairs(self) do
         if type(charInstance) == "table" and charInstance.player == plr then
             return charInstance
@@ -18,6 +23,11 @@ function Characters:GetCharacterObjectByPlayer(plr) --[[ Method that gets a char
 end
 
 function Characters:GetCharacterObjectByCharacter(char)
+    
+    if not char or not char:IsA("Character") then
+        return warn("Provide a character object you idiot")
+    end
+
     for _, charInstance in pairs(self) do
         if type(charInstance) == "table" and charInstance.character == char then
             return charInstance

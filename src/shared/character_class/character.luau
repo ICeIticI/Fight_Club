@@ -133,6 +133,10 @@ function Character:basicAttack(comboCounter) --[[ The character will do some sor
     end
 end
 
+function Character:getHit(attackAnim)
+    
+end
+
 function Character:repulseAttack(attack_type)
     if attack_type == "dodge" then
         self.character_attack:dodgeAttack()
@@ -153,25 +157,28 @@ function Character:grapple() --[[ The character will grapple with an enemy ]]
     
 end
 
-function Character:receive(receiveType) --[[ The character will receive an attack ]]
-
+function Character:receive(receiveType, data) --[[ The character will receive an attack ]]
 
     -- Mitigate attacks:
     if receiveType == "bracingBlock" then
-        character_receive.bracingBlock()
-    elseif receiveType == "SyncBlock" then
-       character_receive.syncBlock()
+        character_receive:bracingBlock()
+    elseif receiveType == "syncBlock" then
+       character_receive:syncBlock()
     elseif receiveType == "dodge" then
-        character_receive.dodge()
+        character_receive:dodge()
     elseif receiveType == "parry" then
-        character_receive.parry()
-
+        character_receive:parry()
+    -- mitigate attacks with our own attack:
+    elseif receiveType == "counterAttack" then
+        character_attack:counterAttack(data)
+    elseif receiveType == "dodgeAttack" then
+        character_attack:dodgeAttack()
 
     -- No mitigation (got struck by an attack):
     elseif receiveType == "receiveLevel1" then
-        character_receive.receiveLevel1()
+        character_receive.receiveLevel1(data)
     elseif receiveType == "receiveLevel2" then
-        character_receive.receiveLevel2()
+        character_receive.receiveLevel2(data)
     elseif receiveType == "receiveLevel3" then
         character_receive.receiveLevel3()
 
@@ -182,6 +189,7 @@ function Character:receive(receiveType) --[[ The character will receive an attac
     elseif receiveType == "receiveParry" then
         character_receive.receiveParry()
     end
+    
 end
 
 return Character

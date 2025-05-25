@@ -102,8 +102,21 @@ function Character_Attack:level3() --[[ Throw a level 3 attack, or in other word
     print("lvl 3 attack")
 end
 
-function Character_Attack:counterAttack() --[[ Perform a counter attack, turning the enemy's attack against them. ]]
+function Character_Attack:counterAttack(attackerAnim) --[[ Perform a counter attack, turning the enemy's attack against them. ]]
+    
+    -- NOTE: Damage is dealt as soon as the 'StartOfAttack' market is reached.
+    
     print("counter attack")
+    if not (self.characterInstance.currentReceiveAnimTRACK and self.characterInstance.currentReceiveAnimTRACK.IsPlaying) then
+        self.characterInstance.isCountering = true
+        self.characterInstance.randAttack:Stop()
+        
+        if attackerAnim:GetAttribute("AnimDirection") == "Left" then
+            self.characterInstance.currentReceiveAnimTRACK = self.characterInstance.randomAnimationTrack(self.characterInstance.counterAttacksTable, "AnimDirection", "Left", "Counter", true)
+        elseif attackerAnim:GetAttribute("AnimDirection") == "Right" then
+            self.characterInstance.currentReceiveAnimTRACK = self.characterInstance.randomAnimationTrack(self.characterInstance.counterAttacksTable, "AnimDirection", "Right", "Counter", true)
+        end
+    end
 end
 
 function Character_Attack:dodgeAttack() --[[ Attempt to evade the attack of the enemy, leaving them open. ]]

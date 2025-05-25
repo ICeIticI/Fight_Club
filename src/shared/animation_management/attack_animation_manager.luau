@@ -113,11 +113,19 @@ local Attack_Animation_Management = {}
 --     end)
 -- end
 
+local counterAttackDamage = 8
 local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
     if trackData.Paired_Attribute and trackData.Counter_Attribute then
         characterInstance.canCounter = false
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
+        if trackData.Counter_Attribute then
+            characterInstance.hitCharacter.Humanoid:TakeDamage(counterAttackDamage)
+            characterInstance.playHitSFX()
+        end
+
+        -- So I may have lied about below lol:
+
         -- All this crap below will be handled in the hitboxes module. Damage and what not do not be dealt via animation manager.
 
         -- -- Deal coubter damage:

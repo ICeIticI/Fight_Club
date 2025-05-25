@@ -143,10 +143,10 @@ function ServerEvents.bAttackEvents(object1, object2, object3, object4, _, _, ob
 	if currentAttack and currentAttack:GetAttribute("AttackLevel") == 1 then
 		attackDamage = A1Damage
 		hitSFX.SoundId = tempHitSFXTable[math.random(1, #tempHitSFXTable)]
-		elseif currentAttack and currentAttack:GetAttribute("AttackLevel") == 2 then
-			attackDamage = A2Damage
-			hitSFX.SoundId = "rbxassetid://112444846023457"
-		end
+	elseif currentAttack and currentAttack:GetAttribute("AttackLevel") == 2 then
+		attackDamage = A2Damage
+		hitSFX.SoundId = "rbxassetid://112444846023457"
+	end
 
 	if Protocol == "Hook" or Protocol == "Haymaker" then -- We're basically making sure the enemy is not countering the player here. enemyInstance is a table that includes the enemy's current attacking animation track. We don't want them taking damage if they are countering.
 		attackHandler(sendingPlayer, hitCharacter, currentAttack, plrIsBlocking, enemyInstance, enemyCFrame)

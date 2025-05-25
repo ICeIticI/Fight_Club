@@ -4,21 +4,24 @@ local ReceivingAndCountering = {}
 
 -- Function to determine which receive animation to play based on the current attack ID
 local function getHit(currentAttackID)
+
+-- Left reaction for level 1 attacks:
     if currentAttackID == GameVariables.FC_LeftHook1.AnimationId or currentAttackID == GameVariables.FC_LeftJab.AnimationId then
-        -- Left reaction for level 1 attacks
         GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHook1RECEIVERTRACK
-    elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then
-        -- Right reaction for level 1 attacks
-        GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
     elseif currentAttackID == GameVariables.FC_LeftUppercut.AnimationId then
         GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftUppercutRECEIVERTRACK
+    elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
+        GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
+            
+-- Right reaction for level 1 attacks:
+    elseif currentAttackID == GameVariables.FC_RightHook1.AnimationId or currentAttackID == GameVariables.FC_RightJab.AnimationId then
+        GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHook1RECEIVERTRACK
     elseif currentAttackID == GameVariables.FC_RightUppercut.AnimationId then
         GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightUppercutRECEIVERTRACK
     elseif currentAttackID == GameVariables.FC_RightHaymaker.AnimationId then
         GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightHaymakerReceiverTRACK
-    elseif currentAttackID == GameVariables.FC_LeftHaymaker.AnimationId then
-        GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftHaymakerRECEIVERTRACK
     end
+    
 end
 
 -- Function to handle blocking and parrying
@@ -42,6 +45,7 @@ local function handleCounter(currentAttack)
     if not (GameVariables.currentReceiveAnimTRACK and GameVariables.currentReceiveAnimTRACK.IsPlaying) then
         GameVariables.isCountering = true
         GameVariables.randAttack:Stop()
+        
         if currentAttack:GetAttribute("AnimDirection") == "Left" then
             GameVariables.currentReceiveAnimTRACK = GameVariables.randomAnimationTrack(GameVariables.counterAttacksTable, "AnimDirection", "Left", "Counter", true)
         elseif currentAttack:GetAttribute("AnimDirection") == "Right" then

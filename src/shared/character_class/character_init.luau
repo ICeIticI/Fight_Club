@@ -290,6 +290,61 @@ function Character_Init.init(charModel)
 
 	end
 
+	function self.playReceivingTrack() --[[ After we define an animation track to play in response to an enemy action, this will play said track. ]]
+		if self.currentReceiveAnimTRACK then -- play receive animation
+			self.currentReceiveAnimTRACK:Play()
+
+			-- reposition the player to face the enemy if they counter them (not a parry)
+			if self.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (self.currentReceiveAnimTRACK == self.FC_RightParryTRACK or self.currentReceiveAnimTRACK == self.FC_LeftParryTRACK) then
+				self.repositionInFrontOfEnemy()
+			end
+    	end
+	end
+
+	-- Damage types:
+	local A1Damage = 5 -- default damage for lvl 1 attacks
+	local A2Damage = 11 -- default damage for lvl 2 attacks
+	local syncBlockDamage = 2.5 -- damage for sync blocks
+	-- local counterAttackDamage = 8
+	self.attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
+
+	local sound1, sound2, sound3 = 
+	"rbxassetid://9118617342",
+	"rbxassetid://82209688846366",
+	"rbxassetid://5507815764"
+
+	local tempHitSFXTable = {
+		sound1, sound2, sound3
+	}
+	function self.setupHitSFX()
+		self.hitSFX = self.characterInstance.character.Torso:FindFirstChild("hitSFX")
+		if not self.hitSFX or not self.hitSFX.SoundId then
+			self.hitSFX = Instance.new("Sound")
+			self.hitSFX.Name = "hitSFX"
+
+			if self.currentAttack and self.currentAttack:GetAttribute("AttackLevel") == 1 then
+				self.attackDamage = A1Damage
+				self.hitSFX.SoundId = tempHitSFXTable[math.random(1, #tempHitSFXTable)]
+			elseif self.currentAttack and self.currentAttack:GetAttribute("AttackLevel") == 2 then
+				self.attackDamage = A2Damage
+				self.hitSFX.SoundId = "rbxassetid://112444846023457"
+			else
+				self.hitSFX.SoundId = math.random(1, #tempHitSFXTable)
+				task.wait()
+			end
+		end
+	end
+
+	function self.setupAttackDamage(attacker_characterInstance)
+		if attacker_characterInstance.currentAttack:GetAttribute("AttackLevel") == 1 then
+			self.attackDamage = A1Damage
+		elseif attacker_characterInstance.currentAttack:GetAttribute("AttackLevel") == 2 then
+			self.attackDamage = A2Damage
+		end
+	end
+
+
+
 	if self.player ~= nil then
 		self.GlobalRemoteFunction:InvokeClient(self.player, "createAnimationTracks")
 	else -- not a player. We wanna create animations on server

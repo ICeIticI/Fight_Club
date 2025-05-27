@@ -449,14 +449,14 @@ end
 
 -- end
 
-function ClientVariables.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. ]]
+-- function ClientVariables.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. ]]
 
-	ClientVariables.character:WaitForChild("HumanoidRootPart").CFrame = 
-	CFrame.new(ClientVariables.enemyChar:WaitForChild("HumanoidRootPart").Position 
-				+ ClientVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 
-				, ClientVariables.enemyChar.HumanoidRootPart.Position)
+-- 	ClientVariables.character:WaitForChild("HumanoidRootPart").CFrame = 
+-- 	CFrame.new(ClientVariables.enemyChar:WaitForChild("HumanoidRootPart").Position 
+-- 				+ ClientVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 
+-- 				, ClientVariables.enemyChar.HumanoidRootPart.Position)
 
-end
+-- end
 
 function ClientVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
 	if ClientVariables.pairedChain <= ClientVariables.PairedChainMAX and ClientVariables.canSyncBlock then

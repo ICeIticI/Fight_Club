@@ -290,22 +290,19 @@ function Character_Init.init(charModel)
 
 	end
 
-	function self.playReceivingTrack() --[[ After we define an animation track to play in response to an enemy action, this will play said track. ]]
-		if self.currentReceiveAnimTRACK then -- play receive animation
-			self.currentReceiveAnimTRACK:Play()
+	function self.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. ]]
 
-			-- reposition the player to face the enemy if they counter them (not a parry)
-			if self.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (self.currentReceiveAnimTRACK == self.FC_RightParryTRACK or self.currentReceiveAnimTRACK == self.FC_LeftParryTRACK) then
-				self.repositionInFrontOfEnemy()
-			end
-    	end
+		self.character:WaitForChild("HumanoidRootPart").CFrame = 
+		CFrame.new(self.enemyChar:WaitForChild("HumanoidRootPart").Position 
+					+ self.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 
+					, self.enemyChar.HumanoidRootPart.Position)
 	end
 
 	-- Damage types:
 	local A1Damage = 5 -- default damage for lvl 1 attacks
 	local A2Damage = 11 -- default damage for lvl 2 attacks
 	local syncBlockDamage = 2.5 -- damage for sync blocks
-	-- local counterAttackDamage = 8
+	local counterAttackDamage = 8
 	self.attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
 
 	local sound1, sound2, sound3 = 
@@ -340,6 +337,8 @@ function Character_Init.init(charModel)
 			self.attackDamage = A1Damage
 		elseif attacker_characterInstance.currentAttack:GetAttribute("AttackLevel") == 2 then
 			self.attackDamage = A2Damage
+		elseif attacker_characterInstance.currentAttack:GetAttribute("Counter") then
+			self.attackDamage = counterAttackDamage
 		end
 	end
 

@@ -373,7 +373,6 @@ AnimationInstances.FC_LDodgeAttack1.Name = "FC_LDodgeAttack1"
 AnimationInstances.FC_LDodgeAttack1.AnimationId = "rbxassetid://93110825889179"
 AnimationInstances.FC_LDodgeAttack1:SetAttribute("Paired", true)
 AnimationInstances.FC_LDodgeAttack1:SetAttribute("AnimType", 1)
-AnimationInstances.FC_LDodgeAttack1:SetAttribute("Counter", true)
 AnimationInstances.FC_LDodgeAttack1:SetAttribute("DodgeAttack", true)
 AnimationInstances.FC_LDodgeAttack1:SetAttribute("AnimDirection", "Left")
 
@@ -390,7 +389,6 @@ AnimationInstances.FC_RDodgeAttack1.Name = "FC_RDodgeAttack1"
 AnimationInstances.FC_RDodgeAttack1.AnimationId = "rbxassetid://115517810366402"
 AnimationInstances.FC_RDodgeAttack1:SetAttribute("Paired", true)
 AnimationInstances.FC_RDodgeAttack1:SetAttribute("AnimType", 1)
-AnimationInstances.FC_RDodgeAttack1:SetAttribute("Counter", true)
 AnimationInstances.FC_RDodgeAttack1:SetAttribute("DodgeAttack", true)
 AnimationInstances.FC_RDodgeAttack1:SetAttribute("AnimDirection", "Right")
 
@@ -407,7 +405,6 @@ AnimationInstances.FC_BDodgeAttack1.Name = "FC_BDodgeAttack1"
 AnimationInstances.FC_BDodgeAttack1.AnimationId = "rbxassetid://113674522948281"
 AnimationInstances.FC_BDodgeAttack1:SetAttribute("Paired", true)
 AnimationInstances.FC_BDodgeAttack1:SetAttribute("AnimType", 1)
-AnimationInstances.FC_BDodgeAttack1:SetAttribute("Counter", true)
 AnimationInstances.FC_BDodgeAttack1:SetAttribute("DodgeAttack", true)
 AnimationInstances.FC_BDodgeAttack1:SetAttribute("AnimDirection", "Back")
 

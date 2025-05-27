@@ -17,6 +17,14 @@ local Attack_Animation_Management = require(game.ReplicatedStorage.Shared.animat
 local Receive_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.receive_animation_manager)
 local Misc_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.misc_animation_manager)
 
+local function getAnimationTrackById(moduleTbl, AnimationId)
+    for _, animationTrack in pairs(moduleTbl.AllAnimations) do
+        if animationTrack.AnimationId == AnimationId then
+            return animationTrack
+        end
+    end
+end
+
 local function randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
 
     	local randAttackTbl = {}
@@ -45,7 +53,6 @@ local function randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, 
 	return randAttackTbl[math.random(1, #randAttackTbl)] -- returns the randomly-selected animation track
 
 end
-
 
 function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize both the animations and their corresponding tracks ]]
     moduleTbl.AllAnimations = {}
@@ -79,7 +86,7 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
         elseif v.Animation:GetAttribute("Paired") then -- adds paired animations into either pairedAttacks or pairedBlocks
             if v.Animation:GetAttribute("AnimType") == 1 then
 
-                if v.Animation:GetAttribute("Counter") and not v.Animation:GetAttribute("DodgeAttack") then
+                if v.Animation:GetAttribute("Counter") then
                     -- is a counter attack
                     table.insert(moduleTbl.counterAttacksTable, v)
                 elseif v.Animation:GetAttribute("DodgeAttack") then
@@ -119,28 +126,20 @@ end
 function Animation_Centric.setupAttackAnimation(moduleTbl, trackData) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
                                                 -- AttackTbl would be the table of attacks, such as attack1Tbl or attack2Tbl
     
-    if trackData.attackLvl == 1 then
+    if trackData.attackLvl == 1 or trackData.attackLvl == 2 then
+        moduleTbl.attackTrack = getAnimationTrackById(moduleTbl, trackData.AnimationId)
+    elseif trackData.attackLvl == 3 then
         
-        if not moduleTbl.attackTrack  then
-            moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", trackData.attackType)
-        else
-            local sameAttackChance = math.random(1, 100)
-            if sameAttackChance > 10 or moduleTbl.lastAttack.Animation:GetAttribute("AttackSeries") == "Uppercuts" then
-                for _, v in pairs(moduleTbl.attack1Table) do
-                    if v ~= moduleTbl.attackTrack and v.Animation:GetAttribute("AttackSeries") == trackData.attackType then
-                        moduleTbl.attackTrack = v
-                        -- warn("Random attack track found.")
-                        break
-                    end
-                end
-                -- moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", trackData.attackType)
-                -- print(moduleTbl.attackTrack)
+        if trackData.Counter_Attribute then
+            moduleTbl.attackTrack:Stop()
+        
+            if moduleTbl.attackTrack.Animation:GetAttribute("AnimDirection") == "Left" then
+                moduleTbl.currentReceiveAnimTRACK = randomAnimationTrack(moduleTbl.counterAttacksTable, "AnimDirection", "Left", "Counter", true)
+            elseif moduleTbl.attackTrack.Animation:GetAttribute("AnimDirection") == "Right" then
+                moduleTbl.currentReceiveAnimTRACK = randomAnimationTrack(moduleTbl.counterAttacksTable, "AnimDirection", "Right", "Counter", true)
             end
         end
-    
-    elseif trackData.attackLvl == 2 then
 
-        moduleTbl.attackTrack = moduleTbl.attack2Table[math.random(1, #moduleTbl.attack2Table)]
     end
 end
 
@@ -153,6 +152,60 @@ function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attac
         moduleTbl.attackTrack:Play()
         moduleTbl.lastAttack = moduleTbl.attackTrack
 
+end
+
+function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
+    if data.receivingFromType == "Level1" then
+
+        if data.attackerAnim.AnimationId == moduleTbl.FC_LeftHook1.AnimationId or data.attackerAnim.AnimationId == moduleTbl.FC_LeftJab.AnimationId then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftHook1RECEIVERTRACK
+        elseif data.attackerAnim.AnimationId == moduleTbl.FC_LeftUppercut.AnimationId then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftUppercutRECEIVERTRACK
+
+        elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightHook1.AnimationId or data.attackerAnim.AnimationId == moduleTbl.FC_RightJab.AnimationId then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightHook1RECEIVERTRACK
+        elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightUppercut.AnimationId then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightUppercutRECEIVERTRACK
+        end
+    elseif data.receivingFromType == "Level2" then
+
+        if data.attackerAnim.AnimationId == moduleTbl.FC_LeftHaymaker.AnimationId then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftHaymakerRECEIVERTRACK
+        elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightHaymaker.AnimationId then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightHaymakerReceiverTRACK
+        end
+    elseif data.receivingFromType == "Parry" then
+        
+        if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
+            -- Perform a left parry
+            warn("ParryL")
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightParryTRACK
+        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+            -- Perform a right parry
+            warn("ParryR")
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftParryTRACK
+        end
+    elseif data.receivingFromType == "gettingParried" then
+        moduleTbl.attackTrack:Stop()
+        if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightParryRECEIVERTRACK
+        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftParryRECEIVERTRACK
+        end
+    elseif data.receivingFromType == "counterAttack" then
+
+    end
+end
+
+function Animation_Centric.playReceiveAnimation(moduleTbl)
+    if moduleTbl.currentReceiveAnimTRACK then -- play receive animation
+        moduleTbl.currentReceiveAnimTRACK:Play()
+
+        -- -- reposition the player to face the enemy if they counter them (not a parry)
+        -- if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (moduleTbl.currentReceiveAnimTRACK == moduleTbl.FC_RightParryTRACK or moduleTbl.currentReceiveAnimTRACK == moduleTbl.FC_LeftParryTRACK) then
+        --     moduleTbl.repositionInFrontOfEnemy()
+        -- end
+    end
 end
 
 return Animation_Centric

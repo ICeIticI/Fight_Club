@@ -20,10 +20,14 @@ function REs_RFs.init()
     end
     
     ClientVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(protocol, data)
-        if protocol == "setUpClientAttackAnimation" then -- Will set up the attack animation for the upcoming attack
+        if protocol == "setupClientAttackAnimation" then -- Will set up the attack animation for the upcoming attack
             Animation_Centric.setupAttackAnimation(ClientVariables, data)
         elseif protocol == "playAttackAnimation" then
             Animation_Centric.playAttackAnimation(ClientVariables)
+        elseif protocol == "setupReceiveAnimation" then
+            Animation_Centric.setupReceiveAnimation(ClientVariables, data)
+        elseif protocol == "playReceiveAnimation" then
+            Animation_Centric.playReceiveAnimation(ClientVariables)
         end
     
         --[[ ^ Might put the animation events into the animation_centric script 

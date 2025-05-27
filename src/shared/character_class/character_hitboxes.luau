@@ -16,7 +16,7 @@ local function isCounterTrackPlaying(animator) --[[Function used to check if a c
 end
 
 -- Function to handle receiving an attack
-local function receive(receiver_characterInstance, attacker_currentAttack)
+local function receive(receiver_characterInstance, attacker_characterInstance)
     -- local currentAttackID = currentAttack.AnimationId
 
     if receiver_characterInstance.currentReceiveAnimTRACK and receiver_characterInstance.currentReceiveAnimTRACK.IsPlaying then
@@ -27,38 +27,41 @@ local function receive(receiver_characterInstance, attacker_currentAttack)
         if receiver_characterInstance.FC_BlockStartTRACK.IsPlaying then
             -- If the player gets hit while the blockstart track is playing, then they will perform a parry
             -- handleBlocking(currentAttack)
-            receiver_characterInstance:receive("parry", attacker_currentAttack)
-        elseif receiver_characterInstance.Protocol ~= "Counter" 
-        and receiver_characterInstance.randAttack 
-        and receiver_characterInstance.randAttack.IsPlaying 
-        and not receiver_characterInstance.currentAttack:GetAttribute("Counter") 
-        and not receiver_characterInstance.isCountering 
-        and not receiver_characterInstance.canFollowUp 
-        and not receiver_characterInstance.attackFrames 
-        and not receiver_characterInstance.isGettingHit 
+            receiver_characterInstance:receive("parry", attacker_characterInstance)
+            attacker_characterInstance:receive("receiveParry", receiver_characterInstance)
+        elseif receiver_characterInstance.Protocol ~= "Counter" -- Checks before countering:
+        and receiver_characterInstance.currentAttack -- Make sure the attack exists for countering
+        and receiver_characterInstance.currentAttack.IsPlaying -- Make sure we are attacking. This anim should be playing before the 'StartOfAttack' marker reaches in order to counter
+        and not receiver_characterInstance.currentAttack:GetAttribute("Counter") -- Make sure we're not playing a counter animation
+        and not receiver_characterInstance.isCountering -- Make sure we're not countering
+        and not receiver_characterInstance.canFollowUp -- NOTE: may change but counters (as of now) are only possible when you wait for an attack, meaning not doable mid-combo
+        and not receiver_characterInstance.attackFrames -- Attackframes mean we're too late in the animation. May be redundant to have this check.
+        and not receiver_characterInstance.isGettingHit -- Should not be possible when getting hit, but I'm sure other checks before would fail if thats the case.. so it may be redundant.
         then
-            -- If the player is just starting an attack and gets hit, they will counter
+            -- ! If the player is just starting an attack and gets hit, they will counter ! --
+
             -- handleCounter(currentAttack)
-            receiver_characterInstance:receive("counterAttack", attacker_currentAttack)
+            receiver_characterInstance:repulseAttack("counter", attacker_characterInstance) 
+            attacker_characterInstance:receive("counterAttack", receiver_characterInstance)
         elseif not receiver_characterInstance.isCountering then
             -- getHit(currentAttack)
-            if attacker_currentAttack:GetAttribute("AttackLevel") == 1 then
-                receiver_characterInstance:receive("receiveLevel1", attacker_currentAttack)
-            elseif attacker_currentAttack:GetAttribute("AttackLevel") == 2 then
-                receiver_characterInstance:receive("receiveLevel2", attacker_currentAttack)
+            if attacker_characterInstance.currentAttack:GetAttribute("AttackLevel") == 1 then
+                receiver_characterInstance:receive("receiveLevel1", attacker_characterInstance)
+            elseif attacker_characterInstance.currentAttack:GetAttribute("AttackLevel") == 2 then
+                receiver_characterInstance:receive("receiveLevel2", attacker_characterInstance)
             end
         end
     elseif receiver_characterInstance.isBlocking then
         warn("We is blocking")
         receiver_characterInstance.canSyncBlock = false
-        receiver_characterInstance:receive("bracingBlock", attacker_currentAttack)
+        receiver_characterInstance:receive("bracingBlock", attacker_characterInstance)
     end
 
     -- characterInstance.playReceivingTrack()
 end
 
 local function attackHandler(characterInstance, enemyInstance) --[[ handles when a character lands an attack ]]
-    local enemyCurrentAttack = enemyInstance.currentAttack
+    -- local enemyCurrentAttack = enemyInstance.currentAttack
 	local hitSFX = characterInstance.player.Character.Torso:FindFirstChild("hitSFX")
 	
 	if not enemyInstance.iFrames and (not isCounterTrackPlaying(enemyInstance.charAnimator)) then
@@ -70,7 +73,7 @@ local function attackHandler(characterInstance, enemyInstance) --[[ handles when
 		-- 	-- isAI = true
 		-- 	GlobalRemoteEvent:FireClient(characterInstance.player, currentAttack, otherProtocol, nil, nil, isAI)
 		-- end
-        receive(characterInstance, enemyCurrentAttack)
+        receive(characterInstance, enemyInstance)
 			
 		task.wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
 		enemyInstance.enemyCFrame = characterInstance.humanoidRootPart.CFrame -- We want to know where the enemy is when they hit us so we can repel the opposite direction

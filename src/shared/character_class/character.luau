@@ -133,15 +133,11 @@ function Character:basicAttack(comboCounter) --[[ The character will do some sor
     end
 end
 
-function Character:getHit(attackAnim)
-    
-end
-
-function Character:repulseAttack(attack_type)
+function Character:repulseAttack(attack_type, attacker_characterInstance)
     if attack_type == "dodge" then
         self.character_attack:dodgeAttack()
     elseif attack_type == "counter" then
-        self.character_attack:counterAttack()
+        self.character_attack:counterAttack(attacker_characterInstance)
     end
 end
 
@@ -170,9 +166,9 @@ function Character:receive(receiveType, data) --[[ The character will receive an
         character_receive:parry()
     -- mitigate attacks with our own attack:
     elseif receiveType == "counterAttack" then
-        character_attack:counterAttack(data)
+        character_receive:receiveCounter(data)
     elseif receiveType == "dodgeAttack" then
-        character_attack:dodgeAttack()
+        character_receive:receiveDodgeAttack()
 
     -- No mitigation (got struck by an attack):
     elseif receiveType == "receiveLevel1" then

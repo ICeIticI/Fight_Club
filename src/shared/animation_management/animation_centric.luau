@@ -56,9 +56,9 @@ end
 
 function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize both the animations and their corresponding tracks ]]
     moduleTbl.AllAnimations = {}
-    for _, obj in pairs(moduleTbl.plrObjectsFolder:GetChildren()) do
+    for _, obj in pairs(require(game.ReplicatedStorage.Shared.AnimationInstances)) do
         if obj:IsA("Animation") then
-            moduleTbl[obj.Name] = obj
+            -- moduleTbl[obj.Name] = obj
             moduleTbl[obj.Name .. "TRACK"] = moduleTbl.charAnimator:LoadAnimation(obj)
             table.insert(moduleTbl.AllAnimations, moduleTbl[obj.Name .. "TRACK"])
         end
@@ -144,18 +144,38 @@ function Animation_Centric.setupAttackAnimation(moduleTbl, trackData) --[[ Will 
 end
 
 function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attack animation before (using the .setUpAttackAnimation). This will execute that animation.  ]]
-    
-    if moduleTbl.lastAttack and moduleTbl.lastAttack.IsPlaying and not moduleTbl.isAttacking then
-        moduleTbl.lastAttack:Stop()
+    if not moduleTbl.attackTrack then return warn("Failed to play attack track, as it doesn't exist.") end
+
+
+    if moduleTbl.attackTrack.IsPlaying and not moduleTbl.isAttacking then
+        moduleTbl.attackTrack:Stop()
     end
+    if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
+        moduleTbl.currentReceiveAnimTRACK:Stop()
+    end
+
         moduleTbl.currentAttack = moduleTbl.attackTrack.Animation
         moduleTbl.attackTrack:Play()
-        moduleTbl.lastAttack = moduleTbl.attackTrack
+        -- moduleTbl.lastAttackTrack = moduleTbl.attackTrack
 
 end
 
 function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
-    if data.receivingFromType == "Level1" then
+    if data.receivingFromType == "AttackStart" then
+
+        if data.IsADodge then
+
+            if data.DodgeDirection == "Right" then
+                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightDodgeTRACK
+            elseif data.DodgeDirection == "Left" then
+                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftDodgeTRACK
+            elseif data.DodgeDirection == "Back" then
+                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_BackDodgeTRACK
+            end
+
+        end
+    
+    elseif data.receivingFromType == "Level1" then
 
         if data.attackerAnim.AnimationId == moduleTbl.FC_LeftHook1.AnimationId or data.attackerAnim.AnimationId == moduleTbl.FC_LeftJab.AnimationId then
             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftHook1RECEIVERTRACK
@@ -192,20 +212,65 @@ function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
         elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftParryRECEIVERTRACK
         end
-    elseif data.receivingFromType == "counterAttack" then
+    elseif data.receivingFromType == "dodgeAttack" then
 
+        -- We will get dodge-attacked
+            
+        if moduleTbl.attackTrack then -- stop any attack that's playing
+            moduleTbl.attackTrack:Stop() 
+        end
+        
+        if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LDodgeAttack1RECEIVERTRACK
+        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RDodgeAttack1RECEIVERTRACK
+        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Back" then
+            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_BDodgeAttack1RECEIVERTRACK
+        end
+
+    elseif data.receivingFromType == "counterAttack" then
+        -- We are gonna get countered
+            
+        -- GameVariables.repositionInFrontOfEnemy()
+        if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
+            moduleTbl.attackTrack:Stop() -- stop an attack if its playing
+        end
+
+        if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
+            if data.attackerAnim.AnimationId == moduleTbl.FC_LeftCounter1.AnimationId then
+                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftCounter1RECEIVERTRACK
+
+            elseif data.attackerAnim.AnimationId == moduleTbl.FC_LeftCounter2.AnimationId then
+                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftCounter2RECEIVERTRACK
+            end
+        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+            if data.attackerAnim.AnimationId == moduleTbl.FC_RightCounter1.AnimationId then
+                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightCounter1RECEIVERTRACK
+
+            elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightCounter2.AnimationId then
+                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightCounter2RECEIVERTRACK
+            end
+        end
     end
 end
 
 function Animation_Centric.playReceiveAnimation(moduleTbl)
-    if moduleTbl.currentReceiveAnimTRACK then -- play receive animation
-        moduleTbl.currentReceiveAnimTRACK:Play()
+    if not moduleTbl.currentReceiveAnimTRACK then return warn("Failed to play receiving animation track, as it doesn't exist.") end
 
-        -- -- reposition the player to face the enemy if they counter them (not a parry)
-        -- if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (moduleTbl.currentReceiveAnimTRACK == moduleTbl.FC_RightParryTRACK or moduleTbl.currentReceiveAnimTRACK == moduleTbl.FC_LeftParryTRACK) then
-        --     moduleTbl.repositionInFrontOfEnemy()
-        -- end
+    
+    if moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
+        moduleTbl.currentReceiveAnimTRACK:Stop()
     end
+    if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying and not moduleTbl.isAttacking then
+        moduleTbl.attackTrack:Stop()
+    end
+
+    moduleTbl.currentReceiveAnimTRACK:Play()
+
+    -- -- reposition the player to face the enemy if they counter them (not a parry)
+    -- if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (moduleTbl.currentReceiveAnimTRACK == moduleTbl.FC_RightParryTRACK or moduleTbl.currentReceiveAnimTRACK == moduleTbl.FC_LeftParryTRACK) then
+    --     moduleTbl.repositionInFrontOfEnemy()
+    -- end
 end
 
 return Animation_Centric

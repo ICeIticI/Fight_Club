@@ -416,4 +416,36 @@ AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("DodgeAttack", true)
 AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("AnimDirection", "Back")
 
+-- Temporarly creating tracks to store the length of said track for management:
+
+local temporaryAnimationController = Instance.new("AnimationController") -- for temporarily loading animation tracks to return a length of the track. Needed to parent the animator.
+local temporaryAnimator = Instance.new("Animator") -- Needed to load the tempoary animation tracks.
+temporaryAnimator.parent = temporaryAnimationController
+
+for _, animation in pairs(AnimationInstances) do
+    local temporaryTrack = temporaryAnimator:LoadAnimation(animation)
+
+    if temporaryTrack.Looped then continue end
+
+    animation:SetAttribute("Length", temporaryTrack.Length)
+    local tempoaryStartOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
+        animation:SetAttribute("TimeUntilStartOfAttack", temporaryTrack.TimePosition)
+    end)
+    local tempoaryEndOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("EndOfAttack"):Connect(function()
+        animation:SetAttribute("TimeUntilEndOfAttack", temporaryTrack.TimePosition)
+        temporaryTrack:Stop()
+    end)
+    
+    animation:Play()
+    animation.Stopped:Wait()
+    tempoaryStartOfAttackConnection:Disconnect()
+    tempoaryEndOfAttackConnection:Disconnect()
+    temporaryTrack:Destroy()
+
+    tempoaryStartOfAttackConnection = nil
+    tempoaryEndOfAttackConnection = nil
+    temporaryTrack = nil
+
+end
+
 return AnimationInstances

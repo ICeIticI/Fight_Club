@@ -79,7 +79,7 @@ local function attackHandler(characterInstance, enemyInstance) --[[ handles when
 		enemyInstance.enemyCFrame = characterInstance.humanoidRootPart.CFrame -- We want to know where the enemy is when they hit us so we can repel the opposite direction
 			
 		if enemyInstance.isBlocking then
-			attackDamage = attackDamage/2
+			characterInstance.attackDamage = characterInstance.attackDamage/2
 		end
 
 		-- if attackDamage and not enemyInstance.canCounter then

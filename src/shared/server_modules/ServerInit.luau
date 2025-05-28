@@ -104,8 +104,8 @@ function ServerInit.InitializePlayer(player)
     -- LocalBindableEvent.Parent = game.ReplicatedStorage
 	
 	-- Animation defining:
-	for _, v in pairs(AnimationInstances) do
-		local clonedAnim = v:Clone()
+	for _, animation in pairs(AnimationInstances) do
+		local clonedAnim = animation:Clone()
 		clonedAnim.Parent = plrObjectsFolder
 	end
 end

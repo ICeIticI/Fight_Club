@@ -24,135 +24,151 @@ local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -
 local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
 input_check_FUNCTION.OnServerInvoke = function(plr, input)
 
-    local characterObject = characters:GetCharacterObjectByPlayer(plr)
-    if not characterObject then return end
+    local characterInstance = characters:GetCharacterObjectByPlayer(plr)
+    if not characterInstance then return end
 
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
 
-        if not characterObject.isAttacking 
-        and not characterObject.isGettingHit 
-        and not characterObject.pairedPlaying 
-        and not characterObject.isDodging
-        and not characterObject.isBlocking 
-        and not characterObject.waitingToAttack
+        if not characterInstance.isAttacking 
+        and not characterInstance.isGettingHit 
+        and not characterInstance.pairedPlaying 
+        and not characterInstance.isDodging
+        and not characterInstance.isBlocking 
+        and not characterInstance.waitingToAttack
         then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
             local rayParams = RaycastParams.new()
-            rayParams.FilterDescendantsInstances = characterObject.character:GetChildren()
+            rayParams.FilterDescendantsInstances = characterInstance.character:GetChildren()
             rayParams.FilterType = Enum.RaycastFilterType.Exclude
             
-            characterObject.raycastResult =
-            workspace:Raycast(characterObject.humanoidRootPart.Position,
-                                characterObject.humanoidRootPart.CFrame.LookVector * 8,
+            characterInstance.raycastResult =
+            workspace:Raycast(characterInstance.humanoidRootPart.Position,
+                                characterInstance.humanoidRootPart.CFrame.LookVector * 8,
                                 rayParams) -- Raycast in front of player to find an enemy
                                 
 
-            if characterObject.raycastResult and not characterObject.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") and characterObject.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto (thats not the tavern keeper).
+            if characterInstance.raycastResult and not characterInstance.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") and characterInstance.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto (thats not the tavern keeper).
                 
-            characterObject.enemyChar = characterObject.raycastResult.Instance.Parent
-            characterObject.enemyHumanoid = characterObject.enemyChar:FindFirstChild("Humanoid")
-                characterObject.enemyCharInstance = characters:GetCharacterObjectByCharacter(characterObject.enemyChar)
-                characterObject.lockOnDebounce.Value = not characterObject.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
+            characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
+            characterInstance.enemyHumanoid = characterInstance.enemyChar:FindFirstChild("Humanoid")
+                characterInstance.enemyCharInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
+                characterInstance.lockOnDebounce.Value = not characterInstance.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
                 
                 
-            if not game.Players:GetPlayerFromCharacter(characterObject.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
-                    if characterObject.enemyChar.Name == "TestDummy" then
-                        characterObject.LocalBindableEvent:Fire(characterObject.lockOnDebounce)
+            if not game.Players:GetPlayerFromCharacter(characterInstance.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
+                    if characterInstance.enemyChar.Name == "TestDummy" then
+                        characterInstance.LocalBindableEvent:Fire(characterInstance.lockOnDebounce)
                     end
                 end
                 
-            elseif characterObject.raycastResult == nil and characterObject.lockOnDebounce.Value == true then -- no enemy detected by raycast
-                characterObject.lockOnDebounce.Value = false
+            elseif characterInstance.raycastResult == nil and characterInstance.lockOnDebounce.Value == true then -- no enemy detected by raycast
+                characterInstance.lockOnDebounce.Value = false
                 
             end
         
             -- GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value
             
         
-            if (characterObject.lockOnDebounce.Value == true and characterObject.raycastResult.Instance.Parent:FindFirstChild("Humanoid")) 
-            or (characterObject.isGettingHit and not characterObject.lockOnDebounce.Value) 
+            if (characterInstance.lockOnDebounce.Value == true and characterInstance.raycastResult.Instance.Parent:FindFirstChild("Humanoid")) 
+            or (characterInstance.isGettingHit and not characterInstance.lockOnDebounce.Value) 
             then -- Runs when the player locks onto somebody
-                characterObject.enemyChar = characterObject.raycastResult.Instance.Parent
-                characterObject.enemyHumanoidRootPart = characterObject.enemyChar:WaitForChild("HumanoidRootPart")
-                characterObject.setSpeed(true)
+                characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
+                characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
+                characterInstance.setSpeed(true)
             -- Passed the lock-on check. Activate the lock-on code:
                 return "LockOnInput", {
-                    lockOnDebounce = characterObject.lockOnDebounce, 
-                    enemyHumanoidRootPart = characterObject.enemyHumanoidRootPart,
-                    enemyHumanoid = characterObject.enemyHumanoid,
+                    lockOnDebounce = characterInstance.lockOnDebounce, 
+                    enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart,
+                    enemyHumanoid = characterInstance.enemyHumanoid,
                     rayParams = rayParams
                 }
             end
 
-            if characterObject.lockOnDebounce.Value == false 
-            or workspace:Raycast(characterObject.humanoidRootPart.Position,
-                                characterObject.humanoidRootPart.CFrame.LookVector * 7,
+            if characterInstance.lockOnDebounce.Value == false 
+            or workspace:Raycast(characterInstance.humanoidRootPart.Position,
+                                characterInstance.humanoidRootPart.CFrame.LookVector * 7,
                                 rayParams) 
             then
-                characterObject.lockOnDebounce.Value = false
-                characterObject.setSpeed(true)
+                characterInstance.lockOnDebounce.Value = false
+                characterInstance.setSpeed(true)
                 return "LockOnInput", {
-                    lockOnDebounce = characterObject.lockOnDebounce, 
+                    lockOnDebounce = characterInstance.lockOnDebounce, 
                 }
             end
         end
 
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
 
-        if not characterObject.waitingToAttack 
-        and characterObject.lockOnDebounce.Value 
-        and characterObject.pairedChain <= characterObject.PairedChainMAX 
-        and characterObject.boolCheck({isBlocking = characterObject.isBlocking, isCountering = characterObject.isCountering, isGettingHit = characterObject.isGettingHit}) 
-        and (characterObject.raycastResult.Instance.Position - characterObject.humanoidRootPart.Position).Magnitude <= 7
-        and characterObject.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
+        if not characterInstance.waitingToAttack 
+        and characterInstance.lockOnDebounce.Value 
+        and characterInstance.pairedChain <= characterInstance.PairedChainMAX 
+        and characterInstance.boolCheck({isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
+        and (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
+        and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
+
+            local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             -- before attacking, check if we're currently dodging so we can do a dodge attack:
-            if characterObject.isDodging == true then
-                if not characterObject.waitingToAttack then
-                    characterObject.waitingToAttack = true
-                    while characterObject.dodgeTrack.IsPlaying do -- wait for entire dodge attack to end
+            if characterInstance.isDodging == true then
+                
+                if not characterInstance.waitingToAttack then
+                    
+                    characterInstance.waitingToAttack = true
+                    while characterInstance.dodgeTrack.IsPlaying do -- wait for entire dodge attack to end
                         task.wait()
                         print("waiting for dodge to end..")
                     end
+
                     -- do the dodge attack (if not already):
-                    if not characterObject.isAttacking then
-                        characterObject.character_attack:dodgeAttack()
+                    if not characterInstance.isAttacking then
+                        characterInstance:repulseAttack("dodge", enemyInstance)
+                        enemyInstance:receive("dodgeAttack", characterInstance)
                     end
+
                 end
             else
-                characterObject.followUpCount += 1
-                characterObject.distanceBetween = (characterObject.raycastResult.Instance.Position - characterObject.humanoidRootPart.Position).Magnitude
+                characterInstance.followUpCount += 1
+                characterInstance.distanceBetween = (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude
                 
-                if characterObject.isEnemyHoldingBlock and characterObject.pairedChain <= characterObject.PairedChainMAX then
-                    characterObject.pairedChain += 1
+                if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
+                    characterInstance.pairedChain += 1
                 end
-                if characterObject.boolCheck({isAttacking = characterObject.isAttacking, isBlocking = characterObject.isBlocking, isCountering = characterObject.isCountering, isGettingHit = characterObject.isGettingHit}) and not characterObject.waitingToAttack and not characterObject.canFollowUp and not characterObject.pairedPlaying then
-                    if characterObject.pairedChain <= characterObject.PairedChainMAX then
-                        characterObject.animPair = {math.random(1, 2), math.random(1, 2)}
+                if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) and not characterInstance.waitingToAttack and not characterInstance.canFollowUp and not characterInstance.pairedPlaying then
+                    if characterInstance.pairedChain <= characterInstance.PairedChainMAX then
+                        characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                         --[[
                         characterObject.Protocol = "AttackStarted"
                         characterObject.GlobalRemoteEvent:FireClient(characterObject.enemyChar, characterObject.Protocol, characterObject.currentAttack, characterObject.animPair, characterObject.pairedChain, nil, false)
-                        ]] 
+                        ]]
+                        if enemyInstance.isBlocking and enemyInstance.humanoid.MoveDirection.Magnitude > 0 then
+                            -- The player is moving
+
+                            handleDodges()
+
+                        elseif enemyInstance.isBlocking and enemyInstance.canSyncBlock and enemyInstance.humanoid.MoveDirection.Magnitude == 0 then
+                            -- The player is not moving and will perform a sync block
+                            -- enemyInstance.synchedBlock(sentAnimPair, sentValue)
+                        end
                     end
 
-                    characterObject:basicAttack(characterObject.comboCounter)
-                elseif characterObject.canFollowUp then
-                    characterObject.waitingToAttack = true
-                    characterObject.didFollowUp = true -- when true, the character did a followup attack
-                    while characterObject.isAttacking do
+                    characterInstance:basicAttack(characterInstance.comboCounter)
+                elseif characterInstance.canFollowUp then
+                    characterInstance.waitingToAttack = true
+                    characterInstance.didFollowUp = true -- when true, the character did a followup attack
+                    while characterInstance.isAttacking do
                         task.wait()
                     end
-                    if characterObject.followUpCount > 1 then
-                        if characterObject.pairedChain <= characterObject.PairedChainMAX then
-                            characterObject.animPair = {math.random(1, 2), math.random(1, 2)}
+                    if characterInstance.followUpCount > 1 then
+                        if characterInstance.pairedChain <= characterInstance.PairedChainMAX then
+                            characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                             --[[
                             characterObject.Protocol = "AttackStarted"
                             characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, nil, characterObject.animPair, characterObject.pairedChain, false)
                             ]]
                         end
-                        characterObject:basicAttack(characterObject.comboCounter) -- followup attack
-                        print(characterObject.followUpCount)
+                        characterInstance:basicAttack(characterInstance.comboCounter) -- followup attack
+                        print(characterInstance.followUpCount)
                     end
-                    characterObject.waitingToAttack = false
+                    characterInstance.waitingToAttack = false
                 end
             end
 

@@ -18,6 +18,8 @@ local character_receive = require(game.ReplicatedStorage.Shared.character_class.
 local character_hitboxes = require(game.ReplicatedStorage.Shared.character_class.character_hitboxes)
 
 local Attack_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.attack_animation_manager)
+local Receive_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.receive_animation_manager)
+local Misc_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.misc_animation_manager)
 
 local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
@@ -60,7 +62,9 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.character_receive = setmetatable({}, { __index = character_receive })
     
     self.attack_animation_manager = setmetatable({}, { __index = Attack_Animation_Manager})
-    
+    self.receive_animation_manager = setmetatable({ __index = Receive_Animation_Manager})
+    self.misc_animation_manager = setmetatable({ __index = Misc_Animation_Manager })
+
     self.character_hitboxes = setmetatable({}, { __index = character_hitboxes })
 
     -- assign the Character instance to the other modules:
@@ -72,6 +76,8 @@ function Character.new(charModel) --[[ Constructor function that will create a n
 
     -- animation management:
     self.attack_animation_manager.characterInstance = self
+    self.receive_animation_manager.characterInstance = self
+    self.misc_animation_manager.characterInstance = self
 
     -- everything else:
     self.hitbox_manager.characterInstance = self
@@ -157,33 +163,33 @@ function Character:receive(receiveType, data) --[[ The character will receive an
 
     -- Mitigate attacks:
     if receiveType == "bracingBlock" then
-        character_receive:bracingBlock()
+        character_receive:bracingBlock(data)
     elseif receiveType == "syncBlock" then
-       character_receive:syncBlock()
+       character_receive:syncBlock(data)
     elseif receiveType == "dodge" then
-        character_receive:dodge()
+        character_receive:dodge(data)
     elseif receiveType == "parry" then
-        character_receive:parry()
+        character_receive:parry(data)
     -- mitigate attacks with our own attack:
     elseif receiveType == "counterAttack" then
         character_receive:receiveCounter(data)
     elseif receiveType == "dodgeAttack" then
-        character_receive:receiveDodgeAttack()
+        character_receive:receiveDodgeAttack(data)
 
     -- No mitigation (got struck by an attack):
     elseif receiveType == "receiveLevel1" then
-        character_receive.receiveLevel1(data)
+        character_receive:receiveLevel1(data)
     elseif receiveType == "receiveLevel2" then
-        character_receive.receiveLevel2(data)
+        character_receive:receiveLevel2(data)
     elseif receiveType == "receiveLevel3" then
-        character_receive.receiveLevel3()
+        character_receive:receiveLevel3(data)
 
     elseif receiveType == "receiveSyncBlock" then
-        character_receive.receiveSyncBlock()
+        character_receive:receiveSyncBlock(data)
     elseif receiveType == "receiveDodgeAttack" then
-        character_receive.receiveDodgeAttack()
+        character_receive:receiveDodgeAttack(data)
     elseif receiveType == "receiveParry" then
-        character_receive.receiveParry()
+        character_receive:receiveParry(data)
     end
     
 end

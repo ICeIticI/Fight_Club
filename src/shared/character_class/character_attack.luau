@@ -2,6 +2,8 @@
 local Character_Attack = {}
 Character_Attack.__index = Character_Attack
 
+local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
+
 local function randomAnimation(animFolder, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
 
     	local randAttackTbl = {}
@@ -36,15 +38,15 @@ local function randomAnimation(animFolder, attribute1, a1Value, attribute2, a2Va
 
 end
 
-local function getAnimationId(characterInstance, trackData, attacker_characterInstance) --[[ Returns a randomly-chosen animation with the given data about what our animation is planned to be (trackData). Level 3 attacks may need the enemy's characterInstance to see what attack they're doing before getting our own ]]
+local function getAnimation(characterInstance, trackData, attacker_characterInstance) --[[ Returns a randomly-chosen animation with the given data about what our animation is planned to be (trackData). Level 3 attacks may need the enemy's characterInstance to see what attack they're doing before getting our own ]]
     if trackData.attackLvl == 1 then
         
         if not trackData.attackId  then
-            return randomAnimation(characterInstance.plrObjectsFolder:GetChildren(), "AttackSeries", trackData.attackType).AnimationId
+            return randomAnimation(AnimationInstances, "AttackSeries", trackData.attackType)
         else
             local sameAttackChance = math.random(1, 100)
             if sameAttackChance > 10 or trackData.attackType == "Uppercuts" then
-                for _, v in pairs(characterInstance.plrObjectsFolder:GetChildren()) do
+                for _, v in pairs(AnimationInstances) do
                     if v.AnimationId ~= trackData.attackId and v:GetAttribute("AttackSeries") == trackData.attackType then
                         return v
                         -- warn("Random attack track found.")
@@ -58,20 +60,22 @@ local function getAnimationId(characterInstance, trackData, attacker_characterIn
     
     elseif trackData.attackLvl == 2 then
 
-        return randomAnimation(characterInstance.plrObjectsFolder, "AttackLevel", 2).AnimationId
+        return randomAnimation(AnimationInstances, "AttackLevel", 2)
 
     elseif trackData.attackLvl == 3 then
 
         if not attacker_characterInstance then return warn("You forgot to add the enemy's character instance to this function call") end
         
+        if trackData.DodgeAttack_Attribute then
 
-        if trackData.Counter_Attribute then
-            characterInstance.randAttack:Stop() -- NOTE: Needs to be done on the client
+            return randomAnimation(characterInstance.dodgeAttacksTable, "DodgeAttack", true, "AnimDirection", characterInstance.dodgeAnimation:GetAttribute("AnimDirection"))
+
+        elseif trackData.Counter_Attribute then
         
             if attacker_characterInstance.currentAttack:GetAttribute("AnimDirection") == "Left" then
-                return randomAnimation(characterInstance.plrObjectsFolder, "AnimDirection", "Left", "Counter", true).AnimationId
+                return randomAnimation(characterInstance.AnimationInstances, "AnimDirection", "Left", "Counter", true)
             elseif attacker_characterInstance.currentAttack:GetAttribute("AnimDirection") == "Right" then
-                return randomAnimation(characterInstance.plrObjectsFolder, "AnimDirection", "Right", "Counter", true).AnimationId
+                return randomAnimation(characterInstance.AnimationInstances, "AnimDirection", "Right", "Counter", true)
             end
 
             return warn("No left or right counterattack track found!") -- If we get to this point, then something went wrong
@@ -120,11 +124,12 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
     end
     -- Whether or not we are starting a new series of attacks (such as jabs, or hooks) or not, we want our attackType to be what's already stored.
     trackData.attackType = characterInstance.attackType
-    trackData.AnimationId = getAnimationId(characterInstance, trackData, enemy_characterInstance)
+    trackData.Animation = getAnimation(characterInstance, trackData, enemy_characterInstance)
 
     if attackLvl == 3 then -- beyond the lvl 1's and 2's:
 
         trackData.Counter_Attribute = characterInstance.isCountering -- When true, we are countering:
+        trackData.DodgeAttack_Attribute = characterInstance.isDodging
         trackData.Animation = characterInstance.currentAttack
 
     end
@@ -141,7 +146,7 @@ end
 
 local function playAttackAnimation(characterInstance) --[[ Responsible for handling the logic of when an attack ANIMATION starts ]]
     
-    -- characterInstance.lastAttackId = characterInstance.
+    -- characterInstance.lastAttackTrackId = characterInstance.
 
     if characterInstance.player then
         characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "playAttackAnimation")
@@ -167,13 +172,7 @@ function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or
     -- end
     trackData.IsPlaying = true
     self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
-    
-    -- task.wait(attack1_waitTime)
-    
-    -- if not self.characterInstance.isAttacking then
-    --     trackData.IsPlaying = false
-    --     self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
-    -- end
+
 end
 
 function Character_Attack:level2() --[[ Throw a level 2 attack, such as a haymaker ]]
@@ -189,6 +188,11 @@ function Character_Attack:level3() --[[ Throw a level 3 attack, or in other word
     print("lvl 3 attack")
 end
 
+function Character_Attack:syncBlock() --[[ Attack an enemy holding their block, resulting in a syncronization of clashing attacks & blocks. ]]
+    
+    self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+end
+
 function Character_Attack:counterAttack(attacker_characterInstance) --[[ Perform a counter attack, turning the enemy's attack against them. ]]
     
     -- NOTE: Damage is dealt as soon as the 'StartOfAttack' marker is reached.
@@ -199,8 +203,9 @@ function Character_Attack:counterAttack(attacker_characterInstance) --[[ Perform
     attacker_characterInstance.currentReceiveAnimTRACK = nil -- So they don't play their previous animation on accident for the counter receive.
     
     self.characterInstance.repositionInFrontOfEnemy()
-    setupAttackAnimation(3, self.characterInstance)
+    local trackData = setupAttackAnimation(3, self.characterInstance)
     playAttackAnimation(self.characterInstance)
+    self.characterInstance.misc_animation_manager:runOnIsPlaying(trackData)
 
     print("counter attack")
     -- if not self.characterInstance.isCountering then
@@ -214,36 +219,40 @@ function Character_Attack:counterAttack(attacker_characterInstance) --[[ Perform
     -- end
 end
 
-function Character_Attack:dodgeAttack() --[[ Attempt to evade the attack of the enemy, leaving them open. ]]
-    self.characterInstance.attackTrack = self.characterInstance.randomAnimationTrack(self.characterInstance.dodgeAttacksTable, "DodgeAttack", true, "AnimDirection", self.characterInstance.dodgeTrack.Animation:GetAttribute("AnimDirection"))
+function Character_Attack:dodgeAttack(attacker_characterInstance) --[[ Attempt to evade the attack of the enemy, leaving them open. ]]
     
-    if self.characterInstance.attackTrack.Animation.AnimationId ~= self.characterInstance.FC_LDodgeAttack1.AnimationId then
+    local trackData = setupAttackAnimation(3, self.characterInstance, attacker_characterInstance)
+
+    if trackData.Animation.AnimationId ~= self.characterInstance.FC_LDodgeAttack1.AnimationId then
         self.characterInstance.repositionInFrontOfEnemy() -- We dont reposition for left dodge attack cause it makes it not as cool for some reason
     end
     
-    if self.characterInstance.attackTrack.Animation.AnimationId == self.characterInstance.FC_LDodgeAttack1.AnimationId then
+    if trackData.Animation.AnimationId == self.characterInstance.FC_LDodgeAttack1.AnimationId then
         
-        self.characterInstance.setCharacterCFrame(self.characterInstance.character, self.characterInstance.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0))
+        -- self.characterInstance.setCharacterCFrame(self.characterInstance.character, self.characterInstance.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0))
+        self.characterInstance.humanoidRootPart.CFrame = self.characterInstance.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0)
         
         local moveDistanceX = -3
         local moveDistanceZ = -3
         local travelTime = 0.14/0.60
-        self.characterInstance.setLinearVelocity(Vector3.new(moveDistanceX/travelTime, 0, moveDistanceZ/travelTime), travelTime)
+        self.characterInstance:setLinearVelocity(Vector3.new(moveDistanceX/travelTime, 0, moveDistanceZ/travelTime), travelTime)
     
-    elseif self.characterInstance.attackTrack.Animation.AnimationId == self.characterInstance.FC_RDodgeAttack1.AnimationId then
+    elseif trackData.Animation.AnimationId == self.characterInstance.FC_RDodgeAttack1.AnimationId then
     
         local moveDistance = 2.5
         local travelTime = 0.26/0.60
-        self.characterInstance.setLinearVelocity(Vector3.new(moveDistance/travelTime, 0, 0), travelTime)
+        self.characterInstance:setLinearVelocity(Vector3.new(moveDistance/travelTime, 0, 0), travelTime)
     end
     
 
     -- self.characterInstance.dodgeAttackTrack:Play()
-    self.characterInstance.attackTrack:Play()
-
+    -- self.characterInstance.attackTrack:Play()
     self.characterInstance.waitingToAttack = false
-    local reason = "dodgeAttack"
-    self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, reason, self.characterInstance.attackTrack.Animation)
+    playAttackAnimation(self.characterInstance)
+    self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+    -- -- Make enemy receive the dodge attack:
+    -- local reason = "dodgeAttack"
+    -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, reason, self.characterInstance.attackTrack.Animation)
 
 end
 

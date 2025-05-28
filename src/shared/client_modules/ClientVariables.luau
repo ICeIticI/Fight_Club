@@ -60,7 +60,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	ClientVariables.canFollowUp = false -- The status of whether a player is able to do a followup attack. If its true, then that means they are able to do one. 
 	ClientVariables.isEnemyHoldingBlock = false -- for attacks to be synched attacks when blocked in a synched block.
 	ClientVariables.followUpCount = 0 -- followUpCount is used so a followup wont be done twice back to back when a follow up is done
-	ClientVariables.lastAttack = nil
+	ClientVariables.lastAttackTrack = nil
 	ClientVariables.comboCounter = 0
 	
 	ClientVariables.currentAttack = nil										
@@ -253,72 +253,72 @@ ClientVariables.LocalBindableEvent.Parent = game.ReplicatedStorage
 
 -- NOTE*: Perhaps instead of creating a bunch of animations, we make a single animation then when the player needs to animate, load the animId into the animation. Id's would prob be in a table.
 
--- *animations (attacker)*
-ClientVariables.FC_Idle = ClientVariables.plrObjectsFolder:WaitForChild("FC_Idle")
-ClientVariables.FC_Block = ClientVariables.plrObjectsFolder:WaitForChild("FC_Block")
-ClientVariables.FC_BlockStart = ClientVariables.plrObjectsFolder:WaitForChild("FC_BlockStart")
-ClientVariables.FC_LeftHook1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHook1")
-ClientVariables.FC_RightHook1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHook1")
-ClientVariables.FC_LeftJab = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftJab")
-ClientVariables.FC_RightJab = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightJab")
-ClientVariables.FC_LeftUppercut = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftUppercut")
-ClientVariables.FC_RightUppercut = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightUppercut")
-ClientVariables.FC_LeftHaymaker = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHaymaker")
-ClientVariables.FC_RightHaymaker = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHaymaker")
+-- -- *animations (attacker)*
+-- ClientVariables.FC_Idle = ClientVariables.plrObjectsFolder:WaitForChild("FC_Idle")
+-- ClientVariables.FC_Block = ClientVariables.plrObjectsFolder:WaitForChild("FC_Block")
+-- ClientVariables.FC_BlockStart = ClientVariables.plrObjectsFolder:WaitForChild("FC_BlockStart")
+-- ClientVariables.FC_LeftHook1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHook1")
+-- ClientVariables.FC_RightHook1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHook1")
+-- ClientVariables.FC_LeftJab = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftJab")
+-- ClientVariables.FC_RightJab = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightJab")
+-- ClientVariables.FC_LeftUppercut = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftUppercut")
+-- ClientVariables.FC_RightUppercut = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightUppercut")
+-- ClientVariables.FC_LeftHaymaker = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHaymaker")
+-- ClientVariables.FC_RightHaymaker = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHaymaker")
 
--- *animations (receiver)*
-ClientVariables.FC_LeftHook1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHook1RECEIVER")
-ClientVariables.FC_RightHook1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHook1RECEIVER")
-ClientVariables.FC_LeftUppercutRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftUppercutRECEIVER")
-ClientVariables.FC_RightUppercutRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightUppercutRECEIVER")
-ClientVariables.FC_LeftHaymakerRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHaymakerRECEIVER")
-ClientVariables.FC_RightHaymakerRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHaymakerRECEIVER")
+-- -- *animations (receiver)*
+-- ClientVariables.FC_LeftHook1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHook1RECEIVER")
+-- ClientVariables.FC_RightHook1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHook1RECEIVER")
+-- ClientVariables.FC_LeftUppercutRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftUppercutRECEIVER")
+-- ClientVariables.FC_RightUppercutRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightUppercutRECEIVER")
+-- ClientVariables.FC_LeftHaymakerRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHaymakerRECEIVER")
+-- ClientVariables.FC_RightHaymakerRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHaymakerRECEIVER")
 
--- *animations (paired)*
-ClientVariables.FC_SyncBlock1L = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1L")
-ClientVariables.FC_SyncBlock1LRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1LRECEIVER")
-ClientVariables.FC_SyncBlock1R = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1R")
-ClientVariables.FC_SyncBlock1RRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1RRECEIVER")
-ClientVariables.FC_SyncBlock2L = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2L")
-ClientVariables.FC_SyncBlock2LRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2LRECEIVER")
-ClientVariables.FC_SyncBlock2R = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2R")
-ClientVariables.FC_SyncBlock2RRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2RRECEIVER")
-ClientVariables.FC_SyncBlock3L1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1")
-ClientVariables.FC_SyncBlock3L1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1RECEIVER")
-ClientVariables.FC_SyncBlock3R1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1")
-ClientVariables.FC_SyncBlock3R1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1RECEIVER")
-ClientVariables.FC_SyncBlock3L2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2")
-ClientVariables.FC_SyncBlock3L2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2RECEIVER")
-ClientVariables.FC_SyncBlock3R2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2")
-ClientVariables.FC_SyncBlock3R2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2RECEIVER")
-ClientVariables.FC_BracingBlockL = ClientVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockL")
-ClientVariables.FC_BracingBlockR = ClientVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockR")
-ClientVariables.FC_LeftParry = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftParry")
-ClientVariables.FC_LeftParryRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftParryRECEIVER")
-ClientVariables.FC_RightParry = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightParry")
-ClientVariables.FC_RightParryRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightParryRECEIVER")
-ClientVariables.FC_RightCounter1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1")
-ClientVariables.FC_RightCounter1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1RECEIVER")
-ClientVariables.FC_LeftCounter1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1")
-ClientVariables.FC_LeftCounter1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1RECEIVER")
-ClientVariables.FC_RightCounter2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2")
-ClientVariables.FC_RightCounter2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2RECEIVER")
-ClientVariables.FC_LeftCounter2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2")
-ClientVariables.FC_LeftCounter2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2RECEIVER")
+-- -- *animations (paired)*
+-- ClientVariables.FC_SyncBlock1L = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1L")
+-- ClientVariables.FC_SyncBlock1LRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1LRECEIVER")
+-- ClientVariables.FC_SyncBlock1R = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1R")
+-- ClientVariables.FC_SyncBlock1RRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1RRECEIVER")
+-- ClientVariables.FC_SyncBlock2L = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2L")
+-- ClientVariables.FC_SyncBlock2LRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2LRECEIVER")
+-- ClientVariables.FC_SyncBlock2R = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2R")
+-- ClientVariables.FC_SyncBlock2RRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2RRECEIVER")
+-- ClientVariables.FC_SyncBlock3L1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1")
+-- ClientVariables.FC_SyncBlock3L1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1RECEIVER")
+-- ClientVariables.FC_SyncBlock3R1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1")
+-- ClientVariables.FC_SyncBlock3R1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1RECEIVER")
+-- ClientVariables.FC_SyncBlock3L2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2")
+-- ClientVariables.FC_SyncBlock3L2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2RECEIVER")
+-- ClientVariables.FC_SyncBlock3R2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2")
+-- ClientVariables.FC_SyncBlock3R2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2RECEIVER")
+-- ClientVariables.FC_BracingBlockL = ClientVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockL")
+-- ClientVariables.FC_BracingBlockR = ClientVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockR")
+-- ClientVariables.FC_LeftParry = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftParry")
+-- ClientVariables.FC_LeftParryRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftParryRECEIVER")
+-- ClientVariables.FC_RightParry = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightParry")
+-- ClientVariables.FC_RightParryRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightParryRECEIVER")
+-- ClientVariables.FC_RightCounter1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1")
+-- ClientVariables.FC_RightCounter1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1RECEIVER")
+-- ClientVariables.FC_LeftCounter1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1")
+-- ClientVariables.FC_LeftCounter1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1RECEIVER")
+-- ClientVariables.FC_RightCounter2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2")
+-- ClientVariables.FC_RightCounter2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2RECEIVER")
+-- ClientVariables.FC_LeftCounter2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2")
+-- ClientVariables.FC_LeftCounter2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2RECEIVER")
 
 
--- *animations (dodges)*
-ClientVariables.FC_LeftDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftDodge")
-ClientVariables.FC_RightDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightDodge")
-ClientVariables.FC_BackDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_BackDodge")
+-- -- *animations (dodges)*
+-- ClientVariables.FC_LeftDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftDodge")
+-- ClientVariables.FC_RightDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightDodge")
+-- ClientVariables.FC_BackDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_BackDodge")
 
--- *animations (dodge attacks)*
-ClientVariables.FC_LDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1")
-ClientVariables.FC_LDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1RECEIVER")
-ClientVariables.FC_RDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1")
-ClientVariables.FC_RDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1RECEIVER")
-ClientVariables.FC_BDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1")
-ClientVariables.FC_BDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1RECEIVER")
+-- -- *animations (dodge attacks)*
+-- ClientVariables.FC_LDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1")
+-- ClientVariables.FC_LDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1RECEIVER")
+-- ClientVariables.FC_RDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1")
+-- ClientVariables.FC_RDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1RECEIVER")
+-- ClientVariables.FC_BDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1")
+-- ClientVariables.FC_BDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1RECEIVER")
 
 ClientVariables.walkingSpeed = 12
 ClientVariables.PairedChainMAX = 3 -- The max value for pairedChain.

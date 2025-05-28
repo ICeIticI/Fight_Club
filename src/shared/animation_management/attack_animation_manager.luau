@@ -52,23 +52,27 @@ local attack1_amountOfTimeBeforeAttackFrames = 0.23 -- the animation marker for 
 local attack1_amountOfTimeBeforeEndOfAttack = 0.45 -- level 1 attacks end 0.45 seconds after the animation begins.
 local attack1_amountOfTimeBeforeEndOFAnimation = 0.75
 
+-- local attack2_amountOfTimeBeforeAttackFrames = 0.52
+-- local attack2_amountOfTimeBeforeEndOfAttack = 1.17
+-- local attack2_amountOfTimeBeforeEndOFAnimation = 1.18
+
 function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages character data based on when an attack is playing. NOT the animation track itself. That runs on the client. Unless I decided to move it to the server. ]]
     print(self, self.characterInstance)
     local attackEnded = false
     if trackData.IsPlaying then
 
         -- Schedule a simulation of the AttackFrames marker and handle data accordingly:
-        task.delay(attack1_amountOfTimeBeforeAttackFrames, function()
+        task.delay(trackData:GetAttribute("TimeUntilStartOfAttack"), function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
             runOnAttackFrames(self.characterInstance, trackData)
         end)
 
         -- Schedule a simulation of the EndOfAttack marker:
-        task.delay(attack1_amountOfTimeBeforeEndOfAttack, function()
+        task.delay(trackData:GetAttribute("TimeUntilEndOfAttack"), function()
             runOnEndOfAttack(self.characterInstance, trackData)
         end)
 
         -- Schedule a simulation of the end of the attacking animation:
-        task.delay(attack1_amountOfTimeBeforeEndOFAnimation, function()
+        task.delay(trackData:GetAttribute("Length"), function()
             trackData.IsPlaying = false
             self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
         end)
@@ -76,7 +80,8 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         self.characterInstance.isAttacking = true
         self.characterInstance.SetSpeed(false)
 
-        if trackData.Counter_Attribute == true then
+        if trackData.Counter_Attribute == true then 
+            -- A level 1 attack played at the time an enemy's attack landed. We transition this into a counter attack.
             self.characterInstance.setupAttackDamage(self.characterInstance)
             self.characterInstance.setPublicPlayerVariable("canCounter", true)
             self.characterInstance.isCountering = true

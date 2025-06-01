@@ -102,10 +102,11 @@ function Character:lockOn() --[[ Makes the character lock onto an enemy (Will ne
     end
 end
 
-function Character:basicAttack(comboCounter) --[[ The character will do some sort of attack ]]
+function Character:basicAttack(comboCounter, enemyInstance) --[[ The character will do some sort of attack ]]
     
-    if self.isEnemyHoldingBlock and not self.isGettingHit and self.enemyChar.Humanoid.MoveDirection.Magnitude == 0 and self.comboCounter == 0 then
-        self.synchedBlock(nil, comboCounter)
+    if enemyInstance.isBlocking and not self.isGettingHit and enemyInstance.humanoid.MoveDirection.Magnitude == 0 and self.comboCounter == 0 then
+        -- self.synchedBlock(nil, comboCounter)
+        self.character_attack.syncBlock(enemyInstance, comboCounter)
     elseif self.isGettingHit then
         return false
     elseif characters:GetCharacterObjectByCharacter(self.enemyChar) and characters:GetCharacterObjectByCharacter(self.enemyChar).isDodging ~= true then -- gets the public canAttack of the player and makes sure its true before attacking
@@ -128,9 +129,9 @@ function Character:basicAttack(comboCounter) --[[ The character will do some sor
             -- character_attack.level2()
             self.character_attack:level2()
 
-    else
-        warn("Attack call failed! :(")
-    end
+        else
+            warn("Attack call failed! :(")
+        end
     
         
     -- elseif comboCounter == 3 then
@@ -170,6 +171,7 @@ function Character:receive(receiveType, data) --[[ The character will receive an
         character_receive:dodge(data)
     elseif receiveType == "parry" then
         character_receive:parry(data)
+        
     -- mitigate attacks with our own attack:
     elseif receiveType == "counterAttack" then
         character_receive:receiveCounter(data)
@@ -184,10 +186,6 @@ function Character:receive(receiveType, data) --[[ The character will receive an
     elseif receiveType == "receiveLevel3" then
         character_receive:receiveLevel3(data)
 
-    elseif receiveType == "receiveSyncBlock" then
-        character_receive:receiveSyncBlock(data)
-    elseif receiveType == "receiveDodgeAttack" then
-        character_receive:receiveDodgeAttack(data)
     elseif receiveType == "receiveParry" then
         character_receive:receiveParry(data)
     end

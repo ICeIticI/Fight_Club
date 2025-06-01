@@ -461,51 +461,64 @@ end
 function ClientVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
 	if ClientVariables.pairedChain <= ClientVariables.PairedChainMAX and ClientVariables.canSyncBlock then
 		if followupCombo and followupCombo > 1 or (ClientVariables.pairedBlock and ClientVariables.pairedBlock.IsPlaying) then -- For followup attacks
+			
 			if ClientVariables.pairedAttack and ClientVariables.pairedAttack.IsPlaying then -- runs for the attacker
-			ClientVariables.pairedAttack:Stop()
-			if followupCombo == 3 then
-				if ClientVariables.animPair and ClientVariables.animPair[1] == 1 then
-					if ClientVariables.animPair and ClientVariables.animPair[2] == 1 then
-						ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock3L1TRACK
-					elseif ClientVariables.animPair and ClientVariables.animPair[2] == 2 then
-						ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock3L2TRACK
+				
+				ClientVariables.pairedAttack:Stop()
+				if followupCombo == 3 then
+
+					if ClientVariables.animPair and ClientVariables.animPair[1] == 1 then
+						if ClientVariables.animPair and ClientVariables.animPair[2] == 1 then
+							ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock3L1TRACK
+						elseif ClientVariables.animPair and ClientVariables.animPair[2] == 2 then
+							ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock3L2TRACK
+						end
+					elseif ClientVariables.animPair and ClientVariables.animPair[1] == 2 then
+						if ClientVariables.animPair and ClientVariables.animPair[2] == 1 then
+							ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock3R1TRACK
+						elseif ClientVariables.animPair and ClientVariables.animPair[2] == 2 then
+							ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock3R2TRACK
+						end
 					end
-				elseif ClientVariables.animPair and ClientVariables.animPair[1] == 2 then
-					if ClientVariables.animPair and ClientVariables.animPair[2] == 1 then
-						ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock3R1TRACK
-					elseif ClientVariables.animPair and ClientVariables.animPair[2] == 2 then
-						ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock3R2TRACK
+					
+				else
+
+					if ClientVariables.pairedAttack == ClientVariables.FC_SyncBlock1LTRACK then
+						ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock1RTRACK
+					elseif ClientVariables.pairedAttack == ClientVariables.FC_SyncBlock1RTRACK then
+						ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock1LTRACK
+					elseif ClientVariables.pairedAttack == ClientVariables.FC_SyncBlock2LTRACK then
+						ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock2RTRACK
+					elseif ClientVariables.pairedAttack == ClientVariables.FC_SyncBlock2RTRACK then
+						ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock2LTRACK
 					end
+				
 				end
-			else
-				if ClientVariables.pairedAttack == ClientVariables.FC_SyncBlock1LTRACK then
-					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock1RTRACK
-				elseif ClientVariables.pairedAttack == ClientVariables.FC_SyncBlock1RTRACK then
-					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock1LTRACK
-				elseif ClientVariables.pairedAttack == ClientVariables.FC_SyncBlock2LTRACK then
-					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock2RTRACK
-				elseif ClientVariables.pairedAttack == ClientVariables.FC_SyncBlock2RTRACK then
-					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock2LTRACK
-				end
-			end
 				
 			elseif ClientVariables.pairedBlock and ClientVariables.pairedBlock.IsPlaying then -- runs for the receiver
+				
 				ClientVariables.pairedBlock:Stop()
 				if followupCombo == 3 then
+					
 					if sentAnimPair and sentAnimPair[1] == 1 then
 						if sentAnimPair and sentAnimPair[2] == 1 then
 							ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock3L1RECEIVERTRACK
 						elseif sentAnimPair and sentAnimPair[2] == 2 then
 							ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock3L2RECEIVERTRACK
 						end
+					
 					elseif sentAnimPair and sentAnimPair[1] == 2 then
+						
 						if sentAnimPair and sentAnimPair[2] == 1 then
 							ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock3R1RECEIVERTRACK
 						elseif sentAnimPair and sentAnimPair[2] == 2 then
 							ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock3R2RECEIVERTRACK
 						end
+					
 					end
+
 				else
+
 					if ClientVariables.pairedBlock == ClientVariables.FC_SyncBlock1LRECEIVERTRACK then
 						ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock1RRECEIVERTRACK
 					elseif ClientVariables.pairedBlock == ClientVariables.FC_SyncBlock1RRECEIVERTRACK then
@@ -515,11 +528,14 @@ function ClientVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles th
 					elseif ClientVariables.pairedBlock == ClientVariables.FC_SyncBlock2RRECEIVERTRACK then
 						ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock2LRECEIVERTRACK
 					end
+
 				end
+				
 			end
 				
 		
 		else -- for non-followup attacks
+			
 			if (sentAnimPair and sentAnimPair[1] == 1) or (ClientVariables.animPair and ClientVariables.animPair[1] == 1) then
 				if (sentAnimPair and sentAnimPair[2] == 1) or (ClientVariables.animPair and ClientVariables.animPair[2] == 1) then
 					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock1LTRACK

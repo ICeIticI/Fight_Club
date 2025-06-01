@@ -219,7 +219,38 @@ function Character_Init.init(charModel)
 		else
 			return false
 		end
+	end
 
+	function characterInstance.randomAnimation(animFolder, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
+
+    	local randAttackTbl = {}
+
+		for _, v in pairs(animFolder) do
+			if
+			(
+				attribute1 == nil 
+				or (a1Value ~= nil 
+				and v:GetAttribute(attribute1) == a1Value) 
+				or (v:GetAttribute(attribute1) 
+				and a1Value == nil)) 
+				and 
+				(attribute2 == nil 
+				or (a2Value ~= nil 
+				and v:GetAttribute(attribute2) == a2Value) 
+				or (v:GetAttribute(attribute2) 
+				and a2Value == nil)
+			) 
+
+			then
+				table.insert(randAttackTbl, v)
+			end
+		end
+
+		if not next(randAttackTbl) then -- No matches were found with the specified attributes
+			return warn("No animation tracks found with the specified parameters, and therefore no animation was randomly picked. Check your given attributes to see if your desired animations have them.")
+		end
+
+		return randAttackTbl[math.random(1, #randAttackTbl)] -- returns the randomly-selected animation track
 	end
 
 	function characterInstance.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
@@ -342,6 +373,27 @@ function Character_Init.init(charModel)
 		end
 	end
 
+	function characterInstance.manageAnimation(trackData)
+		local AnimType = trackData.animation:GetAttribute("AnimType")
+
+		if AnimType and AnimType == 1 then
+			characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+		elseif AnimType and AnimType == 2 then
+			characterInstance.receive_animation_manager:runOnIsPlaying(trackData)
+		else
+			characterInstance.misc_animation_manager:runOnIsPlaying(trackData)
+		end
+	
+	end
+	
+	function characterInstance.simulateIsPlayingOfLastData(bool) --[[ Will turn the IsPlaying data of the previous attack & receive datas to a given bool, probably to false since we wanna turn off the last animations ]]
+		if characterInstance.lastAttackData then
+			characterInstance.lastAttackData.IsPlaying = bool
+		end
+		if characterInstance.lastReceiveData then
+			characterInstance.lastReceiveData.IsPlaying = bool
+		end
+	end
 
 
 	if characterInstance.player ~= nil then

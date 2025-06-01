@@ -1,7 +1,7 @@
 --[[  ]]
 
 
-local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
+-- local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
 
 local GlobalRemoteEvent = Instance.new("RemoteEvent") -- used by each client in a server for communication with server-client or client to server
 GlobalRemoteEvent.Name = "GlobalRemoteEvent"
@@ -103,11 +103,11 @@ function ServerInit.InitializePlayer(player)
     -- LocalBindableEvent.Name = "LocalBindableEvent"
     -- LocalBindableEvent.Parent = game.ReplicatedStorage
 	
-	-- Animation defining:
-	for _, animation in pairs(AnimationInstances) do
-		local clonedAnim = animation:Clone()
-		clonedAnim.Parent = plrObjectsFolder
-	end
+	-- -- Animation defining:
+	-- for _, animation in pairs(AnimationInstances) do
+	-- 	local clonedAnim = animation:Clone()
+	-- 	clonedAnim.Parent = plrObjectsFolder
+	-- end
 end
 
 -- function ServerInit.InitializeCharacter(character)

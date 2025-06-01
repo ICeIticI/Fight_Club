@@ -35,7 +35,6 @@ local function runOnEndOfAttack(characterInstance, trackData) --[[ When we simul
     characterInstance.isAttacking = false
     characterInstance.hitDebounce = false
     characterInstance.canFollowUp = false
-    -- self.GlobalRemoteEvent:FireServer(nil, "AttackEnded", nil, nil, nil, nil, false)
 
     if not trackData.Paired_Attribute then
         characterInstance.SetSpeed(true)
@@ -58,23 +57,29 @@ local attack1_amountOfTimeBeforeEndOFAnimation = 0.75
 
 function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages character data based on when an attack is playing. NOT the animation track itself. That runs on the client. Unless I decided to move it to the server. ]]
     print(self, self.characterInstance)
-    local attackEnded = false
     if trackData.IsPlaying then
 
         -- Schedule a simulation of the AttackFrames marker and handle data accordingly:
         task.delay(trackData:GetAttribute("TimeUntilStartOfAttack"), function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
-            runOnAttackFrames(self.characterInstance, trackData)
+            if trackData.IsPlaying then
+                runOnAttackFrames(self.characterInstance, trackData)
+            end
         end)
 
         -- Schedule a simulation of the EndOfAttack marker:
         task.delay(trackData:GetAttribute("TimeUntilEndOfAttack"), function()
-            runOnEndOfAttack(self.characterInstance, trackData)
+            if trackData.IsPlaying then
+                runOnEndOfAttack(self.characterInstance, trackData)
+            end
         end)
 
         -- Schedule a simulation of the end of the attacking animation:
         task.delay(trackData:GetAttribute("Length"), function()
-            trackData.IsPlaying = false
-            self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+            if trackData.IsPlaying then
+                trackData.IsPlaying = false
+                trackData.Completed = true
+                self.characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+            end
         end)
 
         self.characterInstance.isAttacking = true
@@ -91,25 +96,23 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             self.characterInstance.Protocol = nil
         end
     elseif not trackData.IsPlaying then
-        print(self.characterInstance.didFollowUp, attackEnded)
-        if self.characterInstance.didFollowUp then
+        
+        if not trackData.Completed then
             self.characterInstance.didFollowUp = false
-            attackEnded = true
             self.characterInstance.Protocol = nil
 
-        elseif not self.characterInstance.isAttacking then
+        elseif trackData.Completed  then
             warn("Resetting...")
             self.characterInstance.reset()
         end
 
-        if trackData.Paired_Attribute == true and not self.characterInstance.didFollowUp then
+        if trackData.Paired_Attribute == true and trackData.Completed then
             task.delay(0.5, function()
                 self.characterInstance.hitDebounce = false
             end)
             self.characterInstance.isAttacking = false
         end
 
-        attackEnded = false
         self.characterInstance.attackFrames = false
         self.characterInstance.pairedPlaying = false
         self.characterInstance.SetSpeed(true)

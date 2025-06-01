@@ -23,6 +23,8 @@ local function getAnimationTrackById(moduleTbl, AnimationId)
             return animationTrack
         end
     end
+
+    return warn("No AnimationTrack was found with the given AnimationId: " .. AnimationId)
 end
 
 local function randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
@@ -161,97 +163,100 @@ function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attac
 end
 
 function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
-    if data.receivingFromType == "AttackStart" then
+    -- if data.receivingFromType == "AttackStart" then
 
-        if data.IsADodge then
+    --     if data.IsADodge then
 
-            if data.DodgeDirection == "Right" then
-                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightDodgeTRACK
-            elseif data.DodgeDirection == "Left" then
-                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftDodgeTRACK
-            elseif data.DodgeDirection == "Back" then
-                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_BackDodgeTRACK
-            end
+    --         if data.DodgeDirection == "Right" then
+    --             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightDodgeTRACK
+    --         elseif data.DodgeDirection == "Left" then
+    --             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftDodgeTRACK
+    --         elseif data.DodgeDirection == "Back" then
+    --             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_BackDodgeTRACK
+    --         end
 
-        end
+    --     end
     
-    elseif data.receivingFromType == "Level1" then
+    -- elseif data.receivingFromType == "Level1" then
 
-        if data.attackerAnim.AnimationId == moduleTbl.FC_LeftHook1.AnimationId or data.attackerAnim.AnimationId == moduleTbl.FC_LeftJab.AnimationId then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftHook1RECEIVERTRACK
-        elseif data.attackerAnim.AnimationId == moduleTbl.FC_LeftUppercut.AnimationId then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftUppercutRECEIVERTRACK
+    --     if data.attackerAnim.AnimationId == moduleTbl.FC_LeftHook1.AnimationId or data.attackerAnim.AnimationId == moduleTbl.FC_LeftJab.AnimationId then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftHook1RECEIVERTRACK
+    --     elseif data.attackerAnim.AnimationId == moduleTbl.FC_LeftUppercut.AnimationId then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftUppercutRECEIVERTRACK
 
-        elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightHook1.AnimationId or data.attackerAnim.AnimationId == moduleTbl.FC_RightJab.AnimationId then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightHook1RECEIVERTRACK
-        elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightUppercut.AnimationId then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightUppercutRECEIVERTRACK
-        end
-    elseif data.receivingFromType == "Level2" then
+    --     elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightHook1.AnimationId or data.attackerAnim.AnimationId == moduleTbl.FC_RightJab.AnimationId then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightHook1RECEIVERTRACK
+    --     elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightUppercut.AnimationId then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightUppercutRECEIVERTRACK
+    --     end
+    -- elseif data.receivingFromType == "Level2" then
 
-        if data.attackerAnim.AnimationId == moduleTbl.FC_LeftHaymaker.AnimationId then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftHaymakerRECEIVERTRACK
-        elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightHaymaker.AnimationId then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightHaymakerReceiverTRACK
-        end
-    elseif data.receivingFromType == "Parry" then
+    --     if data.attackerAnim.AnimationId == moduleTbl.FC_LeftHaymaker.AnimationId then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftHaymakerRECEIVERTRACK
+    --     elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightHaymaker.AnimationId then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightHaymakerReceiverTRACK
+    --     end
+    -- elseif data.receivingFromType == "Parry" then
         
-        if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            -- Perform a left parry
-            warn("ParryL")
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightParryTRACK
-        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
-            -- Perform a right parry
-            warn("ParryR")
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftParryTRACK
-        end
-    elseif data.receivingFromType == "gettingParried" then
-        moduleTbl.attackTrack:Stop()
-        if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightParryRECEIVERTRACK
-        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftParryRECEIVERTRACK
-        end
-    elseif data.receivingFromType == "dodgeAttack" then
+    --     if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
+    --         -- Perform a left parry
+    --         warn("ParryL")
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightParryTRACK
+    --     elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+    --         -- Perform a right parry
+    --         warn("ParryR")
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftParryTRACK
+    --     end
+    -- elseif data.receivingFromType == "gettingParried" then
+    --     moduleTbl.attackTrack:Stop()
+    --     if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightParryRECEIVERTRACK
+    --     elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftParryRECEIVERTRACK
+    --     end
+    -- elseif data.receivingFromType == "dodgeAttack" then
 
-        -- We will get dodge-attacked
+    --     -- We will get dodge-attacked
             
-        if moduleTbl.attackTrack then -- stop any attack that's playing
-            moduleTbl.attackTrack:Stop() 
-        end
+    --     if moduleTbl.attackTrack then -- stop any attack that's playing
+    --         moduleTbl.attackTrack:Stop() 
+    --     end
         
-        if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LDodgeAttack1RECEIVERTRACK
-        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RDodgeAttack1RECEIVERTRACK
-        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Back" then
-            moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_BDodgeAttack1RECEIVERTRACK
-        end
+    --     if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LDodgeAttack1RECEIVERTRACK
+    --     elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RDodgeAttack1RECEIVERTRACK
+    --     elseif data.attackerAnim:GetAttribute("AnimDirection") == "Back" then
+    --         moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_BDodgeAttack1RECEIVERTRACK
+    --     end
 
-    elseif data.receivingFromType == "counterAttack" then
-        -- We are gonna get countered
+    -- elseif data.receivingFromType == "counterAttack" then
+    --     -- We are gonna get countered
             
-        -- GameVariables.repositionInFrontOfEnemy()
-        if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
-            moduleTbl.attackTrack:Stop() -- stop an attack if its playing
-        end
+    --     -- GameVariables.repositionInFrontOfEnemy()
+    --     if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
+    --         moduleTbl.attackTrack:Stop() -- stop an attack if its playing
+    --     end
 
-        if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            if data.attackerAnim.AnimationId == moduleTbl.FC_LeftCounter1.AnimationId then
-                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftCounter1RECEIVERTRACK
+    --     if data.attackerAnim:GetAttribute("AnimDirection") == "Left" then
+    --         if data.attackerAnim.AnimationId == moduleTbl.FC_LeftCounter1.AnimationId then
+    --             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftCounter1RECEIVERTRACK
 
-            elseif data.attackerAnim.AnimationId == moduleTbl.FC_LeftCounter2.AnimationId then
-                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftCounter2RECEIVERTRACK
-            end
-        elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
-            if data.attackerAnim.AnimationId == moduleTbl.FC_RightCounter1.AnimationId then
-                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightCounter1RECEIVERTRACK
+    --         elseif data.attackerAnim.AnimationId == moduleTbl.FC_LeftCounter2.AnimationId then
+    --             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_LeftCounter2RECEIVERTRACK
+    --         end
+    --     elseif data.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+    --         if data.attackerAnim.AnimationId == moduleTbl.FC_RightCounter1.AnimationId then
+    --             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightCounter1RECEIVERTRACK
 
-            elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightCounter2.AnimationId then
-                moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightCounter2RECEIVERTRACK
-            end
-        end
-    end
+    --         elseif data.attackerAnim.AnimationId == moduleTbl.FC_RightCounter2.AnimationId then
+    --             moduleTbl.currentReceiveAnimTRACK = moduleTbl.FC_RightCounter2RECEIVERTRACK
+    --         end
+    --     end
+    -- end
+
+    moduleTbl.currentReceiveAnimTRACK = getAnimationTrackById(moduleTbl, data.Animation.AnimationId)
+
 end
 
 function Animation_Centric.playReceiveAnimation(moduleTbl)

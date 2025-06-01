@@ -142,7 +142,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                         if enemyInstance.isBlocking and enemyInstance.humanoid.MoveDirection.Magnitude > 0 then
                             -- The player is moving
 
-                            handleDodges()
+                            enemyInstance:receive("dodge", characterInstance)
 
                         elseif enemyInstance.isBlocking and enemyInstance.canSyncBlock and enemyInstance.humanoid.MoveDirection.Magnitude == 0 then
                             -- The player is not moving and will perform a sync block
@@ -150,7 +150,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                         end
                     end
 
-                    characterInstance:basicAttack(characterInstance.comboCounter)
+                    characterInstance:basicAttack(characterInstance.comboCounter, enemyInstance)
                 elseif characterInstance.canFollowUp then
                     characterInstance.waitingToAttack = true
                     characterInstance.didFollowUp = true -- when true, the character did a followup attack
@@ -158,14 +158,14 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then
-                        if characterInstance.pairedChain <= characterInstance.PairedChainMAX then
+                        if characterInstance.pairedChain < characterInstance.PairedChainMAX then -- The third paired attack, we wanna have the receiver determine the anim so it will be calculated by them, after this player's characterInstance checks its the max value in character_attack.
                             characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                             --[[
                             characterObject.Protocol = "AttackStarted"
                             characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, nil, characterObject.animPair, characterObject.pairedChain, false)
                             ]]
                         end
-                        characterInstance:basicAttack(characterInstance.comboCounter) -- followup attack
+                        characterInstance:basicAttack(characterInstance.comboCounter, enemyInstance) -- followup attack
                         print(characterInstance.followUpCount)
                     end
                     characterInstance.waitingToAttack = false

@@ -356,16 +356,19 @@ AnimationInstances.FC_RightCounter2RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_LeftDodge = Instance.new("Animation")
 AnimationInstances.FC_LeftDodge.Name = "FC_LeftDodge"
 AnimationInstances.FC_LeftDodge.AnimationId = "rbxassetid://117027123930220"
+AnimationInstances.FC_LeftDodge:SetAttribute("Dodge", true)
 AnimationInstances.FC_LeftDodge:SetAttribute("AnimDirection", "Left")
 
 AnimationInstances.FC_RightDodge = Instance.new("Animation")
 AnimationInstances.FC_RightDodge.Name = "FC_RightDodge"
 AnimationInstances.FC_RightDodge.AnimationId = "rbxassetid://134531579306048"
+AnimationInstances.FC_RightDodge:SetAttribute("Dodge", true)
 AnimationInstances.FC_RightDodge:SetAttribute("AnimDirection", "Right")
 
 AnimationInstances.FC_BackDodge = Instance.new("Animation")
 AnimationInstances.FC_BackDodge.Name = "FC_BackDodge"
 AnimationInstances.FC_BackDodge.AnimationId = "rbxassetid://103495259681812"
+AnimationInstances.FC_BackDodge:SetAttribute("Dodge", true)
 AnimationInstances.FC_BackDodge:SetAttribute("AnimDirection", "Back")
 
 AnimationInstances.FC_LDodgeAttack1 = Instance.new("Animation")
@@ -428,22 +431,27 @@ for _, animation in pairs(AnimationInstances) do
     if temporaryTrack.Looped then continue end
 
     animation:SetAttribute("Length", temporaryTrack.Length)
-    local tempoaryStartOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
+    local temporaryStartOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
         animation:SetAttribute("TimeUntilStartOfAttack", temporaryTrack.TimePosition)
     end)
-    local tempoaryEndOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("EndOfAttack"):Connect(function()
+    local temporaryEndOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("EndOfAttack"):Connect(function()
         animation:SetAttribute("TimeUntilEndOfAttack", temporaryTrack.TimePosition)
         temporaryTrack:Stop()
+    end)
+    local temporaryIsBlockingConnection = temporaryTrack:GetMarkerReachedSignal("isBlocking"):Connect(function()
+        animation:SetAttribute("TimeUntilIsBlocking", temporaryTrack.TimePosition)
     end)
     
     animation:Play()
     animation.Stopped:Wait()
-    tempoaryStartOfAttackConnection:Disconnect()
-    tempoaryEndOfAttackConnection:Disconnect()
+    temporaryStartOfAttackConnection:Disconnect()
+    temporaryEndOfAttackConnection:Disconnect()
+    temporaryIsBlockingConnection:Disconnect()
     temporaryTrack:Destroy()
 
-    tempoaryStartOfAttackConnection = nil
-    tempoaryEndOfAttackConnection = nil
+    temporaryStartOfAttackConnection = nil
+    temporaryEndOfAttackConnection = nil
+    temporaryIsBlockingConnection = nil
     temporaryTrack = nil
 
 end

@@ -7,24 +7,18 @@
     on both the server and client, so they need the same functions in this case.
 
 ]]
-
 local Animation_Centric = {}
 Animation_Centric.__index = Animation_Centric
 
--- Modules:
-
-local Attack_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.attack_animation_manager)
-local Receive_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.receive_animation_manager)
-local Misc_Animation_Management = require(game.ReplicatedStorage.Shared.animation_management.misc_animation_manager)
 
 local function getAnimationTrackById(moduleTbl, AnimationId)
     for _, animationTrack in pairs(moduleTbl.AllAnimations) do
-        if animationTrack.AnimationId == AnimationId then
+        if animationTrack.Animation.AnimationId == AnimationId then
             return animationTrack
         end
     end
 
-    return warn("No AnimationTrack was found with the given AnimationId: " .. AnimationId)
+    return warn("No AnimationTrack was found with the given AnimationId: " .. tostring(AnimationId))
 end
 
 local function randomAnimationTrack(aTrackTbl, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
@@ -128,7 +122,16 @@ end
 function Animation_Centric.setupAttackAnimation(moduleTbl, trackData) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
                                                 -- AttackTbl would be the table of attacks, such as attack1Tbl or attack2Tbl
     
+    
+    if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying and not moduleTbl.isAttacking then
+        moduleTbl.attackTrack:Stop()
+    end
+    if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
+        moduleTbl.currentReceiveAnimTRACK:Stop()
+    end
+
     if trackData.attackLvl == 1 or trackData.attackLvl == 2 then
+        print(trackData)
         moduleTbl.attackTrack = getAnimationTrackById(moduleTbl, trackData.AnimationId)
     elseif trackData.attackLvl == 3 then
         
@@ -136,25 +139,16 @@ function Animation_Centric.setupAttackAnimation(moduleTbl, trackData) --[[ Will 
             moduleTbl.attackTrack:Stop()
         
             if moduleTbl.attackTrack.Animation:GetAttribute("AnimDirection") == "Left" then
-                moduleTbl.currentReceiveAnimTRACK = randomAnimationTrack(moduleTbl.counterAttacksTable, "AnimDirection", "Left", "Counter", true)
+                moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.counterAttacksTable, "AnimDirection", "Left", "Counter", true)
             elseif moduleTbl.attackTrack.Animation:GetAttribute("AnimDirection") == "Right" then
-                moduleTbl.currentReceiveAnimTRACK = randomAnimationTrack(moduleTbl.counterAttacksTable, "AnimDirection", "Right", "Counter", true)
+                moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.counterAttacksTable, "AnimDirection", "Right", "Counter", true)
             end
         end
-
     end
 end
 
 function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attack animation before (using the .setUpAttackAnimation). This will execute that animation.  ]]
     if not moduleTbl.attackTrack then return warn("Failed to play attack track, as it doesn't exist.") end
-
-
-    if moduleTbl.attackTrack.IsPlaying and not moduleTbl.isAttacking then
-        moduleTbl.attackTrack:Stop()
-    end
-    if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
-        moduleTbl.currentReceiveAnimTRACK:Stop()
-    end
 
         moduleTbl.currentAttack = moduleTbl.attackTrack.Animation
         moduleTbl.attackTrack:Play()
@@ -255,14 +249,6 @@ function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
     --     end
     -- end
 
-    moduleTbl.currentReceiveAnimTRACK = getAnimationTrackById(moduleTbl, data.Animation.AnimationId)
-
-end
-
-function Animation_Centric.playReceiveAnimation(moduleTbl)
-    if not moduleTbl.currentReceiveAnimTRACK then return warn("Failed to play receiving animation track, as it doesn't exist.") end
-
-    
     if moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
         moduleTbl.currentReceiveAnimTRACK:Stop()
     end
@@ -270,12 +256,33 @@ function Animation_Centric.playReceiveAnimation(moduleTbl)
         moduleTbl.attackTrack:Stop()
     end
 
+    moduleTbl.currentReceiveAnimTRACK = getAnimationTrackById(moduleTbl, data.Animation.AnimationId)
+
+end
+
+function Animation_Centric.playReceiveAnimation(moduleTbl)
+    if not moduleTbl.currentReceiveAnimTRACK then return warn("Failed to play receiving animation track, as it doesn't exist.") end
+
     moduleTbl.currentReceiveAnimTRACK:Play()
 
     -- -- reposition the player to face the enemy if they counter them (not a parry)
     -- if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Counter") and not (moduleTbl.currentReceiveAnimTRACK == moduleTbl.FC_RightParryTRACK or moduleTbl.currentReceiveAnimTRACK == moduleTbl.FC_LeftParryTRACK) then
     --     moduleTbl.repositionInFrontOfEnemy()
     -- end
+end
+
+function Animation_Centric.playBlockStartAnimation(moduleTbl)
+    moduleTbl.FC_BlockStartTRACK:Play()
+end
+
+function Animation_Centric.playBlockAnimation(moduleTbl)
+    moduleTbl.FC_BlockTRACK:Play()
+    print("blocking")
+end
+
+function Animation_Centric.stopBlocking(moduleTbl)
+    moduleTbl.FC_BlockStartTRACK:Stop()
+    moduleTbl.FC_BlockTRACK:Stop()
 end
 
 return Animation_Centric

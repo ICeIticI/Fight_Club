@@ -22,7 +22,6 @@ local Receive_Animation_Manager = require(game.ReplicatedStorage.Shared.animatio
 local Misc_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.misc_animation_manager)
 
 local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
-
 local Character = {}
 Character.__index = Character
 
@@ -62,8 +61,8 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.character_receive = setmetatable({}, { __index = character_receive })
     
     self.attack_animation_manager = setmetatable({}, { __index = Attack_Animation_Manager})
-    self.receive_animation_manager = setmetatable({ __index = Receive_Animation_Manager})
-    self.misc_animation_manager = setmetatable({ __index = Misc_Animation_Manager })
+    self.receive_animation_manager = setmetatable({}, { __index = Receive_Animation_Manager})
+    self.misc_animation_manager = setmetatable({}, { __index = Misc_Animation_Manager })
 
     self.character_hitboxes = setmetatable({}, { __index = character_hitboxes })
 
@@ -80,7 +79,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.misc_animation_manager.characterInstance = self
 
     -- everything else:
-    self.hitbox_manager.characterInstance = self
+    self.character_hitboxes.characterInstance = self
 
     characters[self.id] = self
     return self
@@ -102,11 +101,11 @@ function Character:lockOn() --[[ Makes the character lock onto an enemy (Will ne
     end
 end
 
-function Character:basicAttack(comboCounter, enemyInstance) --[[ The character will do some sort of attack ]]
-    
+function Character:basicAttack(enemyInstance) --[[ The character will do some sort of attack ]]
     if enemyInstance.isBlocking and not self.isGettingHit and enemyInstance.humanoid.MoveDirection.Magnitude == 0 and self.comboCounter == 0 then
         -- self.synchedBlock(nil, comboCounter)
-        self.character_attack.syncBlock(enemyInstance, comboCounter)
+        self.character_attack.syncBlock(enemyInstance)
+        enemyInstance:receive("syncBlock", self)
     elseif self.isGettingHit then
         return false
     elseif characters:GetCharacterObjectByCharacter(self.enemyChar) and characters:GetCharacterObjectByCharacter(self.enemyChar).isDodging ~= true then -- gets the public canAttack of the player and makes sure its true before attacking
@@ -119,13 +118,13 @@ function Character:basicAttack(comboCounter, enemyInstance) --[[ The character w
             local timeToArrive = 0.55
             local speed = -(distanceToTravel / timeToArrive)
 
-            self.setLinearVelocity(Vector3.new(0, 0, speed), timeToArrive)
+            self:setLinearVelocity(Vector3.new(0, 0, speed), timeToArrive)
         end
-        
-        if comboCounter <= 2 and self.enemyHumanoid.Health > 10 then
+
+        if self.comboCounter <= 2 and self.enemyHumanoid.Health > 10 then
             -- character_attack.level1()
             self.character_attack:level1()
-        elseif comboCounter >= 3 or self.enemyHumanoid.Health <= 10 then
+        elseif self.comboCounter >= 3 or self.enemyHumanoid.Health <= 10 then
             -- character_attack.level2()
             self.character_attack:level2()
 
@@ -150,9 +149,9 @@ end
 
 function Character:block(sentBool) --[[ The character will get ready to block an incoming attack ]]
     if sentBool == true then
-        character_block.enable()
+        self.character_block:enable()
     elseif sentBool == false then
-        character_block.disable()
+        self.character_block:disable()
     end
 end
 
@@ -161,7 +160,6 @@ function Character:grapple() --[[ The character will grapple with an enemy ]]
 end
 
 function Character:receive(receiveType, data) --[[ The character will receive an attack ]]
-
     -- Mitigate attacks:
     if receiveType == "bracingBlock" then
         character_receive:bracingBlock(data)

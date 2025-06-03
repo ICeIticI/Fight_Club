@@ -9,10 +9,9 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	
 	ClientVariables.character = ClientVariables.player.Character or ClientVariables.player.CharacterAdded:Wait()
 	ClientVariables.humanoid = ClientVariables.character:WaitForChild("Humanoid")
-	ClientVariables.previousHealth = ClientVariables.humanoid.Health -- This var is used to determine how much damage the character takes.
+	-- ClientVariables.previousHealth = ClientVariables.humanoid.Health -- This var is used to determine how much damage the character takes.
 
 	ClientVariables.charAnimator = ClientVariables.character:WaitForChild("Humanoid"):WaitForChild("charAnimator")
-	
 	ClientVariables.humanoidRootPart = ClientVariables.character:WaitForChild("HumanoidRootPart")
 
 	-- Hitbox stuff:
@@ -31,8 +30,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	ClientVariables.hitboxesFolderATTACK = {ClientVariables.hitboxLeftArm, ClientVariables.hitboxLeftLeg, ClientVariables.hitboxRightArm, ClientVariables.hitboxRightLeg}
 	ClientVariables.hitboxesFolderRECEIVE = {ClientVariables.hitboxHead, ClientVariables.hitboxTorso}
 ]]
-	ClientVariables.Protocol = nil
-	ClientVariables.humanoid.JumpPower = 0
+	-- ClientVariables.Protocol = nil
+	-- ClientVariables.humanoid.JumpPower = 0
 
 	-- Bools and Values:
 	
@@ -44,13 +43,14 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 		ClientVariables.lockOnDebounce.Parent = ClientVariables.plrObjectsFolder
 	end
 
+	--[[
 	ClientVariables.hitDebounce = false -- if false, then the player has the ability to deal damage. This is so the player won't hit the enemy multiple times in one attack.
 	ClientVariables.isBlocking = false -- set to true when the client blocks
 	ClientVariables.isAttacking = false
 	ClientVariables.isCountering = false
 	ClientVariables.isGettingHit = false
-	ClientVariables.waitingToAttack = false
 	ClientVariables.pairedPlaying = false -- used to make sure the paired animations don't play while already playing.
+	ClientVariables.waitingToAttack = false
 	ClientVariables.canSyncBlock = true
 	ClientVariables.previousWalkSpeed = nil
 
@@ -63,26 +63,28 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	ClientVariables.lastAttackTrack = nil
 	ClientVariables.comboCounter = 0
 	
-	ClientVariables.currentAttack = nil										
-	ClientVariables.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
-	ClientVariables.attackSeries = nil
+	ClientVariables.currentAttack = nil		
+
+		ClientVariables.attackSeries = nil
 	-- ClientVariables.randAttack = nil
 	ClientVariables.distanceBetween = nil
 	ClientVariables.enemyHumanoid = nil -- pre-defined enemy Humanoid because the script hates global variables. Used for the enemy.
 	ClientVariables.enemyChar = nil
 
-	ClientVariables.attackerCFrame = nil -- When the character gets struck, this variable will equal the CFrame of the attacker's HumanoidRootPart so we can move the character a direction if the hit is significant
-	-- ClientVariables.enemyCurrentAttack = nil -- used when the enemy would start an attack via the AttackStarted protocol that gets sent when one starts
-	ClientVariables.randLvl1Type = nil --[[ Used to determine what lvl 1 attacks
-						the player will use for said combo ]]
+		ClientVariables.attackerCFrame = nil -- When the character gets struck, this variable will equal the CFrame of the attacker's HumanoidRootPart so we can move the character a direction if the hit is significant
+	ClientVariables.enemyCurrentAttack = nil -- used when the enemy would start an attack via the AttackStarted protocol that gets sent when one starts
+	ClientVariables.randLvl1Type = nil -- Used to determine what lvl 1 attacks the player will use for said combo
 	ClientVariables.animPair = nil
-	ClientVariables.dodgeAttackTrack = nil
-
+	
 	-- New Variables that are replacing old:
 	ClientVariables.canAttack = false
 	ClientVariables.canGetHit = false
 	ClientVariables.areLockedOn = false
 	-- Above are new variables that will be replacing old ^
+	
+	ClientVariables.dodgeAttackTrack = nil
+	]]								
+	ClientVariables.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
 
 	-- Loading animation tracks:
 	--[[
@@ -230,9 +232,14 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	-- 	end
 	-- end
 ]]
+
+--[[
 	ClientVariables.pairedAttack = nil -- the variable for which paired attack the attacker is doing
 	ClientVariables.pairedBlock = nil -- the variable for which paired block the attacker is doing
 	ClientVariables.pairedChain = 0 -- The tracker of the character's sync block attack chain. They can only do as many as the max allows
+]]
+
+	ClientVariables.stamina = ClientVariables.plrObjectsFolder:WaitForChild("stamina")
 
 	ClientVariables.initialized = true
 	return print("Initialized the client variables")
@@ -246,82 +253,84 @@ ClientVariables.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalR
 -- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 ClientVariables.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
+--[[
 ClientVariables.LocalBindableEvent = Instance.new("BindableEvent")
 ClientVariables.LocalBindableEvent.Name = "LocalBindableEvent"
 ClientVariables.LocalBindableEvent.Parent = game.ReplicatedStorage
-
+]]
 
 -- NOTE*: Perhaps instead of creating a bunch of animations, we make a single animation then when the player needs to animate, load the animId into the animation. Id's would prob be in a table.
 
--- -- *animations (attacker)*
--- ClientVariables.FC_Idle = ClientVariables.plrObjectsFolder:WaitForChild("FC_Idle")
--- ClientVariables.FC_Block = ClientVariables.plrObjectsFolder:WaitForChild("FC_Block")
--- ClientVariables.FC_BlockStart = ClientVariables.plrObjectsFolder:WaitForChild("FC_BlockStart")
--- ClientVariables.FC_LeftHook1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHook1")
--- ClientVariables.FC_RightHook1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHook1")
--- ClientVariables.FC_LeftJab = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftJab")
--- ClientVariables.FC_RightJab = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightJab")
--- ClientVariables.FC_LeftUppercut = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftUppercut")
--- ClientVariables.FC_RightUppercut = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightUppercut")
--- ClientVariables.FC_LeftHaymaker = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHaymaker")
--- ClientVariables.FC_RightHaymaker = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHaymaker")
+-- *animations (attacker)*
+--[[
+ClientVariables.FC_Idle = ClientVariables.plrObjectsFolder:WaitForChild("FC_Idle")
+ClientVariables.FC_Block = ClientVariables.plrObjectsFolder:WaitForChild("FC_Block")
+ClientVariables.FC_BlockStart = ClientVariables.plrObjectsFolder:WaitForChild("FC_BlockStart")
+ClientVariables.FC_LeftHook1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHook1")
+ClientVariables.FC_RightHook1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHook1")
+ClientVariables.FC_LeftJab = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftJab")
+ClientVariables.FC_RightJab = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightJab")
+ClientVariables.FC_LeftUppercut = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftUppercut")
+ClientVariables.FC_RightUppercut = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightUppercut")
+ClientVariables.FC_LeftHaymaker = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHaymaker")
+ClientVariables.FC_RightHaymaker = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHaymaker")
 
--- -- *animations (receiver)*
--- ClientVariables.FC_LeftHook1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHook1RECEIVER")
--- ClientVariables.FC_RightHook1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHook1RECEIVER")
--- ClientVariables.FC_LeftUppercutRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftUppercutRECEIVER")
--- ClientVariables.FC_RightUppercutRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightUppercutRECEIVER")
--- ClientVariables.FC_LeftHaymakerRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHaymakerRECEIVER")
--- ClientVariables.FC_RightHaymakerRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHaymakerRECEIVER")
+-- *animations (receiver)*
+ClientVariables.FC_LeftHook1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHook1RECEIVER")
+ClientVariables.FC_RightHook1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHook1RECEIVER")
+ClientVariables.FC_LeftUppercutRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftUppercutRECEIVER")
+ClientVariables.FC_RightUppercutRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightUppercutRECEIVER")
+ClientVariables.FC_LeftHaymakerRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftHaymakerRECEIVER")
+ClientVariables.FC_RightHaymakerRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightHaymakerRECEIVER")
 
--- -- *animations (paired)*
--- ClientVariables.FC_SyncBlock1L = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1L")
--- ClientVariables.FC_SyncBlock1LRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1LRECEIVER")
--- ClientVariables.FC_SyncBlock1R = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1R")
--- ClientVariables.FC_SyncBlock1RRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1RRECEIVER")
--- ClientVariables.FC_SyncBlock2L = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2L")
--- ClientVariables.FC_SyncBlock2LRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2LRECEIVER")
--- ClientVariables.FC_SyncBlock2R = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2R")
--- ClientVariables.FC_SyncBlock2RRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2RRECEIVER")
--- ClientVariables.FC_SyncBlock3L1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1")
--- ClientVariables.FC_SyncBlock3L1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1RECEIVER")
--- ClientVariables.FC_SyncBlock3R1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1")
--- ClientVariables.FC_SyncBlock3R1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1RECEIVER")
--- ClientVariables.FC_SyncBlock3L2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2")
--- ClientVariables.FC_SyncBlock3L2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2RECEIVER")
--- ClientVariables.FC_SyncBlock3R2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2")
--- ClientVariables.FC_SyncBlock3R2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2RECEIVER")
--- ClientVariables.FC_BracingBlockL = ClientVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockL")
--- ClientVariables.FC_BracingBlockR = ClientVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockR")
--- ClientVariables.FC_LeftParry = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftParry")
--- ClientVariables.FC_LeftParryRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftParryRECEIVER")
--- ClientVariables.FC_RightParry = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightParry")
--- ClientVariables.FC_RightParryRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightParryRECEIVER")
--- ClientVariables.FC_RightCounter1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1")
--- ClientVariables.FC_RightCounter1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1RECEIVER")
--- ClientVariables.FC_LeftCounter1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1")
--- ClientVariables.FC_LeftCounter1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1RECEIVER")
--- ClientVariables.FC_RightCounter2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2")
--- ClientVariables.FC_RightCounter2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2RECEIVER")
--- ClientVariables.FC_LeftCounter2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2")
--- ClientVariables.FC_LeftCounter2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2RECEIVER")
+-- *animations (paired)*
+ClientVariables.FC_SyncBlock1L = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1L")
+ClientVariables.FC_SyncBlock1LRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1LRECEIVER")
+ClientVariables.FC_SyncBlock1R = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1R")
+ClientVariables.FC_SyncBlock1RRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock1RRECEIVER")
+ClientVariables.FC_SyncBlock2L = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2L")
+ClientVariables.FC_SyncBlock2LRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2LRECEIVER")
+ClientVariables.FC_SyncBlock2R = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2R")
+ClientVariables.FC_SyncBlock2RRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock2RRECEIVER")
+ClientVariables.FC_SyncBlock3L1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1")
+ClientVariables.FC_SyncBlock3L1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L1RECEIVER")
+ClientVariables.FC_SyncBlock3R1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1")
+ClientVariables.FC_SyncBlock3R1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R1RECEIVER")
+ClientVariables.FC_SyncBlock3L2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2")
+ClientVariables.FC_SyncBlock3L2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3L2RECEIVER")
+ClientVariables.FC_SyncBlock3R2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2")
+ClientVariables.FC_SyncBlock3R2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_SyncBlock3R2RECEIVER")
+ClientVariables.FC_BracingBlockL = ClientVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockL")
+ClientVariables.FC_BracingBlockR = ClientVariables.plrObjectsFolder:WaitForChild("FC_BracingBlockR")
+ClientVariables.FC_LeftParry = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftParry")
+ClientVariables.FC_LeftParryRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftParryRECEIVER")
+ClientVariables.FC_RightParry = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightParry")
+ClientVariables.FC_RightParryRECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightParryRECEIVER")
+ClientVariables.FC_RightCounter1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1")
+ClientVariables.FC_RightCounter1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter1RECEIVER")
+ClientVariables.FC_LeftCounter1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1")
+ClientVariables.FC_LeftCounter1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter1RECEIVER")
+ClientVariables.FC_RightCounter2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2")
+ClientVariables.FC_RightCounter2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightCounter2RECEIVER")
+ClientVariables.FC_LeftCounter2 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2")
+ClientVariables.FC_LeftCounter2RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftCounter2RECEIVER")
 
 
--- -- *animations (dodges)*
--- ClientVariables.FC_LeftDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftDodge")
--- ClientVariables.FC_RightDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightDodge")
--- ClientVariables.FC_BackDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_BackDodge")
+-- *animations (dodges)*
+ClientVariables.FC_LeftDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_LeftDodge")
+ClientVariables.FC_RightDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_RightDodge")
+ClientVariables.FC_BackDodge = ClientVariables.plrObjectsFolder:WaitForChild("FC_BackDodge")
 
--- -- *animations (dodge attacks)*
--- ClientVariables.FC_LDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1")
--- ClientVariables.FC_LDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1RECEIVER")
--- ClientVariables.FC_RDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1")
--- ClientVariables.FC_RDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1RECEIVER")
--- ClientVariables.FC_BDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1")
--- ClientVariables.FC_BDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1RECEIVER")
-
-ClientVariables.walkingSpeed = 12
-ClientVariables.PairedChainMAX = 3 -- The max value for pairedChain.
+-- *animations (dodge attacks)*
+ClientVariables.FC_LDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1")
+ClientVariables.FC_LDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_LDodgeAttack1RECEIVER")
+ClientVariables.FC_RDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1")
+ClientVariables.FC_RDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_RDodgeAttack1RECEIVER")
+ClientVariables.FC_BDodgeAttack1 = ClientVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1")
+ClientVariables.FC_BDodgeAttack1RECEIVER = ClientVariables.plrObjectsFolder:WaitForChild("FC_BDodgeAttack1RECEIVER")
+]]
+-- ClientVariables.walkingSpeed = 12
+-- ClientVariables.PairedChainMAX = 3 -- The max value for pairedChain.
 
 -- User Input Types
 ClientVariables.AttackInputs = {[Enum.UserInputType.MouseButton1] = true, [Enum.UserInputType.Touch] = true, [Enum.KeyCode.ButtonB] = true} -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
@@ -365,21 +374,21 @@ end)
 end
 
 while not ClientVariables.humanoid do -- will wait until the humanoid exists.
-	wait()
+	task.wait()
 end
 
 -- origins
-ClientVariables.originalWalkSpeed = ClientVariables.humanoid.WalkSpeed
+-- ClientVariables.originalWalkSpeed = ClientVariables.humanoid.WalkSpeed
 ClientVariables.originalCamFocus = ClientVariables.Camera.Focus
 ClientVariables.originalCamSubject = ClientVariables.Camera.CameraSubject
 
-ClientVariables.lockOnSpeed = ClientVariables.originalWalkSpeed / 1.85
+-- ClientVariables.lockOnSpeed = ClientVariables.originalWalkSpeed / 1.85
 
 -- functions
 function ClientVariables.stopAnimations() -- add params? Perhaps we could change function to "changeAnimations" with the first parameter being whether we should stop or play, and add animations in following parameters
 	ClientVariables.FC_IdleTRACK:Stop()
 end
-
+--[[
 function ClientVariables.boolCheck(boolTable)
 	for _, v in pairs(boolTable) do
 		if v == true then
@@ -390,73 +399,73 @@ function ClientVariables.boolCheck(boolTable)
 	return true
 end
 
--- function ClientVariables.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
--- 	if bool == true then
--- 		print("giving back speed")
--- 		-- we allow the player the ability to move
+function ClientVariables.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
+	if bool == true then
+		print("giving back speed")
+		-- we allow the player the ability to move
 
--- 		if ClientVariables.pairedPlaying == false and ClientVariables.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
+		if ClientVariables.pairedPlaying == false and ClientVariables.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
 
--- 			if not ClientVariables.isBlocking then
--- 				ClientVariables.previousWalkSpeed = ClientVariables.lockOnSpeed
--- 			elseif ClientVariables.isBlocking then
--- 				ClientVariables.previousWalkSpeed = ClientVariables.lockOnSpeed / 1.5
--- 			end
+			if not ClientVariables.isBlocking then
+				ClientVariables.previousWalkSpeed = ClientVariables.lockOnSpeed
+			elseif ClientVariables.isBlocking then
+				ClientVariables.previousWalkSpeed = ClientVariables.lockOnSpeed / 1.5
+			end
 
--- 			ClientVariables.humanoid.WalkSpeed = ClientVariables.previousWalkSpeed
--- 		else
--- 			ClientVariables.humanoid.WalkSpeed = ClientVariables.originalWalkSpeed
--- 		end
+			ClientVariables.humanoid.WalkSpeed = ClientVariables.previousWalkSpeed
+		else
+			ClientVariables.humanoid.WalkSpeed = ClientVariables.originalWalkSpeed
+		end
 
--- 	elseif bool == false then
--- 		print("taking away speed")
--- 		-- we take the player's ability to move away
--- 		ClientVariables.humanoid.WalkSpeed = 0
--- 	end
--- end
+	elseif bool == false then
+		print("taking away speed")
+		-- we take the player's ability to move away
+		ClientVariables.humanoid.WalkSpeed = 0
+	end
+end
 
 -- Move this function to the server:
 
--- function ClientVariables.reset() --[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back. ]]--
--- 	ClientVariables.isDodging = false
--- 	ClientVariables.isCountering = false
--- 	ClientVariables.isGettingHit = false
+function ClientVariables.reset() --[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back.
+	ClientVariables.isDodging = false
+	ClientVariables.isCountering = false
+	ClientVariables.isGettingHit = false
 	
--- 	ClientVariables.canFollowUp = false
--- 	ClientVariables.hitDebounce = false
--- 	ClientVariables.attackFrames = false
--- 	ClientVariables.waitingToAttack = false
+	ClientVariables.canFollowUp = false
+	ClientVariables.hitDebounce = false
+	ClientVariables.attackFrames = false
+	ClientVariables.waitingToAttack = false
 	
 	
--- 	if (ClientVariables.attackTrack and not ClientVariables.attackTrack.IsPlaying) or (ClientVariables.pairedAttack and not ClientVariables.pairedAttack.IsPlaying) then
--- 			ClientVariables.attackTrack = nil
--- 			ClientVariables.currentAttack = nil
--- 			ClientVariables.followUpCount = 0
--- 			ClientVariables.comboCounter = 0
--- 			ClientVariables.isAttacking = false
--- 			ClientVariables.canSyncBlock = true
--- 			ClientVariables.pairedPlaying = false
--- 			ClientVariables.pairedChain = 0
--- 	end
--- 	if ClientVariables.currentReceiveAnimTRACK and not ClientVariables.currentReceiveAnimTRACK.IsPlaying then
--- 		ClientVariables.currentReceiveAnimTRACK = nil
--- 		ClientVariables.pairedChain = 0
--- 	end
--- 	-- ClientVariables.animPair = nil
+	if (ClientVariables.attackTrack and not ClientVariables.attackTrack.IsPlaying) or (ClientVariables.pairedAttack and not ClientVariables.pairedAttack.IsPlaying) then
+			ClientVariables.attackTrack = nil
+			ClientVariables.currentAttack = nil
+			ClientVariables.followUpCount = 0
+			ClientVariables.comboCounter = 0
+			ClientVariables.isAttacking = false
+			ClientVariables.canSyncBlock = true
+			ClientVariables.pairedPlaying = false
+			ClientVariables.pairedChain = 0
+	end
+	if ClientVariables.currentReceiveAnimTRACK and not ClientVariables.currentReceiveAnimTRACK.IsPlaying then
+		ClientVariables.currentReceiveAnimTRACK = nil
+		ClientVariables.pairedChain = 0
+	end
+	-- ClientVariables.animPair = nil
 
 
--- 	ClientVariables.SetSpeed(true)
+	ClientVariables.SetSpeed(true)
 
--- end
+end
 
--- function ClientVariables.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. ]]
+function ClientVariables.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. 
 
--- 	ClientVariables.character:WaitForChild("HumanoidRootPart").CFrame = 
--- 	CFrame.new(ClientVariables.enemyChar:WaitForChild("HumanoidRootPart").Position 
--- 				+ ClientVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 
--- 				, ClientVariables.enemyChar.HumanoidRootPart.Position)
+	ClientVariables.character:WaitForChild("HumanoidRootPart").CFrame = 
+	CFrame.new(ClientVariables.enemyChar:WaitForChild("HumanoidRootPart").Position 
+				+ ClientVariables.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 
+				, ClientVariables.enemyChar.HumanoidRootPart.Position)
 
--- end
+end
 
 function ClientVariables.synchedBlock(sentAnimPair, followupCombo) -- Handles the sync block mechanic for both attacker and receiver
 	if ClientVariables.pairedChain <= ClientVariables.PairedChainMAX and ClientVariables.canSyncBlock then
@@ -623,30 +632,30 @@ function ClientVariables.block(bool)
 	end
 end
 
-function ClientVariables.getPublicPlayerInstance(plrName) --[[ Function that will fetch from the server the public playerInstance values in a single table, replicating the playerInstance, so the client can use it for checks. Will return nil if there is no such player in the game.]]
+function ClientVariables.getPublicPlayerInstance(plrName) --[[ Function that will fetch from the server the public playerInstance values in a single table, replicating the playerInstance, so the client can use it for checks. Will return nil if there is no such player in the game.
     -- print(plrName)
 	local protocol = "getPlayerInstance"
     return ClientVariables.GlobalRemoteFunction:InvokeServer(protocol, plrName)
 end
 
-function ClientVariables.setPublicPlayerVariable(var, value) --[[ Function that will change a given public variable to a given value from the local player's playerInstance located on the server. If the variable doesn't exist, then it will create a new public variable. ]]
+function ClientVariables.setPublicPlayerVariable(var, value) --[[ Function that will change a given public variable to a given value from the local player's playerInstance located on the server. If the variable doesn't exist, then it will create a new public variable. 
 	
 	local protocol = "setPlayerVariable"
 	ClientVariables.GlobalRemoteEvent:FireServer(var, protocol, value)
 end
 
-function ClientVariables.setLinearVelocity(velocity, durationOfVelocity) --[[ Function that will set the VectorForce of the player's character to the given Vector3. ]]
+function ClientVariables.setLinearVelocity(velocity, durationOfVelocity) --[[ Function that will set the VectorForce of the player's character to the given Vector3. 
 	local protocol = "SetLinearVelocity"
 	ClientVariables.GlobalRemoteEvent:FireServer(velocity, protocol, durationOfVelocity)
 end
 
-function ClientVariables.setCharacterCFrame(char, newCFrame) --[[ Will set the character position on the server so it's changes will more accurately reflect across the server. ]]
+function ClientVariables.setCharacterCFrame(char, newCFrame) --[[ Will set the character position on the server so it's changes will more accurately reflect across the server. 
 	local HRP = char:WaitForChild("HumanoidRootPart")
 	local protocol = "setCharacterCFrame"
 	ClientVariables.GlobalRemoteEvent:FireServer(char, protocol, newCFrame)
 end
 
---[[
+
 function ClientVariables.Set(givenObject, newValue)
     givenObject = newValue
 	ClientVariables.LocalBindableEvent:Fire(givenObject, newValue)

@@ -6,21 +6,17 @@ local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstan
 
 
 local function getReceiveAnimation(characterInstance, trackData) --[[ Will return the receiver animation that gets played based on what specific attack the enemy did. ]]
-    if trackData.receivingFromType == "AttackStart" then
+    if trackData.receivingType == "Dodge" then
 
-        if trackData.IsADodge then
-
-            if trackData.DodgeDirection == "Right" then
-                return AnimationInstances.FC_RightDodge
-            elseif trackData.DodgeDirection == "Left" then
-                return AnimationInstances.FC_LeftDodge
-            elseif trackData.DodgeDirection == "Back" then
-                return AnimationInstances.FC_BackDodge
-            end
-
+        if trackData.DodgeDirection == "Right" then
+            return AnimationInstances.FC_RightDodge
+        elseif trackData.DodgeDirection == "Left" then
+            return AnimationInstances.FC_LeftDodge
+        elseif trackData.DodgeDirection == "Back" then
+            return AnimationInstances.FC_BackDodge
         end
 
-    elseif trackData.receivingFromType == "bracingBlock" then
+    elseif trackData.receivingType == "bracingBlock" then
 
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             return AnimationInstances.FC_BracingBlockR
@@ -28,30 +24,31 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_BracingBlockL
         end
 
-    elseif trackData.receivingFromType == "syncBlock" then
+    elseif trackData.receivingType == "syncBlock" then
 
         if characterInstance.pairedChain <= characterInstance.PairedChainMAX and characterInstance.canSyncBlock then
             if characterInstance.currentReceiveAnimTRACK and characterInstance.currentReceiveAnimTRACK.IsPlaying then -- runs for the receiver
                 
                 characterInstance.pairedBlock:Stop()
-                if followupCombo == 3 then
+                if characterInstance.followupCombo == 3 then
                     
-                    if sentAnimPair and sentAnimPair[1] == 1 then
-                        if sentAnimPair and sentAnimPair[2] == 1 then
-                            return characterInstance.FC_SyncBlock3L1RECEIVERTRACK
-                        elseif sentAnimPair and sentAnimPair[2] == 2 then
-                            return characterInstance.FC_SyncBlock3L2RECEIVERTRACK
-                        end
+                    -- if characterInstance.sentAnimPair and characterInstance.sentAnimPair[1] == 1 then
+                    --     if characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 1 then
+                    --         return characterInstance.FC_SyncBlock3L1RECEIVERTRACK
+                    --     elseif characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 2 then
+                    --         return characterInstance.FC_SyncBlock3L2RECEIVERTRACK
+                    --     end
                     
-                    elseif sentAnimPair and sentAnimPair[1] == 2 then
+                    -- elseif characterInstance.sentAnimPair and characterInstance.sentAnimPair[1] == 2 then
                         
-                        if sentAnimPair and sentAnimPair[2] == 1 then
-                            return characterInstance.FC_SyncBlock3R1RECEIVERTRACK
-                        elseif sentAnimPair and sentAnimPair[2] == 2 then
-                            return characterInstance.FC_SyncBlock3R2RECEIVERTRACK
-                        end
-                    
-                    end
+                    --     if characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 1 then
+                    --         return characterInstance.FC_SyncBlock3R1RECEIVERTRACK
+                    --     elseif characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 2 then
+                    --         return characterInstance.FC_SyncBlock3R2RECEIVERTRACK
+                    --     end
+                    -- end
+                    print("You pick your lvl 3 receive sync block!")
+                    error("Add a level 3 sync block. This char instance must pick it")
 
                 else
 
@@ -75,7 +72,7 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             end
         end
     
-    elseif trackData.receivingFromType == "Level1" then
+    elseif trackData.receivingType == "Level1" then
 
         if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftHook1.AnimationId or trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftJab.AnimationId then
             return AnimationInstances.FC_LeftHook1RECEIVER
@@ -87,14 +84,14 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
         elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightUppercut.AnimationId then
             return AnimationInstances.FC_RightUppercutRECEIVER
         end
-    elseif trackData.receivingFromType == "Level2" then
+    elseif trackData.receivingType == "Level2" then
 
         if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftHaymaker.AnimationId then
             return AnimationInstances.FC_LeftHaymakerRECEIVER
         elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightHaymaker.AnimationId then
             return AnimationInstances.FC_RightHaymakerReceiver
         end
-    elseif trackData.receivingFromType == "Parry" then
+    elseif trackData.receivingType == "Parry" then
         
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             -- Perform a left parry
@@ -105,14 +102,14 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             warn("ParryR")
             return AnimationInstances.FC_LeftParry
         end
-    elseif trackData.receivingFromType == "gettingParried" then
+    elseif trackData.receivingType == "gettingParried" then
         characterInstance.attackTrack:Stop()
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             return AnimationInstances.FC_RightParryRECEIVER
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
             return AnimationInstances.FC_LeftParryRECEIVER
         end
-    elseif trackData.receivingFromType == "dodgeAttack" then
+    elseif trackData.receivingType == "dodgeAttack" then
 
         -- We will get dodge-attacked
             
@@ -128,7 +125,7 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_BDodgeAttack1RECEIVER
         end
 
-    elseif trackData.receivingFromType == "counterAttack" then
+    elseif trackData.receivingType == "counterAttack" then
         -- We are gonna get countered
             
         -- GameVariables.repositionInFrontOfEnemy()
@@ -229,19 +226,19 @@ local function getDodgeInfo(characterInstance, trackData)
     -- end
 end
 
-local function setupTrackData(receivingFromType, attackerAnim) --[[ Because tracks are played on the client, we kinda just have to replicate the attributes of the track when forming the animation here on the server. ]]
+local function setupTrackData(receivingType, attackerAnim) --[[ Because tracks are played on the client, we kinda just have to replicate the attributes of the track when forming the animation here on the server. ]]
     local trackData = {
-        receivingFromType = receivingFromType,
+        receivingType = receivingType,
         attackerAnim = attackerAnim
         }
 
     return trackData
 end
 
-local function setupReceiveAnimation(characterInstance, receivingFromType, attackerAnim)
-    local trackData = setupTrackData(receivingFromType, attackerAnim)
+local function setupReceiveAnimation(characterInstance, receivingType, attackerAnim)
+    local trackData = setupTrackData(receivingType, attackerAnim)
 
-    if characterInstance.isDodging then
+    if receivingType == "Dodge" then
         local dodgeInfo = getDodgeInfo(characterInstance, trackData)
 
         characterInstance.dodgeLength = dodgeInfo.animTime
@@ -299,11 +296,10 @@ end
 
 function Character_Receive:dodge(attacker_characterInstance) --[[ Dodge away from an incoming strike ]]
     
-    self.characterInstance.isDodging = true
     
     local attackerAnim = attacker_characterInstance.currentAttack
     
-    local trackData = setupReceiveAnimation(self.characterInstance, "AttackStart", attackerAnim)
+    local trackData = setupReceiveAnimation(self.characterInstance, "Dodge", attackerAnim)
     self.characterInstance.iFrames = true
     self.characterInstance:block(false)
     playReceivingTrack(self.characterInstance, trackData)

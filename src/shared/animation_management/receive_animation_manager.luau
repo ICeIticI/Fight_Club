@@ -26,7 +26,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             local enemyCFrame = self.characterInstance.getPublicPlayerInstance(self.characterInstance.player.Name).enemyCFrame
             local linearForce = self.characterInstance.humanoidRootPart.CFrame:VectorToObjectSpace(enemyCFrame.LookVector.Unit * 3)
 
-            self.characterInstance.setLinearVelocity(linearForce, 0.63)
+            self.characterInstance:setLinearVelocity(linearForce, 0.63)
         end
 
         if trackData.AnimationId == self.characterInstance.FC_BracingBlockL.AnimationId or trackData.AnimationId == self.characterInstance.FC_BracingBlockR.AnimationId then

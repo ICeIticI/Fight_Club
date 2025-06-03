@@ -1,7 +1,7 @@
 local Character_Init = {}
 Character_Init.__index = Character_Init
-
 local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
+
 
 
 local function createHitbox(bodyPart) --[[ Function that will create a hitbox of a given part for a given player ]]
@@ -52,6 +52,7 @@ local function disableDefaultTouchDetections(givenChar) --[[ This function will 
 end
 
 function Character_Init.init(charModel)
+	print("hw")
     local characterInstance = {}
 
     -- define public variables here that the Character will have:
@@ -61,7 +62,6 @@ function Character_Init.init(charModel)
 	characterInstance.humanoid = characterInstance.character:WaitForChild("Humanoid")
 	characterInstance.humanoidRootPart = characterInstance.character:WaitForChild("HumanoidRootPart")
     characterInstance.player = game.Players:GetPlayerFromCharacter(charModel) -- If the character is a player, their player object will be stored here.
-
 	characterInstance.plrObjectsFolder = characterInstance.player:WaitForChild(characterInstance.player.Name .. "_GameObjects")
 	
 	characterInstance.previousHealth = characterInstance.humanoid.Health -- This var is used to determine how much damage the character takes.
@@ -125,6 +125,13 @@ function Character_Init.init(charModel)
 	characterInstance.previousWalkSpeed = nil -- will be set when we need to know the last known WalkSpeed of the player
 	characterInstance.originalWalkSpeed = characterInstance.humanoid.WalkSpeed
 	characterInstance.lockOnSpeed = characterInstance.originalWalkSpeed / 1.85
+
+	-- Stamina management:
+	characterInstance.stamina = Instance.new("IntValue") -- the stamina of the player. If they get 0 they wont be able to block or parry
+	characterInstance.stamina.Name = "stamina"
+	characterInstance.stamina.Value = 100
+	characterInstance.stamina.Parent = characterInstance.plrObjectsFolder
+
 
 	local linearVelocity = Instance.new("LinearVelocity")
 	linearVelocity.Enabled = false
@@ -311,13 +318,13 @@ function Character_Init.init(charModel)
 
 
 	function characterInstance:setLinearVelocity(sentVelocity, sentDuration)
-
-		self.humanoidRootPart:WaitForChild("FC_LinearVelocity").VectorVelocity = sentVelocity
+		print(self)
+		characterInstance.humanoidRootPart:WaitForChild("FC_LinearVelocity").VectorVelocity = sentVelocity
 		characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = true
 		task.wait(sentDuration) -- Character will be under said force till duration ends.
 
-		self.humanoidRootPart.FC_LinearVelocity.VectorVelocity = Vector3.zero
-		self.humanoidRootPart.FC_LinearVelocity.Enabled = false
+		characterInstance.humanoidRootPart.FC_LinearVelocity.VectorVelocity = Vector3.zero
+		characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = false
 
 	end
 
@@ -374,7 +381,8 @@ function Character_Init.init(charModel)
 	end
 
 	function characterInstance.manageAnimation(trackData)
-		local AnimType = trackData.animation:GetAttribute("AnimType")
+		print(trackData)
+		local AnimType = trackData.Animation:GetAttribute("AnimType")
 
 		if AnimType and AnimType == 1 then
 			characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
@@ -396,6 +404,7 @@ function Character_Init.init(charModel)
 	end
 
 
+	warn(characterInstance.player)
 	if characterInstance.player ~= nil then
 		characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "createAnimationTracks")
 	else -- not a player. We wanna create animations on server

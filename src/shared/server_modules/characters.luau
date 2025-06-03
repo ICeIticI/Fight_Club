@@ -24,7 +24,7 @@ end
 
 function Characters:GetCharacterObjectByCharacter(char)
     
-    if not char or not char:IsA("Character") then
+    if not char or not char:FindFirstChildWhichIsA("Humanoid") then
         return warn("Provide a character object you idiot")
     end
 
@@ -33,6 +33,8 @@ function Characters:GetCharacterObjectByCharacter(char)
             return charInstance
         end
     end
+
+    warn("No characterInstance found with the given character: ".. char)
     return nil
 end
 

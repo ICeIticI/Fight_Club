@@ -28,6 +28,12 @@ function REs_RFs.init()
             Animation_Centric.setupReceiveAnimation(ClientVariables, data)
         elseif protocol == "playReceiveAnimation" then
             Animation_Centric.playReceiveAnimation(ClientVariables)
+        elseif protocol == "playBlockStartAnimation" then
+            Animation_Centric.playBlockStartAnimation(ClientVariables)
+        elseif protocol == "playBlockAnimation" then
+            Animation_Centric.playBlockAnimation(ClientVariables)
+        elseif protocol == "stopBlockingAnimation" then
+            Animation_Centric.stopBlocking(ClientVariables)
         end
     
         --[[ ^ Might put the animation events into the animation_centric script 

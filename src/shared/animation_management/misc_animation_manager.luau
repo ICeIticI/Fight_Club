@@ -2,73 +2,118 @@ local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstan
 
 local Misc_Animation_Management = {}
 
--- function Misc_Animation_Management.manage(moduleTbl, track)
---     -- Function to handle animation playing state changes
---     local function onAnimationPlaying()
---         if track.IsPlaying then
---             if track.Animation.AnimationId == moduleTbl.FC_LeftParry.AnimationId or track.Animation.AnimationId == moduleTbl.FC_RightParry.AnimationId then
---                 -- Parry animation started playing
---                 moduleTbl.isCountering = true
---                 moduleTbl.comboCounter = 3 -- Player can do a haymaker attack following a parry
---             end
---         elseif not track.IsPlaying then
---             if track.Animation.AnimationId == moduleTbl.FC_BlockStart.AnimationId and track.TimePosition == track.Length then
---                 -- Play the looping version of the blocking animation when block start animation ends
---                 -- warn("play loop")
--- 				moduleTbl.FC_BlockTRACK:Play()
---             elseif track.Animation.AnimationId == moduleTbl.FC_LeftParry.AnimationId or track.Animation.AnimationId == moduleTbl.FC_RightParry.AnimationId then
---                 -- Parry animation stopped playing
---                 moduleTbl.isCountering = false
---                 task.delay(0.51, function()
---                     moduleTbl.comboCounter = 0
---                     print("Combo counter is now 0")
---                 end)
---             elseif track.Animation.AnimationId == moduleTbl.FC_LeftParryRECEIVER.AnimationId or track.Animation.AnimationId == moduleTbl.FC_RightParryRECEIVER.AnimationId then
---                 -- Parry receiver animation stopped playing
---                 moduleTbl.canFollowUp = false
---                 task.wait(0.4)
---                 moduleTbl.comboCounter = 0 -- Reset combo counter to prevent continuing the attack chain
---                 moduleTbl.isAttacking = false
---                 moduleTbl.hitDebounce = false
---             end
+--[[
+function Misc_Animation_Management.manage(moduleTbl, track)
+    -- Function to handle animation playing state changes
+    local function onAnimationPlaying()
+        if track.IsPlaying then
+            if track.Animation.AnimationId == moduleTbl.FC_LeftParry.AnimationId or track.Animation.AnimationId == moduleTbl.FC_RightParry.AnimationId then
+                -- Parry animation started playing
+                moduleTbl.isCountering = true
+                moduleTbl.comboCounter = 3 -- Player can do a haymaker attack following a parry
+            end
+        elseif not track.IsPlaying then
+            if track.Animation.AnimationId == moduleTbl.FC_BlockStart.AnimationId and track.TimePosition == track.Length then
+                -- Play the looping version of the blocking animation when block start animation ends
+                -- warn("play loop")
+				moduleTbl.FC_BlockTRACK:Play()
+            elseif track.Animation.AnimationId == moduleTbl.FC_LeftParry.AnimationId or track.Animation.AnimationId == moduleTbl.FC_RightParry.AnimationId then
+                -- Parry animation stopped playing
+                moduleTbl.isCountering = false
+                task.delay(0.51, function()
+                    moduleTbl.comboCounter = 0
+                    print("Combo counter is now 0")
+                end)
+            elseif track.Animation.AnimationId == moduleTbl.FC_LeftParryRECEIVER.AnimationId or track.Animation.AnimationId == moduleTbl.FC_RightParryRECEIVER.AnimationId then
+                -- Parry receiver animation stopped playing
+                moduleTbl.canFollowUp = false
+                task.wait(0.4)
+                moduleTbl.comboCounter = 0 -- Reset combo counter to prevent continuing the attack chain
+                moduleTbl.isAttacking = false
+                moduleTbl.hitDebounce = false
+            end
 
---             moduleTbl.isAttacking = false
---             moduleTbl.hitDebounce = false
---         end
+            moduleTbl.isAttacking = false
+            moduleTbl.hitDebounce = false
+        end
 
---         if track.Animation.AnimationId == moduleTbl.FC_Block.AnimationId then
---             if track.IsPlaying then
---                 task.wait(0.5) -- only add a wait for sync blocks if they start blocking. If they let go, then no sync block should happen as soon as the guard drops
---             end
+        if track.Animation.AnimationId == moduleTbl.FC_Block.AnimationId then
+            if track.IsPlaying then
+                task.wait(0.5) -- only add a wait for sync blocks if they start blocking. If they let go, then no sync block should happen as soon as the guard drops
+            end
 
---             moduleTbl.Protocol = "HoldingBlock"
---             moduleTbl.GlobalRemoteEvent:FireServer(moduleTbl.enemyChar, moduleTbl.Protocol, nil, nil, moduleTbl.isBlocking, nil, false)
---         end
---     end
+            moduleTbl.Protocol = "HoldingBlock"
+            moduleTbl.GlobalRemoteEvent:FireServer(moduleTbl.enemyChar, moduleTbl.Protocol, nil, nil, moduleTbl.isBlocking, nil, false)
+        end
+    end
 
---     -- Function to handle blocking animation marker
---     local function onIsBlocking()
---         moduleTbl.isBlocking = true
---     end
+    -- Function to handle blocking animation marker
+    local function onIsBlocking()
+        moduleTbl.isBlocking = true
+    end
 
---     -- Connect signals to appropriate functions
---     local MiscIsPlayingCONNECT = track:GetPropertyChangedSignal("IsPlaying"):Connect(onAnimationPlaying)
---     local MiscIsBlockingConnect = track:GetMarkerReachedSignal("isBlocking"):Connect(onIsBlocking)
+    -- Connect signals to appropriate functions
+    local MiscIsPlayingCONNECT = track:GetPropertyChangedSignal("IsPlaying"):Connect(onAnimationPlaying)
+    local MiscIsBlockingConnect = track:GetMarkerReachedSignal("isBlocking"):Connect(onIsBlocking)
 
---     -- Store connections in a table for easy management
---     local MiscConnects = {MiscIsPlayingCONNECT, MiscIsBlockingConnect}
+    -- Store connections in a table for easy management
+    local MiscConnects = {MiscIsPlayingCONNECT, MiscIsBlockingConnect}
 
---     -- Disconnect signals when the humanoid dies
---     moduleTbl.humanoid.Died:Connect(function()
---         for _, connection in pairs(MiscConnects) do
---             connection:Disconnect()
---         end
---     end)
--- end
+    -- Disconnect signals when the humanoid dies
+    moduleTbl.humanoid.Died:Connect(function()
+        for _, connection in pairs(MiscConnects) do
+            connection:Disconnect()
+        end
+    end)
+end
+]]
 
 local function runOnIsBlocking(characterInstance) --[[ Simulates when the isBlocking animation marker gets reached. ]]
     characterInstance.isBlocking = true
 end
+
+-- Stamina management:
+
+local drainRate = 1 -- how much stamina gets drained per wait()
+local regenRate = 1 -- how much stamina gets regenerated per wait()
+
+local blockCost = 10
+local isRegening = false -- Gets set to true when the character's stamina is regenerating, so it doesn't stack
+
+local function regenStamina(characterInstance) --[[ Will regenerate stamina, if not already. ]]
+    if not isRegening then
+        while (not characterInstance.BlockStartAnimPlaying and not characterInstance.holdingBlock) and characterInstance.stamina.Value < 100 do
+            isRegening = true
+            characterInstance.stamina.Value += regenRate
+            -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, self.characterInstance.stamina/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
+            task.wait()
+        end
+        isRegening = false
+    end
+end
+
+local function drainStamina(characterInstance, trackData) --[[ Function that will drain stamina, depending on whether or not they're blocking in some way. ]]
+    if trackData.AnimationId == AnimationInstances.FC_BlockStart.AnimationId then
+        -- On block start, we just take a one-time chunk of stamina
+        if characterInstance.stamina.Value - blockCost >= 0 then -- If a block occurs when they have less then 10 stamina, then the size of the green bar will not disappear but keep going
+            characterInstance.stamina.Value -= blockCost
+        else
+            characterInstance.stamina.Value = 0
+        end
+
+    elseif trackData.AnimationId == AnimationInstances.FC_Block.AnimationId then
+        -- On holding block, we continuously drain their stamina until they stop blocking
+        while characterInstance.holdingBlock.IsPlaying do
+            characterInstance.stamina.Value -= drainRate
+            -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, characterInstance.stamina.Value/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
+            if characterInstance.stamina.Value <= 0 then
+                characterInstance:block(false)
+            end
+            task.wait()
+        end
+    end
+end
+
 
 function Misc_Animation_Management:runOnIsPlaying(trackData)
 
@@ -82,8 +127,9 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             end)
         end
 
-        task.delay(trackData:GetAttribute("Length"), function()
+        task.delay(trackData.Animation:GetAttribute("Length"), function()
             if trackData.IsPlaying then
+                print("Hi")
                 trackData.IsPlaying = false
                 trackData.Completed = true -- Represents whether or not an animation track has completely played through and finished.
                 self.characterInstance.misc_animation_manager:runOnIsPlaying(trackData)
@@ -95,14 +141,40 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             -- Parry animation started playing
             self.characterInstance.isCountering = true
             self.characterInstance.comboCounter = 3 -- Player can do a haymaker attack following a parry
+        
+        elseif trackData.Animation.AnimationId == AnimationInstances.FC_BlockStart.AnimationId then
+            drainStamina(self.characterInstance, trackData)
+
+        elseif trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId then
+            self.characterInstance.holdingBlock = true
+            
+            drainStamina(self.characterInstance, trackData)
+            
+            -- while trackData.IsPlaying do
+            --     self.characterInstance.stamina.Value -= drainRate
+            --     -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, self.characterInstance.stamina/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
+            --     if self.characterInstance.stamina <= 0 then
+            --         self.characterInstance.block(false)
+            --     end
+            --     task.wait()
+            -- end
         end
         
     elseif not trackData.IsPlaying then
-
+        print(trackData.Animation)
         if trackData.Animation.AnimationId == AnimationInstances.FC_BlockStart.AnimationId and trackData.Completed then
+
             -- Play the looping version of the blocking animation when block start animation ends
             -- warn("play loop")
-            AnimationInstances.FC_BlockTRACK:Play()
+            -- AnimationInstances.FC_BlockTRACK:Play()
+            if trackData.Completed then
+                print("completed block")
+                self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "playBlockAnimation")
+                self.BlockStartAnimPlaying = false
+            end
+
+            regenStamina(self.characterInstance)
+
         elseif trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
             -- Parry animation stopped playing
             self.characterInstance.isCountering = false
@@ -128,6 +200,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.comboCounter = 0 -- Reset combo counter to prevent continuing the attack chain
             self.characterInstance.isAttacking = false
             self.characterInstance.hitDebounce = false
+        
         end
 
         self.characterInstance.isAttacking = false
@@ -138,9 +211,14 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
         if trackData.IsPlaying then
             task.wait(0.5) -- only add a wait for sync blocks if they start blocking. If they let go, then no sync block should happen as soon as the guard drops
         end
-
+        
+        self.characterInstance.holdingBlock = false
+        
         self.characterInstance.Protocol = "HoldingBlock"
         self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, nil, nil, self.characterInstance.isBlocking, nil, false)
+    
+        regenStamina(self.characterInstance)
+    
     end
 end
 

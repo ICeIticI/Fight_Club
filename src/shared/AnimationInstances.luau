@@ -421,39 +421,53 @@ AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("AnimDirection", "Back"
 
 -- Temporarly creating tracks to store the length of said track for management:
 
-local temporaryAnimationController = Instance.new("AnimationController") -- for temporarily loading animation tracks to return a length of the track. Needed to parent the animator.
-local temporaryAnimator = Instance.new("Animator") -- Needed to load the tempoary animation tracks.
-temporaryAnimator.parent = temporaryAnimationController
+-- local temporaryAnimationController = Instance.new("AnimationController") -- for temporarily loading animation tracks to return a length of the track. Needed to parent the animator.
+local temporaryAnimator = game.Workspace.TestDummy:WaitForChild("Humanoid").charAnimator -- Needed to load the tempoary animation tracks.
+-- temporaryAnimator.Parent = temporaryAnimationController
 
 for _, animation in pairs(AnimationInstances) do
+    task.wait()
+
     local temporaryTrack = temporaryAnimator:LoadAnimation(animation)
-
     if temporaryTrack.Looped then continue end
+    while temporaryTrack.Length == 0 do task.wait() end -- When an animation track isnt fully loaded, its Length property will be 0. Plus we need the length anyways
 
-    animation:SetAttribute("Length", temporaryTrack.Length)
-    local temporaryStartOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
-        animation:SetAttribute("TimeUntilStartOfAttack", temporaryTrack.TimePosition)
-    end)
-    local temporaryEndOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("EndOfAttack"):Connect(function()
-        animation:SetAttribute("TimeUntilEndOfAttack", temporaryTrack.TimePosition)
-        temporaryTrack:Stop()
-    end)
-    local temporaryIsBlockingConnection = temporaryTrack:GetMarkerReachedSignal("isBlocking"):Connect(function()
-        animation:SetAttribute("TimeUntilIsBlocking", temporaryTrack.TimePosition)
-    end)
+    -- Set animation priority based on attributes
+    if temporaryTrack.Animation:GetAttribute("AnimType") and not temporaryTrack.Animation:GetAttribute("Paired") then
+        temporaryTrack.Priority = Enum.AnimationPriority.Action
+    elseif temporaryTrack.Animation:GetAttribute("Paired") then
+        temporaryTrack.Priority = Enum.AnimationPriority.Action2
+    end
+    warn(temporaryTrack, temporaryTrack.Priority)
+
+
+    print(temporaryTrack.Length)
+    task.spawn(function()
+        
+        animation:SetAttribute("Length", temporaryTrack.Length)
+        local temporaryStartOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
+            animation:SetAttribute("TimeUntilStartOfAttack", temporaryTrack.TimePosition)
+        end)
+        local temporaryEndOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("EndOfAttack"):Connect(function()
+            animation:SetAttribute("TimeUntilEndOfAttack", temporaryTrack.TimePosition)
+            temporaryTrack:Stop()
+        end)
+        local temporaryIsBlockingConnection = temporaryTrack:GetMarkerReachedSignal("isBlocking"):Connect(function()
+            animation:SetAttribute("TimeUntilIsBlocking", temporaryTrack.TimePosition)
+        end)
+        temporaryTrack:Play()
+        temporaryTrack.Stopped:Wait()
+        temporaryStartOfAttackConnection:Disconnect()
+        temporaryEndOfAttackConnection:Disconnect()
+        temporaryIsBlockingConnection:Disconnect()
+        temporaryTrack:Destroy()
     
-    animation:Play()
-    animation.Stopped:Wait()
-    temporaryStartOfAttackConnection:Disconnect()
-    temporaryEndOfAttackConnection:Disconnect()
-    temporaryIsBlockingConnection:Disconnect()
-    temporaryTrack:Destroy()
-
-    temporaryStartOfAttackConnection = nil
-    temporaryEndOfAttackConnection = nil
-    temporaryIsBlockingConnection = nil
-    temporaryTrack = nil
-
+        temporaryStartOfAttackConnection = nil
+        temporaryEndOfAttackConnection = nil
+        temporaryIsBlockingConnection = nil
+        temporaryTrack = nil
+    end)
 end
+print("Animations done loading!")
 
 return AnimationInstances

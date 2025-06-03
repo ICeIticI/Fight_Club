@@ -4,6 +4,7 @@ Character_Attack.__index = Character_Attack
 
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
 
+local attackType -- When we call an attack function (such as :level1()), we will set this variable to whatever attack that was, such as "level1". This will change with each attack. Then we will set it to nil after detection so it doesn't trip an unwanted attack in the future.
 
 local function getAnimation(characterInstance, trackData, attacker_characterInstance) --[[ Returns a randomly-chosen animation with the given data about what our animation is planned to be (trackData). Level 3 attacks may need the enemy's characterInstance to see what attack they're doing before getting our own ]]
     if trackData.attackLvl == 1 then
@@ -33,11 +34,14 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
 
         if not attacker_characterInstance then return warn("You forgot to add the enemy's character instance to this function call") end
         
-        if trackData.DodgeAttack_Attribute then
+        
+        if attackType == "DodgeAttack" then
+            attackType = nil
 
             return characterInstance.randomAnimation(characterInstance.dodgeAttacksTable, "DodgeAttack", true, "AnimDirection", characterInstance.dodgeAnimation:GetAttribute("AnimDirection"))
 
-        elseif trackData.Counter_Attribute then
+        elseif attackType == "CounterAttack" then
+            attackType = nil
         
             if attacker_characterInstance.currentAttack:GetAttribute("AnimDirection") == "Left" then
                 return characterInstance.randomAnimation(characterInstance.AnimationInstances, "AnimDirection", "Left", "Counter", true)
@@ -47,10 +51,72 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
 
             return warn("No left or right counterattack track found!") -- If we get to this point, then something went wrong
         
-        elseif 
-        end
+        elseif attackType == "SyncBlock" then -- For sync blocks, may need to change this in the future when we start using pairedPlaying more.
+            attackType = nil
 
+            if characterInstance.comboCounter and characterInstance.comboCounter > 1 then
+
+                if characterInstance.pairedAttack and characterInstance.pairedAttack.IsPlaying then -- runs for the attacker
+                        
+                    characterInstance.pairedAttack:Stop()
+                    if characterInstance.comboCounter == 3 then
+
+                        -- This should be managed by the enemyInstance so they can have a lvl 3 receive attack of their own custom.
+                        -- if self.characterInstance.animPair and self.characterInstance.animPair[1] == 1 then
+                        --     if self.characterInstance.animPair and self.characterInstance.animPair[2] == 1 then
+                        --         self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock3L1TRACK
+                        --     elseif self.characterInstance.animPair and self.characterInstance.animPair[2] == 2 then
+                        --         self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock3L2TRACK
+                        --     end
+                        -- elseif self.characterInstance.animPair and self.characterInstance.animPair[1] == 2 then
+                        --     if self.characterInstance.animPair and self.characterInstance.animPair[2] == 1 then
+                        --         self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock3R1TRACK
+                        --     elseif self.characterInstance.animPair and self.characterInstance.animPair[2] == 2 then
+                        --         self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock3R2TRACK
+                        --     end
+                        -- end
+                        print("The enemy will pick their lvl 3 receive sync block.")
+                        error("Add a level 3 sync block. Enemy must pick it")
+                        
+                    else
+
+                        if characterInstance.pairedAttack == AnimationInstances.FC_SyncBlock1L then
+                            return AnimationInstances.FC_SyncBlock1R
+                        elseif characterInstance.pairedAttack == AnimationInstances.FC_SyncBlock1R then
+                            return AnimationInstances.FC_SyncBlock1L
+                        elseif characterInstance.pairedAttack == AnimationInstances.FC_SyncBlock2L then
+                            return AnimationInstances.FC_SyncBlock2R
+                        elseif characterInstance.pairedAttack == AnimationInstances.FC_SyncBlock2R then
+                            return AnimationInstances.FC_SyncBlock2L
+                        end
+                    end
+                end
+
+            else -- for non-followup attacks
+
+                if (characterInstance.sentAnimPair and characterInstance.sentAnimPair[1] == 1) or (characterInstance.animPair and characterInstance.animPair[1] == 1) then
+                    if (characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then
+                        return AnimationInstances.FC_SyncBlock1L
+                        -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock1LRECEIVER
+                    elseif (characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 2) or (characterInstance.animPair and characterInstance.animPair[2] == 2) then
+                        return AnimationInstances.FC_SyncBlock2L
+                        -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock2LRECEIVER
+                    end
+                
+                elseif (characterInstance.sentAnimPair and characterInstance.sentAnimPair[1] == 2) or (characterInstance.animPair and characterInstance.animPair[1] == 2) then
+                    if (characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then
+                        return AnimationInstances.FC_SyncBlock1R
+                        -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock1RRECEIVER
+                    elseif (characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 2) or (characterInstance.animPair and characterInstance.animPair[2] == 2) then
+                        return AnimationInstances.FC_SyncBlock2R
+                        -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock2RRECEIVER
+                    end
+                end
+            end
+        end
     end
+    
+    return warn("No Animation found with the given data: " .. tostring(characterInstance) .." , " ..tostring(trackData) .. " , " .. tostring(attacker_characterInstance))
 end
 
 local function setupTrackData(attackLvl) --[[ Because tracks are played on the client, we kinda just have to replicate the attributes of the track when forming the animation here on the server. ]]
@@ -94,7 +160,8 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
     -- Whether or not we are starting a new series of attacks (such as jabs, or hooks) or not, we want our attackType to be what's already stored.
     trackData.attackType = characterInstance.attackType
     trackData.Animation = getAnimation(characterInstance, trackData, enemy_characterInstance)
-
+    trackData.AnimationId = trackData.Animation.AnimationId
+    print(trackData.Animation)
     if attackLvl == 3 then -- beyond the lvl 1's and 2's:
 
         trackData.Counter_Attribute = characterInstance.isCountering -- When true, we are countering:
@@ -158,70 +225,12 @@ function Character_Attack:level3() --[[ Throw a level 3 attack, or in other word
     print("lvl 3 attack")
 end
 
-function Character_Attack:syncBlock(attacker_characterInstance, comboCounter) --[[ Attack an enemy holding their block, resulting in a syncronization of clashing attacks & blocks. ]]
+function Character_Attack:syncBlock(attacker_characterInstance) --[[ Attack an enemy holding their block, resulting in a syncronization of clashing attacks & blocks. ]]
     
+    attackType = "SyncBlock"
+
     if self.characterInstance.pairedChain <= self.characterInstance.PairedChainMAX and self.characterInstance.canSyncBlock then
         
-        if comboCounter and comboCounter > 1 then
-
-            if self.characterInstance.pairedAttack and self.characterInstance.pairedAttack.IsPlaying then -- runs for the attacker
-                    
-                self.characterInstance.pairedAttack:Stop()
-                if comboCounter == 3 then
-
-                    -- This should be managed by the enemyInstance so they can have a lvl 3 receive attack of their own custom.
-                    print("Enemy you pick your lvl 3 receive sync block!")
-                    -- if self.characterInstance.animPair and self.characterInstance.animPair[1] == 1 then
-                    --     if self.characterInstance.animPair and self.characterInstance.animPair[2] == 1 then
-                    --         self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock3L1TRACK
-                    --     elseif self.characterInstance.animPair and self.characterInstance.animPair[2] == 2 then
-                    --         self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock3L2TRACK
-                    --     end
-                    -- elseif self.characterInstance.animPair and self.characterInstance.animPair[1] == 2 then
-                    --     if self.characterInstance.animPair and self.characterInstance.animPair[2] == 1 then
-                    --         self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock3R1TRACK
-                    --     elseif self.characterInstance.animPair and self.characterInstance.animPair[2] == 2 then
-                    --         self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock3R2TRACK
-                    --     end
-                    -- end
-                    
-                else
-
-                    if self.characterInstance.pairedAttack == self.characterInstance.FC_SyncBlock1LTRACK then
-                        self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock1RTRACK
-                    elseif self.characterInstance.pairedAttack == self.characterInstance.FC_SyncBlock1RTRACK then
-                        self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock1LTRACK
-                    elseif self.characterInstance.pairedAttack == self.characterInstance.FC_SyncBlock2LTRACK then
-                        self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock2RTRACK
-                    elseif self.characterInstance.pairedAttack == self.characterInstance.FC_SyncBlock2RTRACK then
-                        self.characterInstance.pairedAttack = self.characterInstance.FC_SyncBlock2LTRACK
-                    end
-                end
-            end
-
-        else -- for non-followup attacks
-
-            if (self.characterInstance.sentAnimPair and self.characterInstance.sentAnimPair[1] == 1) or (ClientVariables.animPair and ClientVariables.animPair[1] == 1) then
-				if (self.characterInstance.sentAnimPair and self.characterInstance.sentAnimPair[2] == 1) or (ClientVariables.animPair and ClientVariables.animPair[2] == 1) then
-					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock1LTRACK
-					ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock1LRECEIVERTRACK
-				elseif (self.characterInstance.sentAnimPair and self.characterInstance.sentAnimPair[2] == 2) or (ClientVariables.animPair and ClientVariables.animPair[2] == 2) then
-					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock2LTRACK
-					ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock2LRECEIVERTRACK
-				end
-			
-			elseif (self.characterInstance.sentAnimPair and self.characterInstance.sentAnimPair[1] == 2) or (ClientVariables.animPair and ClientVariables.animPair[1] == 2) then
-				if (self.characterInstance.sentAnimPair and self.characterInstance.sentAnimPair[2] == 1) or (ClientVariables.animPair and ClientVariables.animPair[2] == 1) then
-					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock1RTRACK
-					ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock1RRECEIVERTRACK
-				elseif (self.characterInstance.sentAnimPair and self.characterInstance.sentAnimPair[2] == 2) or (ClientVariables.animPair and ClientVariables.animPair[2] == 2) then
-					ClientVariables.pairedAttack = ClientVariables.FC_SyncBlock2RTRACK
-					ClientVariables.pairedBlock = ClientVariables.FC_SyncBlock2RRECEIVERTRACK
-				end
-            end
-        end
-
-
         self.characterInstance.pairedPlaying = true
         self.characterInstance.SetSpeed(false)
         self.characterInstance.currentAttack = self.characterInstance.pairedAttack.Animation
@@ -252,8 +261,6 @@ function Character_Attack:syncBlock(attacker_characterInstance, comboCounter) --
             repositionTween:Play()
         end
 
-
-
         local trackData = setupAttackAnimation(3, self.characterInstance, attacker_characterInstance)
         playAttackAnimation(self.characterInstance, trackData)
     end
@@ -265,11 +272,13 @@ function Character_Attack:counterAttack(attacker_characterInstance) --[[ Perform
     
     -- local attackerAnim = attacker_characterInstance.currentAttack
 
+    attackType = "CounterAttack"
+
     self.characterInstance.isCountering = true
-    attacker_characterInstance.currentReceiveAnimTRACK = nil -- So they don't play their previous animation on accident for the counter receive.
+    -- attacker_characterInstance.currentReceiveAnimTRACK = nil -- So they don't play their previous animation on accident for the counter receive.
     
     self.characterInstance.repositionInFrontOfEnemy()
-    local trackData = setupAttackAnimation(3, self.characterInstance)
+    local trackData = setupAttackAnimation(3, self.characterInstance, attacker_characterInstance)
     playAttackAnimation(self.characterInstance, trackData)
 
     print("counter attack")
@@ -286,13 +295,15 @@ end
 
 function Character_Attack:dodgeAttack(attacker_characterInstance) --[[ Attempt to evade the attack of the enemy, leaving them open. ]]
     
+    attackType = "DodgeAttack"
+
     local trackData = setupAttackAnimation(3, self.characterInstance, attacker_characterInstance)
 
-    if trackData.Animation.AnimationId ~= self.characterInstance.FC_LDodgeAttack1.AnimationId then
+    if trackData.Animation.AnimationId ~= self.AnimationInstances.FC_LDodgeAttack1.AnimationId then
         self.characterInstance.repositionInFrontOfEnemy() -- We dont reposition for left dodge attack cause it makes it not as cool for some reason
     end
     
-    if trackData.Animation.AnimationId == self.characterInstance.FC_LDodgeAttack1.AnimationId then
+    if trackData.Animation.AnimationId == self.AnimationInstances.FC_LDodgeAttack1.AnimationId then
         
         -- self.characterInstance.setCharacterCFrame(self.characterInstance.character, self.characterInstance.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0))
         self.characterInstance.humanoidRootPart.CFrame = self.characterInstance.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0)
@@ -302,7 +313,7 @@ function Character_Attack:dodgeAttack(attacker_characterInstance) --[[ Attempt t
         local travelTime = 0.14/0.60
         self.characterInstance:setLinearVelocity(Vector3.new(moveDistanceX/travelTime, 0, moveDistanceZ/travelTime), travelTime)
     
-    elseif trackData.Animation.AnimationId == self.characterInstance.FC_RDodgeAttack1.AnimationId then
+    elseif trackData.Animation.AnimationId == AnimationInstances.FC_RDodgeAttack1.AnimationId then
     
         local moveDistance = 2.5
         local travelTime = 0.26/0.60

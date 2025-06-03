@@ -3,15 +3,15 @@
 * It will rely on module scripts with different purposes to function when called upon.
 ]]
 
-local Players = game.Players
+local Players = game:GetService("Players")
 
 -- Modules
 local ServerInit = require(game.ReplicatedStorage.Shared.server_modules.ServerInit)
 -- local ServerEvents = require(game.ReplicatedStorage.Shared.ServerEvents)
 -- local RagdollSystem = require(game.ReplicatedStorage.Shared.RagdollSystem)
 
-local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
-local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
+-- local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
+-- local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
 -- New modules:
 
@@ -33,7 +33,8 @@ require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check
 --     return ServerEvents.RFInvokes(sendingPlayer, Protocol, object1)
 -- end
 
-Players.PlayerAdded:Connect(function(player)
+local function setupPlayer(player)
+    warn("plr")
     ServerInit.InitializePlayer(player) -- initializes player's public objects
     
     -- local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()
@@ -63,4 +64,11 @@ Players.PlayerAdded:Connect(function(player)
             characterInstance:erase()
         end
     end)
+end
+
+for _, player in pairs(game.Players:GetChildren()) do
+    setupPlayer(player)
+end
+Players.PlayerAdded:Connect(function(player)
+    setupPlayer(player)
 end)

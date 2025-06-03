@@ -47,10 +47,9 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                                 
 
             if characterInstance.raycastResult and not characterInstance.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") and characterInstance.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto (thats not the tavern keeper).
-                
+            
             characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
             characterInstance.enemyHumanoid = characterInstance.enemyChar:FindFirstChild("Humanoid")
-                characterInstance.enemyCharInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
                 characterInstance.lockOnDebounce.Value = not characterInstance.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
                 
                 
@@ -105,7 +104,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
         and (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
         and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
-
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             -- before attacking, check if we're currently dodging so we can do a dodge attack:
             if characterInstance.isDodging == true then
@@ -150,7 +148,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                         end
                     end
 
-                    characterInstance:basicAttack(characterInstance.comboCounter, enemyInstance)
+                    characterInstance:basicAttack(enemyInstance)
                 elseif characterInstance.canFollowUp then
                     characterInstance.waitingToAttack = true
                     characterInstance.didFollowUp = true -- when true, the character did a followup attack
@@ -165,7 +163,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                             characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, nil, characterObject.animPair, characterObject.pairedChain, false)
                             ]]
                         end
-                        characterInstance:basicAttack(characterInstance.comboCounter, enemyInstance) -- followup attack
+                        characterInstance:basicAttack(enemyInstance) -- followup attack
                         print(characterInstance.followUpCount)
                     end
                     characterInstance.waitingToAttack = false
@@ -176,6 +174,16 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
         
     elseif BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
         -- print("block input")
+        -- If the player is holding the block button, we store that as a variable:
+        characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
+        
+        if characterInstance.lockOnDebounce.Value 
+        and characterInstance.boolCheck({characterInstance.isAttacking, characterInstance.isBlocking, characterInstance.isCountering}) 
+        and not characterInstance.pairedPlaying
+        and characterInstance.stamina and characterInstance.stamina.Value > 0 then
+            print("yoyoyoyoyo")
+            characterInstance:block(true)
+        end
 
     -- elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
 

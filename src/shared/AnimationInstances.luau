@@ -429,8 +429,12 @@ for _, animation in pairs(AnimationInstances) do
     task.wait()
 
     local temporaryTrack = temporaryAnimator:LoadAnimation(animation)
-    if temporaryTrack.Looped then continue end
     while temporaryTrack.Length == 0 do task.wait() end -- When an animation track isnt fully loaded, its Length property will be 0. Plus we need the length anyways
+    if temporaryTrack.Looped then 
+        animation:SetAttribute("Looped", true)
+        warn(temporaryTrack.Animation.Name .. " got skipped since its looped")
+        continue 
+    end
 
     -- Set animation priority based on attributes
     if temporaryTrack.Animation:GetAttribute("AnimType") and not temporaryTrack.Animation:GetAttribute("Paired") then
@@ -438,7 +442,7 @@ for _, animation in pairs(AnimationInstances) do
     elseif temporaryTrack.Animation:GetAttribute("Paired") then
         temporaryTrack.Priority = Enum.AnimationPriority.Action2
     end
-    warn(temporaryTrack, temporaryTrack.Priority)
+    print(temporaryTrack, temporaryTrack.Priority)
 
 
     print(temporaryTrack.Length)
@@ -454,6 +458,7 @@ for _, animation in pairs(AnimationInstances) do
         end)
         local temporaryIsBlockingConnection = temporaryTrack:GetMarkerReachedSignal("isBlocking"):Connect(function()
             animation:SetAttribute("TimeUntilIsBlocking", temporaryTrack.TimePosition)
+            warn(animation.Name .. " has the isBlocking attri")
         end)
         temporaryTrack:Play()
         temporaryTrack.Stopped:Wait()

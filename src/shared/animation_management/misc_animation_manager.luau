@@ -80,7 +80,7 @@ local regenRate = 1 -- how much stamina gets regenerated per wait()
 local blockCost = 10
 local isRegening = false -- Gets set to true when the character's stamina is regenerating, so it doesn't stack
 
-local function regenStamina(characterInstance) --[[ Will regenerate stamina, if not already. ]]
+local function regenStamina(characterInstance) --[[ Will regenerate stamina, if not doing so already. ]]
     if not isRegening then
         while (not characterInstance.BlockStartAnimPlaying and not characterInstance.holdingBlock) and characterInstance.stamina.Value < 100 do
             isRegening = true
@@ -103,38 +103,42 @@ local function drainStamina(characterInstance, trackData) --[[ Function that wil
 
     elseif trackData.AnimationId == AnimationInstances.FC_Block.AnimationId then
         -- On holding block, we continuously drain their stamina until they stop blocking
-        while characterInstance.holdingBlock.IsPlaying do
+        while characterInstance.holdingBlock and characterInstance.stamina.Value <= 0 do
             characterInstance.stamina.Value -= drainRate
-            -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, characterInstance.stamina.Value/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
-            if characterInstance.stamina.Value <= 0 then
-                characterInstance:block(false)
-            end
             task.wait()
         end
+        characterInstance:block(false)
     end
 end
+
 
 
 function Misc_Animation_Management:runOnIsPlaying(trackData)
 
     if trackData.IsPlaying then
+
+        print("New track playing: " .. trackData.Animation.Name)
         
-        if trackData.Animation:GetAttribute("isBlocking") then
+        if trackData.Animation:GetAttribute("TimeUntilIsBlocking") then
             task.delay(trackData.Animation:GetAttribute("TimeUntilIsBlocking"), function()
+                print("running the 'onIsBlocking' function...") 
                 if trackData.IsPlaying then -- we simulate the track playing, so we need to manually check if the track is even playing
                     runOnIsBlocking(self.characterInstance)
                 end
             end)
         end
 
-        task.delay(trackData.Animation:GetAttribute("Length"), function()
-            if trackData.IsPlaying then
-                print("Hi")
-                trackData.IsPlaying = false
-                trackData.Completed = true -- Represents whether or not an animation track has completely played through and finished.
-                self.characterInstance.misc_animation_manager:runOnIsPlaying(trackData)
-            end
-        end)
+        if not trackData.Animation:GetAttribute("Looped") then
+            print("Anim thats not looped: " .. tostring(trackData.Animation.Name), tostring(trackData.Animation:GetAttribute("Looped")))
+            task.delay(trackData.Animation:GetAttribute("Length"), function()
+                if trackData.IsPlaying then
+                    print("Track that completed it's length: " .. tostring(trackData.Animation.Name))
+                    trackData.IsPlaying = false
+                    trackData.Completed = true -- Represents whether or not an animation track has completely played through and finished.
+                    self.characterInstance.misc_animation_manager:runOnIsPlaying(trackData)
+                end
+            end)
+        end
 
         
         if trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
@@ -146,10 +150,15 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             drainStamina(self.characterInstance, trackData)
 
         elseif trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId then
+            
             self.characterInstance.holdingBlock = true
             
             drainStamina(self.characterInstance, trackData)
             
+            task.wait(0.5) -- only add a wait for sync blocks if they start blocking. If they let go, then no sync block should happen as soon as the guard drops
+            if trackData.IsPlaying then
+                self.characterInstance.canSyncBlock = true
+            end
             -- while trackData.IsPlaying do
             --     self.characterInstance.stamina.Value -= drainRate
             --     -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, self.characterInstance.stamina/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
@@ -161,19 +170,36 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
         end
         
     elseif not trackData.IsPlaying then
-        print(trackData.Animation)
-        if trackData.Animation.AnimationId == AnimationInstances.FC_BlockStart.AnimationId and trackData.Completed then
+
+        if trackData.Animation.AnimationId == AnimationInstances.FC_BlockStart.AnimationId then
 
             -- Play the looping version of the blocking animation when block start animation ends
             -- warn("play loop")
             -- AnimationInstances.FC_BlockTRACK:Play()
-            if trackData.Completed then
-                print("completed block")
-                self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "playBlockAnimation")
+            print("blockstart ended")
+            if trackData.Completed and self.characterInstance.isBlocking then
+                print("completed BlockStart")
+
+                -- block_trackData.IsPlaying = true
+                -- self.characterInstance.manageAnimation(block_trackData)
+
+                -- self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "playBlockAnimation")
+                self.characterInstance:block(true)
                 self.BlockStartAnimPlaying = false
             end
 
+            -- What if we want a delay for stam regen after a parry attempt?:
+            task.wait(0.2)
             regenStamina(self.characterInstance)
+            
+        elseif trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId then
+
+        self.characterInstance.holdingBlock = false
+        regenStamina(self.characterInstance)
+        
+        -- self.characterInstance.Protocol = "HoldingBlock"
+        -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, nil, nil, self.characterInstance.isBlocking, nil, false)
+
 
         elseif trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
             -- Parry animation stopped playing
@@ -207,19 +233,19 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
         self.characterInstance.hitDebounce = false
     end
 
-    if trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId then
-        if trackData.IsPlaying then
-            task.wait(0.5) -- only add a wait for sync blocks if they start blocking. If they let go, then no sync block should happen as soon as the guard drops
-        end
+    -- if trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId then
+    --     if trackData.IsPlaying then
+    --         task.wait(0.5) -- only add a wait for sync blocks if they start blocking. If they let go, then no sync block should happen as soon as the guard drops
+    --     end
         
-        self.characterInstance.holdingBlock = false
+    --     self.characterInstance.holdingBlock = trackData.IsPlaying -- Either true or false depending on if they're animation is playing or not
         
-        self.characterInstance.Protocol = "HoldingBlock"
-        self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, nil, nil, self.characterInstance.isBlocking, nil, false)
+    --     self.characterInstance.Protocol = "HoldingBlock"
+    --     self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, nil, nil, self.characterInstance.isBlocking, nil, false)
     
-        regenStamina(self.characterInstance)
+    --     regenStamina(self.characterInstance)
     
-    end
+    -- end
 end
 
 return Misc_Animation_Management

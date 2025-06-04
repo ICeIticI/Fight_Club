@@ -70,7 +70,7 @@ UserInputService.InputBegan:Connect(function(input)
     or (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode])
     -- or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode]) 
     then
-        local protocol, publicVariables = input_check_FUNCTION:InvokeServer(inputTable) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes
+        local protocol, publicVariables = input_check_FUNCTION:InvokeServer(inputTable, true) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes
         if protocol == "LockOnInput" then
             -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
             if publicVariables.lockOnDebounce.Value == true then
@@ -110,12 +110,17 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 UserInputService.InputEnded:Connect(function(input)
+
+    local inputTable = {} -- Because the server wont let us send the input object, we need to create a table representing input that are strings
+    inputTable.UserInputType = input.UserInputType
+    inputTable.KeyCode = input.KeyCode
     
     -- while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
     
-    -- if GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
+    if BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
     --     -- The player will stop blocking
     --     ReceivingAndCountering.EndBlock(input)
     --     -- receiveCommand:CallEndBlock(input)
-    -- end
+        input_check_FUNCTION:InvokeServer(inputTable, false)
+    end
 end)

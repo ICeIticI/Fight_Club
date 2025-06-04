@@ -131,7 +131,6 @@ function Animation_Centric.setupAttackAnimation(moduleTbl, trackData) --[[ Will 
     end
 
     if trackData.attackLvl == 1 or trackData.attackLvl == 2 then
-        print(trackData)
         moduleTbl.attackTrack = getAnimationTrackById(moduleTbl, trackData.AnimationId)
     elseif trackData.attackLvl == 3 then
         
@@ -249,14 +248,14 @@ function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
     --     end
     -- end
 
-    if moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
+    if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
         moduleTbl.currentReceiveAnimTRACK:Stop()
     end
-    if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying and not moduleTbl.isAttacking then
+    if moduleTbl.attackTrack and moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying and not moduleTbl.isAttacking then
         moduleTbl.attackTrack:Stop()
     end
 
-    moduleTbl.currentReceiveAnimTRACK = getAnimationTrackById(moduleTbl, data.Animation.AnimationId)
+    moduleTbl.currentReceiveAnimTRACK = getAnimationTrackById(moduleTbl, data.AnimationId)
 
 end
 
@@ -277,7 +276,6 @@ end
 
 function Animation_Centric.playBlockAnimation(moduleTbl)
     moduleTbl.FC_BlockTRACK:Play()
-    print("blocking")
 end
 
 function Animation_Centric.stopBlocking(moduleTbl)

@@ -82,9 +82,11 @@ local isRegening = false -- Gets set to true when the character's stamina is reg
 
 local function regenStamina(characterInstance) --[[ Will regenerate stamina, if not doing so already. ]]
     if not isRegening then
+        print("will we regen?: ", characterInstance.BlockStartAnimPlaying, characterInstance.holdingBlock)
+        isRegening = true
         while (not characterInstance.BlockStartAnimPlaying and not characterInstance.holdingBlock) and characterInstance.stamina.Value < 100 do
-            isRegening = true
             characterInstance.stamina.Value += regenRate
+            print("regening health... " .. tostring(characterInstance.stamina.Value))
             -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, self.characterInstance.stamina/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
             task.wait()
         end
@@ -103,7 +105,7 @@ local function drainStamina(characterInstance, trackData) --[[ Function that wil
 
     elseif trackData.AnimationId == AnimationInstances.FC_Block.AnimationId then
         -- On holding block, we continuously drain their stamina until they stop blocking
-        while characterInstance.holdingBlock and characterInstance.stamina.Value <= 0 do
+        while characterInstance.holdingBlock and characterInstance.stamina.Value > 0 do
             characterInstance.stamina.Value -= drainRate
             task.wait()
         end
@@ -177,6 +179,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             -- warn("play loop")
             -- AnimationInstances.FC_BlockTRACK:Play()
             print("blockstart ended")
+            self.characterInstance.BlockStartAnimPlaying = false
             if trackData.Completed and self.characterInstance.isBlocking then
                 print("completed BlockStart")
 
@@ -185,7 +188,6 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
 
                 -- self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "playBlockAnimation")
                 self.characterInstance:block(true)
-                self.BlockStartAnimPlaying = false
             end
 
             -- What if we want a delay for stam regen after a parry attempt?:
@@ -193,12 +195,11 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             regenStamina(self.characterInstance)
             
         elseif trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId then
-
-        self.characterInstance.holdingBlock = false
-        regenStamina(self.characterInstance)
+            self.characterInstance.holdingBlock = false
+            regenStamina(self.characterInstance)
         
-        -- self.characterInstance.Protocol = "HoldingBlock"
-        -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, nil, nil, self.characterInstance.isBlocking, nil, false)
+            -- self.characterInstance.Protocol = "HoldingBlock"
+            -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, nil, nil, self.characterInstance.isBlocking, nil, false)
 
 
         elseif trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then

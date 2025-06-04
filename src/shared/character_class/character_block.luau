@@ -30,8 +30,18 @@ function Character_Block:enable() --[[ Raise our guard and prepare to get hit ]]
 end
 
 function Character_Block:disable() --[[ Drop our guard ]]
-    self.characterInstance.isBlocking = false
+    self.characterInstance.isBlocking = false    
     self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "stopBlockingAnimation")
+    
+    if blockStart_trackData.IsPlaying then
+        blockStart_trackData.IsPlaying = false
+        self.characterInstance.manageAnimation(blockStart_trackData)
+    end
+    if block_trackData.IsPlaying then
+        block_trackData.IsPlaying = false
+        self.characterInstance.manageAnimation(block_trackData)
+    end
+    
     if not self.characterInstance.isGettingHit then
         self.characterInstance.SetSpeed(true)
     end

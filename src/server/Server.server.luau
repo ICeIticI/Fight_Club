@@ -34,7 +34,6 @@ require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check
 -- end
 
 local function setupPlayer(player)
-    warn("plr")
     ServerInit.InitializePlayer(player) -- initializes player's public objects
     
     -- local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()

@@ -82,6 +82,9 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.character_hitboxes.characterInstance = self
 
     characters[self.id] = self
+
+    self.character_hitboxes:manageHitboxes()
+    
     return self
 end
 
@@ -112,14 +115,16 @@ function Character:basicAttack(enemyInstance) --[[ The character will do some so
 
         -- also if they are even further than 3 studs then we can implement a running-ish punch (like in RDR2)
         -- move character closer to enemy if they are a bit too far
-        if self.distanceBetween > 3 then
-            -- local speedUnit = 2500 -- 1 speed unit is 1 stud per second
-            local distanceToTravel = self.distanceBetween - 3 -- we want to be 3 studs away from the enemy
-            local timeToArrive = 0.55
-            local speed = -(distanceToTravel / timeToArrive)
-
-            self:setLinearVelocity(Vector3.new(0, 0, speed), timeToArrive)
-        end
+        task.spawn(function()
+            if self.distanceBetween > 3 then
+                -- local speedUnit = 2500 -- 1 speed unit is 1 stud per second
+                local distanceToTravel = self.distanceBetween - 3 -- we want to be 3 studs away from the enemy
+                local timeToArrive = 0.55
+                local speed = -(distanceToTravel / timeToArrive)
+    
+                self:setLinearVelocity(Vector3.new(0, 0, speed), timeToArrive)
+            end
+        end)
 
         if self.comboCounter <= 2 and self.enemyHumanoid.Health > 10 then
             -- character_attack.level1()
@@ -131,6 +136,7 @@ function Character:basicAttack(enemyInstance) --[[ The character will do some so
         else
             warn("Attack call failed! :(")
         end
+
     
         
     -- elseif comboCounter == 3 then
@@ -162,30 +168,30 @@ end
 function Character:receive(receiveType, data) --[[ The character will receive an attack ]]
     -- Mitigate attacks:
     if receiveType == "bracingBlock" then
-        character_receive:bracingBlock(data)
+        self.character_receive:bracingBlock(data)
     elseif receiveType == "syncBlock" then
-       character_receive:syncBlock(data)
+       self.character_receive:syncBlock(data)
     elseif receiveType == "dodge" then
-        character_receive:dodge(data)
+        self.character_receive:dodge(data)
     elseif receiveType == "parry" then
-        character_receive:parry(data)
+        self.character_receive:parry(data)
         
     -- mitigate attacks with our own attack:
     elseif receiveType == "counterAttack" then
-        character_receive:receiveCounter(data)
+        self.character_receive:receiveCounter(data)
     elseif receiveType == "dodgeAttack" then
-        character_receive:receiveDodgeAttack(data)
+        self.character_receive:receiveDodgeAttack(data)
 
     -- No mitigation (got struck by an attack):
     elseif receiveType == "receiveLevel1" then
-        character_receive:receiveLevel1(data)
+        self.character_receive:receiveLevel1(data)
     elseif receiveType == "receiveLevel2" then
-        character_receive:receiveLevel2(data)
+        self.character_receive:receiveLevel2(data)
     elseif receiveType == "receiveLevel3" then
-        character_receive:receiveLevel3(data)
+        self.character_receive:receiveLevel3(data)
 
     elseif receiveType == "receiveParry" then
-        character_receive:receiveParry(data)
+        self.character_receive:receiveParry(data)
     end
     
 end

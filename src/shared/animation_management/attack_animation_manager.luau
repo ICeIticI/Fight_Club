@@ -7,7 +7,9 @@
 local Attack_Animation_Management = {}
 
 local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
-    if trackData.Paired_Attribute and trackData.Counter_Attribute then
+    
+    characterInstance.attackFrames = true
+    if trackData.Paired_Attribute and trackData.Counter_Attribute then -- counterattack animation
         characterInstance.canCounter = false
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
@@ -58,19 +60,16 @@ local attack1_amountOfTimeBeforeEndOFAnimation = 0.75
 function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages character data based on when an attack is playing. NOT the animation track itself. That runs on the client. Unless I decided to move it to the server. ]]
 
     if trackData.IsPlaying then
-        print(trackData.Animation:GetAttribute("TimeUntilStartOfAttack"), trackData.Animation:GetAttribute("TimeUntilEndOfAttack"), trackData.Animation:GetAttribute("Length"))
 
         -- Schedule a simulation of the AttackFrames marker and handle data accordingly:
         task.delay(trackData.Animation:GetAttribute("TimeUntilStartOfAttack"), function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
             if trackData.IsPlaying then
-                warn("Attack frames reached")
                 runOnAttackFrames(self.characterInstance, trackData)
             end
         end)
 
         -- Schedule a simulation of the EndOfAttack marker:
         task.delay(trackData.Animation:GetAttribute("TimeUntilEndOfAttack"), function()
-            warn("EndOfAttack reached")
             if trackData.IsPlaying then
                 runOnEndOfAttack(self.characterInstance, trackData)
             end
@@ -78,7 +77,6 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
 
         -- Schedule a simulation of the end of the attacking animation:
         task.delay(trackData.Animation:GetAttribute("Length"), function()
-            warn("Animation fully finished.")
             if trackData.IsPlaying then
                 trackData.IsPlaying = false
                 trackData.Completed = true
@@ -87,11 +85,11 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         end)
 
         self.characterInstance.isAttacking = true
+        self.characterInstance.didFollowUp = false
         self.characterInstance.SetSpeed(false)
 
         if trackData.Counter_Attribute == true then 
             -- A level 1 attack played at the time an enemy's attack landed. We transition this into a counter attack.
-            self.characterInstance.setupAttackDamage(self.characterInstance)
             self.characterInstance.setPublicPlayerVariable("canCounter", true)
             self.characterInstance.isCountering = true
             self.characterInstance.isAttacking = true
@@ -102,11 +100,12 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
     elseif not trackData.IsPlaying then
         
         if not trackData.Completed then
-            self.characterInstance.didFollowUp = false
             self.characterInstance.Protocol = nil
-
+            
         elseif trackData.Completed  then
-            warn("Resetting...")
+            -- if not trackData.attackLvl == 2 then
+            --     self.characterInstance.didFollowUp = false
+            -- end
             self.characterInstance.reset()
         end
 

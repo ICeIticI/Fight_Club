@@ -131,10 +131,10 @@ local function setupTrackData(attackLvl) --[[ Because tracks are played on the c
     return trackData
 end
 
-local function setRandomAttackType(followupCombo) --[[ Will set the attack type when a new combo starts ]]
+local function setRandomAttackType(didFollowUp) --[[ Will set the attack type when a new combo starts ]]
     local randNumber
     -- moduleTbl.randAttack = nil
-    if followupCombo then
+    if didFollowUp == true then
         randNumber = math.random(2, 3)
     else
         randNumber = math.random(1, 2)
@@ -154,14 +154,13 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
 
     if characterInstance.comboCounter == 0 then -- Randomize attackType for a new combo:
         -- Store the current attackType in characterInstance so it doesn't get forgotten when we attack in the future (for throwing the same type of attack again. If we throw a hook, we wanna followup with another hook):
-        characterInstance.attackType = setRandomAttackType(characterInstance.comboCounter)
+        characterInstance.attackType = setRandomAttackType(characterInstance.didFollowUp)
 
     end
     -- Whether or not we are starting a new series of attacks (such as jabs, or hooks) or not, we want our attackType to be what's already stored.
     trackData.attackType = characterInstance.attackType
     trackData.Animation = getAnimation(characterInstance, trackData, enemy_characterInstance)
     trackData.AnimationId = trackData.Animation.AnimationId
-    print(trackData.Animation)
     if attackLvl == 3 then -- beyond the lvl 1's and 2's:
 
         trackData.Counter_Attribute = characterInstance.isCountering -- When true, we are countering:
@@ -169,8 +168,12 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
         -- trackData.Animation = characterInstance.currentAttack
 
     end
-    
-    if characterInstance.player then
+
+    characterInstance.currentAttack_trackData = trackData
+    characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
+    warn(characterInstance.attackDamage)
+
+    if characterInstance.player ~= nil then
         characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "setupClientAttackAnimation", trackData)
     else
         -- is an AI. Send directly to animation_centric instead of to the client then to centric.

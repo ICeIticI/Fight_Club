@@ -34,7 +34,7 @@ function Characters:GetCharacterObjectByCharacter(char)
         end
     end
 
-    warn("No characterInstance found with the given character: ".. char)
+    warn("No characterInstance found with the given character: ".. tostring(char))
     return nil
 end
 

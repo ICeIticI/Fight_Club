@@ -458,7 +458,6 @@ for _, animation in pairs(AnimationInstances) do
         end)
         local temporaryIsBlockingConnection = temporaryTrack:GetMarkerReachedSignal("isBlocking"):Connect(function()
             animation:SetAttribute("TimeUntilIsBlocking", temporaryTrack.TimePosition)
-            warn(animation.Name .. " has the isBlocking attri")
         end)
         temporaryTrack:Play()
         temporaryTrack.Stopped:Wait()

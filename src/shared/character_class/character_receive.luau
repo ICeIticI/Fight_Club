@@ -85,11 +85,11 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_RightUppercutRECEIVER
         end
     elseif trackData.receivingType == "Level2" then
-
+        print(trackData.attackerAnim)
         if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftHaymaker.AnimationId then
             return AnimationInstances.FC_LeftHaymakerRECEIVER
         elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightHaymaker.AnimationId then
-            return AnimationInstances.FC_RightHaymakerReceiver
+            return AnimationInstances.FC_RightHaymakerRECEIVER
         end
     elseif trackData.receivingType == "Parry" then
         
@@ -249,6 +249,8 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
     end
     
     trackData.Animation = getReceiveAnimation(characterInstance, trackData)
+    print(trackData.receivingType)
+    trackData.AnimationId = trackData.Animation.AnimationId
 
     if characterInstance.player then
         characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "setupReceiveAnimation", trackData)
@@ -280,7 +282,7 @@ end
 
 function Character_Receive:bracingBlock(attacker_characterInstance) --[[ Block an enemy attack with a shell guard ]]
     
-    local attackerAnim = attacker_characterInstance.currentAttack
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
 
     local trackData = setupReceiveAnimation(self.characterInstance, "bracingBlock", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
@@ -288,7 +290,7 @@ end
 
 function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an enemy attack in smooth syncronization ]]
 
-    local attackerAnim = attacker_characterInstance.currentAttack
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
 
     local trackData = setupReceiveAnimation(self.characterInstance, "syncBlock", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
@@ -297,7 +299,7 @@ end
 function Character_Receive:dodge(attacker_characterInstance) --[[ Dodge away from an incoming strike ]]
     
     
-    local attackerAnim = attacker_characterInstance.currentAttack
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
     
     local trackData = setupReceiveAnimation(self.characterInstance, "Dodge", attackerAnim)
     self.characterInstance.iFrames = true
@@ -310,7 +312,7 @@ function Character_Receive:dodge(attacker_characterInstance) --[[ Dodge away fro
 end
 
 function Character_Receive:parry(attacker_characterInstance) --[[ Parry an incoming strike ]]
-    local attackerAnim = attacker_characterInstance.currentAttack    
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation    
     
     -- if attackerAnim:GetAttribute("AnimDirection") == "Left" then
     --     -- Perform a left parry
@@ -338,7 +340,7 @@ end
 -- Non-mitigation (got struck):
 
 function Character_Receive:receiveLevel1(attacker_characterInstance) --[[ Get hit by a level 1 attack such as jabs and hooks ]]
-    local attackerAnim = attacker_characterInstance.currentAttack
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
     
     -- if attackerAnim.AnimationId == self.characterInstance.FC_LeftHook1.AnimationId or attackerAnim.AnimationId == self.characterInstance.FC_LeftJab.AnimationId then
     --     self.characterInstance.currentReceiveAnimTRACK = self.characterInstance.FC_LeftHook1RECEIVERTRACK
@@ -354,12 +356,12 @@ function Character_Receive:receiveLevel1(attacker_characterInstance) --[[ Get hi
     -- self.characterInstance.playReceivingTrack()
     local trackData = setupReceiveAnimation(self.characterInstance, "Level1", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
-    self.characterInstance.humanoid:TakeDamage(self.characterInstance.attackDamage)
+    self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage)
 
 end
 
 function Character_Receive:receiveLevel2(attacker_characterInstance) --[[ Get hit by a level 2 attack such as haymakers ]]
-    local attackerAnim = attacker_characterInstance.currentAttack
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
 
     -- if attackerAnim.AnimationId == self.characterInstance.FC_LeftHaymaker.AnimationId then
     --     self.characterInstance.currentReceiveAnimTRACK = self.characterInstance.FC_LeftHaymakerRECEIVERTRACK
@@ -371,7 +373,7 @@ function Character_Receive:receiveLevel2(attacker_characterInstance) --[[ Get hi
 
     local trackData = setupReceiveAnimation(self.characterInstance, "Level2", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
-    self.characterInstance.humanoid:TakeDamage(self.characterInstance.attackDamage)
+    self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage)
 end
 
 function Character_Receive:receiveLevel3() --[[ Get hit by a level 3 attack, which essentially are executions ]]
@@ -379,14 +381,14 @@ function Character_Receive:receiveLevel3() --[[ Get hit by a level 3 attack, whi
 end
 
 function Character_Receive:receiveDodgeAttack(attacker_characterInstance) --[[ The enemy dodged away from our strike and caused us to get dodge-attacked ]]
-    local attackerAnim = attacker_characterInstance.currentAttack
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
 
     local trackData = setupReceiveAnimation(self.characterInstance, "dodgeAttack", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
 end
 
 function Character_Receive:receiveParry(attacker_characterInstance) --[[ We tried to strike the enemy but they parried us ]]
-    local attackerAnim = attacker_characterInstance.currentAttack
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
 
     -- self.characterInstance.randAttack:Stop()
     -- if attackerAnim:GetAttribute("AnimDirection") == "Left" then
@@ -399,7 +401,7 @@ function Character_Receive:receiveParry(attacker_characterInstance) --[[ We trie
 end
 
 function Character_Receive:receiveCounter(attacker_characterInstance) --[[ We tried striking the enemy, but they countered us ]]
-    local attackerAnim = attacker_characterInstance.currentAttack
+    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
     
     local trackData = setupReceiveAnimation(self.characterInstance, "counterAttack", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)

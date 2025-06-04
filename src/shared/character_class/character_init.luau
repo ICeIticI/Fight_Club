@@ -2,9 +2,7 @@ local Character_Init = {}
 Character_Init.__index = Character_Init
 local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
 
-
-
-local function createHitbox(bodyPart) --[[ Function that will create a hitbox of a given part for a given player ]]
+local function createHitbox(bodyPart, characterInstance) --[[ Function that will create a hitbox of a given part for a given player ]]
 
 	local char = bodyPart.Parent
 
@@ -39,6 +37,11 @@ local function createHitbox(bodyPart) --[[ Function that will create a hitbox of
 		hitbox.Size = Vector3.new(1,2,1)
 		hitbox:SetAttribute("AttackDirection", "forward")
 	end
+
+	if hitbox:GetAttribute("AttackDirection") then -- add it to the attack hitboxes folder if its an attack hitbox
+		table.insert(characterInstance.attackHitboxes, hitbox)
+	end
+
 	task.wait()
 	return hitbox
 end
@@ -52,7 +55,6 @@ local function disableDefaultTouchDetections(givenChar) --[[ This function will 
 end
 
 function Character_Init.init(charModel)
-	print("hw")
     local characterInstance = {}
 
     -- define public variables here that the Character will have:
@@ -93,7 +95,7 @@ function Character_Init.init(charModel)
 	characterInstance.lastAttackTrack = nil
 	characterInstance.comboCounter = 0
 	
-	characterInstance.currentAttack = nil										
+	characterInstance.currentAttack_trackData = nil										
 	characterInstance.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
 	characterInstance.attackSeries = nil
 	-- self.randAttack = nil
@@ -163,19 +165,21 @@ function Character_Init.init(charModel)
 	hbFolder.Name = characterInstance.character.Name.."_hitboxesFolder"
 	hbFolder.Parent = characterInstance.character
 
+	characterInstance.attackHitboxes = {} -- table that stores the data for the attack hitboxes
+
 	disableDefaultTouchDetections(characterInstance.character)
 	
-	local hitboxHead = createHitbox(characterInstance.character:WaitForChild("Head"))
+	local hitboxHead = createHitbox(characterInstance.character:WaitForChild("Head"), characterInstance)
 	hitboxHead.Parent = characterInstance.character:WaitForChild(hbFolder.Name)
-	local hitboxLeftArm = createHitbox(characterInstance.character:WaitForChild("Left Arm"))
+	local hitboxLeftArm = createHitbox(characterInstance.character:WaitForChild("Left Arm"), characterInstance)
 	hitboxLeftArm.Parent = characterInstance.character:WaitForChild(hbFolder.Name)
-	local hitboxRightArm = createHitbox(characterInstance.character:WaitForChild("Right Arm"))
+	local hitboxRightArm = createHitbox(characterInstance.character:WaitForChild("Right Arm"), characterInstance)
 	hitboxRightArm.Parent = characterInstance.character:WaitForChild(hbFolder.Name)
-	local hitboxLeftLeg = createHitbox(characterInstance.character:WaitForChild("Left Leg"))
+	local hitboxLeftLeg = createHitbox(characterInstance.character:WaitForChild("Left Leg"), characterInstance)
 	hitboxLeftLeg.Parent = characterInstance.character:WaitForChild(hbFolder.Name)
-	local hitboxRightLeg = createHitbox(characterInstance.character:WaitForChild("Right Leg"))
+	local hitboxRightLeg = createHitbox(characterInstance.character:WaitForChild("Right Leg"), characterInstance)
 	hitboxRightLeg.Parent = characterInstance.character:WaitForChild(hbFolder.Name)
-	local hitboxTorso = createHitbox(characterInstance.character:WaitForChild("Torso"))
+	local hitboxTorso = createHitbox(characterInstance.character:WaitForChild("Torso"), characterInstance)
 	hitboxTorso.Parent = characterInstance.character:WaitForChild(hbFolder.Name)
 
 	-- Global Remote Event - Because each player having their own remote event is redundant.
@@ -318,7 +322,6 @@ function Character_Init.init(charModel)
 
 
 	function characterInstance:setLinearVelocity(sentVelocity, sentDuration)
-		print(self)
 		characterInstance.humanoidRootPart:WaitForChild("FC_LinearVelocity").VectorVelocity = sentVelocity
 		characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = true
 		task.wait(sentDuration) -- Character will be under said force till duration ends.
@@ -357,11 +360,11 @@ function Character_Init.init(charModel)
 			characterInstance.hitSFX = Instance.new("Sound")
 			characterInstance.hitSFX.Name = "hitSFX"
 
-			if characterInstance.currentAttack and characterInstance.currentAttack:GetAttribute("AttackLevel") == 1 then
-				characterInstance.attackDamage = A1Damage
+			if characterInstance.currentAttack_trackData and characterInstance.currentAttack_trackData.attackLvl == 1 then
+				-- characterInstance.attackDamage = A1Damage
 				characterInstance.hitSFX.SoundId = tempHitSFXTable[math.random(1, #tempHitSFXTable)]
-			elseif characterInstance.currentAttack and characterInstance.currentAttack:GetAttribute("AttackLevel") == 2 then
-				characterInstance.attackDamage = A2Damage
+			elseif characterInstance.currentAttack_trackData and characterInstance.currentAttack_trackData.attackLvl == 2 then
+				-- characterInstance.attackDamage = A2Damage
 				characterInstance.hitSFX.SoundId = "rbxassetid://112444846023457"
 			else
 				characterInstance.hitSFX.SoundId = math.random(1, #tempHitSFXTable)
@@ -370,18 +373,18 @@ function Character_Init.init(charModel)
 		end
 	end
 
-	function characterInstance.setupAttackDamage(attacker_characterInstance)
-		if attacker_characterInstance.currentAttack:GetAttribute("AttackLevel") == 1 then
-			characterInstance.attackDamage = A1Damage
-		elseif attacker_characterInstance.currentAttack:GetAttribute("AttackLevel") == 2 then
-			characterInstance.attackDamage = A2Damage
-		elseif attacker_characterInstance.currentAttack:GetAttribute("Counter") then
-			characterInstance.attackDamage = counterAttackDamage
+	function characterInstance:setupAttackDamage(trackData)
+		warn(trackData)
+		if trackData and trackData.attackLvl == 1 then
+			return A1Damage
+		elseif trackData and trackData.attackLvl == 2 then
+			return A2Damage
+		elseif trackData.Counter_Attribute then
+			return counterAttackDamage
 		end
 	end
 
 	function characterInstance.manageAnimation(trackData)
-		print(trackData)
 		local AnimType = trackData.Animation:GetAttribute("AnimType")
 
 		if AnimType and AnimType == 1 then
@@ -404,7 +407,6 @@ function Character_Init.init(charModel)
 	end
 
 
-	warn(characterInstance.player)
 	if characterInstance.player ~= nil then
 		characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "createAnimationTracks")
 	else -- not a player. We wanna create animations on server

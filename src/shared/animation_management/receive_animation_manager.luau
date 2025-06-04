@@ -1,7 +1,10 @@
+local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
+local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+
 local Receive_Animation_Management = {}
 
-
 function Receive_Animation_Management:runOnIsPlaying(trackData)
+    warn(trackData)
     if trackData.IsPlaying then
 
         self.characterInstance.isGettingHit = true
@@ -14,7 +17,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.isGettingHit = false
         end
 
-        if trackData.AnimationId == self.characterInstance.FC_RightHaymakerRECEIVER.AnimationId or trackData.AnimationId == self.characterInstance.FC_LeftHaymakerRECEIVER.AnimationId then
+        if trackData.AnimationId == AnimationInstances.FC_RightHaymakerRECEIVER.AnimationId or trackData.AnimationId == AnimationInstances.FC_LeftHaymakerRECEIVER.AnimationId then
         -- Tween specific animations like the rightHaymaker
             --[[
             local tweenPart = GameVariables.character:WaitForChild("HumanoidRootPart")
@@ -23,13 +26,13 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             local reactTween = game:GetService("TweenService"):Create(tweenPart, Info, tweenGoals)
             reactTween:Play()
             ]]
-            local enemyCFrame = self.characterInstance.getPublicPlayerInstance(self.characterInstance.player.Name).enemyCFrame
+            local enemyCFrame = Characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar).humanoidRootPart.CFrame
             local linearForce = self.characterInstance.humanoidRootPart.CFrame:VectorToObjectSpace(enemyCFrame.LookVector.Unit * 3)
-
+            warn("yoyoyoooooo")
             self.characterInstance:setLinearVelocity(linearForce, 0.63)
         end
 
-        if trackData.AnimationId == self.characterInstance.FC_BracingBlockL.AnimationId or trackData.AnimationId == self.characterInstance.FC_BracingBlockR.AnimationId then
+        if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
             self.characterInstance.isBlocking = true
             self.characterInstance.canSyncBlock = false
         end
@@ -42,10 +45,10 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.block(false)
         end
 
-        if trackData.AnimationId == self.characterInstance.FC_BracingBlockL.AnimationId or trackData.AnimationId == self.characterInstance.FC_BracingBlockR.AnimationId then
+        if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
             -- Wait before allowing sync blocks again
             task.wait(1)
-            if not self.characterInstance.FC_BracingBlockLTRACK.IsPlaying or not self.characterInstance.FC_BracingBlockRTRACK.IsPlaying then
+            if not AnimationInstances.FC_BracingBlockL.IsPlaying or not AnimationInstances.FC_BracingBlockR.IsPlaying then
                 self.characterInstance.canSyncBlock = true
             end
         end
@@ -59,12 +62,12 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         self.characterInstance.attackTrack:Stop()
     end
 
-    if trackData.AnimationId == self.characterInstance.FC_BracingBlockL.AnimationId or trackData.AnimationId == self.characterInstance.FC_BracingBlockR.AnimationId then
+    if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
         -- Handle bracing blocks
         if not trackData.IsPlaying then
             -- Wait before allowing sync blocks again
             task.wait(1)
-            if not self.characterInstance.FC_BracingBlockLTRACK.IsPlaying or not self.characterInstance.FC_BracingBlockRTRACK.IsPlaying then
+            if not AnimationInstances.FC_BracingBlockL.IsPlaying or not AnimationInstances.FC_BracingBlockR.IsPlaying then
                 self.characterInstance.canSyncBlock = true
             end
         elseif trackData.IsPlaying then

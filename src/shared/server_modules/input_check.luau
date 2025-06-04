@@ -22,7 +22,7 @@ local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -
 
 
 local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
-input_check_FUNCTION.OnServerInvoke = function(plr, input)
+input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
     local characterInstance = characters:GetCharacterObjectByPlayer(plr)
     if not characterInstance then return end
@@ -130,7 +130,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                 if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                     characterInstance.pairedChain += 1
                 end
-                if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) and not characterInstance.waitingToAttack and not characterInstance.canFollowUp and not characterInstance.pairedPlaying then
+                if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
+                and not characterInstance.waitingToAttack 
+                and not characterInstance.canFollowUp 
+                and not characterInstance.pairedPlaying 
+                then
+                    -- characterInstance.waitingToAttack = true
                     if characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                         characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                         --[[
@@ -147,7 +152,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
                             -- enemyInstance.synchedBlock(sentAnimPair, sentValue)
                         end
                     end
-
+                    -- warn("y")
                     characterInstance:basicAttack(enemyInstance)
                 elseif characterInstance.canFollowUp then
                     characterInstance.waitingToAttack = true
@@ -172,7 +177,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
 
         end
         
-    elseif BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
+    elseif (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode]) and active then
         -- print("block input")
         -- If the player is holding the block button, we store that as a variable:
         characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
@@ -181,12 +186,30 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input)
         and characterInstance.boolCheck({characterInstance.isAttacking, characterInstance.isBlocking, characterInstance.isCountering}) 
         and not characterInstance.pairedPlaying
         and characterInstance.stamina and characterInstance.stamina.Value > 0 then
-            print("yoyoyoyoyo")
             characterInstance:block(true)
         end
 
     -- elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
 
+
+    elseif (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode]) and not active then
+        
+        -- If the player is holding the block button, we store that as a variable:
+        if BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
+            characterInstance.isBlockBeingPressed = false
+        end
+
+        if 
+        (characterInstance.BlockStartAnimPlaying 
+        or 
+        characterInstance.holdingBlock) 
+        and not characterInstance.pairedPlaying
+        and not characterInstance.waitingToAttack 
+        and not characterInstance.isAttacking 
+        and not characterInstance.isDodging
+        then
+            characterInstance:block(false)
+        end
     end
 end
 

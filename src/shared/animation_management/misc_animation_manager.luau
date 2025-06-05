@@ -82,11 +82,9 @@ local isRegening = false -- Gets set to true when the character's stamina is reg
 
 local function regenStamina(characterInstance) --[[ Will regenerate stamina, if not doing so already. ]]
     if not isRegening then
-        print("will we regen?: ", characterInstance.BlockStartAnimPlaying, characterInstance.holdingBlock)
         isRegening = true
         while (not characterInstance.BlockStartAnimPlaying and not characterInstance.holdingBlock) and characterInstance.stamina.Value < 100 do
             characterInstance.stamina.Value += regenRate
-            print("regening health... " .. tostring(characterInstance.stamina.Value))
             -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, self.characterInstance.stamina/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
             task.wait()
         end
@@ -119,11 +117,9 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
 
     if trackData.IsPlaying then
 
-        print("New track playing: " .. trackData.Animation.Name)
         
         if trackData.Animation:GetAttribute("TimeUntilIsBlocking") then
             task.delay(trackData.Animation:GetAttribute("TimeUntilIsBlocking"), function()
-                print("running the 'onIsBlocking' function...") 
                 if trackData.IsPlaying then -- we simulate the track playing, so we need to manually check if the track is even playing
                     runOnIsBlocking(self.characterInstance)
                 end
@@ -131,10 +127,8 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
         end
 
         if not trackData.Animation:GetAttribute("Looped") then
-            print("Anim thats not looped: " .. tostring(trackData.Animation.Name), tostring(trackData.Animation:GetAttribute("Looped")))
             task.delay(trackData.Animation:GetAttribute("Length"), function()
                 if trackData.IsPlaying then
-                    print("Track that completed it's length: " .. tostring(trackData.Animation.Name))
                     trackData.IsPlaying = false
                     trackData.Completed = true -- Represents whether or not an animation track has completely played through and finished.
                     self.characterInstance.misc_animation_manager:runOnIsPlaying(trackData)
@@ -178,10 +172,8 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             -- Play the looping version of the blocking animation when block start animation ends
             -- warn("play loop")
             -- AnimationInstances.FC_BlockTRACK:Play()
-            print("blockstart ended")
             self.characterInstance.BlockStartAnimPlaying = false
             if trackData.Completed and self.characterInstance.isBlocking then
-                print("completed BlockStart")
 
                 -- block_trackData.IsPlaying = true
                 -- self.characterInstance.manageAnimation(block_trackData)
@@ -217,7 +209,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.isDodging = false
 
             if not self.characterInstance.isAttacking and not self.characterInstance.waitingToAttack then
-                self.characterInstance.setSpeed(true)
+                self.characterInstance.SetSpeed(true)
             end
 
         elseif trackData.Animation.AnimationId == AnimationInstances.FC_LeftParryRECEIVER.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParryRECEIVER.AnimationId then

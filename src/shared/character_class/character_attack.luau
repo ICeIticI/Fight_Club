@@ -171,7 +171,6 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
 
     characterInstance.currentAttack_trackData = trackData
     characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
-    warn(characterInstance.attackDamage)
 
     if characterInstance.player ~= nil then
         characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "setupClientAttackAnimation", trackData)

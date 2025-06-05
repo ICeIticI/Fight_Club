@@ -85,49 +85,55 @@ function LockOn.Lock(publicVariables)
 		
 		-- ClientVariables.enemyHumanoidRootPart = ClientVariables.raycastResult.Instance.Parent:WaitForChild("HumanoidRootPart")
 		
-		ClientVariables.FC_IdleTRACK:Play()
-		
-		-- character changes below:
-		ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
-		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
-		
-		-- camera subject part
-		ClientVariables.subject = ClientVariables.character:FindFirstChild("subject") or Instance.new("Part") --[[ Subject is the point
-		That the player's camera revoles around when they lock on. It is perfectly between the player and enemy.]]
-		
-		if ClientVariables.character:FindFirstChild("subject") == nil then --[[ Creates a subject if it's not created yet on
-		it's first lock on.]]
-			createSubject(ClientVariables.subject)
-		end
-		if ClientVariables.subject.CFrame ~= ClientVariables.humanoidRootPart.CFrame then
-			ClientVariables.subject.CFrame = ClientVariables.humanoidRootPart.CFrame -- the subject will begin at the humanoid's CFrame and smoothly transition to the center between character and enemy
-		end
+	ClientVariables.FC_IdleTRACK:Play()
+	
+	-- character changes below:
+	ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
+	-- UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
+	
+	-- camera subject part
+	ClientVariables.subject = ClientVariables.character:FindFirstChild("subject") or Instance.new("Part") --[[ Subject is the point
+	That the player's camera revoles around when they lock on. It is perfectly between the player and enemy.]]
+	
+	if ClientVariables.character:FindFirstChild("subject") == nil then --[[ Creates a subject if it's not created yet on
+	it's first lock on.]]
+		createSubject(ClientVariables.subject)
+	end
+	if ClientVariables.subject.CFrame ~= ClientVariables.humanoidRootPart.CFrame then
+		ClientVariables.subject.CFrame = ClientVariables.humanoidRootPart.CFrame -- the subject will begin at the humanoid's CFrame and smoothly transition to the center between character and enemy
+	end
 
-		
-		-- camera changes:
-		-- ClientVariables.Camera.CameraType = Enum.CameraType.Orbital
-		ClientVariables.Camera.CameraSubject = ClientVariables.subject
-		
-		local subjectTweenInfo = TweenInfo.new(
-			1,
-			Enum.EasingStyle.Sine,
-			Enum.EasingDirection.Out
-		)
-		local subjectTweenGoal = {CFrame = getCenteredSubjectCFrame()}
+	
+	-- camera changes:
+	-- ClientVariables.Camera.CameraType = Enum.CameraType.Orbital
+	ClientVariables.Camera.CameraSubject = ClientVariables.subject
+	
+	local subjectTweenInfo = TweenInfo.new(
+		1,
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.Out
+	)
+	local subjectTweenGoal = {CFrame = getCenteredSubjectCFrame()}
 
-		ClientVariables.subjectTween = TweenService:Create(ClientVariables.subject, subjectTweenInfo, subjectTweenGoal)
-		ClientVariables.subjectTween:Play()
+	ClientVariables.subjectTween = TweenService:Create(ClientVariables.subject, subjectTweenInfo, subjectTweenGoal)
+	ClientVariables.subjectTween:Play()
 
-		-- ClientVariables.subjectTween.Completed:Wait()
-		
-		while ClientVariables.lockOnDebounce.Value == true and workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 8, ClientVariables.rayParams) ~= nil and ClientVariables.enemyHumanoid.Health > 0 and ClientVariables.humanoid.Health > 0 do -- constantly keeps the player facing the enemy
-			-- Constantly having the player face the enemy when locked on
+	-- ClientVariables.subjectTween.Completed:Wait()
+	
+	while ClientVariables.lockOnDebounce.Value == true and workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 8, ClientVariables.rayParams) ~= nil and ClientVariables.enemyHumanoid.Health > 0 and ClientVariables.humanoid.Health > 0 do -- constantly keeps the player facing the enemy
+		-- Constantly having the player face the enemy when locked on
 
-			task.wait()
-			faceEnemy(ClientVariables.subject)
-		end
+		task.wait()
+		faceEnemy(ClientVariables.subject)
+	end
 
-		return
+	-- No-longer locked-on. Ensure old, irrelevant data doesn't get used
+	for varName, _ in pairs(publicVariables) do -- public variables aint useful after lock-off
+		if varName == "lockOnDebounce" then continue end -- Dont wanna make lockOnDebounce nil. We handle that already.
+		ClientVariables[varName] = nil
+	end
+
+	return
 end
 
 function LockOn.Unlock()
@@ -138,7 +144,6 @@ function LockOn.Unlock()
 
 	if not workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 7, ClientVariables.rayParams) then -- When the while loop above ends, we want to check if its because the player got too far. If so, then we want to set the lockOnDebounce to false
 		ClientVariables.lockOnDebounce.Value = false
-		print("Too far from enemy.")
 	end
 	-- end
 	

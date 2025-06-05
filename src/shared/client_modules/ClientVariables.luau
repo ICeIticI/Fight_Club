@@ -6,7 +6,8 @@ ClientVariables.player = game:GetService("Players").LocalPlayer
 ClientVariables.initialized = false
 
 local function Init() -- The .CharacterAdded event doesn't always track when a player character is added. Sometimes the character spawns and beats the event. So just in case, this function was created to initialize (or reinitialize) variables that are crutial for the game to work.
-	
+	ClientVariables.initialized = false
+
 	ClientVariables.character = ClientVariables.player.Character or ClientVariables.player.CharacterAdded:Wait()
 	ClientVariables.humanoid = ClientVariables.character:WaitForChild("Humanoid")
 	-- ClientVariables.previousHealth = ClientVariables.humanoid.Health -- This var is used to determine how much damage the character takes.

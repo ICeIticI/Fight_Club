@@ -11,7 +11,7 @@ local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.Cli
 -- local LockOnSystem = require(game.ReplicatedStorage.Shared.LockOnSystem) -- Holds the mechanics for locking onto enemies
 -- local BasicStriking = require(game.ReplicatedStorage.Shared.BasicStriking)
 -- local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAndCountering)
--- local UIManager = require(game.ReplicatedStorage.Shared.UIManager)
+local UIManager = require(game.ReplicatedStorage.Shared.client_modules.UIManager)
 
 -- New Modules:
 
@@ -33,21 +33,17 @@ end)
 if game.Players.LocalPlayer.Character then -- The player may load faster than the script, so this will ensure the player won't skip initializing
     -- Initializes the player
 
-    -- while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+    while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
 
-    -- Animation_Manager.manageAnimations() --We want to manage the animations of the player as soon as they spawn in.
-    -- BasicStriking.manageHitboxes() -- We also want to manage the plr char's attack hitboxes when they spawn as well.
-    -- UIManager.Init()
+    UIManager.manageUI()
 end
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
     -- Initializes the player
 
-    -- while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+    while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
 
-    -- Animation_Manager.manageAnimations() --We want to manage the animations of the player as soon as they spawn in.
-    -- BasicStriking.manageHitboxes() -- We also want to manage the plr char's attack hitboxes when they spawn as well.
-    -- UIManager.Init()
+    UIManager.manageUI()
 end)
 
 -- User Input Types
@@ -58,6 +54,11 @@ local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -
 
 
 UserInputService.InputBegan:Connect(function(input)
+
+    if (AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode]) and ClientVariables.player.Name == "Player2" then
+        warn("2 seconds till attack...")
+        task.wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
+    end
 
     
     local inputTable = {} -- Because the server wont let us send the input object, we need to create a table representing input that are strings
@@ -72,6 +73,7 @@ UserInputService.InputBegan:Connect(function(input)
     then
         local protocol, publicVariables = input_check_FUNCTION:InvokeServer(inputTable, true) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes
         if protocol == "LockOnInput" then
+            print("e")
             -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
             if publicVariables.lockOnDebounce.Value == true then
                 lockOn.Lock(publicVariables)

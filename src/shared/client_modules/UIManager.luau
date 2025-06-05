@@ -2,13 +2,22 @@ local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.Cli
 
 local UIManager = {}
 
-function UIManager.Init()
+local gameFrame
+local healthBar
+local healthFrameLabel
+local staminaBar
+local staminaFrameLabel
 
-    local gameFrame = ClientVariables.player.PlayerGui.gameGUI.Frame
-    local healthBar = gameFrame.healthLabel
-    local healthFrameLabel = gameFrame.healthFrameLabel
-    local staminaBar = gameFrame.staminaLabel
-    local staminaFrameLabel = gameFrame.staminaFrameLabel
+local staminaChecker
+local healthChecker
+
+function UIManager.manageUI()
+
+    gameFrame = ClientVariables.player.PlayerGui.gameGUI.Frame
+    healthBar = gameFrame.healthLabel
+    healthFrameLabel = gameFrame.healthFrameLabel
+    staminaBar = gameFrame.staminaLabel
+    staminaFrameLabel = gameFrame.staminaFrameLabel
 
     -- local drainRate = 1 -- how much stamina gets drained per wait()
     -- local regenRate = 1 -- how much stamina gets regenerated per wait()
@@ -16,15 +25,22 @@ function UIManager.Init()
     
     -- Health management:
     
-    ClientVariables.humanoid.HealthChanged:Connect(function(health)
-        local newYScale = health / ClientVariables.humanoid.MaxHealth
-        healthBar.Size = UDim2.new(healthBar.Size.X.Scale, healthBar.Size.X.Offset, newYScale * healthFrameLabel.Size.Y.Scale, healthBar.Size.Y.Offset)
-    end)
-
-    ClientVariables.stamina:GetPropertyChangedSignal("Value"):Connect(function()
+    
+    staminaChecker = ClientVariables.stamina:GetPropertyChangedSignal("Value"):Connect(function()
         staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, ClientVariables.stamina.Value/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
     end)
     
+    
+    healthChecker = ClientVariables.humanoid.HealthChanged:Connect(function(health)
+        local newYScale = health / ClientVariables.humanoid.MaxHealth
+        healthBar.Size = UDim2.new(healthBar.Size.X.Scale, healthBar.Size.X.Offset, newYScale * healthFrameLabel.Size.Y.Scale, healthBar.Size.Y.Offset)
+        if health <= 0 then
+            staminaChecker:Disconnect()
+            healthChecker:Disconnect()
+
+            staminaChecker, healthChecker = nil, nil
+        end
+    end)
     -- -- Stamina management:
     -- ClientVariables.stamina = 100 -- the stamina of the player. If they get 0 they wont be able to block or parry
     -- local blockCost = 10

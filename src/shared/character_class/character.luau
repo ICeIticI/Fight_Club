@@ -54,7 +54,10 @@ end
 
 -- constructor function for Character:
 function Character.new(charModel) --[[ Constructor function that will create a new instance of a character. ]]
+    
     local self = setmetatable(character_init.init(charModel), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
+    -- while not self.initialized do task.wait() end
+    
     self.id = getNextId()
     self.character_attack = setmetatable({}, { __index = character_attack })
     self.character_block = setmetatable({}, { __index = character_block })
@@ -85,6 +88,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
 
     self.character_hitboxes:manageHitboxes()
     
+    self.initialized = true
     return self
 end
 
@@ -93,6 +97,7 @@ end
 -- end
 
 function Character:erase() --[[ Method that will delete the Character object to free up data and prevent memory leaks. ]]
+    characters[self.id] = nil
     self = nil
 end
 
@@ -115,7 +120,6 @@ function Character:basicAttack(enemyInstance) --[[ The character will do some so
 
         -- also if they are even further than 3 studs then we can implement a running-ish punch (like in RDR2)
         -- move character closer to enemy if they are a bit too far
-        task.spawn(function()
             if self.distanceBetween > 3 then
                 -- local speedUnit = 2500 -- 1 speed unit is 1 stud per second
                 local distanceToTravel = self.distanceBetween - 3 -- we want to be 3 studs away from the enemy
@@ -124,7 +128,6 @@ function Character:basicAttack(enemyInstance) --[[ The character will do some so
     
                 self:setLinearVelocity(Vector3.new(0, 0, speed), timeToArrive)
             end
-        end)
 
         if self.comboCounter <= 2 and self.enemyHumanoid.Health > 10 then
             -- character_attack.level1()

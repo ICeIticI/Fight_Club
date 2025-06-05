@@ -442,10 +442,10 @@ for _, animation in pairs(AnimationInstances) do
     elseif temporaryTrack.Animation:GetAttribute("Paired") then
         temporaryTrack.Priority = Enum.AnimationPriority.Action2
     end
-    print(temporaryTrack, temporaryTrack.Priority)
+    -- print(temporaryTrack, temporaryTrack.Priority)
 
 
-    print(temporaryTrack.Length)
+    -- print(temporaryTrack.Length)
     task.spawn(function()
         
         animation:SetAttribute("Length", temporaryTrack.Length)
@@ -472,6 +472,5 @@ for _, animation in pairs(AnimationInstances) do
         temporaryTrack = nil
     end)
 end
-print("Animations done loading!")
 
 return AnimationInstances

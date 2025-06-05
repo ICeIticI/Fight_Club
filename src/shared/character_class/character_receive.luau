@@ -85,7 +85,6 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_RightUppercutRECEIVER
         end
     elseif trackData.receivingType == "Level2" then
-        print(trackData.attackerAnim)
         if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftHaymaker.AnimationId then
             return AnimationInstances.FC_LeftHaymakerRECEIVER
         elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightHaymaker.AnimationId then
@@ -249,7 +248,6 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
     end
     
     trackData.Animation = getReceiveAnimation(characterInstance, trackData)
-    print(trackData.receivingType)
     trackData.AnimationId = trackData.Animation.AnimationId
 
     if characterInstance.player then

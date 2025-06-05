@@ -19,19 +19,15 @@ Character_Hitboxes.__index = Character_Hitboxes
 local function receive(receiver_characterInstance, attacker_characterInstance)
     -- local currentAttackID = currentAttack.AnimationId
     receiver_characterInstance.attackingChar = attacker_characterInstance.character
-    print("check 1")
     -- if receiver_characterInstance.currentReceiveAnimTRACK and receiver_characterInstance.currentReceiveAnimTRACK.IsPlaying then
     --     receiver_characterInstance.currentReceiveAnimTRACK:Stop()
     -- end
-    print(attacker_characterInstance, attacker_characterInstance.currentAttack_trackData)
     if not receiver_characterInstance.isBlocking then
-        print("check 1.5")
         if receiver_characterInstance.BlockStartAnimPlaying then
             -- If the player gets hit while the blockstart track is playing, then they will perform a parry
             -- handleBlocking(currentAttack)
             receiver_characterInstance:receive("parry", attacker_characterInstance)
             attacker_characterInstance:receive("receiveParry", receiver_characterInstance)
-        print("check 2")
         elseif receiver_characterInstance.Protocol ~= "Counter" -- Checks before countering:
         and receiver_characterInstance.currentAttack_trackData -- Make sure the attack exists for countering
         and receiver_characterInstance.currentAttack_trackData.IsPlaying -- Make sure we are attacking. This anim should be playing before the 'StartOfAttack' marker reaches in order to counter
@@ -42,7 +38,6 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
         and not receiver_characterInstance.isGettingHit -- Should not be possible when getting hit, but I'm sure other checks before would fail if thats the case.. so it may be redundant.
         then
             -- ! If the player is just starting an attack and gets hit, they will counter ! --
-            print("check 3")
             -- handleCounter(currentAttack)
             receiver_characterInstance:repulseAttack("counter", attacker_characterInstance) 
             attacker_characterInstance:receive("counterAttack", receiver_characterInstance)
@@ -50,7 +45,6 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
         elseif not receiver_characterInstance.isCountering
         and attacker_characterInstance.currentAttack_trackData 
         then
-            print("check 4")
                 -- getHit(currentAttack)
             if attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AttackLevel") == 1 then
                 receiver_characterInstance:receive("receiveLevel1", attacker_characterInstance)
@@ -82,7 +76,6 @@ local function attackHandler(characterInstance, enemyInstance) --[[ handles when
 		-- 	-- isAI = true
 		-- 	GlobalRemoteEvent:FireClient(characterInstance.player, currentAttack, otherProtocol, nil, nil, isAI)
 		-- end
-        print("receive reached")
         receive(enemyInstance, characterInstance)
 			
 		task.wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
@@ -127,7 +120,6 @@ function Character_Hitboxes:manageHitboxes()
                 local enemyPlayer = enemyInstance.player
 
                 if not self.characterInstance.isCountering then
-                    print("attackLevel stuff reached")
                     local attackLevel = self.characterInstance.currentAttack_trackData.Animation:GetAttribute("AttackLevel")
                     if attackLevel == 1 then
                         self.characterInstance.Protocol = "Hook"
@@ -138,23 +130,19 @@ function Character_Hitboxes:manageHitboxes()
                     end
                 end
 
-                -- if not self.characterInstance.attackFrames then -- Will wait for an attack to end before attacking again
-                --     print("waiting for attack to end")
-                --     repeat task.wait()
-                --     until self.characterInstance.attackFrames or not self.characterInstance.isAttacking
-                -- end
+                if not self.characterInstance.attackFrames then -- Will wait for an attack to end before attacking again
+                    print("waiting for attack to end...")
+                    repeat task.wait()
+                    until self.characterInstance.attackFrames or not self.characterInstance.isAttacking
+                end
 
-                print(enemyPlayer, self.characterInstance.isAttacking, self.characterInstance.attackFrames)
                 if enemyPlayer and self.characterInstance.isAttacking and self.characterInstance.attackFrames then
-                    warn(self.characterInstance.Protocol)
                     -- self.characterInstance.GlobalRemoteEvent:FireServer(enemyCharacter, self.characterInstance.Protocol, self.characterInstance.currentAttack, self.characterInstance.character.HumanoidRootPart.CFrame, nil, self.characterInstance.isEnemyHoldingBlock, false)
                     
                     -- self.setupHitSFX()
                     -- setupAttackDamage(self.characterInstance)
-                    print("attackHandler reached")
                     attackHandler(self.characterInstance, enemyInstance)
                 -- else
-                --     warn({enemyPlayer, GameVariables.isAttacking, GameVariables.attackFrames})
                 end
             end
         end)

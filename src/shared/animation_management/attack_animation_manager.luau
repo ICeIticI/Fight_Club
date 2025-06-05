@@ -34,6 +34,7 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
 end
 
 local function runOnEndOfAttack(characterInstance, trackData) --[[ When we simulate the end of an attack, this will run to correctly manage the data ]]
+    characterInstance.attackFrames = false
     characterInstance.isAttacking = false
     characterInstance.hitDebounce = false
     characterInstance.canFollowUp = false
@@ -49,9 +50,9 @@ local function runOnEndOfAttack(characterInstance, trackData) --[[ When we simul
     end
 end
 
-local attack1_amountOfTimeBeforeAttackFrames = 0.23 -- the animation marker for StartOfAttack was at 0.14 / 0.60 (1 second).
-local attack1_amountOfTimeBeforeEndOfAttack = 0.45 -- level 1 attacks end 0.45 seconds after the animation begins.
-local attack1_amountOfTimeBeforeEndOFAnimation = 0.75
+-- local attack1_amountOfTimeBeforeAttackFrames = 0.23 -- the animation marker for StartOfAttack was at 0.14 / 0.60 (1 second).
+-- local attack1_amountOfTimeBeforeEndOfAttack = 0.45 -- level 1 attacks end 0.45 seconds after the animation begins.
+-- local attack1_amountOfTimeBeforeEndOFAnimation = 0.75
 
 -- local attack2_amountOfTimeBeforeAttackFrames = 0.52
 -- local attack2_amountOfTimeBeforeEndOfAttack = 1.17
@@ -84,6 +85,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             end
         end)
 
+        self.characterInstance.attackFrames = false -- attackFrames will only be enabled once the "StartOfAttack" marker gets reached.
         self.characterInstance.isAttacking = true
         self.characterInstance.didFollowUp = false
         self.characterInstance.SetSpeed(false)

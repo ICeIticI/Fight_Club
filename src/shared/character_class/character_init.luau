@@ -57,6 +57,8 @@ end
 function Character_Init.init(charModel)
     local characterInstance = {}
 
+	characterInstance.initialized = false -- bool that identifies whether or not the characterInstance finished it's init.
+
     -- define public variables here that the Character will have:
     
     characterInstance.id = nil -- the ID is how the server will identify which character this is when we need to retrieve it from the characters table.
@@ -74,6 +76,8 @@ function Character_Init.init(charModel)
 		characterInstance.lockOnDebounce.Name = "lockOnDebounce"
 		characterInstance.lockOnDebounce.Parent = characterInstance.plrObjectsFolder
 	end
+
+	characterInstance.lockOnDebounce.Value = false
 
 	characterInstance.hitDebounce = false -- if false, then the player has the ability to deal damage. This is so the player won't hit the enemy multiple times in one attack.
 	characterInstance.isBlocking = false -- set to true when the client blocks
@@ -190,29 +194,6 @@ function Character_Init.init(charModel)
 	characterInstance.LocalBindableEvent = Instance.new("BindableEvent")
 	characterInstance.LocalBindableEvent.Name = "LocalBindableEvent"
 	characterInstance.LocalBindableEvent.Parent = game.ReplicatedStorage
-
-	function characterInstance.setSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
-		if bool == true then
-		-- we allow the player the ability to move
-		
-			if characterInstance.pairedPlaying == false and characterInstance.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
-			
-				if not characterInstance.isBlocking then
-					characterInstance.previousWalkSpeed = characterInstance.lockOnSpeed
-				elseif characterInstance.isBlocking then
-					characterInstance.previousWalkSpeed = characterInstance.lockOnSpeed / 1.5
-				end
-					
-				characterInstance.humanoid.WalkSpeed = characterInstance.previousWalkSpeed
-			else
-				characterInstance.humanoid.WalkSpeed = characterInstance.originalWalkSpeed
-			end
-
-		elseif bool == false then
-			-- we take the player's ability to move away
-			characterInstance.humanoid.WalkSpeed = 0
-		end
-	end
 	
 	function characterInstance.boolCheck(boolTable) --[[ Function that will check the given boolean values. If any of them are true, then this will return false. If none of them are true, then this will return true. ]]
 		local trueBoolTbl = {} -- Table that will store bools that are true, which will mean the boolCheck failed
@@ -322,13 +303,14 @@ function Character_Init.init(charModel)
 
 
 	function characterInstance:setLinearVelocity(sentVelocity, sentDuration)
-		characterInstance.humanoidRootPart:WaitForChild("FC_LinearVelocity").VectorVelocity = sentVelocity
-		characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = true
-		task.wait(sentDuration) -- Character will be under said force till duration ends.
-
-		characterInstance.humanoidRootPart.FC_LinearVelocity.VectorVelocity = Vector3.zero
-		characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = false
-
+		task.spawn(function() -- this function should not halt the script
+			characterInstance.humanoidRootPart:WaitForChild("FC_LinearVelocity").VectorVelocity = sentVelocity
+			characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = true
+			task.wait(sentDuration) -- Character will be under said force till duration ends.
+	
+			characterInstance.humanoidRootPart.FC_LinearVelocity.VectorVelocity = Vector3.zero
+			characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = false
+		end)
 	end
 
 	function characterInstance.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. ]]
@@ -374,7 +356,6 @@ function Character_Init.init(charModel)
 	end
 
 	function characterInstance:setupAttackDamage(trackData)
-		warn(trackData)
 		if trackData and trackData.attackLvl == 1 then
 			return A1Damage
 		elseif trackData and trackData.attackLvl == 2 then

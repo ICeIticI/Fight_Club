@@ -4,8 +4,16 @@ local Characters = require(game.ReplicatedStorage.Shared.server_modules.characte
 local Receive_Animation_Management = {}
 
 function Receive_Animation_Management:runOnIsPlaying(trackData)
-    warn(trackData)
     if trackData.IsPlaying then
+
+        -- Schedule a simulation of the end of the receiving animation:
+        task.delay(trackData.Animation:GetAttribute("Length"), function()
+            if trackData.IsPlaying then
+                trackData.IsPlaying = false
+                trackData.Completed = true
+                self.characterInstance.receive_animation_manager:runOnIsPlaying(trackData)
+            end
+        end)
 
         self.characterInstance.isGettingHit = true
         self.characterInstance.canFollowUp = false
@@ -28,7 +36,6 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             ]]
             local enemyCFrame = Characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar).humanoidRootPart.CFrame
             local linearForce = self.characterInstance.humanoidRootPart.CFrame:VectorToObjectSpace(enemyCFrame.LookVector.Unit * 3)
-            warn("yoyoyoooooo")
             self.characterInstance:setLinearVelocity(linearForce, 0.63)
         end
 
@@ -39,7 +46,6 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
 
         
     elseif not trackData.IsPlaying then
-        
         self.characterInstance.reset()
         if not self.characterInstance.isBlockBeingPressed and self.characterInstance.isBlocking then
             self.characterInstance.block(false)

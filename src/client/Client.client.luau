@@ -73,7 +73,6 @@ UserInputService.InputBegan:Connect(function(input)
     then
         local protocol, publicVariables = input_check_FUNCTION:InvokeServer(inputTable, true) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes
         if protocol == "LockOnInput" then
-            print("e")
             -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
             if publicVariables.lockOnDebounce.Value == true then
                 lockOn.Lock(publicVariables)

@@ -4,18 +4,21 @@
 
 ]]
 
+local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+
 local Attack_Animation_Management = {}
 
 local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
-    
+    warn("We is in our attack frames")
     characterInstance.attackFrames = true
     if trackData.Paired_Attribute and trackData.Counter_Attribute then -- counterattack animation
         characterInstance.canCounter = false
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
         if trackData.Counter_Attribute then -- NOTE: Move this to the receiving counter instead so the damage aligns with itself
-            characterInstance.hitCharacter.Humanoid:TakeDamage(characterInstance.attackDamage)
-            characterInstance.playHitSFX()
+           print("yo yo yo doing counter dmggggg!!!:")
+            characterInstance.attackingChar.Humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.playHitSFX(trackData)
         end
 
         -- So I may have lied about below lol:
@@ -92,12 +95,14 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
 
         if trackData.Counter_Attribute == true then 
             -- A level 1 attack played at the time an enemy's attack landed. We transition this into a counter attack.
-            self.characterInstance.setPublicPlayerVariable("canCounter", true)
-            self.characterInstance.isCountering = true
+            self.characterInstance.canCounter = true
+            -- self.characterInstance.isCountering = true
             self.characterInstance.isAttacking = true
-            self.characterInstance.Protocol = "Counter"
-            self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, self.characterInstance.currentAttack)
-            self.characterInstance.Protocol = nil
+            -- self.characterInstance.Protocol = "Counter"
+            -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, self.characterInstance.currentAttack)
+            -- self.characterInstance.Protocol = nil
+            print("Yo we is counterin'")
+            -- self.characterInstance:repulseAttack("counter", Characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar))
         end
     elseif not trackData.IsPlaying then
         

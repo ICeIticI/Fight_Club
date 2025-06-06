@@ -16,6 +16,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         end)
 
         self.characterInstance.isGettingHit = true
+        self.characterInstance.isAttacking = false
         self.characterInstance.canFollowUp = false
         self.characterInstance.SetSpeed(false) -- Prevent the player from moving while being hit
         self.characterInstance.hitDebounce = false

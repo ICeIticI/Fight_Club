@@ -43,10 +43,10 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
         elseif attackType == "CounterAttack" then
             attackType = nil
         
-            if attacker_characterInstance.currentAttack:GetAttribute("AnimDirection") == "Left" then
-                return characterInstance.randomAnimation(characterInstance.AnimationInstances, "AnimDirection", "Left", "Counter", true)
-            elseif attacker_characterInstance.currentAttack:GetAttribute("AnimDirection") == "Right" then
-                return characterInstance.randomAnimation(characterInstance.AnimationInstances, "AnimDirection", "Right", "Counter", true)
+            if attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AnimDirection") == "Left" then
+                return characterInstance.randomAnimation(AnimationInstances, "AnimDirection", "Left", "Counter", true)
+            elseif attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AnimDirection") == "Right" then
+                return characterInstance.randomAnimation(AnimationInstances, "AnimDirection", "Right", "Counter", true)
             end
 
             return warn("No left or right counterattack track found!") -- If we get to this point, then something went wrong
@@ -163,8 +163,9 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
     trackData.AnimationId = trackData.Animation.AnimationId
     if attackLvl == 3 then -- beyond the lvl 1's and 2's:
 
-        trackData.Counter_Attribute = characterInstance.isCountering -- When true, we are countering:
-        trackData.DodgeAttack_Attribute = characterInstance.isDodging
+        trackData.Counter_Attribute = trackData.Animation:GetAttribute("Counter") -- When true, we are countering:
+        trackData.Paired_Attribute = trackData.Animation:GetAttribute("Paired")
+        trackData.DodgeAttack_Attribute = trackData.Animation:GetAttribute("DodgeAttack")
         -- trackData.Animation = characterInstance.currentAttack
 
     end

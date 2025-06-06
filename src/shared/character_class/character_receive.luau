@@ -324,6 +324,7 @@ function Character_Receive:parry(attacker_characterInstance) --[[ Parry an incom
     local trackData = setupReceiveAnimation(self.characterInstance, "Parry", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
+    self.characterInstance.playHitSFX(trackData)
     -- Move the below damage code to the receive parry
     attacker_characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
     self.characterInstance.hitSFX:Play()
@@ -355,7 +356,7 @@ function Character_Receive:receiveLevel1(attacker_characterInstance) --[[ Get hi
     local trackData = setupReceiveAnimation(self.characterInstance, "Level1", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage)
-
+    self.characterInstance.playHitSFX(trackData)
 end
 
 function Character_Receive:receiveLevel2(attacker_characterInstance) --[[ Get hit by a level 2 attack such as haymakers ]]
@@ -372,6 +373,7 @@ function Character_Receive:receiveLevel2(attacker_characterInstance) --[[ Get hi
     local trackData = setupReceiveAnimation(self.characterInstance, "Level2", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage)
+    self.characterInstance.playHitSFX(trackData)
 end
 
 function Character_Receive:receiveLevel3() --[[ Get hit by a level 3 attack, which essentially are executions ]]

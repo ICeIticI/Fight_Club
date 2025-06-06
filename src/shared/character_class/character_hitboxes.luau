@@ -47,6 +47,7 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
         then
                 -- getHit(currentAttack)
             if attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AttackLevel") == 1 then
+                print("receiving lvl 1")
                 receiver_characterInstance:receive("receiveLevel1", attacker_characterInstance)
             elseif attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AttackLevel") == 2 then
                 receiver_characterInstance:receive("receiveLevel2", attacker_characterInstance)
@@ -65,7 +66,7 @@ end
 
 local function attackHandler(characterInstance, enemyInstance) --[[ handles when a character lands an attack ]]
     -- local enemyCurrentAttack = enemyInstance.currentAttack_trackData
-	local hitSFX = characterInstance.player.Character.Torso:FindFirstChild("hitSFX")
+	-- local hitSFX = characterInstance.player.Character.Torso:FindFirstChild("hitSFX")
 	
 	if not enemyInstance.iFrames and not (enemyInstance.currentAttack_trackData and enemyInstance.currentAttack_trackData.Animation:GetAttribute("Counter")) then
 		-- local otherProtocol = "Receive"

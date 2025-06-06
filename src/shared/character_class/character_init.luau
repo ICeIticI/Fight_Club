@@ -388,6 +388,44 @@ function Character_Init.init(charModel)
 	end
 
 
+	local hitCacheTable = {}
+	for _ = 1, 3 do -- caching 3 different sounds so in quick progression of gettin hit, the SFX wont just cut, which would be noticeable
+		local newSound = Instance.new("Sound")
+		newSound.Name = "hitSFX"
+		newSound.Parent = characterInstance.character.Torso
+		table.insert(hitCacheTable, newSound)
+	end
+
+	local SFXTable = {
+		"rbxassetid://9118617342",
+		"rbxassetid://82209688846366",
+		"rbxassetid://5507815764"
+	}
+
+	function characterInstance.playHitSFX(trackData)
+		local soundId
+		if trackData.receivingType == "Level1" or trackData.Paired_Attribute then
+			soundId = SFXTable[math.random(1, #SFXTable)]
+		elseif trackData.receivingType == "Level2" then
+			soundId = "rbxassetid://112444846023457"
+		end
+
+		if not soundId then 
+			warn("Current trackData: ")
+			print(trackData)
+			return error("playHitSFX function: The specified attack level of the given trackData isn't specified to get a sound for the hit SFX.") 
+		end
+		
+		local i, sfx = next(hitCacheTable)
+		sfx.SoundId = soundId
+		sfx:Play()
+		-- Removing & re-inserting the sound object into the table pushes it to the end so it doesn't get drawn back-to-back on SFX plays:
+		table.remove(hitCacheTable, i)
+		table.insert(hitCacheTable, sfx)
+	end
+
+
+	
 	if characterInstance.player ~= nil then
 		characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "createAnimationTracks")
 	else -- not a player. We wanna create animations on server

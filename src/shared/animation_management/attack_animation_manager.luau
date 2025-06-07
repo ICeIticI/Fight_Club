@@ -9,14 +9,12 @@ local Characters = require(game.ReplicatedStorage.Shared.server_modules.characte
 local Attack_Animation_Management = {}
 
 local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
-    warn("We is in our attack frames")
     characterInstance.attackFrames = true
     if trackData.Paired_Attribute and trackData.Counter_Attribute then -- counterattack animation
         characterInstance.canCounter = false
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
         if trackData.Counter_Attribute then -- NOTE: Move this to the receiving counter instead so the damage aligns with itself
-           print("yo yo yo doing counter dmggggg!!!:")
             characterInstance.attackingChar.Humanoid:TakeDamage(characterInstance.attackDamage)
             characterInstance.playHitSFX(trackData)
         end
@@ -101,7 +99,6 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- self.characterInstance.Protocol = "Counter"
             -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, self.characterInstance.currentAttack)
             -- self.characterInstance.Protocol = nil
-            print("Yo we is counterin'")
             -- self.characterInstance:repulseAttack("counter", Characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar))
         end
     elseif not trackData.IsPlaying then
@@ -123,6 +120,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             self.characterInstance.isAttacking = false
         end
 
+        self.characterInstance.currentAttack_trackData = nil
         self.characterInstance.attackFrames = false
         self.characterInstance.pairedPlaying = false
         self.characterInstance.SetSpeed(true)

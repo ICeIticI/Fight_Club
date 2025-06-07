@@ -198,6 +198,8 @@ local function playAttackAnimation(characterInstance, trackData) --[[ Responsibl
     trackData.IsPlaying = true
     characterInstance.manageAnimation(trackData)
     characterInstance.lastAttackData = trackData
+    -- characterInstance.currentAttack_trackData = nil
+    print(trackData.Animation)
     
 end
 
@@ -284,7 +286,6 @@ function Character_Attack:counterAttack(attacker_characterInstance) --[[ Perform
     local trackData = setupAttackAnimation(3, self.characterInstance, attacker_characterInstance)
     playAttackAnimation(self.characterInstance, trackData)
 
-    print("counter attack")
     -- if not self.characterInstance.isCountering then
         -- self.characterInstance.randAttack:Stop() -- NOTE: Needs to be done on the client
         

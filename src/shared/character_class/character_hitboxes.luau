@@ -47,7 +47,6 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
         then
                 -- getHit(currentAttack)
             if attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AttackLevel") == 1 then
-                print("receiving lvl 1")
                 receiver_characterInstance:receive("receiveLevel1", attacker_characterInstance)
             elseif attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AttackLevel") == 2 then
                 receiver_characterInstance:receive("receiveLevel2", attacker_characterInstance)
@@ -132,7 +131,7 @@ function Character_Hitboxes:manageHitboxes()
                 end
 
                 if not self.characterInstance.attackFrames then -- Will wait for an attack to end before attacking again
-                    print("waiting for attack to end...")
+                    -- print("waiting for attack to end...")
                     repeat task.wait()
                     until self.characterInstance.attackFrames or not self.characterInstance.isAttacking
                 end

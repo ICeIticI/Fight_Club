@@ -182,7 +182,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                             ]]
                         end
                         characterInstance:basicAttack(enemyInstance) -- followup attack
-                        print(characterInstance.followUpCount)
                     end
                     characterInstance.waitingToAttack = false
                 end

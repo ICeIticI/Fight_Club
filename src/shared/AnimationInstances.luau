@@ -432,7 +432,6 @@ for _, animation in pairs(AnimationInstances) do
     while temporaryTrack.Length == 0 do task.wait() end -- When an animation track isnt fully loaded, its Length property will be 0. Plus we need the length anyways
     if temporaryTrack.Looped then 
         animation:SetAttribute("Looped", true)
-        warn(temporaryTrack.Animation.Name .. " got skipped since its looped")
         continue 
     end
 

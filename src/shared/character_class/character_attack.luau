@@ -42,7 +42,6 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
 
         elseif attackType == "CounterAttack" then
             attackType = nil
-        
             if attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AnimDirection") == "Left" then
                 return characterInstance.randomAnimation(AnimationInstances, "AnimDirection", "Left", "Counter", true)
             elseif attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AnimDirection") == "Right" then
@@ -170,6 +169,9 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
 
     end
 
+    if trackData.Animation:GetAttribute("Counter") then
+        warn("The enemy threw a " .. tostring(enemy_characterInstance.currentAttack_trackData.Animation) .. " , so we are countering with a " ..tostring(trackData.Animation))
+    end
     characterInstance.currentAttack_trackData = trackData
     characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
 
@@ -199,7 +201,6 @@ local function playAttackAnimation(characterInstance, trackData) --[[ Responsibl
     characterInstance.manageAnimation(trackData)
     characterInstance.lastAttackData = trackData
     -- characterInstance.currentAttack_trackData = nil
-    print(trackData.Animation)
     
 end
 

@@ -218,20 +218,39 @@ function Character_Init.init(charModel)
     	local randAttackTbl = {}
 
 		for _, v in pairs(animFolder) do
+			
 			if
-			(
-				attribute1 == nil 
-				or (a1Value ~= nil 
-				and v:GetAttribute(attribute1) == a1Value) 
-				or (v:GetAttribute(attribute1) 
-				and a1Value == nil)) 
-				and 
-				(attribute2 == nil 
-				or (a2Value ~= nil 
-				and v:GetAttribute(attribute2) == a2Value) 
-				or (v:GetAttribute(attribute2) 
-				and a2Value == nil)
-			) 
+				( -- Below basically sees if the first attribute exists, and if it does, then it must equal it's given value (if any), otherwise it can be anything
+					(
+						attribute1 == nil
+					)
+					or 
+					(
+						a1Value ~= nil 
+						and v:GetAttribute(attribute1) == a1Value
+					) 
+					or 
+					(
+						v:GetAttribute(attribute1) 
+						and a1Value == nil
+					)
+				) 
+			and 
+				( -- Same for the first attribute, but for the second this time
+					(
+						attribute2 == nil
+					)
+					or 
+					(
+						a2Value ~= nil 
+						and v:GetAttribute(attribute2) == a2Value
+					) 
+					or 
+					(
+						v:GetAttribute(attribute2) 
+						and a2Value == nil
+					)
+				) 
 
 			then
 				table.insert(randAttackTbl, v)

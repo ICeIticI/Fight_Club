@@ -120,7 +120,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             self.characterInstance.isAttacking = false
         end
 
-        self.characterInstance.currentAttack_trackData = nil
+        -- self.characterInstance.currentAttack_trackData = nil
         self.characterInstance.attackFrames = false
         self.characterInstance.pairedPlaying = false
         self.characterInstance.SetSpeed(true)

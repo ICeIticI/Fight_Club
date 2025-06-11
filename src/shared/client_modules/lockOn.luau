@@ -45,7 +45,7 @@ function LockOn.Lock(publicVariables)
 	for varName, value in pairs(publicVariables) do
 		ClientVariables[varName] = value
 	end
-
+--[[
     -- local rayParams = RaycastParams.new()
 	-- 		rayParams.FilterDescendantsInstances = ClientVariables.character:GetChildren()
 	-- 		rayParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -84,8 +84,11 @@ function LockOn.Lock(publicVariables)
 		-- setup stuff:
 		
 		-- ClientVariables.enemyHumanoidRootPart = ClientVariables.raycastResult.Instance.Parent:WaitForChild("HumanoidRootPart")
+
+]]
 		
 	ClientVariables.FC_IdleTRACK:Play()
+	print("playin idle")
 	
 	-- character changes below:
 	ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
@@ -144,11 +147,13 @@ function LockOn.Unlock()
 
 	if not workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 7, ClientVariables.rayParams) then -- When the while loop above ends, we want to check if its because the player got too far. If so, then we want to set the lockOnDebounce to false
 		ClientVariables.lockOnDebounce.Value = false
+		print("nun found")
 	end
 	-- end
 	
 	if ClientVariables.lockOnDebounce.Value == false then
 		-- Stop locking onto enemy
+		print("stop the lock on")
 		
 		ClientVariables.stopAnimations()
 		

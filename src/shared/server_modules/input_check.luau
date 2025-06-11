@@ -40,60 +40,98 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             rayParams.FilterDescendantsInstances = characterInstance.character:GetChildren()
             rayParams.FilterType = Enum.RaycastFilterType.Exclude
             
-            characterInstance.raycastResult =
-            workspace:Raycast(characterInstance.humanoidRootPart.Position,
-                                characterInstance.humanoidRootPart.CFrame.LookVector * 8,
-                                rayParams) -- Raycast in front of player to find an enemy
-            -- print(characterInstance.character.Humanoid.Health)            
-            -- if not characterInstance.raycastResult then
-            --     warn("nothing in the raycast result found")
-            -- else
-            --     warn({characterInstance.isAttacking,
-            --     characterInstance.isGettingHit,
-            --     characterInstance.pairedPlaying, 
-            --     characterInstance.isDodging,
-            --     characterInstance.isBlocking, 
-            --     characterInstance.waitingToAttack}, characterInstance.raycastResult.Instance, characterInstance.raycastResult.Instance.Parent)
-            -- end
+            characterInstance.raycastResult = workspace:Raycast(
+                characterInstance.humanoidRootPart.Position,
+                characterInstance.humanoidRootPart.CFrame.LookVector * 8,
+                rayParams
+            ) -- Raycast in front of player to find an enemy
+            
+            print(characterInstance.character.Humanoid.Health)            
+            if not characterInstance.raycastResult then
+                characterInstance.lockOnDebounce.Value = false
+                return warn("nothing in the raycast result found")
+            else
+                warn(
+                    {
+                    not characterInstance.isAttacking.Value,
+                    not characterInstance.isGettingHit,
+                    not characterInstance.pairedPlaying, 
+                    not characterInstance.isDodging,
+                    not characterInstance.isBlocking, 
+                    not characterInstance.waitingToAttack,
+                    not characterInstance.lockOnDebounce.Value
+                },
+                characterInstance.raycastResult.Instance, 
+                characterInstance.raycastResult.Instance.Parent,
+                characterInstance.raycastResult.Instance.Parent.Parent
+            )
+            end
+            
+            -- if not characterInstance.raycastResult then return warn("No result") end
+
+            if characterInstance.raycastResult.Instance.Parent:FindFirstChildWhichIsA("Humanoid") then
+                characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
+            elseif characterInstance.raycastResult.Instance.Parent.Parent:FindFirstChildWhichIsA("Humanoid") or characterInstance.raycastResult.Instance:GetAttribute("ReceiveBox") then
+                characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent.Parent
+            end
 
             if not characterInstance.lockOnDebounce.Value -- can't be locked on already
-            and characterInstance.raycastResult
-            and not characterInstance.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") 
-            and (characterInstance.raycastResult.Instance) and (characterInstance.raycastResult.Instance.Parent:FindFirstChild("Humanoid") or characterInstance.raycastResult.Instance:GetAttribute("ReceiveBox"))
+            and characterInstance.enemyChar
+            and not characterInstance.raycastResult.Instance.Parent:GetAttribute("TavernKeeper")
+            and characterInstance.raycastResult.Instance 
             then -- We found an alive enemy to lock onto (thats not the tavern keeper).
-
-                characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
-                characterInstance.enemyHumanoid = characterInstance.enemyChar:FindFirstChild("Humanoid")
-                    characterInstance.lockOnDebounce.Value = not characterInstance.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
-                    
-                    
-                if not game.Players:GetPlayerFromCharacter(characterInstance.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
-                    if characterInstance.enemyChar.Name == "TestDummy" then
-                        characterInstance.LocalBindableEvent:Fire(characterInstance.lockOnDebounce)
-                    end
-                end
                 
-            elseif (characterInstance.lockOnDebounce.Value) or (characterInstance.raycastResult == nil and characterInstance.lockOnDebounce.Value == true) then -- no enemy detected by raycast
+                -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
+                characterInstance.enemyHumanoid = characterInstance.enemyChar:FindFirstChild("Humanoid")
+                characterInstance.lockOnDebounce.Value = not characterInstance.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
+                    
+                    
+                -- if not game.Players:GetPlayerFromCharacter(characterInstance.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
+                --     if characterInstance.enemyChar.Name == "TestDummy" then
+                --         characterInstance.LocalBindableEvent:Fire(characterInstance.lockOnDebounce)
+                --     end
+                -- end
+                
+            elseif (
+                characterInstance.lockOnDebounce.Value
+            ) or (
+                characterInstance.raycastResult == nil
+                and characterInstance.lockOnDebounce.Value == true
+            ) 
+            then -- no enemy detected by raycast
+               
                 characterInstance.lockOnDebounce.Value = false
                 
             end
         
             -- GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value
             
-        
-            if (characterInstance.lockOnDebounce.Value == true and characterInstance.raycastResult.Instance.Parent:FindFirstChild("Humanoid")) 
-            or (characterInstance.isGettingHit and not characterInstance.lockOnDebounce.Value) 
+            if (
+                characterInstance.lockOnDebounce.Value == true 
+                -- and characterInstance.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
+            ) or (
+                characterInstance.isGettingHit 
+                and not characterInstance.lockOnDebounce.Value
+            ) 
             then -- Runs when the player locks onto somebody
-                characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
+                print(characterInstance.lockOnDebounce.Value)
+                -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
                 characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
                 characterInstance.SetSpeed(true)
             -- Passed the lock-on check. Activate the lock-on code:
+
+                print({lockOnDebounce = characterInstance.lockOnDebounce, 
+                enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart,
+                enemyHumanoid = characterInstance.enemyHumanoid,
+                rayParams = rayParams})
+
                 return "LockOnInput", {
                     lockOnDebounce = characterInstance.lockOnDebounce, 
                     enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart,
                     enemyHumanoid = characterInstance.enemyHumanoid,
                     rayParams = rayParams
                 }
+
             end
 
             if characterInstance.lockOnDebounce.Value == false 
@@ -101,10 +139,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                                 characterInstance.humanoidRootPart.CFrame.LookVector * 7,
                                 rayParams) 
             then
+                print("this runs.. doesn't it?..")
                 characterInstance.lockOnDebounce.Value = false
                 characterInstance.SetSpeed(true)
+                characterInstance.enemyChar = nil
                 return "LockOnInput", {
-                    lockOnDebounce = characterInstance.lockOnDebounce, 
+                    lockOnDebounce = characterInstance.lockOnDebounce
                 }
             end
         end

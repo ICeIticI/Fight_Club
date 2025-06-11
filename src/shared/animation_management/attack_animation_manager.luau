@@ -91,7 +91,8 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         self.characterInstance.didFollowUp = false
         self.characterInstance.SetSpeed(false)
 
-        if trackData.Counter_Attribute == true then 
+        if trackData.Counter_Attribute == true then
+            self.characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = false
             -- A level 1 attack played at the time an enemy's attack landed. We transition this into a counter attack.
             self.characterInstance.canCounter = true
             -- self.characterInstance.isCountering = true
@@ -124,6 +125,10 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         self.characterInstance.attackFrames = false
         self.characterInstance.pairedPlaying = false
         self.characterInstance.SetSpeed(true)
+        
+        -- if self.currentAttack_trackData == trackData then
+        --     self.currentAttack_trackData = nil
+        -- end
     end
 end
 

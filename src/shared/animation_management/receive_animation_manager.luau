@@ -69,6 +69,11 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         self.characterInstance.attackTrack:Stop()
     end
 
+    -- stop linear velocity if its playing thats not in response to a haymaker:
+    if not (trackData.AnimationId == AnimationInstances.FC_RightHaymakerRECEIVER.AnimationId or trackData.AnimationId == AnimationInstances.FC_LeftHaymakerRECEIVER.AnimationId) then
+        self.characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = false
+    end
+
     if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
         -- Handle bracing blocks
         if not trackData.IsPlaying then

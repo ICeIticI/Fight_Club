@@ -313,7 +313,6 @@ function Character_Init.init(charModel)
 
 	function characterInstance.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
 		if bool == true then
-			print("giving back speed")
 			-- we allow the player the ability to move
 
 			if characterInstance.pairedPlaying == false and characterInstance.lockOnDebounce.Value then -- if the player isn't in a paired animation, then
@@ -330,7 +329,6 @@ function Character_Init.init(charModel)
 			end
 
 		elseif bool == false then
-			print("taking away speed")
 			-- we take the player's ability to move away
 			characterInstance.humanoid.WalkSpeed = 0
 		end

@@ -9,13 +9,16 @@ local attackType -- When we call an attack function (such as :level1()), we will
 local function getAnimation(characterInstance, trackData, attacker_characterInstance) --[[ Returns a randomly-chosen animation with the given data about what our animation is planned to be (trackData). Level 3 attacks may need the enemy's characterInstance to see what attack they're doing before getting our own ]]
     if trackData.attackLvl == 1 then
         
-        if not trackData.attackId  then
+        if not characterInstance.currentAttack_trackData then
+            warn("random anim")
             return characterInstance.randomAnimation(AnimationInstances, "AttackSeries", trackData.attackType)
         else
+            warn("not-so random anim")
             local sameAttackChance = math.random(1, 100)
-            if sameAttackChance > 10 or trackData.attackType == "Uppercuts" then
+            if sameAttackChance > 10 or characterInstance.currentAttack_trackData.attackType == "Uppercuts" then
+                -- opposite attack of the same attack type
                 for _, v in pairs(AnimationInstances) do
-                    if v.AnimationId ~= trackData.attackId and v:GetAttribute("AttackSeries") == trackData.attackType then
+                    if v.AnimationId ~= characterInstance.currentAttack_trackData.AnimationId and v:GetAttribute("AttackSeries") == characterInstance.currentAttack_trackData.attackType then
                         return v
                         -- warn("Random attack track found.")
                         -- break
@@ -23,6 +26,9 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
                 end
                 -- moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", trackData.attackType)
                 -- print(moduleTbl.attackTrack)
+            else
+                -- same attack as last time
+                return characterInstance.currentAttack_trackData.Animation -- use the previous attack animation because we got the random chance of doing same attack again.
             end
         end
     
@@ -115,7 +121,8 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
         end
     end
     
-    return warn("No Animation found with the given data: " .. tostring(characterInstance) .." , " ..tostring(trackData) .. " , " .. tostring(attacker_characterInstance))
+    warn(trackData)
+    return warn("^ No Animation found with the given trackData ^")
 end
 
 local function setupTrackData(attackLvl) --[[ Because tracks are played on the client, we kinda just have to replicate the attributes of the track when forming the animation here on the server. ]]
@@ -153,6 +160,7 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
 
     if characterInstance.comboCounter == 0 then -- Randomize attackType for a new combo:
         -- Store the current attackType in characterInstance so it doesn't get forgotten when we attack in the future (for throwing the same type of attack again. If we throw a hook, we wanna followup with another hook):
+        characterInstance.currentAttack_trackData = nil
         characterInstance.attackType = setRandomAttackType(characterInstance.didFollowUp)
 
     end

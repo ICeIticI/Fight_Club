@@ -29,7 +29,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
 
-        if not characterInstance.isAttacking 
+        if not characterInstance.isAttacking.Value
         and not characterInstance.isGettingHit 
         and not characterInstance.pairedPlaying 
         and not characterInstance.isDodging
@@ -131,7 +131,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                     end
 
                     -- do the dodge attack (if not already):
-                    if not characterInstance.isAttacking then
+                    if not characterInstance.isAttacking.Value then
                         characterInstance:repulseAttack("dodge", enemyInstance)
                         enemyInstance:receive("dodgeAttack", characterInstance)
                     end
@@ -144,7 +144,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                     characterInstance.pairedChain += 1
                 end
-                if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
+                if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
                 and not characterInstance.waitingToAttack 
                 and not characterInstance.canFollowUp 
                 and not characterInstance.pairedPlaying 
@@ -170,7 +170,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 elseif characterInstance.canFollowUp then
                     characterInstance.waitingToAttack = true
                     characterInstance.didFollowUp = true -- when true, the character did a followup attack
-                    while characterInstance.isAttacking do
+                    while characterInstance.isAttacking.Value do
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then
@@ -195,7 +195,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
         
         if characterInstance.lockOnDebounce.Value 
-        and characterInstance.boolCheck({characterInstance.isAttacking, characterInstance.isBlocking, characterInstance.isCountering}) 
+        and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering}) 
         and not characterInstance.pairedPlaying
         and characterInstance.stamina and characterInstance.stamina.Value > 0 then
             characterInstance:block(true)
@@ -217,7 +217,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         characterInstance.holdingBlock) 
         and not characterInstance.pairedPlaying
         and not characterInstance.waitingToAttack 
-        and not characterInstance.isAttacking 
+        and not characterInstance.isAttacking.Value
         and not characterInstance.isDodging
         then
             characterInstance:block(false)

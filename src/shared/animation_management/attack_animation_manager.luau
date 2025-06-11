@@ -36,8 +36,8 @@ end
 
 local function runOnEndOfAttack(characterInstance, trackData) --[[ When we simulate the end of an attack, this will run to correctly manage the data ]]
     characterInstance.attackFrames = false
-    characterInstance.isAttacking = false
-    characterInstance.hitDebounce = false
+    characterInstance.isAttacking.Value = false
+    -- characterInstance.hitDebounce = false
     characterInstance.canFollowUp = false
 
     if not trackData.Paired_Attribute then
@@ -87,7 +87,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         end)
 
         self.characterInstance.attackFrames = false -- attackFrames will only be enabled once the "StartOfAttack" marker gets reached.
-        self.characterInstance.isAttacking = true
+        self.characterInstance.isAttacking.Value = true
         self.characterInstance.didFollowUp = false
         self.characterInstance.SetSpeed(false)
 
@@ -95,7 +95,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- A level 1 attack played at the time an enemy's attack landed. We transition this into a counter attack.
             self.characterInstance.canCounter = true
             -- self.characterInstance.isCountering = true
-            self.characterInstance.isAttacking = true
+            self.characterInstance.isAttacking.Value = true
             -- self.characterInstance.Protocol = "Counter"
             -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, self.characterInstance.currentAttack)
             -- self.characterInstance.Protocol = nil
@@ -114,10 +114,10 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         end
 
         if trackData.Paired_Attribute == true and trackData.Completed then
-            task.delay(0.5, function()
-                self.characterInstance.hitDebounce = false
-            end)
-            self.characterInstance.isAttacking = false
+            -- task.delay(0.5, function()
+            --     self.characterInstance.hitDebounce = false
+            -- end)
+            self.characterInstance.isAttacking.Value = false
         end
 
         -- self.characterInstance.currentAttack_trackData = nil

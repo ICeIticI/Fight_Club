@@ -48,7 +48,7 @@ end
 
 function LockOnSystem.LockOn()
 
-	if not GameVariables.isAttacking 
+	if not GameVariables.isAttacking.Value
 	and not GameVariables.isGettingHit 
 	and not GameVariables.pairedPlaying 
 	and not GameVariables.getPublicPlayerInstance(GameVariables.player.Name)["isDodging"] 

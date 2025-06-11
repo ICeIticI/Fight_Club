@@ -79,7 +79,7 @@ end
 function Animation_Centric.setupAttackAnimation(moduleTbl, trackData) --[[ Will setup an attack. Execute after using the .playAttackAnimation() ]]
                                                 -- AttackTbl would be the table of attacks, such as attack1Tbl or attack2Tbl
     
-    if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying and not moduleTbl.isAttacking then
+    if moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
         moduleTbl.attackTrack:Stop()
     end
     if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
@@ -104,7 +104,7 @@ function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
     if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
         moduleTbl.currentReceiveAnimTRACK:Stop()
     end
-    if moduleTbl.attackTrack and moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying and not moduleTbl.isAttacking then
+    if moduleTbl.attackTrack and moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
         moduleTbl.attackTrack:Stop()
     end
 

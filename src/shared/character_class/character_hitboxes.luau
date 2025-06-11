@@ -94,30 +94,45 @@ local function attackHandler(characterInstance, enemyInstance) --[[ handles when
 end
 
 
+local potentialEnemyChar -- when attacking and hit something, this will store what could potentially be a charcter, if any.
+local potentialEnemyInstance -- if the potentialEnemyChar is in fact a character and has a characterInstance
+
 function Character_Hitboxes:manageHitboxes()
     for _, v in pairs(self.characterInstance.attackHitboxes) do
+        
         local touchedConnection = v.Touched:Connect(function(touchedObject)
+            if self.characterInstance.isAttacking.Value then -- Begin checling for potentialEnemy stuff only if we're attacking, otherwise it'll check for every single .Touched no matter the circumstance, which is very processing.
+                potentialEnemyChar = touchedObject.Parent.Parent
+                potentialEnemyInstance = Characters:GetCharacterObjectByCharacter(potentialEnemyChar)
+                -- print(potentialEnemyInstance.hitDebounce[self.characterInstance.id])
+            end
+        
             -- print
             -- (
-            -- self.characterInstance.isAttacking, 
-            -- not self.characterInstance.hitDebounce,
+            -- self.characterInstance.isAttacking.Value,
             -- touchedObject:GetAttribute("ReceiveBox"),
-            -- touchedObject.Parent.Parent:FindFirstChild("Humanoid"),
-            -- self.characterInstance.currentAttack,
+            -- potentialEnemyInstance ~= nil,
+            -- not potentialEnemyInstance.hitDebounce,
+            -- self.characterInstance.currentAttack_trackData,
             -- not touchedObject:IsAncestorOf(self.characterInstance.character)
             -- )
-            
-            if self.characterInstance.isAttacking 
-            and not self.characterInstance.hitDebounce 
+        
+            if self.characterInstance.isAttacking.Value 
             and touchedObject:GetAttribute("ReceiveBox")
-            and touchedObject.Parent.Parent:FindFirstChild("Humanoid")
+            and potentialEnemyInstance ~= nil
             and self.characterInstance.currentAttack_trackData
-            and not touchedObject:IsAncestorOf(self.characterInstance.character) 
+            and not touchedObject:IsAncestorOf(self.characterInstance.character)
+            and not potentialEnemyInstance.hitDebounce[self.characterInstance.id]
             then
-                self.characterInstance.hitDebounce = true
-                local enemyCharacter = touchedObject.Parent.Parent
-                local enemyInstance = Characters:GetCharacterObjectByCharacter(enemyCharacter)
+                potentialEnemyInstance.hitDebounce[self.characterInstance.id] = true
+                
+                local enemyInstance = potentialEnemyInstance
                 local enemyPlayer = enemyInstance.player
+
+
+                -- cleanup the potentialEnemy stuff so irrelevant data doesn't get used for future attacks:
+                potentialEnemyChar = nil
+                potentialEnemyInstance = nil
 
                 if not self.characterInstance.isCountering then
                     local attackLevel = self.characterInstance.currentAttack_trackData.Animation:GetAttribute("AttackLevel")
@@ -133,10 +148,10 @@ function Character_Hitboxes:manageHitboxes()
                 if not self.characterInstance.attackFrames then -- Will wait for an attack to end before attacking again
                     -- print("waiting for attack to end...")
                     repeat task.wait()
-                    until self.characterInstance.attackFrames or not self.characterInstance.isAttacking
+                    until self.characterInstance.attackFrames or not self.characterInstance.isAttacking.Value
                 end
 
-                if enemyPlayer and self.characterInstance.isAttacking and self.characterInstance.attackFrames then
+                if enemyPlayer and self.characterInstance.isAttacking.Value and self.characterInstance.attackFrames then
                     -- self.characterInstance.GlobalRemoteEvent:FireServer(enemyCharacter, self.characterInstance.Protocol, self.characterInstance.currentAttack, self.characterInstance.character.HumanoidRootPart.CFrame, nil, self.characterInstance.isEnemyHoldingBlock, false)
                     
                     -- self.setupHitSFX()

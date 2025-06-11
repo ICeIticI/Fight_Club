@@ -16,10 +16,9 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         end)
 
         self.characterInstance.isGettingHit = true
-        self.characterInstance.isAttacking = false
+        self.characterInstance.isAttacking.Value = false
         self.characterInstance.canFollowUp = false
         self.characterInstance.SetSpeed(false) -- Prevent the player from moving while being hit
-        self.characterInstance.hitDebounce = false
 
         if trackData.Counter_Attribute then
             task.wait(0.4)
@@ -47,6 +46,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
 
         
     elseif not trackData.IsPlaying then
+        -- self.characterInstance.hitDebounce = false
         self.characterInstance.reset()
         if not self.characterInstance.isBlockBeingPressed and self.characterInstance.isBlocking then
             self.characterInstance.block(false)

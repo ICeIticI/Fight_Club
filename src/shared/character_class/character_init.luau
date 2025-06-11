@@ -1,6 +1,7 @@
 local Character_Init = {}
 Character_Init.__index = Character_Init
 local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
+local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
 local function createHitbox(bodyPart, characterInstance) --[[ Function that will create a hitbox of a given part for a given player ]]
 
@@ -79,9 +80,55 @@ function Character_Init.init(charModel)
 
 	characterInstance.lockOnDebounce.Value = false
 
-	characterInstance.hitDebounce = false -- if false, then the player has the ability to deal damage. This is so the player won't hit the enemy multiple times in one attack.
+	characterInstance.hitDebounce = {} -- Dictates whether or not we can take damage. This will ideally be a table of characters who hit us, and their name gets removed after their attack is finished.
+	characterInstance.hitDebounce_metatable = {
+
+		__newindex = function(t, i, v) -- runs when a table value gets changed that does NOT exist
+			print("yoyoyo __newindex")
+			if v == true then
+				
+				local isAttacking = Characters:GetCharacterObjectById(i).isAttacking
+				isAttacking:GetPropertyChangedSignal("Value"):Connect(function()
+					t[i] = false
+				end)
+				
+				rawset(t, i, v)
+				print(t[i], t)
+
+			elseif v == false then
+				print("enemy is no-longer attacking. Removing enemy from hitDebounce table...")
+				rawset(t, i, nil)
+			end
+		end
+
+		-- __index = function(t, i) -- runs when hitDebounce tries to access a value that doesn't exist. The table will initially be empty so every index will have to run
+		-- 	-- 'i' should be a characterInstance ID
+		-- 	if not i or not type(i) == "number" then
+		-- 		return warn("the hitDebounce table should only take characterInstance IDs as indexes. However, the index attempted is: " .. tostring(i))
+		-- 	end
+
+		-- 	-- local isAttacking = Characters:GetCharacterObjectById(i).isAttacking
+		-- 	-- local connection
+		-- 	-- warn(isAttacking.Value)
+		-- 	-- if isAttacking.Value and not connection then
+		-- 		-- print("we attckn")
+		-- 		-- t[i] = true
+		-- 		-- connection = isAttacking:GetPropertyChangedSignal("Value"):Connect(function()
+		-- 			print("we no longer attcn")
+		-- 			-- t[i] = nil
+		-- 			-- connection:Disconnect()
+		-- 		-- end)
+		-- 	-- end
+
+		-- 	return nil -- this __index runs because we tried indexing something thats not there.. meaning theres no hitDebounce for this character already.
+		-- end
+	}
+
+	setmetatable(characterInstance.hitDebounce, characterInstance.hitDebounce_metatable)
+	
 	characterInstance.isBlocking = false -- set to true when the client blocks
-	characterInstance.isAttacking = false
+	characterInstance.isAttacking = Instance.new("BoolValue")
+	characterInstance.isAttacking.Value = false
 	characterInstance.isCountering = false
 	characterInstance.isGettingHit = false
 	characterInstance.waitingToAttack = false
@@ -295,7 +342,10 @@ function Character_Init.init(charModel)
 		characterInstance.isGettingHit = false
 		
 		characterInstance.canFollowUp = false
-		characterInstance.hitDebounce = false
+		
+		-- characterInstance.hitDebounce = {}
+		-- setmetatable(characterInstance.hitDebounce_metatable) --re-applying the metatable after clearing the table so it can be given back its metatable functionality.
+		
 		characterInstance.attackFrames = false
 		characterInstance.waitingToAttack = false
 		
@@ -305,7 +355,7 @@ function Character_Init.init(charModel)
 			-- self.currentAttack = nil
 		characterInstance.followUpCount = 0
 		characterInstance.comboCounter = 0
-		characterInstance.isAttacking = false
+		characterInstance.isAttacking.Value = false
 		characterInstance.canSyncBlock = true
 		characterInstance.pairedPlaying = false
 		characterInstance.pairedChain = 0

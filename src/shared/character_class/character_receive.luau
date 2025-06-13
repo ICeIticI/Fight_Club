@@ -284,6 +284,7 @@ function Character_Receive:bracingBlock(attacker_characterInstance) --[[ Block a
 
     local trackData = setupReceiveAnimation(self.characterInstance, "bracingBlock", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
+    self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
 end
 
 function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an enemy attack in smooth syncronization ]]

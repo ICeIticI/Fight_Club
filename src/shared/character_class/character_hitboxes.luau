@@ -85,12 +85,12 @@ local function attackHandler(attacker_characterInstance, receiver_characterInsta
         print("receivin")
         receive(receiver_characterInstance, attacker_characterInstance)
 			
-		task.wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
+		-- task.wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
 		receiver_characterInstance.enemyCFrame = attacker_characterInstance.humanoidRootPart.CFrame -- We want to know where the enemy is when they hit us so we can repel the opposite direction
 			
-		if receiver_characterInstance.isBlocking then
-			attacker_characterInstance.attackDamage = attacker_characterInstance.attackDamage/2
-		end
+		-- if receiver_characterInstance.isBlocking then
+		-- 	attacker_characterInstance.attackDamage = attacker_characterInstance.attackDamage/2
+		-- end
 
 		-- if attackDamage and not enemyInstance.canCounter then
 		-- 	enemyInstance.humanoid:TakeDamage(attackDamage)
@@ -121,7 +121,7 @@ function Character_Hitboxes:manageHitboxes()
                 --     not touchedObject:IsAncestorOf(self.characterInstance.character),
                 --     not potentialEnemyInstance.hitDebounce[self.characterInstance.id]
                 -- )
-                print(potentialEnemyInstance.character.Name, potentialEnemyInstance.hitDebounce)
+                -- print(potentialEnemyInstance.character.Name, potentialEnemyInstance.hitDebounce)
             end
         
             if self.characterInstance.isAttacking.Value 

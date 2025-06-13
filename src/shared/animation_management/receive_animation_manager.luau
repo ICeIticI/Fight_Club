@@ -4,6 +4,7 @@ local Characters = require(game.ReplicatedStorage.Shared.server_modules.characte
 local Receive_Animation_Management = {}
 
 function Receive_Animation_Management:runOnIsPlaying(trackData)
+    
     if trackData.IsPlaying then
 
         -- Schedule a simulation of the end of the receiving animation:
@@ -56,7 +57,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
             -- Wait before allowing sync blocks again
             task.wait(1)
-            if not AnimationInstances.FC_BracingBlockL.IsPlaying or not AnimationInstances.FC_BracingBlockR.IsPlaying then
+            if not trackData.IsPlaying then
                 self.characterInstance.canSyncBlock = true
             end
         end
@@ -75,19 +76,19 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         self.characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = false
     end
 
-    if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
-        -- Handle bracing blocks
-        if not trackData.IsPlaying then
-            -- Wait before allowing sync blocks again
-            task.wait(1)
-            if not AnimationInstances.FC_BracingBlockL.IsPlaying or not AnimationInstances.FC_BracingBlockR.IsPlaying then
-                self.characterInstance.canSyncBlock = true
-            end
-        elseif trackData.IsPlaying then
-            self.characterInstance.isBlocking = true
-            self.characterInstance.canSyncBlock = false
-        end
-    end
+    -- if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
+    --     -- Handle bracing blocks
+    --     if not trackData.IsPlaying then
+    --         -- Wait before allowing sync blocks again
+    --         task.wait(1)
+    --         if not AnimationInstances.FC_BracingBlockL.IsPlaying or not AnimationInstances.FC_BracingBlockR.IsPlaying then
+    --             self.characterInstance.canSyncBlock = true
+    --         end
+    --     elseif trackData.IsPlaying then
+    --         self.characterInstance.isBlocking = true
+    --         self.characterInstance.canSyncBlock = false
+    --     end
+    -- end
 end
 
 return Receive_Animation_Management

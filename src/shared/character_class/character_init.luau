@@ -84,20 +84,17 @@ function Character_Init.init(charModel)
 	characterInstance.hitDebounce_metatable = {
 
 		__newindex = function(t, i, v) -- runs when a table value gets changed that does NOT exist
-			print("yoyoyo __newindex")
 			if v == true then
 				
+				rawset(t, i, v)
+
 				local isAttacking = Characters:GetCharacterObjectById(i).isAttacking
 				isAttacking:GetPropertyChangedSignal("Value"):Connect(function()
-					t[i] = false
+					rawset(t, i, nil)
 				end)
 				
-				rawset(t, i, v)
-				print(t[i], t)
-
-			elseif v == false then
-				print("enemy is no-longer attacking. Removing enemy from hitDebounce table...")
-				rawset(t, i, nil)
+			-- elseif v == false then
+			-- 	rawset(t, i, nil)
 			end
 		end
 
@@ -248,7 +245,7 @@ function Character_Init.init(charModel)
 		for i, v in pairs(boolTable) do
 			if v == true then
 				table.insert(trueBoolTbl, v)
-				warn("boolCheck failed: ".. tostring(i) .. " is true.")
+				warn("boolCheck failed for " .. tostring(characterInstance.character.Name) .. ": " .. tostring(i) .. " is true.")
 			end
 		end
 
@@ -340,6 +337,7 @@ function Character_Init.init(charModel)
 		characterInstance.isGettingHit = false
 		
 		characterInstance.canFollowUp = false
+		characterInstance.didFollowUp = false
 		
 		-- characterInstance.hitDebounce = {}
 		-- setmetatable(characterInstance.hitDebounce_metatable) --re-applying the metatable after clearing the table so it can be given back its metatable functionality.
@@ -354,6 +352,7 @@ function Character_Init.init(charModel)
 		characterInstance.followUpCount = 0
 		characterInstance.comboCounter = 0
 		characterInstance.isAttacking.Value = false
+		print("did we reset and make isAttacking false?")
 		characterInstance.canSyncBlock = true
 		characterInstance.pairedPlaying = false
 		characterInstance.pairedChain = 0
@@ -471,7 +470,10 @@ function Character_Init.init(charModel)
 
 	function characterInstance.playHitSFX(trackData)
 		local soundId
-		if trackData.receivingType == "Level1" or trackData.Paired_Attribute then
+		if trackData.receivingType == "Level1"
+		or trackData.Paired_Attribute
+		or (trackData.receivingType and trackData.receivingType == "Parry") -- parrys should have their own special SFX at some point
+		then
 			soundId = SFXTable[math.random(1, #SFXTable)]
 		elseif trackData.receivingType == "Level2" then
 			soundId = "rbxassetid://112444846023457"

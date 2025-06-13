@@ -46,39 +46,42 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 rayParams
             ) -- Raycast in front of player to find an enemy
             
-            print(characterInstance.character.Humanoid.Health)            
             if not characterInstance.raycastResult then
                 characterInstance.lockOnDebounce.Value = false
                 return warn("nothing in the raycast result found")
-            else
-                warn(
-                    {
-                    not characterInstance.isAttacking.Value,
-                    not characterInstance.isGettingHit,
-                    not characterInstance.pairedPlaying, 
-                    not characterInstance.isDodging,
-                    not characterInstance.isBlocking, 
-                    not characterInstance.waitingToAttack,
-                    not characterInstance.lockOnDebounce.Value
-                },
-                characterInstance.raycastResult.Instance, 
-                characterInstance.raycastResult.Instance.Parent,
-                characterInstance.raycastResult.Instance.Parent.Parent
-            )
+            -- else
+            --     warn(
+            --         {
+            --         not characterInstance.isAttacking.Value,
+            --         not characterInstance.isGettingHit,
+            --         not characterInstance.pairedPlaying, 
+            --         not characterInstance.isDodging,
+            --         not characterInstance.isBlocking, 
+            --         not characterInstance.waitingToAttack,
+            --         not characterInstance.lockOnDebounce.Value
+            --     },
+            --     characterInstance.raycastResult.Instance, 
+            --     characterInstance.raycastResult.Instance.Parent,
+            --     characterInstance.raycastResult.Instance.Parent.Parent
+            -- )
             end
             
             -- if not characterInstance.raycastResult then return warn("No result") end
 
-            if characterInstance.raycastResult.Instance.Parent:FindFirstChildWhichIsA("Humanoid") then
-                characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
-            elseif characterInstance.raycastResult.Instance.Parent.Parent:FindFirstChildWhichIsA("Humanoid") or characterInstance.raycastResult.Instance:GetAttribute("ReceiveBox") then
-                characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent.Parent
+            -- if characterInstance.raycastResult.Instance.Parent:FindFirstChildWhichIsA("Humanoid") then
+            --     characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
+            -- elseif characterInstance.raycastResult.Instance.Parent.Parent:FindFirstChildWhichIsA("Humanoid") or characterInstance.raycastResult.Instance:GetAttribute("ReceiveBox") then
+            --     characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent.Parent
+            -- end
+            if characterInstance.raycastResult.Instance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
+                characterInstance.enemyChar = characterInstance.raycastResult.Instance:FindFirstAncestorWhichIsA("Model")
             end
 
             if not characterInstance.lockOnDebounce.Value -- can't be locked on already
             and characterInstance.enemyChar
             and not characterInstance.raycastResult.Instance.Parent:GetAttribute("TavernKeeper")
             and characterInstance.raycastResult.Instance 
+            and active
             then -- We found an alive enemy to lock onto (thats not the tavern keeper).
                 
                 -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
@@ -97,7 +100,9 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             ) or (
                 characterInstance.raycastResult == nil
                 and characterInstance.lockOnDebounce.Value == true
-            ) 
+            ) or (
+                not active
+            )
             then -- no enemy detected by raycast
                
                 characterInstance.lockOnDebounce.Value = false
@@ -114,16 +119,10 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 and not characterInstance.lockOnDebounce.Value
             ) 
             then -- Runs when the player locks onto somebody
-                print(characterInstance.lockOnDebounce.Value)
                 -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
                 characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
                 characterInstance.SetSpeed(true)
             -- Passed the lock-on check. Activate the lock-on code:
-
-                print({lockOnDebounce = characterInstance.lockOnDebounce, 
-                enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart,
-                enemyHumanoid = characterInstance.enemyHumanoid,
-                rayParams = rayParams})
 
                 return "LockOnInput", {
                     lockOnDebounce = characterInstance.lockOnDebounce, 
@@ -139,7 +138,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                                 characterInstance.humanoidRootPart.CFrame.LookVector * 7,
                                 rayParams) 
             then
-                print("this runs.. doesn't it?..")
                 characterInstance.lockOnDebounce.Value = false
                 characterInstance.SetSpeed(true)
                 characterInstance.enemyChar = nil
@@ -154,7 +152,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         if not characterInstance.waitingToAttack 
         and characterInstance.lockOnDebounce.Value 
         and characterInstance.pairedChain <= characterInstance.PairedChainMAX 
-        and characterInstance.boolCheck({isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
+        and characterInstance.boolCheck({isBlocking = characterInstance.isBlocking}) 
         and (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
         and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
@@ -167,7 +165,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                     characterInstance.waitingToAttack = true
                     while characterInstance.dodgeTrack.IsPlaying do -- wait for entire dodge attack to end
                         task.wait()
-                        print("waiting for dodge to end..")
+                        -- print("waiting for dodge to end..")
                     end
 
                     -- do the dodge attack (if not already):
@@ -184,6 +182,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                     characterInstance.pairedChain += 1
                 end
+                print(characterInstance.character.Name, "we made it here for attk", characterInstance.canFollowUp)
                 if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
                 and not characterInstance.waitingToAttack 
                 and not characterInstance.canFollowUp 
@@ -207,10 +206,13 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                         end
                     end
                     characterInstance:basicAttack(enemyInstance)
-                elseif characterInstance.canFollowUp then
+                elseif characterInstance.canFollowUp and characterInstance.comboCounter <= 3 then
+                    print("we followin' upppp", characterInstance.followUpCount, characterInstance.character.Name)
                     characterInstance.waitingToAttack = true
                     characterInstance.didFollowUp = true -- when true, the character did a followup attack
+                    characterInstance.isParrying = false -- var thats only true when a parry anim starts.
                     while characterInstance.isAttacking.Value do
+                        print("we waitin'")
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then
@@ -221,6 +223,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                             characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, nil, characterObject.animPair, characterObject.pairedChain, false)
                             ]]
                         end
+                        print("we attackin", characterInstance.character.Name)
                         characterInstance:basicAttack(enemyInstance) -- followup attack
                     end
                     characterInstance.waitingToAttack = false

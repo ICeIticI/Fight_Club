@@ -74,9 +74,18 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
         
         if trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
             -- Parry animation started playing
+            task.spawn(function() -- likely will cause delay if not in place
+                self.characterInstance:block(false)
+            end)
+            self.characterInstance.isGettingHit = false
+
+            self.characterInstance.canFollowUp = true
+            print(self.characterInstance.canFollowUp)
+            -- self.characterInstance.isAttacking.Value = true
             self.characterInstance.isCountering = true
             self.characterInstance.comboCounter = 3 -- Player can do a haymaker attack following a parry
-        
+            self.characterInstance.followUpCount = 1 -- for followup attacks, followUpCount must be > 1, so attacking will increase it (to 2), making it pass the > 1 check.
+
         elseif trackData.Animation.AnimationId == AnimationInstances.FC_BlockStart.AnimationId then
             drainStamina(self.characterInstance, trackData)
 
@@ -131,10 +140,16 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
 
         elseif trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
             -- Parry animation stopped playing
+            -- self.characterInstance.isAttacking.Value = false
+            
             self.characterInstance.isCountering = false
+            self.characterInstance.isGettingHit = false
             task.delay(0.51, function()
-                self.characterInstance.comboCounter = 0
-                print("Combo counter is now 0")
+                if not self.characterInstance.isAttacking.Value then -- the character went through the whole parry animation and didnt riposte.
+                    self.characterInstance.canFollowUp = false -- if they attacked during the parry anim, it will followup, so
+                    self.characterInstance.comboCounter = 0
+                    print("Combo counter is now 0")
+                end
             end)
         elseif trackData.Animation:GetAttribute("Dodge") then
             
@@ -152,13 +167,19 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.canFollowUp = false
             task.wait(0.4)
             self.characterInstance.comboCounter = 0 -- Reset combo counter to prevent continuing the attack chain
-            self.characterInstance.isAttacking.Value = false
+            -- self.characterInstance.isAttacking.Value = false
             -- self.characterInstance.hitDebounce = false
         
         end
 
-        self.characterInstance.isAttacking.Value = false
-        -- self.characterInstance.hitDebounce = false
+        -- runs regardless of the receive type when they stop playing:
+
+        -- This will run for the end for every misc animation thats not a parry:
+        if not trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
+            
+            self.characterInstance.isAttacking.Value = false
+            -- self.characterInstance.hitDebounce = false
+        end
     end
 
     -- if trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId then

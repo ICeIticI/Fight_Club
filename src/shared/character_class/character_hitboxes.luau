@@ -18,7 +18,6 @@ Character_Hitboxes.__index = Character_Hitboxes
 -- Function to handle receiving an attack
 local function receive(receiver_characterInstance, attacker_characterInstance)
     -- local currentAttackID = currentAttack.AnimationId
-    print("hi")
     receiver_characterInstance.attackingChar = attacker_characterInstance.character
     -- if receiver_characterInstance.currentReceiveAnimTRACK and receiver_characterInstance.currentReceiveAnimTRACK.IsPlaying then
     --     receiver_characterInstance.currentReceiveAnimTRACK:Stop()
@@ -28,6 +27,7 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
             -- If the player gets hit while the blockstart track is playing, then they will perform a parry
             -- handleBlocking(currentAttack)
             receiver_characterInstance:receive("parry", attacker_characterInstance)
+            print("receiveParry")
             attacker_characterInstance:receive("receiveParry", receiver_characterInstance)
         elseif receiver_characterInstance.Protocol ~= "Counter" -- Checks before countering:
         and receiver_characterInstance.currentAttack_trackData -- Make sure the attack exists for countering
@@ -38,7 +38,6 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
         and not receiver_characterInstance.attackFrames -- Attackframes mean we're too late in the animation. May be redundant to have this check.
         and not receiver_characterInstance.isGettingHit -- Should not be possible when getting hit, but I'm sure other checks before would fail if thats the case.. so it may be redundant.
         then
-            print("we here")
             -- ! If the player is just starting an attack and gets hit, they will counter ! --
             -- handleCounter(currentAttack)
             receiver_characterInstance:repulseAttack("counter", attacker_characterInstance) 
@@ -68,9 +67,8 @@ end
 local function attackHandler(attacker_characterInstance, receiver_characterInstance) --[[ handles when a character lands an attack ]]
     -- local enemyCurrentAttack = enemyInstance.currentAttack_trackData
 	-- local hitSFX = characterInstance.player.Character.Torso:FindFirstChild("hitSFX")
-	print("yo")
-    print(receiver_characterInstance.iFrames, receiver_characterInstance.currentAttack_trackData)
-	if not receiver_characterInstance.iFrames and not (
+	
+    if not receiver_characterInstance.iFrames and not (
         receiver_characterInstance.currentAttack_trackData 
         and receiver_characterInstance.currentAttack_trackData.Animation:GetAttribute("Counter")
         and receiver_characterInstance.currentAttack_trackData.IsPlaying
@@ -111,18 +109,19 @@ function Character_Hitboxes:manageHitboxes()
         
         local touchedConnection = v.Touched:Connect(function(touchedObject)
             if self.characterInstance.isAttacking.Value then -- Begin checling for potentialEnemy stuff only if we're attacking, otherwise it'll check for every single .Touched no matter the circumstance, which is very processing.
-                potentialEnemyChar = touchedObject.Parent.Parent
+                potentialEnemyChar = touchedObject:FindFirstAncestorWhichIsA("Model")
                 potentialEnemyInstance = Characters:GetCharacterObjectByCharacter(potentialEnemyChar)
                 -- print(potentialEnemyInstance.hitDebounce[self.characterInstance.id])
                 
-                print(
-                    self.characterInstance.isAttacking.Value ,
-                    touchedObject:GetAttribute("ReceiveBox"),
-                    potentialEnemyInstance ~= nil,
-                    self.characterInstance.currentAttack_trackData,
-                    not touchedObject:IsAncestorOf(self.characterInstance.character),
-                    not potentialEnemyInstance.hitDebounce[self.characterInstance.id]
-                )
+                -- print(
+                --     self.characterInstance.isAttacking.Value ,
+                --     touchedObject:GetAttribute("ReceiveBox"),
+                --     potentialEnemyInstance ~= nil,
+                --     self.characterInstance.currentAttack_trackData,
+                --     not touchedObject:IsAncestorOf(self.characterInstance.character),
+                --     not potentialEnemyInstance.hitDebounce[self.characterInstance.id]
+                -- )
+                print(potentialEnemyInstance.character.Name, potentialEnemyInstance.hitDebounce)
             end
         
             if self.characterInstance.isAttacking.Value 
@@ -132,6 +131,8 @@ function Character_Hitboxes:manageHitboxes()
             and not touchedObject:IsAncestorOf(self.characterInstance.character)
             and not potentialEnemyInstance.hitDebounce[self.characterInstance.id]
             then
+
+                
                 potentialEnemyInstance.hitDebounce[self.characterInstance.id] = true
                 
                 local enemyInstance = potentialEnemyInstance
@@ -161,7 +162,7 @@ function Character_Hitboxes:manageHitboxes()
 
                 if enemyPlayer and self.characterInstance.isAttacking.Value and self.characterInstance.attackFrames then
                     -- self.characterInstance.GlobalRemoteEvent:FireServer(enemyCharacter, self.characterInstance.Protocol, self.characterInstance.currentAttack, self.characterInstance.character.HumanoidRootPart.CFrame, nil, self.characterInstance.isEnemyHoldingBlock, false)
-                    
+                    print("We hit a valid enemy")
                     -- self.setupHitSFX()
                     -- setupAttackDamage(self.characterInstance)
                     attackHandler(self.characterInstance, enemyInstance)

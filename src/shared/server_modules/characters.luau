@@ -16,9 +16,9 @@ function Characters:GetCharacterObjectByPlayer(plr) --[[ Method that gets a char
         return warn("Provide a player object you idiot")
     end
 
-    for _, charInstance in pairs(self) do
-        if type(charInstance) == "table" and charInstance.player == plr then
-            return charInstance
+    for _, potentialCharacterInstance in pairs(self) do
+        if type(potentialCharacterInstance) == "table" and potentialCharacterInstance.player == plr then
+            return potentialCharacterInstance
         end
     end
     warn("No characterInstance found with the given player: ".. tostring(plr))
@@ -31,9 +31,9 @@ function Characters:GetCharacterObjectByCharacter(char)
         return warn("Provide a character object you idiot")
     end
 
-    for _, charInstance in pairs(self) do
-        if type(charInstance) == "table" and charInstance.character == char then
-            return charInstance
+    for _, potentialCharacterInstance in pairs(self) do
+        if type(potentialCharacterInstance) == "table" and potentialCharacterInstance.character == char then
+            return potentialCharacterInstance
         end
     end
 
@@ -47,9 +47,9 @@ function Characters:GetCharacterObjectById(id)
         return warn("Provide an ID you idiot")
     end
 
-    for _, charInstance in pairs(self) do
-        if type(charInstance) == "table" and charInstance.id == id then
-            return charInstance
+    for _, potentialCharacterInstance in pairs(self) do
+        if type(potentialCharacterInstance) == "table" and potentialCharacterInstance.id == id then
+            return potentialCharacterInstance
         end
     end
 

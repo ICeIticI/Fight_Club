@@ -269,6 +269,7 @@ AnimationInstances.FC_LeftParry = Instance.new("Animation")
 AnimationInstances.FC_LeftParry.Name = "FC_LeftParry"
 AnimationInstances.FC_LeftParry.AnimationId = "rbxassetid://98670773281611"
 AnimationInstances.FC_LeftParry:SetAttribute("Paired", true)
+AnimationInstances.FC_LeftParry:SetAttribute("AnimDirection", "Left")
 
 AnimationInstances.FC_LeftParryRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_LeftParryRECEIVER.Name = "FC_LeftParryRECEIVER"
@@ -279,6 +280,7 @@ AnimationInstances.FC_RightParry = Instance.new("Animation")
 AnimationInstances.FC_RightParry.Name = "FC_RightParry"
 AnimationInstances.FC_RightParry.AnimationId = "rbxassetid://113708135947767"
 AnimationInstances.FC_RightParry:SetAttribute("Paired", true)
+AnimationInstances.FC_RightParry:SetAttribute("AnimDirection", "Right")
 
 AnimationInstances.FC_RightParryRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_RightParryRECEIVER.Name = "FC_RightParryRECEIVER"

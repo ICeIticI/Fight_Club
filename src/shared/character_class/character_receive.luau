@@ -102,11 +102,11 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_LeftParry
         end
     elseif trackData.receivingType == "gettingParried" then
-        characterInstance.attackTrack:Stop()
+        -- characterInstance.attackTrack:Stop()
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            return AnimationInstances.FC_RightParryRECEIVER
-        elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
             return AnimationInstances.FC_LeftParryRECEIVER
+        elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
+            return AnimationInstances.FC_RightParryRECEIVER
         end
     elseif trackData.receivingType == "dodgeAttack" then
 
@@ -134,20 +134,16 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
 
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftCounter1.AnimationId then
-                print(trackData.attackerAnim, AnimationInstances.FC_LeftCounter1RECEIVER)
                 return AnimationInstances.FC_LeftCounter1RECEIVER
 
             elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftCounter2.AnimationId then
-                print(trackData.attackerAnim, AnimationInstances.FC_LeftCounter2RECEIVER)
                 return AnimationInstances.FC_LeftCounter2RECEIVER
             end
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
             if trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightCounter1.AnimationId then
-                print(trackData.attackerAnim, AnimationInstances.FC_RightCounter1RECEIVER)
                 return AnimationInstances.FC_RightCounter1RECEIVER
 
             elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightCounter2.AnimationId then
-                print(trackData.attackerAnim, AnimationInstances.FC_RightCounter2RECEIVER)
                 return AnimationInstances.FC_RightCounter2RECEIVER
             end
         end
@@ -331,7 +327,7 @@ function Character_Receive:parry(attacker_characterInstance) --[[ Parry an incom
     self.characterInstance.playHitSFX(trackData)
     -- Move the below damage code to the receive parry
     attacker_characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
-    self.characterInstance.hitSFX:Play()
+    -- self.characterInstance.hitSFX:Play()
     -- local Protocol = "Parry"
     -- self.characterInstance.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)
 
@@ -392,7 +388,7 @@ function Character_Receive:receiveDodgeAttack(attacker_characterInstance) --[[ T
 end
 
 function Character_Receive:receiveParry(attacker_characterInstance) --[[ We tried to strike the enemy but they parried us ]]
-    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
+    local attackerAnim = attacker_characterInstance.lastReceiveData.Animation
 
     -- self.characterInstance.randAttack:Stop()
     -- if attackerAnim:GetAttribute("AnimDirection") == "Left" then

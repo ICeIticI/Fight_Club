@@ -10,10 +10,8 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
     if trackData.attackLvl == 1 then
         
         if not characterInstance.currentAttack_trackData then
-            warn("random anim")
             return characterInstance.randomAnimation(AnimationInstances, "AttackSeries", trackData.attackType)
         else
-            warn("not-so random anim")
             local sameAttackChance = math.random(1, 100)
             if sameAttackChance > 10 or characterInstance.currentAttack_trackData.attackType == "Uppercuts" then
                 -- opposite attack of the same attack type
@@ -121,7 +119,6 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
         end
     end
     
-    warn(trackData)
     return warn("^ No Animation found with the given trackData ^")
 end
 
@@ -177,9 +174,6 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
 
     end
 
-    if trackData.Animation:GetAttribute("Counter") then
-        warn("The enemy threw a " .. tostring(enemy_characterInstance.currentAttack_trackData.Animation) .. " , so we are countering with a " ..tostring(trackData.Animation))
-    end
     characterInstance.currentAttack_trackData = trackData
     characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
 

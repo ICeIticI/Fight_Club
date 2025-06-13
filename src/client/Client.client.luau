@@ -73,43 +73,14 @@ UserInputService.InputBegan:Connect(function(input)
     then
         local protocol, publicVariables = input_check_FUNCTION:InvokeServer(inputTable, true) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes
         if protocol == "LockOnInput" then
-            print("sending sig")
             -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
             if publicVariables.lockOnDebounce.Value == true then
                 lockOn.Lock(publicVariables)
             end
-            print(publicVariables.lockOnDebounce.Value)
             input_check_FUNCTION:InvokeServer(inputTable)
             lockOn.Unlock() -- will run as soon as the player stops qualifying to be able to lock on (such as walking away or pressing Q again)
         end
     end
-
-
-
-    -- while not GameVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
-
-    -- if GameVariables.LockOnInputs[input.KeyCode] then -- May have lock on inputs for each system.
-    --     -- Locks the player onto the enemy
-    --     LockOnSystem.LockOn()
-    
-    -- elseif GameVariables.AttackInputs[input.UserInputType] or GameVariables.AttackInputs[input.KeyCode] then -- AttackInputs is a table of input types that are allowed in this context. The indexes of that table are actually the input types that we allow, so we can referance an index in that table by what the player inputed.
-    
-    --     if input.UserInputType == Enum.UserInputType.MouseButton1 and GameVariables.lockOnDebounce.Value and GameVariables.player.Name == "Player2" then -- for testing
-    --         warn("2 seconds till attack...")
-    --         task.wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
-    --     end
-        
-    --     -- The player will throw an attack
-    --     BasicStriking.Attack(input)
-
-
-    --     -- attackCommand:Call() -- Will replace BasicStriking.Attack()
-
-    -- elseif GameVariables.BlockInputs[input.UserInputType] or GameVariables.BlockInputs[input.KeyCode] then
-    --     -- The player will block
-    --     ReceivingAndCountering.Block(input)
-    --     -- receiveCommand:CallBlock(input)
-    -- end
 end)
 
 UserInputService.InputEnded:Connect(function(input)

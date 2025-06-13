@@ -88,7 +88,9 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
 
         self.characterInstance.attackFrames = false -- attackFrames will only be enabled once the "StartOfAttack" marker gets reached.
         self.characterInstance.isAttacking.Value = true
+        print(self.characterInstance.character.Name, "we b attckntgdags")
         self.characterInstance.didFollowUp = false
+        self.characterInstance.isGettingHit = false
         self.characterInstance.SetSpeed(false)
 
         if trackData.Counter_Attribute == true then
@@ -96,7 +98,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- A level 1 attack played at the time an enemy's attack landed. We transition this into a counter attack.
             self.characterInstance.canCounter = true
             -- self.characterInstance.isCountering = true
-            self.characterInstance.isAttacking.Value = true
+            -- self.characterInstance.isAttacking.Value = true
             -- self.characterInstance.Protocol = "Counter"
             -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, self.characterInstance.currentAttack)
             -- self.characterInstance.Protocol = nil
@@ -118,6 +120,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- task.delay(0.5, function()
             --     self.characterInstance.hitDebounce = false
             -- end)
+            print("pairedddd")
             self.characterInstance.isAttacking.Value = false
         end
 

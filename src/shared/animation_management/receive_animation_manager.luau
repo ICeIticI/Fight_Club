@@ -17,6 +17,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
 
         self.characterInstance.isGettingHit = true
         self.characterInstance.isAttacking.Value = false
+        print("a receive?")
         self.characterInstance.canFollowUp = false
         self.characterInstance.SetSpeed(false) -- Prevent the player from moving while being hit
 

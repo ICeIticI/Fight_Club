@@ -1,7 +1,18 @@
-* Fixed linear velocity issue
+* I think I finally fixed the lock-on bug I was having before! All I had to do was pass the "active" parameter in the remote function signal and also use it as a parameter for if we're allowed to lock-on.
 
-* Fixed an issue where you're unable to damage an enemy after getting countered
+* Health & Stamina UI shrinkage direction flipped, thanks to the AnchorPoint
 
-* Fixed randomization issue with level 1 attacks (they would tend to throw the same exact attack over and over again)
+* I finally got the parrying working!! Ugh what a painful process! Much more than expected Alot of stuff
 
-* 
+* Next I'm gonna work on bracing blocks
+
+* As usual, work on rest of the receives, ragdolling, and anything else.. we can finally finish for open alpha!
+
+!
+!
+
+* After open alpha, our goal for beta is to get grappling in place and working, create some basic character classes (Will they be just animations or will they also influence how much more/less damage one will do/take on an attack. receive, grapple, etc).
+
+*Maybe we can create our own version of Ability Cards from RDO. Whether or not the character classes affect stats, maybe this feature will further enhance the player. They can either stick to their build and strengthen their own strongpoints, or maybe go for a more balanced build.
+
+* Theres alot to do for beta, but we'll surely need to do more planning and add on to our Game Design Document before executing these ideas.

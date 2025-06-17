@@ -136,6 +136,7 @@ AnimationInstances.FC_SyncBlock1L:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_SyncBlock1L:SetAttribute("AnimType", 1)
 AnimationInstances.FC_SyncBlock1L:SetAttribute("AnimDirection", "Left")
 AnimationInstances.FC_SyncBlock1L:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock1L:SetAttribute("SyncBlockFinisher", false)
 
 AnimationInstances.FC_SyncBlock1LRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock1LRECEIVER.Name = "FC_SyncBlock1LRECEIVER"
@@ -143,6 +144,7 @@ AnimationInstances.FC_SyncBlock1LRECEIVER.AnimationId = "rbxassetid://1831335025
 AnimationInstances.FC_SyncBlock1LRECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_SyncBlock1LRECEIVER:SetAttribute("AnimDirection", "Left")
 AnimationInstances.FC_SyncBlock1LRECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock1LRECEIVER:SetAttribute("SyncBlockFinisher", false)
 
 AnimationInstances.FC_SyncBlock1R = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock1R.Name = "FC_SyncBlock1R"
@@ -151,6 +153,7 @@ AnimationInstances.FC_SyncBlock1R:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_SyncBlock1R:SetAttribute("AnimType", 1)
 AnimationInstances.FC_SyncBlock1R:SetAttribute("AnimDirection", "Right")
 AnimationInstances.FC_SyncBlock1R:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock1R:SetAttribute("SyncBlockFinisher", false)
 
 AnimationInstances.FC_SyncBlock1RRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock1RRECEIVER.Name = "FC_SyncBlock1RRECEIVER"
@@ -158,6 +161,7 @@ AnimationInstances.FC_SyncBlock1RRECEIVER.AnimationId = "rbxassetid://1841166325
 AnimationInstances.FC_SyncBlock1RRECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_SyncBlock1RRECEIVER:SetAttribute("AnimDirection", "Right")
 AnimationInstances.FC_SyncBlock1RRECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock1RRECEIVER:SetAttribute("SyncBlockFinisher", false)
 
 AnimationInstances.FC_SyncBlock2L = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock2L.Name = "FC_SyncBlock2L"
@@ -166,6 +170,7 @@ AnimationInstances.FC_SyncBlock2L:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_SyncBlock2L:SetAttribute("AnimType", 1)
 AnimationInstances.FC_SyncBlock2L:SetAttribute("AnimDirection", "Left")
 AnimationInstances.FC_SyncBlock2L:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock2L:SetAttribute("SyncBlockFinisher", false)
 
 AnimationInstances.FC_SyncBlock2LRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock2LRECEIVER.Name = "FC_SyncBlock2LRECEIVER"
@@ -173,6 +178,7 @@ AnimationInstances.FC_SyncBlock2LRECEIVER.AnimationId = "rbxassetid://1851397617
 AnimationInstances.FC_SyncBlock2LRECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_SyncBlock2LRECEIVER:SetAttribute("AnimDirection", "Left")
 AnimationInstances.FC_SyncBlock2LRECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock2LRECEIVER:SetAttribute("SyncBlockFinisher", false)
 
 AnimationInstances.FC_SyncBlock2R = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock2R.Name = "FC_SyncBlock2R"
@@ -181,6 +187,7 @@ AnimationInstances.FC_SyncBlock2R:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_SyncBlock2R:SetAttribute("AnimType", 1)
 AnimationInstances.FC_SyncBlock2R:SetAttribute("AnimDirection", "Right")
 AnimationInstances.FC_SyncBlock2R:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock2R:SetAttribute("SyncBlockFinisher", false)
 
 AnimationInstances.FC_SyncBlock2RRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock2RRECEIVER.Name = "FC_SyncBlock2RRECEIVER"
@@ -188,6 +195,7 @@ AnimationInstances.FC_SyncBlock2RRECEIVER.AnimationId = "rbxassetid://1851398960
 AnimationInstances.FC_SyncBlock2RRECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_SyncBlock2RRECEIVER:SetAttribute("AnimDirection", "Right")
 AnimationInstances.FC_SyncBlock2RRECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock2RRECEIVER:SetAttribute("SyncBlockFinisher", false)
 
 AnimationInstances.FC_SyncBlock3L1 = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock3L1.Name = "FC_SyncBlock3L1"
@@ -196,6 +204,7 @@ AnimationInstances.FC_SyncBlock3L1:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_SyncBlock3L1:SetAttribute("AnimType", 1)
 AnimationInstances.FC_SyncBlock3L1:SetAttribute("AnimDirection", "Left")
 AnimationInstances.FC_SyncBlock3L1:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock3L1:SetAttribute("SyncBlockFinisher", true)
 
 AnimationInstances.FC_SyncBlock3L1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock3L1RECEIVER.Name = "FC_SyncBlock3L1RECEIVER"
@@ -203,6 +212,7 @@ AnimationInstances.FC_SyncBlock3L1RECEIVER.AnimationId = "rbxassetid://187409542
 AnimationInstances.FC_SyncBlock3L1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_SyncBlock3L1RECEIVER:SetAttribute("AnimDirection", "Left")
 AnimationInstances.FC_SyncBlock3L1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock3L1RECEIVER:SetAttribute("SyncBlockFinisher", true)
 
 AnimationInstances.FC_SyncBlock3R1 = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock3R1.Name = "FC_SyncBlock3R1"
@@ -211,6 +221,7 @@ AnimationInstances.FC_SyncBlock3R1:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_SyncBlock3R1:SetAttribute("AnimType", 1)
 AnimationInstances.FC_SyncBlock3R1:SetAttribute("AnimDirection", "Right")
 AnimationInstances.FC_SyncBlock3R1:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock3R1:SetAttribute("SyncBlockFinisher", true)
 
 AnimationInstances.FC_SyncBlock3R1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock3R1RECEIVER.Name = "FC_SyncBlock3R1RECEIVER"
@@ -218,6 +229,7 @@ AnimationInstances.FC_SyncBlock3R1RECEIVER.AnimationId = "rbxassetid://187437144
 AnimationInstances.FC_SyncBlock3R1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_SyncBlock3R1RECEIVER:SetAttribute("AnimDirection", "Right")
 AnimationInstances.FC_SyncBlock3R1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock3R1RECEIVER:SetAttribute("SyncBlockFinisher", true)
 
 AnimationInstances.FC_SyncBlock3L2 = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock3L2.Name = "FC_SyncBlock3L2"
@@ -226,6 +238,7 @@ AnimationInstances.FC_SyncBlock3L2:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_SyncBlock3L2:SetAttribute("AnimType", 1)
 AnimationInstances.FC_SyncBlock3L2:SetAttribute("AnimDirection", "Left")
 AnimationInstances.FC_SyncBlock3L2:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock3L2:SetAttribute("SyncBlockFinisher", true)
 
 AnimationInstances.FC_SyncBlock3L2RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock3L2RECEIVER.Name = "FC_SyncBlock3L2RECEIVER"
@@ -233,6 +246,7 @@ AnimationInstances.FC_SyncBlock3L2RECEIVER.AnimationId = "rbxassetid://187471808
 AnimationInstances.FC_SyncBlock3L2RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_SyncBlock3L2RECEIVER:SetAttribute("AnimDirection", "Left")
 AnimationInstances.FC_SyncBlock3L2RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock3L2RECEIVER:SetAttribute("SyncBlockFinisher", true)
 
 AnimationInstances.FC_SyncBlock3R2 = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock3R2.Name = "FC_SyncBlock3R2"
@@ -241,6 +255,7 @@ AnimationInstances.FC_SyncBlock3R2:SetAttribute("AttackLevel", 3)
 AnimationInstances.FC_SyncBlock3R2:SetAttribute("AnimType", 1)
 AnimationInstances.FC_SyncBlock3R2:SetAttribute("AnimDirection", "Right")
 AnimationInstances.FC_SyncBlock3R2:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock3R2:SetAttribute("SyncBlockFinisher", true)
 
 AnimationInstances.FC_SyncBlock3R2RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_SyncBlock3R2RECEIVER.Name = "FC_SyncBlock3R2RECEIVER"
@@ -248,6 +263,7 @@ AnimationInstances.FC_SyncBlock3R2RECEIVER.AnimationId = "rbxassetid://187571728
 AnimationInstances.FC_SyncBlock3R2RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_SyncBlock3R2RECEIVER:SetAttribute("AnimDirection", "Right")
 AnimationInstances.FC_SyncBlock3R2RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_SyncBlock3R2RECEIVER:SetAttribute("SyncBlockFinisher", true)
 
 
 

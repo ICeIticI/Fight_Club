@@ -148,13 +148,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         end
 
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
-
         if not characterInstance.waitingToAttack 
         and characterInstance.lockOnDebounce.Value 
         and characterInstance.pairedChain <= characterInstance.PairedChainMAX 
         and characterInstance.boolCheck({isBlocking = characterInstance.isBlocking}) 
         and (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
-        and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
+        -- and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             -- before attacking, check if we're currently dodging so we can do a dodge attack:
@@ -163,7 +162,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 if not characterInstance.waitingToAttack then
                     
                     characterInstance.waitingToAttack = true
-                    while characterInstance.dodgeTrack.IsPlaying do -- wait for entire dodge attack to end
+                    while characterInstance.lastReceiveData.IsPlaying do -- wait for entire dodge attack to end
                         task.wait()
                         -- print("waiting for dodge to end..")
                     end
@@ -189,6 +188,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 and not characterInstance.pairedPlaying 
                 then
                     -- characterInstance.waitingToAttack = true
+                    print("attk")
+                    characterInstance:basicAttack(enemyInstance)
                     if characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                         characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                         --[[
@@ -197,7 +198,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                         ]]
                         if enemyInstance.isBlocking and enemyInstance.humanoid.MoveDirection.Magnitude > 0 then
                             -- The player is moving
-
                             enemyInstance:receive("dodge", characterInstance)
 
                         elseif enemyInstance.isBlocking and enemyInstance.canSyncBlock and enemyInstance.humanoid.MoveDirection.Magnitude == 0 then
@@ -205,14 +205,11 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                             -- enemyInstance.synchedBlock(sentAnimPair, sentValue)
                         end
                     end
-                    characterInstance:basicAttack(enemyInstance)
                 elseif characterInstance.canFollowUp and characterInstance.comboCounter <= 3 then
-                    print("we followin' upppp", characterInstance.followUpCount, characterInstance.character.Name)
                     characterInstance.waitingToAttack = true
                     characterInstance.didFollowUp = true -- when true, the character did a followup attack
                     characterInstance.isParrying = false -- var thats only true when a parry anim starts.
                     while characterInstance.isAttacking.Value do
-                        print("we waitin'")
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then
@@ -223,7 +220,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                             characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, nil, characterObject.animPair, characterObject.pairedChain, false)
                             ]]
                         end
-                        print("we attackin", characterInstance.character.Name)
                         characterInstance:basicAttack(enemyInstance) -- followup attack
                     end
                     characterInstance.waitingToAttack = false

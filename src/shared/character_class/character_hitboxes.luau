@@ -55,7 +55,7 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
         
         end
     
-    elseif receiver_characterInstance.isBlocking then
+    elseif receiver_characterInstance.isBlocking and not receiver_characterInstance.pairedPlaying then
         warn("We is blocking")
         receiver_characterInstance.canSyncBlock = false
         receiver_characterInstance:receive("bracingBlock", attacker_characterInstance)
@@ -162,7 +162,6 @@ function Character_Hitboxes:manageHitboxes()
 
                 if enemyPlayer and self.characterInstance.isAttacking.Value and self.characterInstance.attackFrames then
                     -- self.characterInstance.GlobalRemoteEvent:FireServer(enemyCharacter, self.characterInstance.Protocol, self.characterInstance.currentAttack, self.characterInstance.character.HumanoidRootPart.CFrame, nil, self.characterInstance.isEnemyHoldingBlock, false)
-                    print("We hit a valid enemy")
                     -- self.setupHitSFX()
                     -- setupAttackDamage(self.characterInstance)
                     attackHandler(self.characterInstance, enemyInstance)

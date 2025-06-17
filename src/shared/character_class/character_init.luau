@@ -177,9 +177,16 @@ function Character_Init.init(charModel)
 	characterInstance.lockOnSpeed = characterInstance.originalWalkSpeed / 1.85
 
 	-- Stamina management:
+
+	characterInstance.maxStamina = Instance.new("IntValue") -- the maximum stamina of the character. This value will likely change depending on what abilities the character has that grant them more or less stamina
+	characterInstance.maxStamina.Name = "maxStamina"
+	characterInstance.maxStamina.Value = 100
+	characterInstance.maxStamina.Parent = characterInstance.plrObjectsFolder
+
+
 	characterInstance.stamina = Instance.new("IntValue") -- the stamina of the player. If they get 0 they wont be able to block or parry
 	characterInstance.stamina.Name = "stamina"
-	characterInstance.stamina.Value = 100
+	characterInstance.stamina.Value = characterInstance.maxStamina.Value -- start out with max stamina
 	characterInstance.stamina.Parent = characterInstance.plrObjectsFolder
 
 
@@ -257,49 +264,43 @@ function Character_Init.init(charModel)
 		end
 	end
 
-	function characterInstance.randomAnimation(animFolder, attribute1, a1Value, attribute2, a2Value) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
+	function characterInstance.randomAnimation(animFolder, attribuesAndValuesTable) --[[ Will return a randomly-picked animation from a given table. You can put in attributes to filter what kind of animation you want.]]
+
+		--[[ 
+		attributesAndValuesTable will be a dictionary with the index being 
+		the attribute name and the value being what it should equal. 
+		For example:
+
+		{AnimDirection = "Right", Paired = true,}
+
+		^ These are the attributes we want as well as the values we want them to equal.
+
+		]]
 
     	local randAttackTbl = {}
 
-		for _, v in pairs(animFolder) do
-			
-			if
-				( -- Below basically sees if the first attribute exists, and if it does, then it must equal it's given value (if any), otherwise it can be anything
-					(
-						attribute1 == nil
-					)
-					or 
-					(
-						a1Value ~= nil 
-						and v:GetAttribute(attribute1) == a1Value
-					) 
-					or 
-					(
-						v:GetAttribute(attribute1) 
-						and a1Value == nil
-					)
-				) 
-			and 
-				( -- Same for the first attribute, but for the second this time
-					(
-						attribute2 == nil
-					)
-					or 
-					(
-						a2Value ~= nil 
-						and v:GetAttribute(attribute2) == a2Value
-					) 
-					or 
-					(
-						v:GetAttribute(attribute2) 
-						and a2Value == nil
-					)
-				) 
+		-- Microsoft Copilot AI-altered my old code to make it work:
 
-			then
-				table.insert(randAttackTbl, v)
+		for _, animation in pairs(animFolder) do
+			local matchesAll = true -- ✅ Track whether all attributes match
+			
+			for attribute, value in pairs(attribuesAndValuesTable) do
+				local attrValue = animation:GetAttribute(tostring(attribute))
+
+				-- ✅ Ensure all attributes match
+				if (value and attrValue ~= value) or (not value and not attrValue) then
+					matchesAll = false -- 🚫 Mark as a mismatch
+					break -- ✅ Exit the attribute loop early
+				end
+			end
+			
+			-- ✅ Add animation only if all attributes matched
+			if matchesAll then
+				table.insert(randAttackTbl, animation)
 			end
 		end
+
+		-- Microsoft Copilot AI-altered my old code to make it work ^
 
 		if not next(randAttackTbl) then -- No matches were found with the specified attributes
 			return warn("No animation tracks found with the specified parameters, and therefore no animation was randomly picked. Check your given attributes to see if your desired animations have them.")
@@ -352,7 +353,6 @@ function Character_Init.init(charModel)
 		characterInstance.followUpCount = 0
 		characterInstance.comboCounter = 0
 		characterInstance.isAttacking.Value = false
-		print("did we reset and make isAttacking false?")
 		characterInstance.canSyncBlock = true
 		characterInstance.pairedPlaying = false
 		characterInstance.pairedChain = 0
@@ -422,26 +422,30 @@ function Character_Init.init(charModel)
 	end
 
 	function characterInstance:setupAttackDamage(trackData)
-		if trackData and trackData.attackLvl == 1 then
+		if not trackData then return warn("No trackData provided to the :setupAttackDamage function: ", trackData) end
+
+		if trackData.attackLvl == 1 or trackData.Animation:GetAttribute("SyncBlockFinisher") == (true or false) then
 			return A1Damage
-		elseif trackData and trackData.attackLvl == 2 then
+		elseif trackData.attackLvl == 2 then
 			return A2Damage
-		elseif trackData.Counter_Attribute then
+		elseif trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then
 			return counterAttackDamage
 		end
 	end
 
 	function characterInstance.manageAnimation(trackData)
-		local AnimType = trackData.Animation:GetAttribute("AnimType")
-
-		if AnimType and AnimType == 1 then
-			characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
-		elseif AnimType and AnimType == 2 then
-			characterInstance.receive_animation_manager:runOnIsPlaying(trackData)
-		else
-			characterInstance.misc_animation_manager:runOnIsPlaying(trackData)
-		end
+		task.spawn(function()
+			
+			local AnimType = trackData.Animation:GetAttribute("AnimType")
 	
+			if AnimType and AnimType == 1 then
+				characterInstance.attack_animation_manager:runOnIsPlaying(trackData)
+			elseif AnimType and AnimType == 2 then
+				characterInstance.receive_animation_manager:runOnIsPlaying(trackData)
+			else
+				characterInstance.misc_animation_manager:runOnIsPlaying(trackData)
+			end
+		end)
 	end
 	
 	function characterInstance.simulateIsPlayingOfLastData(bool) --[[ Will turn the IsPlaying data of the previous attack & receive datas to a given bool, probably to false since we wanna turn off the last animations ]]

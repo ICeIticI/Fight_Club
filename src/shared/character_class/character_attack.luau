@@ -10,7 +10,7 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
     if trackData.attackLvl == 1 then
         
         if not characterInstance.currentAttack_trackData then
-            return characterInstance.randomAnimation(AnimationInstances, "AttackSeries", trackData.attackType)
+            return characterInstance.randomAnimation(AnimationInstances, {AttackSeries = trackData.attackType})
         else
             local sameAttackChance = math.random(1, 100)
             if sameAttackChance > 10 or characterInstance.currentAttack_trackData.attackType == "Uppercuts" then
@@ -32,7 +32,7 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
     
     elseif trackData.attackLvl == 2 then
 
-        return characterInstance.randomAnimation(AnimationInstances, "AttackLevel", 2)
+        return characterInstance.randomAnimation(AnimationInstances, {AttackLevel = 2})
 
     elseif trackData.attackLvl == 3 then
 
@@ -42,14 +42,14 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
         if attackType == "DodgeAttack" then
             attackType = nil
 
-            return characterInstance.randomAnimation(characterInstance.dodgeAttacksTable, "DodgeAttack", true, "AnimDirection", characterInstance.dodgeAnimation:GetAttribute("AnimDirection"))
+            return characterInstance.randomAnimation(AnimationInstances, {DodgeAttack = true, AnimDirection = characterInstance.lastReceiveData.Animation:GetAttribute("AnimDirection"), AnimType = 1})
 
         elseif attackType == "CounterAttack" then
             attackType = nil
             if attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AnimDirection") == "Left" then
-                return characterInstance.randomAnimation(AnimationInstances, "AnimDirection", "Left", "Counter", true)
+                return characterInstance.randomAnimation(AnimationInstances, {AnimDirection = "Left", Counter = true})
             elseif attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AnimDirection") == "Right" then
-                return characterInstance.randomAnimation(AnimationInstances, "AnimDirection", "Right", "Counter", true)
+                return characterInstance.randomAnimation(AnimationInstances, {AnimDirection = "Right", Counter = true})
             end
 
             return warn("No left or right counterattack track found!") -- If we get to this point, then something went wrong
@@ -97,20 +97,20 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
 
             else -- for non-followup attacks
 
-                if (characterInstance.sentAnimPair and characterInstance.sentAnimPair[1] == 1) or (characterInstance.animPair and characterInstance.animPair[1] == 1) then
-                    if (characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then
+                if (characterInstance.animPair and characterInstance.animPair[1] == 1) or (characterInstance.animPair and characterInstance.animPair[1] == 1) then
+                    if (characterInstance.animPair and characterInstance.animPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then
                         return AnimationInstances.FC_SyncBlock1L
                         -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock1LRECEIVER
-                    elseif (characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 2) or (characterInstance.animPair and characterInstance.animPair[2] == 2) then
+                    elseif (characterInstance.animPair and characterInstance.animPair[2] == 2) or (characterInstance.animPair and characterInstance.animPair[2] == 2) then
                         return AnimationInstances.FC_SyncBlock2L
                         -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock2LRECEIVER
                     end
                 
-                elseif (characterInstance.sentAnimPair and characterInstance.sentAnimPair[1] == 2) or (characterInstance.animPair and characterInstance.animPair[1] == 2) then
-                    if (characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then
+                elseif (characterInstance.animPair and characterInstance.animPair[1] == 2) or (characterInstance.animPair and characterInstance.animPair[1] == 2) then
+                    if (characterInstance.animPair and characterInstance.animPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then
                         return AnimationInstances.FC_SyncBlock1R
                         -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock1RRECEIVER
-                    elseif (characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 2) or (characterInstance.animPair and characterInstance.animPair[2] == 2) then
+                    elseif (characterInstance.animPair and characterInstance.animPair[2] == 2) or (characterInstance.animPair and characterInstance.animPair[2] == 2) then
                         return AnimationInstances.FC_SyncBlock2R
                         -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock2RRECEIVER
                     end
@@ -155,7 +155,7 @@ end
 local function setupAttackAnimation(attackLvl, characterInstance, enemy_characterInstance : Required_For_Level_3_Attacks) --[[ Will ready an attack animation on the client ]]
     local trackData = setupTrackData(attackLvl)
 
-    if characterInstance.comboCounter == 0 then -- Randomize attackType for a new combo:
+    if characterInstance.comboCounter == 0 and trackData.attackLvl == 1 then -- Randomize attackType for a new combo:
         -- Store the current attackType in characterInstance so it doesn't get forgotten when we attack in the future (for throwing the same type of attack again. If we throw a hook, we wanna followup with another hook):
         characterInstance.currentAttack_trackData = nil
         characterInstance.attackType = setRandomAttackType(characterInstance.didFollowUp)
@@ -217,7 +217,7 @@ function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or
     -- Playing said animation:
     playAttackAnimation(self.characterInstance, trackData)
     -- if self.characterInstance.comboCounter < 1 then -- For debuggin! Delete after!
-        self.characterInstance.comboCounter += 1
+    self.characterInstance.comboCounter += 1
     -- end
 
 end
@@ -241,9 +241,9 @@ function Character_Attack:syncBlock(attacker_characterInstance) --[[ Attack an e
         
         self.characterInstance.pairedPlaying = true
         self.characterInstance.SetSpeed(false)
-        self.characterInstance.currentAttack = self.characterInstance.pairedAttack.Animation
+        -- self.characterInstance.currentAttack = self.characterInstance.pairedAttack.Animation
         if self.characterInstance.distanceBetween ~= 3 then -- we want the sync to happen at three studs ideally
-            local enemyRoot = self.characterInstance.raycastResult.Instance.Parent.HumanoidRootPart
+            local enemyRoot = self.characterInstance.raycastResult.Instance:FindFirstAncestorWhichIsA("Model").HumanoidRootPart
             
             local direction = enemyRoot.Position - self.characterInstance.humanoidRootPart.Position -- the direction toward the enemy from the player
             local normalizedDirection = direction.Unit -- makes the unit measuring toward the player equal to 1. It is the |absolute value|
@@ -306,14 +306,14 @@ function Character_Attack:dodgeAttack(attacker_characterInstance) --[[ Attempt t
 
     local trackData = setupAttackAnimation(3, self.characterInstance, attacker_characterInstance)
 
-    if trackData.Animation.AnimationId ~= self.AnimationInstances.FC_LDodgeAttack1.AnimationId then
+    -- if trackData.Animation.AnimationId ~= AnimationInstances.FC_LDodgeAttack1.AnimationId then
         self.characterInstance.repositionInFrontOfEnemy() -- We dont reposition for left dodge attack cause it makes it not as cool for some reason
-    end
+    -- end
     
-    if trackData.Animation.AnimationId == self.AnimationInstances.FC_LDodgeAttack1.AnimationId then
+    if trackData.Animation.AnimationId == AnimationInstances.FC_LDodgeAttack1.AnimationId then
         
         -- self.characterInstance.setCharacterCFrame(self.characterInstance.character, self.characterInstance.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0))
-        self.characterInstance.humanoidRootPart.CFrame = self.characterInstance.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0)
+        self.characterInstance.humanoidRootPart.CFrame = self.characterInstance.humanoidRootPart.CFrame * CFrame.new(-2, 0, 0)
         
         local moveDistanceX = -3
         local moveDistanceZ = -3

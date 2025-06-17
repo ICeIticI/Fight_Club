@@ -241,6 +241,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 ]]
 
 	ClientVariables.stamina = ClientVariables.plrObjectsFolder:WaitForChild("stamina")
+	ClientVariables.maxStamina = ClientVariables.plrObjectsFolder:WaitForChild("maxStamina")
 
 	ClientVariables.initialized = true
 	return print("Initialized the client variables")

@@ -112,7 +112,10 @@ end
 function Character:basicAttack(enemyInstance) --[[ The character will do some sort of attack ]]
     if enemyInstance.isBlocking and not self.isGettingHit and enemyInstance.humanoid.MoveDirection.Magnitude == 0 and self.comboCounter == 0 then
         -- self.synchedBlock(nil, comboCounter)
-        self.character_attack.syncBlock(enemyInstance)
+        local animPair = {math.random(1, 2), math.random(1, 2)}
+        self.animPair = animPair
+        enemyInstance.animPair = animPair
+        self.character_attack:syncBlock(enemyInstance)
         enemyInstance:receive("syncBlock", self)
     elseif self.isGettingHit then
         return false
@@ -150,7 +153,7 @@ end
 
 function Character:repulseAttack(attack_type, attacker_characterInstance)
     if attack_type == "dodge" then
-        self.character_attack:dodgeAttack()
+        self.character_attack:dodgeAttack(attacker_characterInstance)
     elseif attack_type == "counter" then
         self.character_attack:counterAttack(attacker_characterInstance)
     end

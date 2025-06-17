@@ -25,11 +25,11 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
         end
 
     elseif trackData.receivingType == "syncBlock" then
-
         if characterInstance.pairedChain <= characterInstance.PairedChainMAX and characterInstance.canSyncBlock then
-            if characterInstance.currentReceiveAnimTRACK and characterInstance.currentReceiveAnimTRACK.IsPlaying then -- runs for the receiver
+            print("Ayy we sync blockin")
+            -- if trackData.lastReceiveData and trackData.lastReceiveData.IsPlaying then -- runs for the receiver
                 
-                characterInstance.pairedBlock:Stop()
+                -- characterInstance.pairedBlock:Stop()
                 if characterInstance.followupCombo == 3 then
                     
                     -- if characterInstance.sentAnimPair and characterInstance.sentAnimPair[1] == 1 then
@@ -51,25 +51,25 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
                     error("Add a level 3 sync block. This char instance must pick it")
 
                 else
-
-                    if characterInstance.pairedBlock == AnimationInstances.FC_SyncBlock1LRECEIVERTRACK then
-                        return AnimationInstances.FC_SyncBlock1RRECEIVERTRACK
-                    elseif characterInstance.pairedBlock == AnimationInstances.FC_SyncBlock1RRECEIVERTRACK then
-                        return AnimationInstances.FC_SyncBlock1LRECEIVERTRACK
-                    elseif characterInstance.pairedBlock == AnimationInstances.FC_SyncBlock2LRECEIVERTRACK then
-                        return AnimationInstances.FC_SyncBlock2RRECEIVERTRACK
-                    elseif characterInstance.pairedBlock == AnimationInstances.FC_SyncBlock2RRECEIVERTRACK then
-                        return AnimationInstances.FC_SyncBlock2LRECEIVERTRACK
+                    print("no followup here", trackData.attackerAnim)
+                    if trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock1L.AnimationId then
+                        return AnimationInstances.FC_SyncBlock1LRECEIVER
+                    elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock1R.AnimationId then
+                        return AnimationInstances.FC_SyncBlock1RRECEIVER
+                    elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock2L.AnimationId then
+                        return AnimationInstances.FC_SyncBlock2LRECEIVER
+                    elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock2R.AnimationId then
+                        return AnimationInstances.FC_SyncBlock2RRECEIVER
                     end
                 end
-            end
+            -- end
 
-            characterInstance.pairedPlaying = true
-            characterInstance.SetSpeed(false)
+            -- characterInstance.pairedPlaying = true
+            -- characterInstance.SetSpeed(false)
 
-            if characterInstance.isBlocking then
-                characterInstance.pairedBlock:Play()
-            end
+            -- if characterInstance.isBlocking then
+            --     characterInstance.pairedBlock:Play()
+            -- end
         end
     
     elseif trackData.receivingType == "Level1" then
@@ -292,21 +292,36 @@ function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an e
     local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
 
     local trackData = setupReceiveAnimation(self.characterInstance, "syncBlock", attackerAnim)
+
+    self.characterInstance.pairedPlaying = true
+    self.characterInstance.SetSpeed(false)
+    print("sync blockinnnnnnnnnn")
+
+    -- if self.characterInstance.isBlocking then
+    --     self.characterInstance.pairedBlock:Play()
+    -- end
+
     playReceivingTrack(self.characterInstance, trackData)
 end
 
 function Character_Receive:dodge(attacker_characterInstance) --[[ Dodge away from an incoming strike ]]
     
     
-    local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
+    -- Typically attackingChar gets assigned on hitbox collision but this doesnt happen with a dodge.
+    self.characterInstance.attackingChar = attacker_characterInstance.character
+    -- local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
     
-    local trackData = setupReceiveAnimation(self.characterInstance, "Dodge", attackerAnim)
+    -- no need for attackerAnim this time. We dont depend on it for dodges.
+    local trackData = setupReceiveAnimation(self.characterInstance, "Dodge", nil)
     self.characterInstance.iFrames = true
     self.characterInstance:block(false)
     playReceivingTrack(self.characterInstance, trackData)
-    self.characterInstance:setLinearVelocity(self.dodgeVelocity, self.dodgeLength)
-    self.SetSpeed(false)
+    self.characterInstance:setLinearVelocity(self.characterInstance.dodgeVelocity, self.characterInstance.dodgeLength)
+    self.characterInstance.SetSpeed(false)
     self.characterInstance.isDodging = true
+
+    task.wait(0.4)
+    self.characterInstance.iFrames = false
 
 end
 
@@ -377,9 +392,9 @@ function Character_Receive:receiveLevel2(attacker_characterInstance) --[[ Get hi
     self.characterInstance.playHitSFX(trackData)
 end
 
-function Character_Receive:receiveLevel3() --[[ Get hit by a level 3 attack, which essentially are executions ]]
+-- function Character_Receive:receiveLevel3() --[[ Get hit by a level 3 attack, which essentially are executions ]]
     
-end
+-- end
 
 function Character_Receive:receiveDodgeAttack(attacker_characterInstance) --[[ The enemy dodged away from our strike and caused us to get dodge-attacked ]]
     local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation

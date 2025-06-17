@@ -12,7 +12,8 @@ end
 local drainRate = 1 -- how much stamina gets drained per wait()
 local regenRate = 1 -- how much stamina gets regenerated per wait()
 
-local blockCost = 10
+
+local blockCost = 5
 local isRegening = false -- Gets set to true when the character's stamina is regenerating, so it doesn't stack
 
 local function regenStamina(characterInstance) --[[ Will regenerate stamina, if not doing so already. ]]
@@ -21,7 +22,7 @@ local function regenStamina(characterInstance) --[[ Will regenerate stamina, if 
         while (not characterInstance.BlockStartAnimPlaying and not characterInstance.holdingBlock) and characterInstance.stamina.Value < 100 do
             characterInstance.stamina.Value += regenRate
             -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, self.characterInstance.stamina/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
-            task.wait()
+            task.wait(0.1)
         end
         isRegening = false
     end
@@ -40,7 +41,7 @@ local function drainStamina(characterInstance, trackData) --[[ Function that wil
         -- On holding block, we continuously drain their stamina until they stop blocking
         while characterInstance.holdingBlock and characterInstance.stamina.Value > 0 do
             characterInstance.stamina.Value -= drainRate
-            task.wait()
+            task.wait(0.1)
         end
         characterInstance:block(false)
     end
@@ -152,7 +153,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
                 end
             end)
         elseif trackData.Animation:GetAttribute("Dodge") then
-            
+            print("dodgin end")
             if trackData.Completed then
                 task.wait(0.2) -- give the dodger a bit of time to do an attack before the dodge ends after doing a successful dodge without getting hit when the dodge animation finishes.
             end

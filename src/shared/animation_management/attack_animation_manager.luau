@@ -10,12 +10,16 @@ local Attack_Animation_Management = {}
 
 local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
     characterInstance.attackFrames = true
-    if trackData.Paired_Attribute and trackData.Counter_Attribute then -- counterattack animation
+    if trackData.Paired_Attribute then 
         characterInstance.canCounter = false
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
-        if trackData.Counter_Attribute then -- NOTE: Move this to the receiving counter instead so the damage aligns with itself
+        if trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then -- counterattack animation
             characterInstance.attackingChar.Humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.playHitSFX(trackData)
+        -- elseif trackData.DodgeAttack_Attribute then
+        elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == (true or false) then -- can be true or false, all we know is its a sync block of some sort
+            characterInstance.attackingChar.Humanoid:TakeDamage(characterInstance.attackDamage / 2)
             characterInstance.playHitSFX(trackData)
         end
 
@@ -88,7 +92,6 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
 
         self.characterInstance.attackFrames = false -- attackFrames will only be enabled once the "StartOfAttack" marker gets reached.
         self.characterInstance.isAttacking.Value = true
-        print(self.characterInstance.character.Name, "we b attckntgdags")
         self.characterInstance.didFollowUp = false
         self.characterInstance.isGettingHit = false
         self.characterInstance.SetSpeed(false)

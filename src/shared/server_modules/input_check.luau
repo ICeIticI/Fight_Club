@@ -178,17 +178,19 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 characterInstance.followUpCount += 1
                 characterInstance.distanceBetween = (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude
                 
-                if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
-                    characterInstance.pairedChain += 1
-                end
+                -- if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
+                --     characterInstance.pairedChain += 1
+                -- end
                 print(characterInstance.character.Name, "we made it here for attk", characterInstance.canFollowUp)
                 if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
                 and not characterInstance.waitingToAttack 
-                and not characterInstance.canFollowUp 
+                and not characterInstance.canFollowUp
                 and not characterInstance.pairedPlaying 
                 then
                     -- characterInstance.waitingToAttack = true
                     print("attk")
+                    characterInstance.syncBlockFollowup = false
+                    
                     characterInstance:basicAttack(enemyInstance)
                     if characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                         characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
@@ -214,11 +216,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                     end
                     if characterInstance.followUpCount > 1 then
                         if characterInstance.pairedChain < characterInstance.PairedChainMAX then -- The third paired attack, we wanna have the receiver determine the anim so it will be calculated by them, after this player's characterInstance checks its the max value in character_attack.
-                            characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
+                            -- characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                             --[[
                             characterObject.Protocol = "AttackStarted"
                             characterObject.GlobalRemoteEvent:FireServer(characterObject.enemyChar, characterObject.Protocol, nil, characterObject.animPair, characterObject.pairedChain, false)
                             ]]
+                            characterInstance.syncBlockFollowup = true
                         end
                         characterInstance:basicAttack(enemyInstance) -- followup attack
                     end

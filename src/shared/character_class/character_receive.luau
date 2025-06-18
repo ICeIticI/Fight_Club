@@ -26,11 +26,13 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
 
     elseif trackData.receivingType == "syncBlock" then
         if characterInstance.pairedChain <= characterInstance.PairedChainMAX and characterInstance.canSyncBlock then
-            print("Ayy we sync blockin")
+
             -- if trackData.lastReceiveData and trackData.lastReceiveData.IsPlaying then -- runs for the receiver
                 
                 -- characterInstance.pairedBlock:Stop()
-                if characterInstance.followupCombo == 3 then
+                if characterInstance.pairedChain == 3 then
+
+                    return characterInstance.pairedReceive
                     
                     -- if characterInstance.sentAnimPair and characterInstance.sentAnimPair[1] == 1 then
                     --     if characterInstance.sentAnimPair and characterInstance.sentAnimPair[2] == 1 then
@@ -47,8 +49,8 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
                     --         return characterInstance.FC_SyncBlock3R2RECEIVERTRACK
                     --     end
                     -- end
-                    print("You pick your lvl 3 receive sync block!")
-                    error("Add a level 3 sync block. This char instance must pick it")
+                    -- print("You pick your lvl 3 receive sync block!")
+                    -- error("Add a level 3 sync block. This char instance must pick it")
 
                 else
                     print("no followup here", trackData.attackerAnim)
@@ -288,10 +290,12 @@ function Character_Receive:bracingBlock(attacker_characterInstance) --[[ Block a
 end
 
 function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an enemy attack in smooth syncronization ]]
+    self.characterInstance.pairedChain += 1
 
     local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation
 
     local trackData = setupReceiveAnimation(self.characterInstance, "syncBlock", attackerAnim)
+    self.characterInstance.pairedAttack = nil -- This gets returned on lvl 3 sync blocks so we dont wanna use old data so we clear it
 
     self.characterInstance.pairedPlaying = true
     self.characterInstance.SetSpeed(false)

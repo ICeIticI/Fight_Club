@@ -424,7 +424,7 @@ function Character_Init.init(charModel)
 	function characterInstance:setupAttackDamage(trackData)
 		if not trackData then return warn("No trackData provided to the :setupAttackDamage function: ", trackData) end
 
-		if trackData.attackLvl == 1 or trackData.Animation:GetAttribute("SyncBlockFinisher") == (true or false) then
+		if trackData.attackLvl == 1 or trackData.Animation:GetAttribute("SyncBlockFinisher") == true or trackData.Animation:GetAttribute("SyncBlockFinisher") == false then
 			return A1Damage
 		elseif trackData.attackLvl == 2 then
 			return A2Damage

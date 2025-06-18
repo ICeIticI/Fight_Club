@@ -197,6 +197,7 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
         elseif GameVariables.canFollowUp then
             GameVariables.waitingToAttack = true
             while GameVariables.isAttacking do
+                print("wating")
                 task.wait()
             end
             if GameVariables.followUpCount > 1 then

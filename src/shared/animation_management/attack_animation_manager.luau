@@ -15,12 +15,16 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
         if trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then -- counterattack animation
-            characterInstance.attackingChar.Humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
             characterInstance.playHitSFX(trackData)
         -- elseif trackData.DodgeAttack_Attribute then
-        elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == (true or false) then -- can be true or false, all we know is its a sync block of some sort
-            characterInstance.attackingChar.Humanoid:TakeDamage(characterInstance.attackDamage / 2)
+        elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true then -- can be true or false, all we know is its a sync block of some sort
+            characterInstance.humanoid:TakeDamage(characterInstance.attackDamage / 2)
             characterInstance.playHitSFX(trackData)
+        elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == false then -- can be true or false, all we know is its a sync block of some sort
+            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage / 2)
+            characterInstance.playHitSFX(trackData)
+            characterInstance.canFollowUp = true
         end
 
         -- So I may have lied about below lol:
@@ -68,11 +72,13 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
     if trackData.IsPlaying then
 
         -- Schedule a simulation of the AttackFrames marker and handle data accordingly:
-        task.delay(trackData.Animation:GetAttribute("TimeUntilStartOfAttack"), function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
+        if trackData.Animation:GetAttribute("TimeUntilStartOfAttack") then -- Some level 3 sync blocks have no damage-dealing, so no StartOfAttack
+            task.delay(trackData.Animation:GetAttribute("TimeUntilStartOfAttack"), function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
             if trackData.IsPlaying then
-                runOnAttackFrames(self.characterInstance, trackData)
-            end
-        end)
+                    runOnAttackFrames(self.characterInstance, trackData)
+                end
+            end)
+        end
 
         -- Schedule a simulation of the EndOfAttack marker:
         task.delay(trackData.Animation:GetAttribute("TimeUntilEndOfAttack"), function()
@@ -116,7 +122,10 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- if not trackData.attackLvl == 2 then
             --     self.characterInstance.didFollowUp = false
             -- end
-            self.characterInstance.reset()
+            -- if not self.syncBlockFollowup then
+                warn("Resetting")
+                self.characterInstance.reset()
+            -- end
         end
 
         if trackData.Paired_Attribute == true and trackData.Completed then

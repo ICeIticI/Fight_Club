@@ -14,6 +14,7 @@
 local character_init = require(game.ReplicatedStorage.Shared.character_class.character_init)
 local character_attack = require(game.ReplicatedStorage.Shared.character_class.character_attack) -- contains the attack functions and what not
 local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
+local character_grapple = require(game.ReplicatedStorage.Shared.character_class.character_grapple)
 local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
 local character_hitboxes = require(game.ReplicatedStorage.Shared.character_class.character_hitboxes)
 local character_ragdoll = require(game.ReplicatedStorage.Shared.character_class.character_ragdoll)
@@ -63,6 +64,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     
     self.character_attack = setmetatable({}, { __index = character_attack })
     self.character_block = setmetatable({}, { __index = character_block })
+    self.character_grapple = setmetatable({}, { __index = character_grapple })
     self.character_receive = setmetatable({}, { __index = character_receive })
     
     self.attack_animation_manager = setmetatable({}, { __index = Attack_Animation_Manager})
@@ -77,6 +79,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     -- functionalities:
     self.character_attack.characterInstance = self
     self.character_block.characterInstance = self
+    self.character_grapple.characterInstance = self
     self.character_receive.characterInstance = self
 
     -- animation management:
@@ -172,8 +175,11 @@ function Character:block(sentBool) --[[ The character will get ready to block an
     end
 end
 
-function Character:grapple() --[[ The character will grapple with an enemy ]]
-    
+function Character:grab(enemyInstance) --[[ The character will attempt to grapple with an enemy ]]
+    if self.character_grapple:Attempt(enemyInstance) then -- the grab attempt return was successful and we can now actually grapple the enemy
+        self.character_grapple:Secure(enemyInstance)
+    end
+    self.character_grapple:EndGrab(enemyInstance)
 end
 
 function Character:receive(receiveType, data) --[[ The character will receive an attack ]]
@@ -192,7 +198,9 @@ function Character:receive(receiveType, data) --[[ The character will receive an
         self.character_receive:receiveCounter(data)
     elseif receiveType == "dodgeAttack" then
         self.character_receive:receiveDodgeAttack(data)
-
+    elseif receiveType == "repelGrab" then
+        self.character_receive:repelGrab()
+        
     -- No mitigation (got struck by an attack):
     elseif receiveType == "receiveLevel1" then
         self.character_receive:receiveLevel1(data)
@@ -200,11 +208,14 @@ function Character:receive(receiveType, data) --[[ The character will receive an
         self.character_receive:receiveLevel2(data)
     elseif receiveType == "receiveLevel3" then
         self.character_receive:receiveLevel3(data)
-
+    elseif receiveType == "receiveGrabSuccess" then
+        self.character_receive:receiveGrabSuccess()
     elseif receiveType == "receiveParry" then
         self.character_receive:receiveParry(data)
+    elseif receiveType == "grabAttempt" then
+        self.character_receive:receiveGrabAttempt()
     end
-    
+
 end
 
 return Character

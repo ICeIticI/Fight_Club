@@ -427,4 +427,16 @@ function Character_Receive:receiveCounter(attacker_characterInstance) --[[ We tr
     playReceivingTrack(self.characterInstance, trackData)
 end
 
+function Character_Receive:receiveGrabAttempt() --[[ An enemy is attempting to grab us ]]
+    
+end
+
+function Character_Receive:repelGrab() --[[ Either we stopped the enemy from grabbing us or we broke free of a grab success ]]
+    
+end
+
+function Character_Receive:receiveGrabSuccess() --[[ The enemy successfully got a hold on us ]]
+    
+end
+
 return Character_Receive

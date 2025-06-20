@@ -349,7 +349,6 @@ function Character_Attack:dodgeAttack(attacker_characterInstance) --[[ Attempt t
     -- -- Make enemy receive the dodge attack:
     -- local reason = "dodgeAttack"
     -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, reason, self.characterInstance.attackTrack.Animation)
-
 end
 
 return Character_Attack

@@ -230,6 +230,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             end
 
         end
+
+    elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
+        
+        local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
+        
+        characterInstance:grab(enemyInstance)
         
     elseif (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode]) and active then
         -- print("block input")

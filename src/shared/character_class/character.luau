@@ -16,6 +16,7 @@ local character_attack = require(game.ReplicatedStorage.Shared.character_class.c
 local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
 local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
 local character_hitboxes = require(game.ReplicatedStorage.Shared.character_class.character_hitboxes)
+local character_ragdoll = require(game.ReplicatedStorage.Shared.character_class.character_ragdoll)
 
 local Attack_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.attack_animation_manager)
 local Receive_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.receive_animation_manager)
@@ -59,6 +60,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     -- while not self.initialized do task.wait() end
     
     self.id = getNextId()
+    
     self.character_attack = setmetatable({}, { __index = character_attack })
     self.character_block = setmetatable({}, { __index = character_block })
     self.character_receive = setmetatable({}, { __index = character_receive })
@@ -68,6 +70,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.misc_animation_manager = setmetatable({}, { __index = Misc_Animation_Manager })
 
     self.character_hitboxes = setmetatable({}, { __index = character_hitboxes })
+    self.character_ragdoll = setmetatable({}, { __index = character_ragdoll })
 
     -- assign the Character instance to the other modules:
 
@@ -83,10 +86,12 @@ function Character.new(charModel) --[[ Constructor function that will create a n
 
     -- everything else:
     self.character_hitboxes.characterInstance = self
+    self.character_ragdoll.characterInstance = self
 
     characters[self.id] = self
 
     self.character_hitboxes:manageHitboxes()
+    self.character_ragdoll:InitializeCharacter()
     
     self.initialized = true
     return self

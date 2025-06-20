@@ -10,12 +10,13 @@ local REs_RFs = {}
 
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
 local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
+local ragdollFunction = require(game.ReplicatedStorage.Shared.ragdollFunction)
 
 function REs_RFs.init()
     
-    ClientVariables.GlobalRemoteFunction.OnClientInvoke = function(protocol)
+    ClientVariables.GlobalRemoteFunction.OnClientInvoke = function(protocol, data)
         if protocol == "createAnimationTracks" then -- initializes animations on character creation
-            Animation_Centric.initialize_animations(ClientVariables)
+            Animation_Centric.initialize_animations(ClientVariables)        
         end
     end
     
@@ -34,6 +35,12 @@ function REs_RFs.init()
             Animation_Centric.playBlockAnimation(ClientVariables)
         elseif protocol == "stopBlockingAnimation" then
             Animation_Centric.stopBlocking(ClientVariables)
+
+        elseif protocol == "setupRagdoll" then
+            ragdollFunction.setupRagdoll(data.character, data.id)
+        elseif protocol == "ragdoll" then
+            ragdollFunction.ragdoll(data.character, data.id, data.ragdollBool)
+
         end
     
         --[[ ^ Might put the animation events into the animation_centric script 

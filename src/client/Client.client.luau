@@ -69,6 +69,7 @@ UserInputService.InputBegan:Connect(function(input)
     if (LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode])
     or (AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode])
     or (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode])
+    or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode])
     -- or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode]) 
     then
         local protocol, publicVariables = input_check_FUNCTION:InvokeServer(inputTable, true) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes

@@ -437,6 +437,46 @@ AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("DodgeAttack", true)
 AnimationInstances.FC_BDodgeAttack1RECEIVER:SetAttribute("AnimDirection", "Back")
 
+
+
+AnimationInstances.FC_GrabAttempt1 = Instance.new("Animation")
+AnimationInstances.FC_GrabAttempt1.Name = "FC_GrabAttempt1"
+AnimationInstances.FC_GrabAttempt1.AnimationId = "rbxassetid://101813920133730"
+AnimationInstances.FC_GrabAttempt1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttempt1:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabAttempt1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_GrabAttempt1RECEIVER.Name = "FC_GrabAttempt1RECEIVER"
+AnimationInstances.FC_GrabAttempt1RECEIVER.AnimationId = "rbxassetid://85030383265342"
+AnimationInstances.FC_GrabAttempt1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttempt1RECEIVER:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabSuccess1 = Instance.new("Animation")
+AnimationInstances.FC_GrabSuccess1.Name = "FC_GrabSuccess1"
+AnimationInstances.FC_GrabSuccess1.AnimationId = "rbxassetid://94042116341448"
+AnimationInstances.FC_GrabSuccess1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabSuccess1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabSuccess1:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabSuccess1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_GrabSuccess1RECEIVER.Name = "FC_GrabSuccess1RECEIVER"
+AnimationInstances.FC_GrabSuccess1RECEIVER.AnimationId = "rbxassetid://80770148456768"
+AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabSecure1 = Instance.new("Animation")
+AnimationInstances.FC_GrabSecure1.Name = "FC_GrabSecure1"
+AnimationInstances.FC_GrabSecure1.AnimationId = "rbxassetid://112508453642375"
+AnimationInstances.FC_GrabSecure1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabSecure1:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabSecure1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_GrabSecure1RECEIVER.Name = "FC_GrabSecure1RECEIVER"
+AnimationInstances.FC_GrabSecure1RECEIVER.AnimationId = "rbxassetid://77909255553049"
+AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("AttackLevel", 3)
+
 -- Temporarly creating tracks to store the length of said track for management:
 
 -- local temporaryAnimationController = Instance.new("AnimationController") -- for temporarily loading animation tracks to return a length of the track. Needed to parent the animator.

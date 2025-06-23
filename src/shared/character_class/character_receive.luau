@@ -149,6 +149,16 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
                 return AnimationInstances.FC_RightCounter2RECEIVER
             end
         end
+    elseif trackData.receivingType == "grabAttempt" then
+        return AnimationInstances.FC_GrabAttempt1RECEIVER
+    elseif trackData.receivingType == "grabSuccess" then
+        return AnimationInstances.FC_GrabSuccess1RECEIVER
+    elseif trackData.receivingType == "grabSecure" then
+        return AnimationInstances.FC_GrabSecure1RECEIVER
+    elseif trackData.receivingType == "grabAttack1" then
+        return AnimationInstances.FC_GrabAttack1RECEIVER
+    elseif trackData.receivingType == "repelGrab" then
+        return AnimationInstances.FC_EndGrab1RECEIVER
     end
 
     return warn("No receive animation found with the given attacker's animation.")
@@ -427,16 +437,43 @@ function Character_Receive:receiveCounter(attacker_characterInstance) --[[ We tr
     playReceivingTrack(self.characterInstance, trackData)
 end
 
-function Character_Receive:receiveGrabAttempt() --[[ An enemy is attempting to grab us ]]
-    
+function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ An enemy is attempting to grab us ]]
+    local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
+
+    local trackData = setupReceiveAnimation(self.characterInstance, "grabAttempt", attackerAnim)
+    playReceivingTrack(self.characterInstance, trackData)
+
+    self.characterInstance.isGrappling = true
+    -- Detect next input. If its the attack button in the window of time they can deny a grab, then it will allow them to deny.
+    -- If its the block button, then their opportunity is gone. No matter what button they press now, even pressed in the time frame, will mean they will get grapped.
+    self.characterInstance.nextInput = nil -- will be set on their next action input
+
+    while trackData.IsPlaying do task.wait() end -- wait for the whole grab attempt to end before returning true or false (which means we succeeded or not with tryna grab the enemy)
+    warn("Finished grab attempt", self.characterInstance.nextInput)
+    if self.characterInstance.nextInput == "attack" then
+        return true -- we successfully defended against the grab attempt
+    else
+        return false
+    end
+
 end
 
 function Character_Receive:repelGrab() --[[ Either we stopped the enemy from grabbing us or we broke free of a grab success ]]
     
 end
 
-function Character_Receive:receiveGrabSuccess() --[[ The enemy successfully got a hold on us ]]
-    
+function Character_Receive:receiveGrabSuccess(attacker_characterInstance) --[[ The enemy successfully got a hold on us ]]
+    local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
+
+    local trackData = setupReceiveAnimation(self.characterInstance, "grabSuccess", attackerAnim)
+    playReceivingTrack(self.characterInstance, trackData)
+end
+
+function Character_Receive:receiveGrabSecure(attacker_characterInstance)
+    local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
+
+    local trackData = setupReceiveAnimation(self.characterInstance, "grabSecure", attackerAnim)
+    playReceivingTrack(self.characterInstance, trackData)
 end
 
 return Character_Receive

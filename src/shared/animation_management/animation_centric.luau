@@ -10,6 +10,17 @@
 local Animation_Centric = {}
 Animation_Centric.__index = Animation_Centric
 
+local function stopActionTracks(moduleTbl) --[[ Function that will stop an attack, receive, or grab track if they are playing ]]
+    if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
+        moduleTbl.currentReceiveAnimTRACK:Stop()
+    end
+    if moduleTbl.attackTrack and moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
+        moduleTbl.attackTrack:Stop()
+    end
+    if moduleTbl.currentGrabTRACK and moduleTbl.currentGrabTRACK.IsPlaying then
+        moduleTbl.currentGrabTRACK:Stop()
+    end
+end
 
 local function getAnimationTrackById(moduleTbl, AnimationId)
     for _, animationTrack in pairs(moduleTbl.AllAnimations) do
@@ -100,12 +111,10 @@ function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attac
 end
 
 function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
+    stopActionTracks(moduleTbl)
 
-    if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
-        moduleTbl.currentReceiveAnimTRACK:Stop()
-    end
-    if moduleTbl.attackTrack and moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
-        moduleTbl.attackTrack:Stop()
+    if data.receivingType == "grabAttempt" then
+        moduleTbl.FC_IdleTRACK:Stop()
     end
 
     moduleTbl.currentReceiveAnimTRACK = getAnimationTrackById(moduleTbl, data.AnimationId)
@@ -114,8 +123,21 @@ end
 
 function Animation_Centric.playReceiveAnimation(moduleTbl)
     if not moduleTbl.currentReceiveAnimTRACK then return warn("Failed to play receiving animation track, as it doesn't exist.") end
-
     moduleTbl.currentReceiveAnimTRACK:Play()
+
+end
+
+function Animation_Centric.setupGrabAnimation(moduleTbl, data)
+    stopActionTracks(moduleTbl)
+    moduleTbl.currentGrabTRACK = getAnimationTrackById(moduleTbl, data.AnimationId)
+
+end
+
+function Animation_Centric.playGrabAnimation(moduleTbl)
+    if not moduleTbl.currentGrabTRACK then return warn("Failed to play grab animation track, as it doesn't exist.") end
+    
+    moduleTbl.FC_IdleTRACK:Stop()
+    moduleTbl.currentGrabTRACK:Play()
 
 end
 

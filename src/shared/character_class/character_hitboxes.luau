@@ -101,7 +101,7 @@ local function attackHandler(attacker_characterInstance, receiver_characterInsta
 end
 
 
-local potentialEnemyChar -- when attacking and hit something, this will store what could potentially be a charcter, if any.
+local potentialEnemyChar -- when attacking and hit something, this will store what could potentially be a character, if any.
 local potentialEnemyInstance -- if the potentialEnemyChar is in fact a character and has a characterInstance
 
 function Character_Hitboxes:manageHitboxes()

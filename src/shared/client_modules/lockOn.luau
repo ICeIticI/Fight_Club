@@ -156,7 +156,7 @@ function LockOn.Unlock()
 		
 		-- character changes below:
 		ClientVariables.humanoid.AutoRotate = true
-		-- ClientVariables.GlobalRemoteEvent:FireServer("setSpeed")
+		-- ClientVariables.GlobalRemoteEvent:FireServer("SetSpeed")
 		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 		
 		-- camera changes

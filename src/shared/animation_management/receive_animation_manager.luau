@@ -49,7 +49,9 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         
     elseif not trackData.IsPlaying then
         -- self.characterInstance.hitDebounce = false
-        self.characterInstance.reset()
+        if not self.characterInstance.isGrappling then
+            self.characterInstance.reset()
+        end
         if not self.characterInstance.isBlockBeingPressed and self.characterInstance.isBlocking then
             self.characterInstance.block(false)
         end

@@ -29,6 +29,10 @@ function REs_RFs.init()
             Animation_Centric.setupReceiveAnimation(ClientVariables, data)
         elseif protocol == "playReceiveAnimation" then
             Animation_Centric.playReceiveAnimation(ClientVariables)
+        elseif protocol == "setupGrabAnimation" then
+            Animation_Centric.setupGrabAnimation(ClientVariables, data)
+        elseif protocol == "playGrabAnimation" then
+            Animation_Centric.playGrabAnimation(ClientVariables)
         elseif protocol == "playBlockStartAnimation" then
             Animation_Centric.playBlockStartAnimation(ClientVariables)
         elseif protocol == "playBlockAnimation" then

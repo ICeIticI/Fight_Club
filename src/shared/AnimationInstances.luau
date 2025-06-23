@@ -477,6 +477,34 @@ AnimationInstances.FC_GrabSecure1RECEIVER.AnimationId = "rbxassetid://7790925555
 AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("AttackLevel", 3)
 
+AnimationInstances.FC_GrabAttack1 = Instance.new("Animation")
+AnimationInstances.FC_GrabAttack1.Name = "FC_GrabAttack1"
+AnimationInstances.FC_GrabAttack1.AnimationId = "rbxassetid://127844448562647"
+AnimationInstances.FC_GrabAttack1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttack1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabAttack1:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabAttack1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_GrabAttack1RECEIVER.Name = "FC_GrabAttack1RECEIVER"
+AnimationInstances.FC_GrabAttack1RECEIVER.AnimationId = "rbxassetid://119789073708740"
+AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_EndGrab1 = Instance.new("Animation")
+AnimationInstances.FC_EndGrab1.Name = "FC_EndGrab1"
+AnimationInstances.FC_EndGrab1.AnimationId = "rbxassetid://139684625934016"
+AnimationInstances.FC_EndGrab1:SetAttribute("Paired", true)
+AnimationInstances.FC_EndGrab1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_EndGrab1:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_EndGrab1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_EndGrab1RECEIVER.Name = "FC_EndGrab1RECEIVER"
+AnimationInstances.FC_EndGrab1RECEIVER.AnimationId = "rbxassetid://105870024919891"
+AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("AttackLevel", 3)
+
 -- Temporarly creating tracks to store the length of said track for management:
 
 -- local temporaryAnimationController = Instance.new("AnimationController") -- for temporarily loading animation tracks to return a length of the track. Needed to parent the animator.

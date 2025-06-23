@@ -122,10 +122,10 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- if not trackData.attackLvl == 2 then
             --     self.characterInstance.didFollowUp = false
             -- end
-            -- if not self.syncBlockFollowup then
+            if not self.characterInstance.isGrappling then
                 warn("Resetting")
                 self.characterInstance.reset()
-            -- end
+            end
         end
 
         if trackData.Paired_Attribute == true and trackData.Completed then
@@ -139,7 +139,11 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         -- self.characterInstance.currentAttack_trackData = nil
         self.characterInstance.attackFrames = false
         self.characterInstance.pairedPlaying = false
-        self.characterInstance.SetSpeed(true)
+
+        if not self.characterInstance.isGrappling then
+            print("hi")
+            self.characterInstance.SetSpeed(true)
+        end
         
         -- if self.currentAttack_trackData == trackData then
         --     self.currentAttack_trackData = nil

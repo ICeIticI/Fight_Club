@@ -379,12 +379,15 @@ function Character_Init.init(charModel)
 		end)
 	end
 
-	function characterInstance.repositionInFrontOfEnemy() --[[ repositions the character in front of the enemy. ]]
-
+	function characterInstance.repositionInFrontOfEnemy(sentCharacter) --[[ repositions the character in front of the enemy. ]]
+		if not sentCharacter then 
+			sentCharacter = characterInstance.enemyChar -- sentCharacter is a newer feature added to this function. Before adding enemyChar would be used, so to still support that code, we'll just set enemyChar to sentCharacter
+		end
+		
 		characterInstance.character:WaitForChild("HumanoidRootPart").CFrame = 
-		CFrame.new(characterInstance.enemyChar:WaitForChild("HumanoidRootPart").Position 
-					+ characterInstance.enemyChar.HumanoidRootPart.CFrame.LookVector * 3 
-					, characterInstance.enemyChar.HumanoidRootPart.Position)
+		CFrame.new(sentCharacter:WaitForChild("HumanoidRootPart").Position 
+					+ sentCharacter.HumanoidRootPart.CFrame.LookVector * 3 
+					, sentCharacter.HumanoidRootPart.Position)
 	end
 
 	-- Damage types:

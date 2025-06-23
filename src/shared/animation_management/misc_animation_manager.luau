@@ -159,7 +159,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             end
             self.characterInstance.isDodging = false
 
-            if not self.characterInstance.isAttacking.Value and not self.characterInstance.waitingToAttack then
+            if not self.characterInstance.isAttacking.Value and not self.characterInstance.waitingToAttack and not self.characterInstance.isGrappling then
                 self.characterInstance.SetSpeed(true)
             end
 

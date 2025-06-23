@@ -175,11 +175,24 @@ function Character:block(sentBool) --[[ The character will get ready to block an
     end
 end
 
-function Character:grab(enemyInstance) --[[ The character will attempt to grapple with an enemy ]]
-    if self.character_grapple:Attempt(enemyInstance) then -- the grab attempt return was successful and we can now actually grapple the enemy
-        self.character_grapple:Secure(enemyInstance)
-    end
-    self.character_grapple:EndGrab(enemyInstance)
+function Character:grab(enemyInstance, success) --[[ The character will attempt to grapple with an enemy ]]
+    
+    -- if success == nil then
+        if self.character_grapple:Attempt(enemyInstance) == true then
+            -- we succeeded with our grab
+            self.character_grapple:Success(enemyInstance)
+            self.character_grapple:Secure(enemyInstance)
+        end
+        self.character_grapple:EndGrab(enemyInstance)
+
+    -- elseif success == true then
+    --     self.character_grapple:Success(enemyInstance)
+    --     self.character_grapple:Secure(enemyInstance)
+    --     self.character_grapple:EndGrab(enemyInstance)
+    -- elseif success == false then
+    --     self.character_grapple:EndGrab(enemyInstance)
+    -- end
+    
 end
 
 function Character:receive(receiveType, data) --[[ The character will receive an attack ]]
@@ -199,7 +212,7 @@ function Character:receive(receiveType, data) --[[ The character will receive an
     elseif receiveType == "dodgeAttack" then
         self.character_receive:receiveDodgeAttack(data)
     elseif receiveType == "repelGrab" then
-        self.character_receive:repelGrab()
+        self.character_receive:repelGrab(data)
         
     -- No mitigation (got struck by an attack):
     elseif receiveType == "receiveLevel1" then
@@ -209,11 +222,13 @@ function Character:receive(receiveType, data) --[[ The character will receive an
     elseif receiveType == "receiveLevel3" then
         self.character_receive:receiveLevel3(data)
     elseif receiveType == "receiveGrabSuccess" then
-        self.character_receive:receiveGrabSuccess()
+        self.character_receive:receiveGrabSuccess(data)
+    elseif receiveType == "receiveGrabSecure" then
+        self.character_receive:receiveGrabSecure(data)
     elseif receiveType == "receiveParry" then
         self.character_receive:receiveParry(data)
     elseif receiveType == "grabAttempt" then
-        self.character_receive:receiveGrabAttempt()
+        return self.character_receive:receiveGrabAttempt(data)
     end
 
 end

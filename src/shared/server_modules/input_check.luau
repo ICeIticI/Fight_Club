@@ -148,6 +148,11 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         end
 
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
+        
+        if not characterInstance.nextInput then
+            characterInstance.nextInput = "attack"
+        end
+        
         if not characterInstance.waitingToAttack 
         and characterInstance.lockOnDebounce.Value 
         and characterInstance.pairedChain <= characterInstance.PairedChainMAX 
@@ -234,40 +239,47 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
     elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
         
         local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
-        characterInstance:grab(enemyInstance)
+        characterInstance:grab(enemyInstance, nil)
+        -- if enemyInstance:receive("grabAttempt", characterInstance) == false then
+        --     enemyInstance:receive("receiveGrabSuccess", characterInstance)
+        --     characterInstance:grab(enemyInstance, true)
+
+        -- end
         
-    elseif (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode]) and active then
-        -- print("block input")
-        -- If the player is holding the block button, we store that as a variable:
-        characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
+    elseif BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
         
-        if characterInstance.lockOnDebounce.Value 
-        and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering}) 
-        and not characterInstance.pairedPlaying
-        and characterInstance.stamina and characterInstance.stamina.Value > 0 then
-            characterInstance:block(true)
-        end
+        if active then
 
-    -- elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
+            if not characterInstance.nextInput then
+                characterInstance.nextInput = "block"
+            end
+            -- print("block input")
+            -- If the player is holding the block button, we store that as a variable:
+            characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
+            
+            if characterInstance.lockOnDebounce.Value 
+            and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering}) 
+            and not characterInstance.pairedPlaying
+            and characterInstance.stamina and characterInstance.stamina.Value > 0 then
+                characterInstance:block(true)
+            end
+        else
+            -- If the player is holding the block button, we store that as a variable:
+            if BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
+                characterInstance.isBlockBeingPressed = false
+            end
 
-
-    elseif (BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode]) and not active then
-        
-        -- If the player is holding the block button, we store that as a variable:
-        if BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
-            characterInstance.isBlockBeingPressed = false
-        end
-
-        if 
-        (characterInstance.BlockStartAnimPlaying 
-        or 
-        characterInstance.holdingBlock) 
-        and not characterInstance.pairedPlaying
-        and not characterInstance.waitingToAttack 
-        and not characterInstance.isAttacking.Value
-        and not characterInstance.isDodging
-        then
-            characterInstance:block(false)
+            if 
+            (characterInstance.BlockStartAnimPlaying 
+            or 
+            characterInstance.holdingBlock) 
+            and not characterInstance.pairedPlaying
+            and not characterInstance.waitingToAttack 
+            and not characterInstance.isAttacking.Value
+            and not characterInstance.isDodging
+            then
+                characterInstance:block(false)
+            end
         end
     end
 end

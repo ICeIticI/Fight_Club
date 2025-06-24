@@ -475,6 +475,7 @@ AnimationInstances.FC_GrabSecure1.AnimationId = "rbxassetid://112508453642375"
 AnimationInstances.FC_GrabSecure1:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabSecure1:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabSecure1:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_GrabSecure1:SetAttribute("Secure", true)
 
 AnimationInstances.FC_GrabSecure1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabSecure1RECEIVER.Name = "FC_GrabSecure1RECEIVER"
@@ -482,6 +483,7 @@ AnimationInstances.FC_GrabSecure1RECEIVER.AnimationId = "rbxassetid://7790925555
 AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("Secure", true)
 
 AnimationInstances.FC_GrabAttack1 = Instance.new("Animation")
 AnimationInstances.FC_GrabAttack1.Name = "FC_GrabAttack1"

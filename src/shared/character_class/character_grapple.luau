@@ -41,6 +41,12 @@ local function setupGrabAnimation(characterInstance)
     trackData.Animation = getGrabAnimation()
     trackData.AnimationId = trackData.Animation.AnimationId
     characterInstance.currentGrab_trackData = trackData
+    trackData.Paired_Attribute = true
+
+    if trackData.Animation:GetAttribute("AnimType") == 1 then
+        trackData.attackLvl = 1
+        characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
+    end
 
     if characterInstance.player then
         characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "setupGrabAnimation", trackData)

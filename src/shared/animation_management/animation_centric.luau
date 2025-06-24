@@ -11,13 +11,13 @@ local Animation_Centric = {}
 Animation_Centric.__index = Animation_Centric
 
 local function stopActionTracks(moduleTbl) --[[ Function that will stop an attack, receive, or grab track if they are playing ]]
-    if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit then
+    if moduleTbl.currentReceiveAnimTRACK and moduleTbl.currentReceiveAnimTRACK.IsPlaying and not moduleTbl.isGettingHit and not moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Secure") then
         moduleTbl.currentReceiveAnimTRACK:Stop()
     end
     if moduleTbl.attackTrack and moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
         moduleTbl.attackTrack:Stop()
     end
-    if moduleTbl.currentGrabTRACK and moduleTbl.currentGrabTRACK.IsPlaying and not moduleTbl.isGrappling then
+    if moduleTbl.currentGrabTRACK and moduleTbl.currentGrabTRACK.IsPlaying and not moduleTbl.currentGrabTRACK.Animation:GetAttribute("Secure") then
         moduleTbl.currentGrabTRACK:Stop()
     end
 end

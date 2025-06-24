@@ -9,14 +9,13 @@ local Characters = require(game.ReplicatedStorage.Shared.server_modules.characte
 local Attack_Animation_Management = {}
 
 local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
+    warn("Yoyo attackframes reached")
     characterInstance.attackFrames = true
     if trackData.Paired_Attribute then 
         characterInstance.canCounter = false
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
         if trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then -- counterattack animation
-            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
-            characterInstance.playHitSFX(trackData)
         -- elseif trackData.DodgeAttack_Attribute then
         elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true then -- can be true or false, all we know is its a sync block of some sort
             characterInstance.humanoid:TakeDamage(characterInstance.attackDamage / 2)
@@ -25,6 +24,9 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
             characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage / 2)
             characterInstance.playHitSFX(trackData)
             characterInstance.canFollowUp = true
+        else
+            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.playHitSFX(trackData)
         end
 
         -- So I may have lied about below lol:

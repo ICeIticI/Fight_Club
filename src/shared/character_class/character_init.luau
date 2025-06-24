@@ -500,6 +500,42 @@ function Character_Init.init(charModel)
 		table.insert(hitCacheTable, sfx)
 	end
 
+	-- AI-Altered code by Microsoft Copilot:
+	local MoveDirectionConnection
+	MoveDirectionConnection = characterInstance.humanoid:GetPropertyChangedSignal("MoveDirection"):Connect(function()
+		local root = characterInstance.character:WaitForChild("HumanoidRootPart")
+		local moveDir = characterInstance.humanoid.MoveDirection
+
+		local frontVector = root.CFrame.LookVector
+		local rightVector = root.CFrame.RightVector -- the right side of where the character's facing
+
+		local frontDot = moveDir:Dot(frontVector)
+		local rightDot = moveDir:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
+
+		if rightDot > 0.5 and frontDot > -0.5 then -- 0.5 makes our range of momentum we consider right, left, etc more strict than 0, otherwise every little movement in a direction will make the movingDirection that direction. We dont want unintentional direction momentum.
+			characterInstance.movingDirection = "right"
+		elseif rightDot < -0.5 and frontDot > -0.5 then
+			characterInstance.movingDirection = "left"
+		elseif frontDot < -0.5 then
+			characterInstance.movingDirection = "backwards"
+		elseif frontDot > 0.5 then
+			characterInstance.movingDirection = "forwards"
+		else
+			characterInstance.movingDirection = "none"
+		end
+	end)
+	-- AI-Altered code by Microsoft Copilot ^
+
+
+	local DiedConnection
+	DiedConnection = characterInstance.humanoid.Died:Connect(function()
+		MoveDirectionConnection:Disconnect()
+		MoveDirectionConnection = nil
+		
+		DiedConnection:Disconnect()
+		DiedConnection = nil
+	end)
+
 
 	
 	if characterInstance.player ~= nil then

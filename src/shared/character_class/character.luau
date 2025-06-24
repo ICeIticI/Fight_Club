@@ -118,7 +118,10 @@ function Character:lockOn() --[[ Makes the character lock onto an enemy (Will ne
 end
 
 function Character:basicAttack(enemyInstance) --[[ The character will do some sort of attack ]]
-    if enemyInstance.isBlocking and not self.isGettingHit and enemyInstance.humanoid.MoveDirection.Magnitude == 0 and self.comboCounter == 0 then
+    
+    if self.isGrappling then
+        self.character_grapple:GrabAttack(enemyInstance)
+    elseif enemyInstance.isBlocking and not self.isGettingHit and enemyInstance.humanoid.MoveDirection.Magnitude == 0 and self.comboCounter == 0 then
         -- self.synchedBlock(nil, comboCounter)
         local animPair = {math.random(1, 2), math.random(1, 2)}
         self.animPair = animPair
@@ -225,6 +228,8 @@ function Character:receive(receiveType, data) --[[ The character will receive an
         self.character_receive:receiveGrabSuccess(data)
     elseif receiveType == "receiveGrabSecure" then
         self.character_receive:receiveGrabSecure(data)
+    elseif receiveType == "receiveGrabAttack" then
+        self.character_receive:receiveGrabAttack(data)
     elseif receiveType == "receiveParry" then
         self.character_receive:receiveParry(data)
     elseif receiveType == "grabAttempt" then

@@ -13,6 +13,14 @@ local function setCharacterNetworkOwnershipTo(character, owner)
     end
 end
 
+local function setCharacterMassless(character, bool)
+    for _, child in pairs(character:GetChildren()) do
+        if child:IsA("BasePart") then
+            child.Massless = bool
+        end
+    end
+end
+
 local function getGrabAnimation()
     if grabType == "attempt" then
         return AnimationInstances.FC_GrabAttempt1 -- will be a more sophisticated way in the future when we start dealing with fighter classes and other animations
@@ -20,6 +28,8 @@ local function getGrabAnimation()
         return AnimationInstances.FC_GrabSuccess1
     elseif grabType == "secure" then
         return AnimationInstances.FC_GrabSecure1
+    elseif grabType == "attack" then
+        return AnimationInstances.FC_GrabAttack1
     -- grabAttack is done on character_attack rather than this script to make it easier to add to the game
     elseif grabType == "end" then
         return AnimationInstances.FC_EndGrab1
@@ -91,6 +101,27 @@ function Character_Grapple:Success(enemyInstance) --[[ The character attempted t
     return true
 end
 
+function Character_Grapple:Secure_TurnLeft(enemyInstance)
+    return warn("Add a turning-left animation for grapple secure")
+end
+
+function Character_Grapple:Secure_TurnRight(enemyInstance)
+    return warn("Add a turning-right animation for grapple secure")
+end
+
+function Character_Grapple:GrabAttack(enemyInstance)
+    grabType = "attack"
+    local trackData = setupGrabAnimation(self.characterInstance)
+    playGrabAnimation(self.characterInstance, trackData)
+    enemyInstance:receive("receiveGrabAttack", self.characterInstance)
+    
+    -- self.characterInstance.comboCounter = 0
+    -- self.characterInstance.followUpCount = 0
+
+    -- while trackData.IsPlaying do task.wait() end
+    -- self.characterInstance.character_grapple:Secure(enemyInstance)
+end
+
 function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. Now they can begin throwing blows and what not at the enemy while grappled on, and the enemy cant do anything about it except try to break free. ]]
     grabType = "secure"
     local trackData = setupGrabAnimation(self.characterInstance)
@@ -98,17 +129,24 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     enemyInstance:receive("receiveGrabSecure", self.characterInstance)
 
     -- local offset = Vector3.new(0, 1, -3)
-    setCharacterNetworkOwnershipTo(enemyInstance.character, self.characterInstance.player)
-    local grabWeld = Instance.new("Weld")
+    -- setCharacterNetworkOwnershipTo(enemyInstance.character, self.characterInstance.player)
+    local grabWeld = Instance.new("WeldConstraint")
     -- grabWeld.Enabled = false
     grabWeld.Parent = self.characterInstance.humanoidRootPart
-    grabWeld.Part0 = self.characterInstance.character.PrimaryPart
-    grabWeld.Part1 = enemyInstance.character.PrimaryPart
-    grabWeld.C1 = CFrame.new(0,0,3)
-    enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
+    grabWeld.Part0 = self.characterInstance.character["Left Arm"]
+    grabWeld.Part1 = enemyInstance.humanoidRootPart
+    -- grabWeld.C1 = CFrame.new(0,0,-3) * CFrame.Angles(0,math.rad(180), 0)
+    setCharacterMassless(enemyInstance.character, true)
+    enemyInstance.humanoid.PlatformStand = true
+    -- enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
     -- grabWeld.Enabled = true
     while true do
         task.wait()
+        if self.characterInstance.movingDirection == "left" then
+            Character_Grapple:Secure_TurnLeft()
+        elseif self.characterInstance.movingDirection == "right" then
+            Character_Grapple:Secure_TurnRight()
+        end
         -- enemyInstance.character:SetPrimaryPartCFrame(self.characterInstance.humanoidRootPart.CFrame * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0))
     end
 

@@ -443,18 +443,21 @@ AnimationInstances.FC_GrabAttempt1 = Instance.new("Animation")
 AnimationInstances.FC_GrabAttempt1.Name = "FC_GrabAttempt1"
 AnimationInstances.FC_GrabAttempt1.AnimationId = "rbxassetid://101813920133730"
 AnimationInstances.FC_GrabAttempt1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttempt1:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttempt1:SetAttribute("AttackLevel", 3)
 
 AnimationInstances.FC_GrabAttempt1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabAttempt1RECEIVER.Name = "FC_GrabAttempt1RECEIVER"
 AnimationInstances.FC_GrabAttempt1RECEIVER.AnimationId = "rbxassetid://85030383265342"
 AnimationInstances.FC_GrabAttempt1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttempt1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttempt1RECEIVER:SetAttribute("AttackLevel", 3)
 
 AnimationInstances.FC_GrabSuccess1 = Instance.new("Animation")
 AnimationInstances.FC_GrabSuccess1.Name = "FC_GrabSuccess1"
 AnimationInstances.FC_GrabSuccess1.AnimationId = "rbxassetid://94042116341448"
 AnimationInstances.FC_GrabSuccess1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabSuccess1:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabSuccess1:SetAttribute("AnimType", 1)
 AnimationInstances.FC_GrabSuccess1:SetAttribute("AttackLevel", 3)
 
@@ -462,6 +465,7 @@ AnimationInstances.FC_GrabSuccess1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabSuccess1RECEIVER.Name = "FC_GrabSuccess1RECEIVER"
 AnimationInstances.FC_GrabSuccess1RECEIVER.AnimationId = "rbxassetid://80770148456768"
 AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("AttackLevel", 3)
 
@@ -469,18 +473,21 @@ AnimationInstances.FC_GrabSecure1 = Instance.new("Animation")
 AnimationInstances.FC_GrabSecure1.Name = "FC_GrabSecure1"
 AnimationInstances.FC_GrabSecure1.AnimationId = "rbxassetid://112508453642375"
 AnimationInstances.FC_GrabSecure1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabSecure1:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabSecure1:SetAttribute("AttackLevel", 3)
 
 AnimationInstances.FC_GrabSecure1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabSecure1RECEIVER.Name = "FC_GrabSecure1RECEIVER"
 AnimationInstances.FC_GrabSecure1RECEIVER.AnimationId = "rbxassetid://77909255553049"
 AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabSecure1RECEIVER:SetAttribute("AttackLevel", 3)
 
 AnimationInstances.FC_GrabAttack1 = Instance.new("Animation")
 AnimationInstances.FC_GrabAttack1.Name = "FC_GrabAttack1"
 AnimationInstances.FC_GrabAttack1.AnimationId = "rbxassetid://127844448562647"
 AnimationInstances.FC_GrabAttack1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttack1:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack1:SetAttribute("AnimType", 1)
 AnimationInstances.FC_GrabAttack1:SetAttribute("AttackLevel", 3)
 
@@ -488,6 +495,7 @@ AnimationInstances.FC_GrabAttack1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabAttack1RECEIVER.Name = "FC_GrabAttack1RECEIVER"
 AnimationInstances.FC_GrabAttack1RECEIVER.AnimationId = "rbxassetid://119789073708740"
 AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("AttackLevel", 3)
 
@@ -495,6 +503,7 @@ AnimationInstances.FC_EndGrab1 = Instance.new("Animation")
 AnimationInstances.FC_EndGrab1.Name = "FC_EndGrab1"
 AnimationInstances.FC_EndGrab1.AnimationId = "rbxassetid://139684625934016"
 AnimationInstances.FC_EndGrab1:SetAttribute("Paired", true)
+AnimationInstances.FC_EndGrab1:SetAttribute("Grapple", true)
 AnimationInstances.FC_EndGrab1:SetAttribute("AnimType", 1)
 AnimationInstances.FC_EndGrab1:SetAttribute("AttackLevel", 3)
 
@@ -502,6 +511,7 @@ AnimationInstances.FC_EndGrab1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_EndGrab1RECEIVER.Name = "FC_EndGrab1RECEIVER"
 AnimationInstances.FC_EndGrab1RECEIVER.AnimationId = "rbxassetid://105870024919891"
 AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("AttackLevel", 3)
 
@@ -520,16 +530,6 @@ for _, animation in pairs(AnimationInstances) do
         animation:SetAttribute("Looped", true)
         continue 
     end
-
-    -- Set animation priority based on attributes
-    if temporaryTrack.Animation:GetAttribute("AnimType") and not temporaryTrack.Animation:GetAttribute("Paired") then
-        temporaryTrack.Priority = Enum.AnimationPriority.Action
-    elseif temporaryTrack.Animation:GetAttribute("Paired") then
-        temporaryTrack.Priority = Enum.AnimationPriority.Action2
-    end
-    -- print(temporaryTrack, temporaryTrack.Priority)
-
-
     -- print(temporaryTrack.Length)
     task.spawn(function()
         

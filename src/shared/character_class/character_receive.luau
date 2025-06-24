@@ -165,10 +165,10 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
 end
 
 local function getDodgeInfo(characterInstance, trackData)
-	local frontVector = characterInstance.character.HumanoidRootPart.CFrame.LookVector
-    local frontDotProduct = characterInstance.humanoid.MoveDirection:Dot(frontVector)
-    local rightVector = characterInstance.character.HumanoidRootPart.CFrame.RightVector -- the right side of where the character's facing
-	local rightDotProduct = characterInstance.humanoid.MoveDirection:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
+	-- local frontVector = characterInstance.character.HumanoidRootPart.CFrame.LookVector
+    -- local frontDotProduct = characterInstance.humanoid.MoveDirection:Dot(frontVector)
+    -- local rightVector = characterInstance.character.HumanoidRootPart.CFrame.RightVector -- the right side of where the character's facing
+	-- local rightDotProduct = characterInstance.humanoid.MoveDirection:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
 
     -- characterInstance.dodgeTrack = nil -- Will be what animation the player dodges with after some checks
     local distanceToTravel = 0 -- The distance the player will travel when dodging. This will be used to calculate vectorVelocity.
@@ -176,7 +176,7 @@ local function getDodgeInfo(characterInstance, trackData)
     local vectorVelocity = Vector3.zero -- When dodging, we obviously want the player to move, so this will be the moving part of the dodge. Depending on the dodge, this will equal a vector3 value.
     local direction = nil -- Will be set depending on the direction the character is going
 
-    if rightDotProduct > 0 and frontDotProduct > -0.5 then -- character is moving right
+    if characterInstance.movingDirection == "right" then -- character is moving right
         distanceToTravel = 2
         animTime = 0.53
         vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
@@ -186,7 +186,7 @@ local function getDodgeInfo(characterInstance, trackData)
         -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
         -- GameVariables.dodgeAttackTrack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Right", "DodgeAttack", true)
     
-    elseif rightDotProduct < 0 and frontDotProduct > -0.5 then -- character is moving left
+    elseif characterInstance.movingDirection == "left" then -- character is moving left
         distanceToTravel = -2
         animTime = 0.53 
         vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
@@ -196,7 +196,7 @@ local function getDodgeInfo(characterInstance, trackData)
         -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
         -- GameVariables.dodgeAttackTrack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Left", "DodgeAttack", true)
     else
-        if frontDotProduct < 0 then -- character is moving backwards
+        if characterInstance.movingDirection == "backwards" then -- character is moving backwards
             distanceToTravel = 2
             animTime = 0.23
             vectorVelocity = Vector3.new(0, 0, distanceToTravel / animTime)
@@ -473,6 +473,13 @@ function Character_Receive:receiveGrabSecure(attacker_characterInstance)
     local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
 
     local trackData = setupReceiveAnimation(self.characterInstance, "grabSecure", attackerAnim)
+    playReceivingTrack(self.characterInstance, trackData)
+end
+
+function Character_Receive:receiveGrabAttack(attacker_characterInstance)
+    local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
+
+    local trackData = setupReceiveAnimation(self.characterInstance, "grabAttack1", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
 end
 

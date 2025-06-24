@@ -17,7 +17,7 @@ local function stopActionTracks(moduleTbl) --[[ Function that will stop an attac
     if moduleTbl.attackTrack and moduleTbl.attackTrack and moduleTbl.attackTrack.IsPlaying then
         moduleTbl.attackTrack:Stop()
     end
-    if moduleTbl.currentGrabTRACK and moduleTbl.currentGrabTRACK.IsPlaying then
+    if moduleTbl.currentGrabTRACK and moduleTbl.currentGrabTRACK.IsPlaying and not moduleTbl.isGrappling then
         moduleTbl.currentGrabTRACK:Stop()
     end
 end
@@ -37,8 +37,19 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
     moduleTbl.AllAnimations = {}
     for _, obj in pairs(require(game.ReplicatedStorage.Shared.AnimationInstances)) do
         if obj:IsA("Animation") then
+
             -- moduleTbl[obj.Name] = obj
             moduleTbl[obj.Name .. "TRACK"] = moduleTbl.charAnimator:LoadAnimation(obj)
+
+            -- Set animation priority based on attributes
+            if obj:GetAttribute("Paired") and obj:GetAttribute("AnimType") then
+                moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action3
+            elseif obj:GetAttribute("Paired") then
+                moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action2
+            elseif obj:GetAttribute("AnimType") and not obj:GetAttribute("Paired") then
+                moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action
+            end
+
             table.insert(moduleTbl.AllAnimations, moduleTbl[obj.Name .. "TRACK"])
         end
     end
@@ -123,6 +134,11 @@ end
 
 function Animation_Centric.playReceiveAnimation(moduleTbl)
     if not moduleTbl.currentReceiveAnimTRACK then return warn("Failed to play receiving animation track, as it doesn't exist.") end
+    
+    if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Grapple") then
+        moduleTbl.isGrappling = true
+    end
+    
     moduleTbl.currentReceiveAnimTRACK:Play()
 
 end
@@ -138,6 +154,7 @@ function Animation_Centric.playGrabAnimation(moduleTbl)
     
     moduleTbl.FC_IdleTRACK:Stop()
     moduleTbl.currentGrabTRACK:Play()
+    moduleTbl.isGrappling = true
 
 end
 

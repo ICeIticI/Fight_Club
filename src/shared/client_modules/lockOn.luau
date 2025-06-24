@@ -14,12 +14,14 @@ local function getCenteredSubjectCFrame() --[[ When the character locks onto the
 	
 local function faceEnemy(subject)
 	
-	ClientVariables.humanoidRootPart.CFrame = CFrame.lookAt(
-		ClientVariables.humanoidRootPart.Position, 
-		Vector3.new(ClientVariables.enemyHumanoidRootPart.Position.X, 
-		ClientVariables.humanoidRootPart.Position.Y, 
-		ClientVariables.enemyHumanoidRootPart.Position.Z)
-	) -- makes sure the player character is always facing the enemy character.
+	if not ClientVariables.isGrappling then
+		ClientVariables.humanoidRootPart.CFrame = CFrame.lookAt(
+			ClientVariables.humanoidRootPart.Position, 
+			Vector3.new(ClientVariables.enemyHumanoidRootPart.Position.X, 
+			ClientVariables.humanoidRootPart.Position.Y, 
+			ClientVariables.enemyHumanoidRootPart.Position.Z)
+		) -- makes sure the player character is always facing the enemy character.
+	end
 	
 	if ClientVariables.subjectTween.PlaybackState ~= Enum.PlaybackState.Playing then
 		

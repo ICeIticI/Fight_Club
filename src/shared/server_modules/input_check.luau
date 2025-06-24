@@ -152,6 +152,13 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         if not characterInstance.nextInput then
             characterInstance.nextInput = "attack"
         end
+        print("attack input gate 0", {
+        not characterInstance.waitingToAttack,
+         characterInstance.lockOnDebounce.Value ,
+         characterInstance.pairedChain <= characterInstance.PairedChainMAX ,
+         characterInstance.boolCheck({isBlocking = characterInstance.isBlocking}) ,
+         (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7,
+        })
         
         if not characterInstance.waitingToAttack 
         and characterInstance.lockOnDebounce.Value 
@@ -160,6 +167,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         and (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
         -- and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
+            print("attack input gate 1")
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             -- before attacking, check if we're currently dodging so we can do a dodge attack:
             if characterInstance.isDodging == true then
@@ -213,10 +221,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                         end
                     end
                 elseif characterInstance.canFollowUp and characterInstance.comboCounter <= 3 then
+                    print("yo we waiting to attack")
                     characterInstance.waitingToAttack = true
                     characterInstance.didFollowUp = true -- when true, the character did a followup attack
                     characterInstance.isParrying = false -- var thats only true when a parry anim starts.
                     while characterInstance.isAttacking.Value do
+                        print("waiting for attack to end")
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then

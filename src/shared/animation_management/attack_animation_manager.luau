@@ -125,6 +125,8 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             if not self.characterInstance.isGrappling then
                 warn("Resetting")
                 self.characterInstance.reset()
+            else
+                self.characterInstance.waitingToAttack = false
             end
         end
 

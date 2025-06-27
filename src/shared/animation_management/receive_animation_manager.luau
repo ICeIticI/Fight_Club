@@ -18,7 +18,6 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
 
         self.characterInstance.isGettingHit = true
         self.characterInstance.isAttacking.Value = false
-        print("a receive?")
         self.characterInstance.canFollowUp = false
         self.characterInstance.SetSpeed(false) -- Prevent the player from moving while being hit
 
@@ -49,6 +48,11 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         
     elseif not trackData.IsPlaying then
         -- self.characterInstance.hitDebounce = false
+
+        if trackData.Animation:GetAttribute("Grapple") == false then -- a false grapple, which means it ends the grappling session
+            self.characterInstance.isGrappling = false
+        end
+
         if not self.characterInstance.isGrappling then
             self.characterInstance.reset()
         end

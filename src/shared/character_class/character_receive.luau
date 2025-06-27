@@ -2,7 +2,7 @@ local Character_Receive = {}
 Character_Receive.__index = Character_Receive
 
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
--- local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
 
 local function getReceiveAnimation(characterInstance, trackData) --[[ Will return the receiver animation that gets played based on what specific attack the enemy did. ]]
@@ -269,6 +269,31 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
 
     end
 
+    -- lock us onto the attacker (if not done already): 
+    if not characterInstance.lockOnDebounce.Value then
+
+        characterInstance.lockOnDebounce.Value = true
+        local attacker_characterInstance = characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
+        characterInstance.enemyHumanoidRootPart = attacker_characterInstance.character:WaitForChild("HumanoidRootPart")
+        print(characterInstance.enemyHumanoidRootPart)
+        characterInstance.SetSpeed(true)
+        
+        if characterInstance.player then
+            -- is a player. Send to client for lock on:
+            characterInstance.GlobalRemoteEvent:FireClient(
+            characterInstance.player,
+            "lockOn", {
+                lockOnDebounce = characterInstance.lockOnDebounce, 
+                enemyHumanoidRootPart = attacker_characterInstance.humanoidRootPart,
+                enemyHumanoid = attacker_characterInstance.humanoid,
+                lockOnRayParams = characterInstance.lockOnRayParams
+            })
+        else
+            --Is an AI. Send to server:
+
+        end
+    end
+
     return trackData
 end
 
@@ -309,7 +334,6 @@ function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an e
 
     self.characterInstance.pairedPlaying = true
     self.characterInstance.SetSpeed(false)
-    print("sync blockinnnnnnnnnn")
 
     -- if self.characterInstance.isBlocking then
     --     self.characterInstance.pairedBlock:Play()
@@ -385,6 +409,7 @@ function Character_Receive:receiveLevel1(attacker_characterInstance) --[[ Get hi
     -- self.characterInstance.playReceivingTrack()
     local trackData = setupReceiveAnimation(self.characterInstance, "Level1", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
+    print(tostring(self.characterInstance.character) .. " receiving lvl 1")
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage)
     self.characterInstance.playHitSFX(trackData)
 end
@@ -458,8 +483,11 @@ function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ A
 
 end
 
-function Character_Receive:repelGrab() --[[ Either we stopped the enemy from grabbing us or we broke free of a grab success ]]
-    
+function Character_Receive:repelGrab(attacker_characterInstance) --[[ Either we stopped the enemy from grabbing us or we broke free of a grab success ]]
+    local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
+
+    local trackData = setupReceiveAnimation(self.characterInstance, "repelGrab", attackerAnim)
+    playReceivingTrack(self.characterInstance, trackData)
 end
 
 function Character_Receive:receiveGrabSuccess(attacker_characterInstance) --[[ The enemy successfully got a hold on us ]]
@@ -474,6 +502,9 @@ function Character_Receive:receiveGrabSecure(attacker_characterInstance)
 
     local trackData = setupReceiveAnimation(self.characterInstance, "grabSecure", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
+
+    self.characterInstance.escapeGrappleProgress = 0 -- When this hits 100, the character will escape. For NPCs, this will probably just automatically go up since they don't have input
+    self.characterInstance.isInSecureGrapple = true -- when true, the player is given the option to spam the attack button to "break free" of the grab
 end
 
 function Character_Receive:receiveGrabAttack(attacker_characterInstance)

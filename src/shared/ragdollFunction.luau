@@ -69,9 +69,7 @@ function ragdollFunction.ragdoll(char : Model, id : number, sentBool : boolean) 
 
 	local current_characterRagdollData = charactersRagdollData[id] -- the specific table for this character holding data for ragdoll functionality
 	local jointsCache = current_characterRagdollData.jointsCache
-	
-	print(charactersRagdollData[id].jointsCache)
-	
+		
 	if sentBool == true then
 
 		current_characterRagdollData.linearVelocity.Enabled = true

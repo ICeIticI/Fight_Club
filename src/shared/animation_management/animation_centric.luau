@@ -124,38 +124,61 @@ end
 function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
     stopActionTracks(moduleTbl)
 
-    if data.receivingType == "grabAttempt" then
-        moduleTbl.FC_IdleTRACK:Stop()
-    end
+    -- if data.receivingType == "grabAttempt" then
+    --     moduleTbl.FC_IdleTRACK:Stop()
+    -- end
 
     moduleTbl.currentReceiveAnimTRACK = getAnimationTrackById(moduleTbl, data.AnimationId)
+
+    if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Secure") then
+        moduleTbl.currentReceiveGrabSecureTRACK = moduleTbl.currentReceiveAnimTRACK
+    end
 
 end
 
 function Animation_Centric.playReceiveAnimation(moduleTbl)
     if not moduleTbl.currentReceiveAnimTRACK then return warn("Failed to play receiving animation track, as it doesn't exist.") end
     
-    if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Grapple") then
-        moduleTbl.isGrappling = true
-    end
+
     
     moduleTbl.currentReceiveAnimTRACK:Play()
 
+    if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Grapple") == true then
+        moduleTbl.isGrappling = true
+    elseif moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Grapple") == false then
+        moduleTbl.isGrappling = false
+        if moduleTbl.currentReceiveGrabSecureTRACK then
+            moduleTbl.currentReceiveGrabSecureTRACK:Stop()
+        end
+
+    end
 end
 
 function Animation_Centric.setupGrabAnimation(moduleTbl, data)
     stopActionTracks(moduleTbl)
     moduleTbl.currentGrabTRACK = getAnimationTrackById(moduleTbl, data.AnimationId)
 
+    if moduleTbl.currentGrabTRACK.Animation:GetAttribute("Secure") then
+        moduleTbl.currentGrabSecureTRACK = moduleTbl.currentGrabTRACK
+    end
+
 end
 
 function Animation_Centric.playGrabAnimation(moduleTbl)
     if not moduleTbl.currentGrabTRACK then return warn("Failed to play grab animation track, as it doesn't exist.") end
     
-    moduleTbl.FC_IdleTRACK:Stop()
     moduleTbl.currentGrabTRACK:Play()
-    moduleTbl.isGrappling = true
+    
+    if moduleTbl.currentGrabTRACK.Animation:GetAttribute("Grapple") == true then
+        moduleTbl.isGrappling = true
+        -- moduleTbl.FC_IdleTRACK:Stop()
+    elseif moduleTbl.currentGrabTRACK.Animation:GetAttribute("Grapple") == false then
+        moduleTbl.isGrappling = false
+        if moduleTbl.currentGrabSecureTRACK then
+            moduleTbl.currentGrabSecureTRACK:Stop()
+        end
 
+    end
 end
 
 function Animation_Centric.playBlockStartAnimation(moduleTbl)

@@ -172,6 +172,9 @@ function Character_Init.init(charModel)
 	characterInstance.character.Humanoid.WalkSpeed = 12
 	characterInstance.character.Humanoid.JumpPower = 0
 
+	-- "Variable" variables; these values will differ per fighter class the character chooses:
+	characterInstance.escapeGrappleProgressPower = 10 -- How much progress the character has to escaping a grapple each time input is pressed. For NPCs, this will be autonomously applied
+
 	characterInstance.previousWalkSpeed = nil -- will be set when we need to know the last known WalkSpeed of the player
 	characterInstance.originalWalkSpeed = characterInstance.humanoid.WalkSpeed
 	characterInstance.lockOnSpeed = characterInstance.originalWalkSpeed / 1.85
@@ -427,10 +430,12 @@ function Character_Init.init(charModel)
 	function characterInstance:setupAttackDamage(trackData)
 		if not trackData then return warn("No trackData provided to the :setupAttackDamage function: ", trackData) end
 
-		if trackData.attackLvl == 1 or trackData.Animation:GetAttribute("SyncBlockFinisher") == true or trackData.Animation:GetAttribute("SyncBlockFinisher") == false then
+		if trackData.attackLvl == 1 then
 			return A1Damage
 		elseif trackData.attackLvl == 2 then
 			return A2Damage
+		elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true or trackData.Animation:GetAttribute("SyncBlockFinisher") == false then
+			return syncBlockDamage
 		elseif trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then
 			return counterAttackDamage
 		end
@@ -500,6 +505,15 @@ function Character_Init.init(charModel)
 		table.insert(hitCacheTable, sfx)
 	end
 
+	
+	function characterInstance.setCharacterMassless(character, bool)
+		for _, child in pairs(character:GetChildren()) do
+			if child:IsA("BasePart") then
+				child.Massless = bool
+			end
+		end
+	end
+
 	-- AI-Altered code by Microsoft Copilot:
 	local MoveDirectionConnection
 	MoveDirectionConnection = characterInstance.humanoid:GetPropertyChangedSignal("MoveDirection"):Connect(function()
@@ -535,7 +549,7 @@ function Character_Init.init(charModel)
 		DiedConnection:Disconnect()
 		DiedConnection = nil
 	end)
-
+	
 
 	
 	if characterInstance.player ~= nil then

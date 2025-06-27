@@ -12,7 +12,7 @@ local function getCenteredSubjectCFrame() --[[ When the character locks onto the
 		(ClientVariables.humanoidRootPart.Position.Z + ClientVariables.enemyHumanoidRootPart.Position.Z) / 2)
 	end
 	
-local function faceEnemy(subject)
+local function faceEnemy(subject)	
 	
 	if not ClientVariables.isGrappling then
 		ClientVariables.humanoidRootPart.CFrame = CFrame.lookAt(
@@ -42,52 +42,11 @@ local function createSubject(subject) --[[Creates a invisible part (subject) bet
 end
 
 function LockOn.Lock(publicVariables)
-
 	-- sync public variables to client:
 	for varName, value in pairs(publicVariables) do
+		print(varName, type(value))
 		ClientVariables[varName] = value
 	end
---[[
-    -- local rayParams = RaycastParams.new()
-	-- 		rayParams.FilterDescendantsInstances = ClientVariables.character:GetChildren()
-	-- 		rayParams.FilterType = Enum.RaycastFilterType.Exclude
-			
-	-- 		ClientVariables.raycastResult =
-	-- 		workspace:Raycast(ClientVariables.humanoidRootPart.Position,
-	-- 						  ClientVariables.humanoidRootPart.CFrame.LookVector * 8,
-	-- 						  rayParams) -- Raycast in front of player to find an enemy
-							  
-	
-	-- 		if ClientVariables.raycastResult and not ClientVariables.raycastResult.Instance.Parent:GetAttribute("TavernKeeper") and ClientVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid") then -- We found an alive enemy to lock onto (thats not the tavern keeper).
-				
-	-- 			ClientVariables.enemyHumanoid = ClientVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
-	-- 			ClientVariables.enemyChar = ClientVariables.enemyHumanoid.Parent
-	-- 			ClientVariables.lockOnDebounce.Value = not ClientVariables.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
-				
-				
-	-- 		if not game.Players:GetPlayerFromCharacter(ClientVariables.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
-	-- 				if ClientVariables.enemyChar.Name == "TestDummy" then
-	-- 					ClientVariables.LocalBindableEvent:Fire(ClientVariables.lockOnDebounce)
-	-- 				end
-	-- 			end
-				
-	-- 		elseif ClientVariables.raycastResult == nil and ClientVariables.lockOnDebounce.Value == true then -- no enemy detected by raycast
-	-- 			ClientVariables.lockOnDebounce.Value = false
-				
-	-- 		end
-	
-		-- ClientVariables.lockOnDebounce.Value = not ClientVariables.lockOnDebounce.Value
-		
-	
-		-- if (ClientVariables.lockOnDebounce.Value == true and ClientVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")) or (ClientVariables.isGettingHit and not ClientVariables.lockOnDebounce.Value) then -- Runs when the player locks onto somebody
-		
-		-- print(ClientVariables.originalCamFocus, "Subject:", ClientVariables.originalCamSubject)
-		
-		-- setup stuff:
-		
-		-- ClientVariables.enemyHumanoidRootPart = ClientVariables.raycastResult.Instance.Parent:WaitForChild("HumanoidRootPart")
-
-]]
 		
 	ClientVariables.FC_IdleTRACK:Play()
 	
@@ -115,21 +74,26 @@ function LockOn.Lock(publicVariables)
 	local subjectTweenInfo = TweenInfo.new(
 		1,
 		Enum.EasingStyle.Sine,
-		Enum.EasingDirection.Out
-	)
+		Enum.EasingDirection.Out)
+		
 	local subjectTweenGoal = {CFrame = getCenteredSubjectCFrame()}
 
 	ClientVariables.subjectTween = TweenService:Create(ClientVariables.subject, subjectTweenInfo, subjectTweenGoal)
 	ClientVariables.subjectTween:Play()
 
 	-- ClientVariables.subjectTween.Completed:Wait()
-	
-	while ClientVariables.lockOnDebounce.Value == true and workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 8, ClientVariables.rayParams) ~= nil and ClientVariables.enemyHumanoid.Health > 0 and ClientVariables.humanoid.Health > 0 do -- constantly keeps the player facing the enemy
+	faceEnemy(ClientVariables.subject)
+	while ClientVariables.lockOnDebounce.Value == true 
+	and workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 8, ClientVariables.lockOnRayParams) ~= nil 
+	and ClientVariables.enemyHumanoid.Health > 0 
+	and ClientVariables.humanoid.Health > 0 
+	do -- constantly keeps the player facing the enemy
 		-- Constantly having the player face the enemy when locked on
 
 		task.wait()
 		faceEnemy(ClientVariables.subject)
 	end
+	warn("broke out")
 
 	-- No-longer locked-on. Ensure old, irrelevant data doesn't get used
 	for varName, _ in pairs(publicVariables) do -- public variables aint useful after lock-off
@@ -146,7 +110,7 @@ function LockOn.Unlock()
 		ClientVariables.lockOnDebounce.Value = false
 	end
 
-	if not workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 7, ClientVariables.rayParams) then -- When the while loop above ends, we want to check if its because the player got too far. If so, then we want to set the lockOnDebounce to false
+	if not workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 7, ClientVariables.lockOnRayParams) then -- When the while loop above ends, we want to check if its because the player got too far. If so, then we want to set the lockOnDebounce to false
 		ClientVariables.lockOnDebounce.Value = false
 	end
 	-- end

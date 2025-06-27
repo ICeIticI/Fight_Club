@@ -13,13 +13,6 @@ local function setCharacterNetworkOwnershipTo(character, owner)
     end
 end
 
-local function setCharacterMassless(character, bool)
-    for _, child in pairs(character:GetChildren()) do
-        if child:IsA("BasePart") then
-            child.Massless = bool
-        end
-    end
-end
 
 local function getGrabAnimation()
     if grabType == "attempt" then
@@ -76,7 +69,6 @@ end
 function Character_Grapple:Attempt(enemyInstance) --[[ The character goes to attempt to grab an enemy. If this succeeds, then it'll transition to the :Secure() method. ]]
     grabType = "attempt"
     
-    print("Attempting a grab")
     local trackData = setupGrabAnimation(self.characterInstance)
 
     self.characterInstance.isGrappling = true
@@ -90,19 +82,22 @@ function Character_Grapple:Attempt(enemyInstance) --[[ The character goes to att
 end
 
 function Character_Grapple:EndGrab(enemyInstance)
-    -- g rabType = "end"
+    grabType = "end"
+    self.characterInstance.isInGrappleSuccess = false
+    local trackData = setupGrabAnimation(self.characterInstance)
+    playGrabAnimation(self.characterInstance, trackData)
+    enemyInstance:receive("repelGrab", self.characterInstance)
 
-    print("Grab ended/failed")
 end
 
 function Character_Grapple:Success(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. We'll now strike the enemy to transition into :Secure() ]]
     grabType = "success"
+    self.characterInstance.isInGrappleSuccess = true
     local trackData = setupGrabAnimation(self.characterInstance)
     
     playGrabAnimation(self.characterInstance, trackData)
     enemyInstance:receive("receiveGrabSuccess", self.characterInstance)
     
-    print("grab attempt successful!")
     while trackData.IsPlaying do task.wait() end
     return true
 end
@@ -119,13 +114,9 @@ function Character_Grapple:GrabAttack(enemyInstance)
     grabType = "attack"
     local trackData = setupGrabAnimation(self.characterInstance)
     playGrabAnimation(self.characterInstance, trackData)
+    self.characterInstance.lastAttackData = trackData
     enemyInstance:receive("receiveGrabAttack", self.characterInstance)
     
-    -- self.characterInstance.comboCounter = 0
-    -- self.characterInstance.followUpCount = 0
-
-    -- while trackData.IsPlaying do task.wait() end
-    -- self.characterInstance.character_grapple:Secure(enemyInstance)
 end
 
 function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. Now they can begin throwing blows and what not at the enemy while grappled on, and the enemy cant do anything about it except try to break free. ]]
@@ -137,16 +128,17 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     -- local offset = Vector3.new(0, 1, -3)
     -- setCharacterNetworkOwnershipTo(enemyInstance.character, self.characterInstance.player)
     local grabWeld = Instance.new("WeldConstraint")
+    grabWeld.Name = "grabWeld"
     -- grabWeld.Enabled = false
     grabWeld.Parent = self.characterInstance.humanoidRootPart
     grabWeld.Part0 = self.characterInstance.character["Left Arm"]
     grabWeld.Part1 = enemyInstance.humanoidRootPart
     -- grabWeld.C1 = CFrame.new(0,0,-3) * CFrame.Angles(0,math.rad(180), 0)
-    setCharacterMassless(enemyInstance.character, true)
+    self.characterInstance.setCharacterMassless(enemyInstance.character, true)
     enemyInstance.humanoid.PlatformStand = true
     -- enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
     -- grabWeld.Enabled = true
-    while true do
+    while enemyInstance.isInSecureGrapple do
         task.wait()
         if self.characterInstance.movingDirection == "left" then
             Character_Grapple:Secure_TurnLeft()
@@ -155,6 +147,11 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
         end
         -- enemyInstance.character:SetPrimaryPartCFrame(self.characterInstance.humanoidRootPart.CFrame * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0))
     end
+
+    self.characterInstance.setCharacterMassless(enemyInstance.character, false)
+    enemyInstance.humanoid.PlatformStand = false
+    grabWeld.Enabled = false
+    grabWeld:Destroy()
 
     return false
 end

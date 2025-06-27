@@ -22,6 +22,7 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
     -- if receiver_characterInstance.currentReceiveAnimTRACK and receiver_characterInstance.currentReceiveAnimTRACK.IsPlaying then
     --     receiver_characterInstance.currentReceiveAnimTRACK:Stop()
     -- end
+
     if not receiver_characterInstance.isBlocking then
         if receiver_characterInstance.BlockStartAnimPlaying then
             -- If the player gets hit while the blockstart track is playing, then they will perform a parry
@@ -72,32 +73,12 @@ local function attackHandler(attacker_characterInstance, receiver_characterInsta
         receiver_characterInstance.currentAttack_trackData 
         and receiver_characterInstance.currentAttack_trackData.Animation:GetAttribute("Counter")
         and receiver_characterInstance.currentAttack_trackData.IsPlaying
-    ) 
+    )
+    and not receiver_characterInstance.isGrappling
     then
-		-- local otherProtocol = "Receive"
-		
-		-- if hitPlayer then
-		-- 	GlobalRemoteEvent:FireClient(hitPlayer, currentAttack, otherProtocol)
-		-- elseif hitCharacter then
-		-- 	-- isAI = true
-		-- 	GlobalRemoteEvent:FireClient(characterInstance.player, currentAttack, otherProtocol, nil, nil, isAI)
-		-- end
-        print("receivin")
         receive(receiver_characterInstance, attacker_characterInstance)
-			
-		-- task.wait(0.1) -- give the server enough time to retrieve the enemy's current attack.. if any.
-		receiver_characterInstance.enemyCFrame = attacker_characterInstance.humanoidRootPart.CFrame -- We want to know where the enemy is when they hit us so we can repel the opposite direction
-			
-		-- if receiver_characterInstance.isBlocking then
-		-- 	attacker_characterInstance.attackDamage = attacker_characterInstance.attackDamage/2
-		-- end
-
-		-- if attackDamage and not enemyInstance.canCounter then
-		-- 	enemyInstance.humanoid:TakeDamage(attackDamage)
-		-- 	hitSFX:Play()
-		-- end
-
-	end
+	
+    end
 end
 
 

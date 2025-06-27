@@ -119,7 +119,7 @@ end
 
 function Character:basicAttack(enemyInstance) --[[ The character will do some sort of attack ]]
     
-    if self.isGrappling then
+    if self.isInGrappleSuccess and not self.isAttacking.Value then
         self.character_grapple:GrabAttack(enemyInstance)
     elseif enemyInstance.isBlocking and not self.isGettingHit and enemyInstance.humanoid.MoveDirection.Magnitude == 0 and self.comboCounter == 0 then
         -- self.synchedBlock(nil, comboCounter)
@@ -130,7 +130,7 @@ function Character:basicAttack(enemyInstance) --[[ The character will do some so
         enemyInstance:receive("syncBlock", self)
     elseif self.isGettingHit then
         return false
-    elseif characters:GetCharacterObjectByCharacter(self.enemyChar) and characters:GetCharacterObjectByCharacter(self.enemyChar).isDodging ~= true then -- gets the public canAttack of the player and makes sure its true before attacking
+    elseif characters:GetCharacterObjectByCharacter(self.enemyChar) and characters:GetCharacterObjectByCharacter(self.enemyChar).isDodging ~= true and not self.isGrappling then -- gets the public canAttack of the player and makes sure its true before attacking
 
         -- also if they are even further than 3 studs then we can implement a running-ish punch (like in RDR2)
         -- move character closer to enemy if they are a bit too far

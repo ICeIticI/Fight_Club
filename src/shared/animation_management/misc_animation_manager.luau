@@ -81,7 +81,6 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.isGettingHit = false
 
             self.characterInstance.canFollowUp = true
-            print(self.characterInstance.canFollowUp)
             -- self.characterInstance.isAttacking.Value = true
             self.characterInstance.isCountering = true
             self.characterInstance.comboCounter = 3 -- Player can do a haymaker attack following a parry
@@ -149,11 +148,9 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
                 if not self.characterInstance.isAttacking.Value then -- the character went through the whole parry animation and didnt riposte.
                     self.characterInstance.canFollowUp = false -- if they attacked during the parry anim, it will followup, so
                     self.characterInstance.comboCounter = 0
-                    print("Combo counter is now 0")
                 end
             end)
         elseif trackData.Animation:GetAttribute("Dodge") then
-            print("dodgin end")
             if trackData.Completed then
                 task.wait(0.2) -- give the dodger a bit of time to do an attack before the dodge ends after doing a successful dodge without getting hit when the dodge animation finishes.
             end

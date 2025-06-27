@@ -26,6 +26,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
     local characterInstance = characters:GetCharacterObjectByPlayer(plr)
     if not characterInstance then return end
+    if characterInstance.humanoid.Health <= 0 then return end
 
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
 
@@ -36,14 +37,14 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         and not characterInstance.isBlocking 
         and not characterInstance.waitingToAttack
         then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
-            local rayParams = RaycastParams.new()
-            rayParams.FilterDescendantsInstances = characterInstance.character:GetChildren()
-            rayParams.FilterType = Enum.RaycastFilterType.Exclude
+            characterInstance.lockOnRayParams = RaycastParams.new()
+            characterInstance.lockOnRayParams.FilterDescendantsInstances = characterInstance.character:GetChildren()
+            characterInstance.lockOnRayParams.FilterType = Enum.RaycastFilterType.Exclude
             
             characterInstance.raycastResult = workspace:Raycast(
                 characterInstance.humanoidRootPart.Position,
                 characterInstance.humanoidRootPart.CFrame.LookVector * 8,
-                rayParams
+                characterInstance.lockOnRayParams
             ) -- Raycast in front of player to find an enemy
             
             if not characterInstance.raycastResult then
@@ -79,10 +80,10 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
             if not characterInstance.lockOnDebounce.Value -- can't be locked on already
             and characterInstance.enemyChar
-            and not characterInstance.raycastResult.Instance.Parent:GetAttribute("TavernKeeper")
-            and characterInstance.raycastResult.Instance 
+            and characterInstance.raycastResult.Instance
+            and characters:GetCharacterObjectByCharacter(characterInstance.raycastResult.Instance:FindFirstAncestorWhichIsA("Model"))
             and active
-            then -- We found an alive enemy to lock onto (thats not the tavern keeper).
+            then -- We found an alive enemy to lock onto (that has a characterInstance, making them a fighter. The tavern keeper, for example, doesn't have a characterInstance.).
                 
                 -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
                 characterInstance.enemyHumanoid = characterInstance.enemyChar:FindFirstChild("Humanoid")
@@ -111,13 +112,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         
             -- GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value
             
-            if (
-                characterInstance.lockOnDebounce.Value == true 
+            if characterInstance.lockOnDebounce.Value == true 
                 -- and characterInstance.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
-            ) or (
-                characterInstance.isGettingHit 
-                and not characterInstance.lockOnDebounce.Value
-            ) 
             then -- Runs when the player locks onto somebody
                 -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
                 characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
@@ -128,7 +124,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                     lockOnDebounce = characterInstance.lockOnDebounce, 
                     enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart,
                     enemyHumanoid = characterInstance.enemyHumanoid,
-                    rayParams = rayParams
+                    lockOnRayParams = characterInstance.lockOnRayParams
                 }
 
             end
@@ -136,7 +132,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             if characterInstance.lockOnDebounce.Value == false 
             or workspace:Raycast(characterInstance.humanoidRootPart.Position,
                                 characterInstance.humanoidRootPart.CFrame.LookVector * 7,
-                                rayParams) 
+                                characterInstance.lockOnRayParams) 
             then
                 characterInstance.lockOnDebounce.Value = false
                 characterInstance.SetSpeed(true)
@@ -152,13 +148,21 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         if not characterInstance.nextInput then
             characterInstance.nextInput = "attack"
         end
-        print("attack input gate 0", {
-        not characterInstance.waitingToAttack,
-         characterInstance.lockOnDebounce.Value ,
-         characterInstance.pairedChain <= characterInstance.PairedChainMAX ,
-         characterInstance.boolCheck({isBlocking = characterInstance.isBlocking}) ,
-         (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7,
-        })
+
+        if characterInstance.isInSecureGrapple then
+            characterInstance.escapeGrappleProgress += characterInstance.escapeGrappleProgressPower
+
+            if characterInstance.escapeGrappleProgress >= 100 then -- the character broke free from a secure grapple
+                characterInstance.isInSecureGrapple = false
+            end
+        end
+        -- print("attack input gate 0", {
+        -- not characterInstance.waitingToAttack,
+        --  characterInstance.lockOnDebounce.Value ,
+        --  characterInstance.pairedChain <= characterInstance.PairedChainMAX ,
+        --  characterInstance.boolCheck({isBlocking = characterInstance.isBlocking}) ,
+        --  (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7,
+        -- })
         
         if not characterInstance.waitingToAttack 
         and characterInstance.lockOnDebounce.Value 
@@ -167,7 +171,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         and (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
         -- and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
-            print("attack input gate 1")
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             -- before attacking, check if we're currently dodging so we can do a dodge attack:
             if characterInstance.isDodging == true then
@@ -187,6 +190,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                     end
 
                 end
+
             else
                 characterInstance.followUpCount += 1
                 characterInstance.distanceBetween = (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude
@@ -194,14 +198,19 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 -- if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                 --     characterInstance.pairedChain += 1
                 -- end
-                print(characterInstance.character.Name, "we made it here for attk", characterInstance.canFollowUp)
+                -- print("will we attk?", {
+                -- characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}),
+                -- not characterInstance.waitingToAttack ,
+                -- not characterInstance.canFollowUp,
+                -- not (characterInstance.pairedPlaying and not characterInstance.isGrappling)
+                -- })
+                
                 if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
                 and not characterInstance.waitingToAttack 
                 and not characterInstance.canFollowUp
-                and not characterInstance.pairedPlaying 
+                and not (characterInstance.pairedPlaying and not characterInstance.isGrappling) 
                 then
                     -- characterInstance.waitingToAttack = true
-                    print("attk")
                     characterInstance.syncBlockFollowup = false
                     
                     characterInstance:basicAttack(enemyInstance)
@@ -221,12 +230,10 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                         end
                     end
                 elseif characterInstance.canFollowUp and characterInstance.comboCounter <= 3 then
-                    print("yo we waiting to attack")
                     characterInstance.waitingToAttack = true
                     characterInstance.didFollowUp = true -- when true, the character did a followup attack
                     characterInstance.isParrying = false -- var thats only true when a parry anim starts.
                     while characterInstance.isAttacking.Value do
-                        print("waiting for attack to end")
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then
@@ -248,13 +255,21 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
     elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
         
-        local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
-        characterInstance:grab(enemyInstance, nil)
-        -- if enemyInstance:receive("grabAttempt", characterInstance) == false then
-        --     enemyInstance:receive("receiveGrabSuccess", characterInstance)
-        --     characterInstance:grab(enemyInstance, true)
-
-        -- end
+        if characterInstance.boolCheck({
+            isAttacking = characterInstance.isAttacking.Value, 
+            isBlocking = characterInstance.isBlocking, 
+            isCountering = characterInstance.isCountering, 
+            isGettingHit = characterInstance.isGettingHit, 
+            isGrappling = characterInstance.isGrappling})
+        then
+            local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
+            characterInstance:grab(enemyInstance, nil)
+            -- if enemyInstance:receive("grabAttempt", characterInstance) == false then
+            --     enemyInstance:receive("receiveGrabSuccess", characterInstance)
+            --     characterInstance:grab(enemyInstance, true)
+    
+            -- end
+        end
         
     elseif BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
         
@@ -268,7 +283,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
             
             if characterInstance.lockOnDebounce.Value 
-            and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering}) 
+            and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGrappling = characterInstance.isGrappling}) 
             and not characterInstance.pairedPlaying
             and characterInstance.stamina and characterInstance.stamina.Value > 0 then
                 characterInstance:block(true)

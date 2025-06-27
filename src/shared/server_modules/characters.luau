@@ -13,7 +13,7 @@ local Characters = {}
 function Characters:GetCharacterObjectByPlayer(plr) --[[ Method that gets a character based off an assigned player. WIll return nil otherwise. ]]
     
     if not plr or not plr:IsA("Player") then
-        return warn("Provide a player object you idiot")
+        return warn("Provide a player object you idiot. You gave: ", plr)
     end
 
     for _, potentialCharacterInstance in pairs(self) do
@@ -28,7 +28,7 @@ end
 function Characters:GetCharacterObjectByCharacter(char)
     
     if not char or not char:FindFirstChildWhichIsA("Humanoid") then
-        return warn("Provide a character object you idiot")
+        return warn("Provide a character object you idiot. You gave:", char)
     end
 
     for _, potentialCharacterInstance in pairs(self) do

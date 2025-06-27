@@ -13,20 +13,40 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
     characterInstance.attackFrames = true
     if trackData.Paired_Attribute then 
         characterInstance.canCounter = false
+        if trackData.Animation:GetAttribute("Grapple") == true then
+            characterInstance.canFollowUp = true
+        end
         -- self.GlobalRemoteEvent:FireServer(self.enemyChar, "CounterAttack", self.currentAttack, nil, nil, self.isEnemyHoldingBlock, false)
         
-        if trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then -- counterattack animation
-        -- elseif trackData.DodgeAttack_Attribute then
-        elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true then -- can be true or false, all we know is its a sync block of some sort
-            characterInstance.humanoid:TakeDamage(characterInstance.attackDamage / 2)
+        -- if trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then -- counterattack animation
+        -- -- elseif trackData.DodgeAttack_Attribute then
+        if (trackData.Animation:GetAttribute("SyncBlockFinisher") == true) or (trackData.Animation:GetAttribute("Grapple") == false) then -- can be true or false, all we know is its a sync block of some sort
+            print("receiver dmged attacker:" , characterInstance.character.Name)
+            characterInstance.humanoid:TakeDamage(characterInstance.attackDamage)
             characterInstance.playHitSFX(trackData)
         elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == false then -- can be true or false, all we know is its a sync block of some sort
-            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage / 2)
-            characterInstance.playHitSFX(trackData)
-            characterInstance.canFollowUp = true
-        else
             characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
             characterInstance.playHitSFX(trackData)
+            characterInstance.canFollowUp = true
+        -- elseif trackData.Animation:GetAttribute("Grapple") == false then
+            
+        else
+
+            -- Disables the grapple weld before killing the enemy if they're about to die, or else the attacker will also die for some reason:
+            if characterInstance.isGrappling and (characterInstance.enemyChar.Humanoid.Health - characterInstance.attackDamage <= 0) and trackData.Animation:GetAttribute("Secure") then
+                characterInstance.humanoidRootPart:FindFirstChild("grabWeld").Enabled = false
+            end
+
+            warn(characterInstance.character.Name, characterInstance.enemyChar)
+            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.playHitSFX(trackData)
+        end
+
+        if characterInstance.enemyChar.Humanoid.Health <= 0 then
+            if characterInstance.isGrappling then
+                characterInstance.isGrappling = false
+            end
+            
         end
 
         -- So I may have lied about below lol:
@@ -83,11 +103,13 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         end
 
         -- Schedule a simulation of the EndOfAttack marker:
-        task.delay(trackData.Animation:GetAttribute("TimeUntilEndOfAttack"), function()
-            if trackData.IsPlaying then
-                runOnEndOfAttack(self.characterInstance, trackData)
-            end
-        end)
+        if trackData.Animation:GetAttribute("TimeUntilEndOfAttack") then
+            task.delay(trackData.Animation:GetAttribute("TimeUntilEndOfAttack"), function()
+                if trackData.IsPlaying then
+                    runOnEndOfAttack(self.characterInstance, trackData)
+                end
+            end)
+        end
 
         -- Schedule a simulation of the end of the attacking animation:
         task.delay(trackData.Animation:GetAttribute("Length"), function()
@@ -116,6 +138,8 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- self.characterInstance:repulseAttack("counter", Characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar))
         end
     elseif not trackData.IsPlaying then
+
+
         
         if not trackData.Completed then
             self.characterInstance.Protocol = nil
@@ -124,30 +148,34 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- if not trackData.attackLvl == 2 then
             --     self.characterInstance.didFollowUp = false
             -- end
+            
             if not self.characterInstance.isGrappling then
                 warn("Resetting")
                 self.characterInstance.reset()
             else
                 self.characterInstance.waitingToAttack = false
+                self.characterInstance.canFollowUp = false
+                self.characterInstance.SetSpeed(true)
             end
+        end
+
+        if trackData.Animation:GetAttribute("Grapple") == false then -- a false grapple, which means it ends the grappling session
+            self.characterInstance.isGrappling = false
+
+            self.characterInstance.setCharacterMassless(self.characterInstance.enemyChar, false)
+            self.characterInstance.enemyChar.Humanoid.PlatformStand = false
         end
 
         if trackData.Paired_Attribute == true and trackData.Completed then
             -- task.delay(0.5, function()
             --     self.characterInstance.hitDebounce = false
             -- end)
-            print("pairedddd")
             self.characterInstance.isAttacking.Value = false
         end
 
         -- self.characterInstance.currentAttack_trackData = nil
         self.characterInstance.attackFrames = false
         self.characterInstance.pairedPlaying = false
-
-        if not self.characterInstance.isGrappling then
-            print("hi")
-            self.characterInstance.SetSpeed(true)
-        end
         
         -- if self.currentAttack_trackData == trackData then
         --     self.currentAttack_trackData = nil

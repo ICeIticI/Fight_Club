@@ -505,7 +505,7 @@ AnimationInstances.FC_EndGrab1 = Instance.new("Animation")
 AnimationInstances.FC_EndGrab1.Name = "FC_EndGrab1"
 AnimationInstances.FC_EndGrab1.AnimationId = "rbxassetid://139684625934016"
 AnimationInstances.FC_EndGrab1:SetAttribute("Paired", true)
-AnimationInstances.FC_EndGrab1:SetAttribute("Grapple", true)
+AnimationInstances.FC_EndGrab1:SetAttribute("Grapple", false) -- a false grapple means it ends the grappling session between attacker and receiver.
 AnimationInstances.FC_EndGrab1:SetAttribute("AnimType", 1)
 AnimationInstances.FC_EndGrab1:SetAttribute("AttackLevel", 3)
 
@@ -513,7 +513,7 @@ AnimationInstances.FC_EndGrab1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_EndGrab1RECEIVER.Name = "FC_EndGrab1RECEIVER"
 AnimationInstances.FC_EndGrab1RECEIVER.AnimationId = "rbxassetid://105870024919891"
 AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("Paired", true)
-AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("Grapple", true)
+AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("Grapple", false)
 AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("AttackLevel", 3)
 

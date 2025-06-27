@@ -30,7 +30,6 @@ function RagdollSystem:InitializeCharacter()
 	humanoid.BreakJointsOnDeath = false -- so the player's body parts don't fall apart.
 	-- char.Archivable = true
 	--charClone = char:Clone() -- We do the ragdoll physics on a clone since we can't add velocity to a dead player's character
-	print("heyy")
 
 	-- if self.characterInstance.player then
 	-- 	self.characterInstance.GlobalRemoteEvent:FireAllClients("setupRagdoll", {character = self.characterInstance.character, id = self.characterInstance.id})
@@ -39,7 +38,6 @@ function RagdollSystem:InitializeCharacter()
 	-- end
 
 	humanoid.Died:Connect(function() -- to ragdoll the character on death
-		print("ooo death")			
 		
 		-- if self.characterInstance.player then
 		-- 	setCharacterNetworkOwnershipTo(self.characterInstance.character, self.characterInstance.player)

@@ -23,23 +23,29 @@ local function getGrabAnimation()
         return AnimationInstances.FC_GrabSecure1
     elseif grabType == "attack" then
         return AnimationInstances.FC_GrabAttack1
-    -- grabAttack is done on character_attack rather than this script to make it easier to add to the game
+    elseif grabType == "execute" then
+        
     elseif grabType == "end" then
         return AnimationInstances.FC_EndGrab1
     end
 end
 
-local function setupGrabAnimation(characterInstance)
+local function setupGrabAnimation(characterInstance : table, enemyInstance : any?)
     local trackData = {}
+    
+    if trackData.Animation:GetAttribute("AnimType") == 1 then
+        trackData.attackLvl = 1
+        characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
+        if enemyInstance and enemyInstance.humanoid.Health <= characterInstance.attackDamage then
+            grabType = "execute"
+        end
+    end
+
     trackData.Animation = getGrabAnimation()
     trackData.AnimationId = trackData.Animation.AnimationId
     characterInstance.currentGrab_trackData = trackData
     trackData.Paired_Attribute = true
 
-    if trackData.Animation:GetAttribute("AnimType") == 1 then
-        trackData.attackLvl = 1
-        characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
-    end
 
     if characterInstance.player then
         characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "setupGrabAnimation", trackData)
@@ -112,7 +118,7 @@ end
 
 function Character_Grapple:GrabAttack(enemyInstance)
     grabType = "attack"
-    local trackData = setupGrabAnimation(self.characterInstance)
+    local trackData = setupGrabAnimation(self.characterInstance, enemyInstance)
     playGrabAnimation(self.characterInstance, trackData)
     self.characterInstance.lastAttackData = trackData
     enemyInstance:receive("receiveGrabAttack", self.characterInstance)

@@ -1,12 +1,18 @@
-* I think I finally fixed the lock-on bug I was having before! All I had to do was pass the "active" parameter in the remote function signal and also use it as a parameter for if we're allowed to lock-on.
+* The idea behind Fighter Kits is to have AnimationIds for each fighter class in the game. Instead of creating Animation instances for every fighter, just keep the amount we already have, and when loading them for the client to play, give them the animationId kit to load depending on what fighter class they are/chose.
 
-* Health & Stamina UI shrinkage direction flipped, thanks to the AnchorPoint
+* I wont implement this into my program just yet -- once I get every animation I like created for the base fighter class, I will start to implement it for a scaled approach for when players can choose fighter classes.
 
-* I finally got the parrying working!! Ugh what a painful process! Much more than expected Alot of stuff
+* Oh also for Fighter Kits that share animation Ids with other kits, DON'T copy and paste the animationId, instead referance to the fighterkit's animationId to which it shares. This is so it will make it alot easier to tell which AnimationIds are shared or not.
 
-* Next I'm gonna work on bracing blocks
+* Began working on a GrabExecute animation. Needs to be finished and revised.
 
-* As usual, work on rest of the receives, ragdolling, and anything else.. we can finally finish for open alpha!
+* I'm thinking to just create a couple other GrabAttacks before implementing the execution.
+
+* See if we can utilize the CFrame propery of Moon2 files in Moon Animator to move enemy while in the track
+
+* Need to create a few grab attacks (after entering Grapple:Secure, such as a straight to the face, a hook to the face, an uppercut to the body, and maybe a uppercut to the face and maybe even an elbow to the face).
+
+* Do some finishing touches for Alpha, such as animating tavern keeper (and maybe have dialogue), expanding landscape in front of tavern for more room, loading screen, and that should be it! Our game will be ready for Alpha!
 
 !
 !

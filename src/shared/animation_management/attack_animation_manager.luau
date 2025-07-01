@@ -9,7 +9,6 @@ local Characters = require(game.ReplicatedStorage.Shared.server_modules.characte
 local Attack_Animation_Management = {}
 
 local function runOnAttackFrames(characterInstance, trackData) --[[ Manages character data when the attack frames of an animation start. NOT the animation itself. Only the data associated with it.]]
-    warn("Yoyo attackframes reached")
     characterInstance.attackFrames = true
     if trackData.Paired_Attribute then 
         characterInstance.canCounter = false
@@ -21,7 +20,6 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
         -- if trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then -- counterattack animation
         -- -- elseif trackData.DodgeAttack_Attribute then
         if (trackData.Animation:GetAttribute("SyncBlockFinisher") == true) or (trackData.Animation:GetAttribute("Grapple") == false) then -- can be true or false, all we know is its a sync block of some sort
-            print("receiver dmged attacker:" , characterInstance.character.Name)
             characterInstance.humanoid:TakeDamage(characterInstance.attackDamage)
             characterInstance.playHitSFX(trackData)
         elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == false then -- can be true or false, all we know is its a sync block of some sort
@@ -37,7 +35,6 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
                 characterInstance.humanoidRootPart:FindFirstChild("grabWeld").Enabled = false
             end
 
-            warn(characterInstance.character.Name, characterInstance.enemyChar)
             characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
             characterInstance.playHitSFX(trackData)
         end

@@ -14,7 +14,7 @@ local function setCharacterNetworkOwnershipTo(character, owner)
 end
 
 
-local function getGrabAnimation()
+local function getGrabAnimation(characterInstance)
     if grabType == "attempt" then
         return AnimationInstances.FC_GrabAttempt1 -- will be a more sophisticated way in the future when we start dealing with fighter classes and other animations
     elseif grabType == "success" then
@@ -22,7 +22,8 @@ local function getGrabAnimation()
     elseif grabType == "secure" then
         return AnimationInstances.FC_GrabSecure1
     elseif grabType == "attack" then
-        return AnimationInstances.FC_GrabAttack1
+        return characterInstance.randomAnimation(characterInstance.AT_GrabAttacks)
+        -- return AnimationInstances.FC_GrabAttack1
     elseif grabType == "execute" then
         
     elseif grabType == "end" then
@@ -33,6 +34,10 @@ end
 local function setupGrabAnimation(characterInstance : table, enemyInstance : any?)
     local trackData = {}
     
+    
+    trackData.Animation = getGrabAnimation(characterInstance)
+    trackData.AnimationId = trackData.Animation.AnimationId
+    
     if trackData.Animation:GetAttribute("AnimType") == 1 then
         trackData.attackLvl = 1
         characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
@@ -40,9 +45,8 @@ local function setupGrabAnimation(characterInstance : table, enemyInstance : any
             grabType = "execute"
         end
     end
+    
 
-    trackData.Animation = getGrabAnimation()
-    trackData.AnimationId = trackData.Animation.AnimationId
     characterInstance.currentGrab_trackData = trackData
     trackData.Paired_Attribute = true
 

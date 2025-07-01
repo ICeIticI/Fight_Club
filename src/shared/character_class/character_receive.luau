@@ -53,7 +53,6 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
                     -- error("Add a level 3 sync block. This char instance must pick it")
 
                 else
-                    print("no followup here", trackData.attackerAnim)
                     if trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock1L.AnimationId then
                         return AnimationInstances.FC_SyncBlock1LRECEIVER
                     elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock1R.AnimationId then
@@ -155,8 +154,16 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
         return AnimationInstances.FC_GrabSuccess1RECEIVER
     elseif trackData.receivingType == "grabSecure" then
         return AnimationInstances.FC_GrabSecure1RECEIVER
-    elseif trackData.receivingType == "grabAttack1" then
-        return AnimationInstances.FC_GrabAttack1RECEIVER
+    elseif trackData.receivingType == "grabAttack" then
+
+        if trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabAttack1.AnimationId then
+            return AnimationInstances.FC_GrabAttack1RECEIVER
+        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabAttack2.AnimationId then
+            return AnimationInstances.FC_GrabAttack2RECEIVER
+        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabAttack3.AnimationId then
+            return AnimationInstances.FC_GrabAttack3RECEIVER
+        end
+    
     elseif trackData.receivingType == "repelGrab" then
         return AnimationInstances.FC_EndGrab1RECEIVER
     end
@@ -273,9 +280,8 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
     if not characterInstance.lockOnDebounce.Value then
 
         characterInstance.lockOnDebounce.Value = true
-        local attacker_characterInstance = characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
+        local attacker_characterInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
         characterInstance.enemyHumanoidRootPart = attacker_characterInstance.character:WaitForChild("HumanoidRootPart")
-        print(characterInstance.enemyHumanoidRootPart)
         characterInstance.SetSpeed(true)
         
         if characterInstance.player then
@@ -409,7 +415,6 @@ function Character_Receive:receiveLevel1(attacker_characterInstance) --[[ Get hi
     -- self.characterInstance.playReceivingTrack()
     local trackData = setupReceiveAnimation(self.characterInstance, "Level1", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
-    print(tostring(self.characterInstance.character) .. " receiving lvl 1")
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage)
     self.characterInstance.playHitSFX(trackData)
 end
@@ -465,6 +470,8 @@ end
 function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ An enemy is attempting to grab us ]]
     local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
 
+    self.characterInstance.attackingChar = attacker_characterInstance.character
+
     local trackData = setupReceiveAnimation(self.characterInstance, "grabAttempt", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
 
@@ -474,7 +481,7 @@ function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ A
     self.characterInstance.nextInput = nil -- will be set on their next action input
 
     while trackData.IsPlaying do task.wait() end -- wait for the whole grab attempt to end before returning true or false (which means we succeeded or not with tryna grab the enemy)
-    warn("Finished grab attempt", self.characterInstance.nextInput)
+    
     if self.characterInstance.nextInput == "attack" then
         return true -- we successfully defended against the grab attempt
     else
@@ -510,7 +517,7 @@ end
 function Character_Receive:receiveGrabAttack(attacker_characterInstance)
     local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
 
-    local trackData = setupReceiveAnimation(self.characterInstance, "grabAttack1", attackerAnim)
+    local trackData = setupReceiveAnimation(self.characterInstance, "grabAttack", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
 end
 

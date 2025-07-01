@@ -25,7 +25,6 @@ local function solidifyBodyParts(char : Model, sentBool : boolean) -- Function t
 			if child:IsA("BasePart") then -- we found a body part
 				if child.Name == "Torso" or child.Name == "Head" then
 					child.CanCollide = true
-					warn(child)
 				else
 					child.CanCollide = false
 				end

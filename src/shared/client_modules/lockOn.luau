@@ -44,7 +44,6 @@ end
 function LockOn.Lock(publicVariables)
 	-- sync public variables to client:
 	for varName, value in pairs(publicVariables) do
-		print(varName, type(value))
 		ClientVariables[varName] = value
 	end
 		
@@ -93,7 +92,6 @@ function LockOn.Lock(publicVariables)
 		task.wait()
 		faceEnemy(ClientVariables.subject)
 	end
-	warn("broke out")
 
 	-- No-longer locked-on. Ensure old, irrelevant data doesn't get used
 	for varName, _ in pairs(publicVariables) do -- public variables aint useful after lock-off

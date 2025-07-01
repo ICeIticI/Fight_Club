@@ -115,7 +115,6 @@ local function dodgeAttack() --[[ Function that will execute a dodge attack betw
 
     -- GameVariables.dodgeAttackTrack:Play()
     GameVariables.randAttack:Play()
-    print(GameVariables.randAttack, GameVariables.dodgeTrack)
 
     GameVariables.waitingToAttack = false
     local reason = "dodgeAttack"
@@ -149,7 +148,6 @@ function BasicStriking.manageHitboxes()
                 end
 
                 if enemyPlayer and GameVariables.isAttacking and GameVariables.attackFrames then
-                    warn(GameVariables.Protocol)
                     GameVariables.GlobalRemoteEvent:FireServer(enemyCharacter, GameVariables.Protocol, GameVariables.currentAttack, GameVariables.character.HumanoidRootPart.CFrame, nil, GameVariables.isEnemyHoldingBlock, false)
                 -- else
                 --     warn({enemyPlayer, GameVariables.isAttacking, GameVariables.attackFrames})
@@ -197,7 +195,6 @@ local function handleAttackInput(input) --[[ When user presses attack then this 
         elseif GameVariables.canFollowUp then
             GameVariables.waitingToAttack = true
             while GameVariables.isAttacking do
-                print("wating")
                 task.wait()
             end
             if GameVariables.followUpCount > 1 then

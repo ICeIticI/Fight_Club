@@ -1,7 +1,9 @@
 local Character_Init = {}
 Character_Init.__index = Character_Init
-local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
+
+local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
 local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
 
 local function createHitbox(bodyPart, characterInstance) --[[ Function that will create a hitbox of a given part for a given player ]]
 
@@ -287,13 +289,15 @@ function Character_Init.init(charModel)
 		for _, animation in pairs(animFolder) do
 			local matchesAll = true -- ✅ Track whether all attributes match
 			
-			for attribute, value in pairs(attribuesAndValuesTable) do
-				local attrValue = animation:GetAttribute(tostring(attribute))
-
-				-- ✅ Ensure all attributes match
-				if (value and attrValue ~= value) or (not value and not attrValue) then
-					matchesAll = false -- 🚫 Mark as a mismatch
-					break -- ✅ Exit the attribute loop early
+			if attribuesAndValuesTable then -- if you dont put in a table of attributes and values, then every single animation in the given table will be considered in the randomization
+				for attribute, value in pairs(attribuesAndValuesTable) do
+					local attrValue = animation:GetAttribute(tostring(attribute))
+	
+					-- ✅ Ensure all attributes match
+					if (value and attrValue ~= value) or (not value and not attrValue) then
+						matchesAll = false -- 🚫 Mark as a mismatch
+						break -- ✅ Exit the attribute loop early
+					end
 				end
 			end
 			
@@ -549,6 +553,11 @@ function Character_Init.init(charModel)
 		DiedConnection:Disconnect()
 		DiedConnection = nil
 	end)
+
+	-- Putting animations into tables to easily pull from them when needed without having a bunch of attributes for each animation for distinction:
+	-- AT stands for Animation Table
+
+	characterInstance.AT_GrabAttacks = {AnimationInstances.FC_GrabAttack1, AnimationInstances.FC_GrabAttack2, AnimationInstances.FC_GrabAttack3}
 	
 
 	

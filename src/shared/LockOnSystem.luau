@@ -89,7 +89,7 @@ function LockOnSystem.LockOn()
 	
 		if (GameVariables.lockOnDebounce.Value == true and GameVariables.raycastResult.Instance.Parent:FindFirstChild("Humanoid")) or (GameVariables.isGettingHit and not GameVariables.lockOnDebounce.Value) then -- Runs when the player locks onto somebody
 		
-			print(GameVariables.originalCamFocus, "Subject:", GameVariables.originalCamSubject)
+			-- print(GameVariables.originalCamFocus, "Subject:", GameVariables.originalCamSubject)
 			
 			-- setup stuff:
 			

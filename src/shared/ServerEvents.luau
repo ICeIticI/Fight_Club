@@ -89,7 +89,6 @@ local function syncBlockHandler(hitCharacter, plrIsBlocking, sentSFX)
 	hitCharacter.Humanoid.Health -= attackDamage
 	if sentSFX then
 		sentSFX:Play()
-		print("Playing SFX")
 		sentSFX.SoundId = ""
 	end
 end

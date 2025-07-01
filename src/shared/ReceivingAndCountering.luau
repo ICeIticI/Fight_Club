@@ -28,11 +28,9 @@ end
 local function handleBlocking(currentAttack)
     if currentAttack:GetAttribute("AnimDirection") == "Left" then
         -- Perform a left parry
-        warn("ParryL")
         GameVariables.currentReceiveAnimTRACK = GameVariables.FC_RightParryTRACK
     elseif currentAttack:GetAttribute("AnimDirection") == "Right" then
         -- Perform a right parry
-        warn("ParryR")
         GameVariables.currentReceiveAnimTRACK = GameVariables.FC_LeftParryTRACK
     end
     local Protocol = "Parry"
@@ -144,7 +142,6 @@ local function receive(currentAttack)
             getHit(currentAttackID)
         end
     elseif GameVariables.isBlocking then
-        warn("We is blocking")
         GameVariables.canSyncBlock = false
         if currentAttack:GetAttribute("AnimDirection") == "Left" then
             GameVariables.currentReceiveAnimTRACK = GameVariables.FC_BracingBlockRTRACK

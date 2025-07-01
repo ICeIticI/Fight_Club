@@ -119,7 +119,6 @@ local function ReceiveAnimManager(v, currentAnim)
         if not v.IsPlaying and v.Animation:GetAttribute("Counter") then
             -- Delay the receiver after getting countered to ensure a punish
             task.wait(0.4)
-            print("can now do stuff")
             GameVariables.isGettingHit = false
         end
         
@@ -208,7 +207,6 @@ local function MiscAnimManager(v)
                 GameVariables.isCountering = false
                 task.delay(0.51, function()
                     GameVariables.comboCounter = 0
-                    print("Combo counter is now 0")
                 end)
             elseif v.Animation.AnimationId == GameVariables.FC_LeftParryRECEIVER.AnimationId or v.Animation.AnimationId == GameVariables.FC_RightParryRECEIVER.AnimationId then
                 -- Parry receiver animation stopped playing
@@ -257,7 +255,6 @@ end
 
 function AnimationManager.manageAnimations()
 	task.wait()
-    warn("Now gonna manage aniamtions:")
    
     while not GameVariables.AllAnimations do task.wait() end
 	

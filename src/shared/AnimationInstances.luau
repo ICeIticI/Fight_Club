@@ -501,6 +501,38 @@ AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("AttackLevel", 3)
 
+AnimationInstances.FC_GrabAttack2 = Instance.new("Animation")
+AnimationInstances.FC_GrabAttack2.Name = "FC_GrabAttack2"
+AnimationInstances.FC_GrabAttack2.AnimationId = "rbxassetid://89135848497992"
+AnimationInstances.FC_GrabAttack2:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttack2:SetAttribute("Grapple", true)
+AnimationInstances.FC_GrabAttack2:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabAttack2:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabAttack2RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_GrabAttack2RECEIVER.Name = "FC_GrabAttack2RECEIVER"
+AnimationInstances.FC_GrabAttack2RECEIVER.AnimationId = "rbxassetid://112490489486418"
+AnimationInstances.FC_GrabAttack2RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttack2RECEIVER:SetAttribute("Grapple", true)
+AnimationInstances.FC_GrabAttack2RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabAttack2RECEIVER:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabAttack3 = Instance.new("Animation")
+AnimationInstances.FC_GrabAttack3.Name = "FC_GrabAttack3"
+AnimationInstances.FC_GrabAttack3.AnimationId = "rbxassetid://92386968277312"
+AnimationInstances.FC_GrabAttack3:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttack3:SetAttribute("Grapple", true)
+AnimationInstances.FC_GrabAttack3:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabAttack3:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabAttack3RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_GrabAttack3RECEIVER.Name = "FC_GrabAttack3RECEIVER"
+AnimationInstances.FC_GrabAttack3RECEIVER.AnimationId = "rbxassetid://135316875442531"
+AnimationInstances.FC_GrabAttack3RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabAttack3RECEIVER:SetAttribute("Grapple", true)
+AnimationInstances.FC_GrabAttack3RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabAttack3RECEIVER:SetAttribute("AttackLevel", 3)
+
 AnimationInstances.FC_EndGrab1 = Instance.new("Animation")
 AnimationInstances.FC_EndGrab1.Name = "FC_EndGrab1"
 AnimationInstances.FC_EndGrab1.AnimationId = "rbxassetid://139684625934016"

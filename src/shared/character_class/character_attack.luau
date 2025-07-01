@@ -58,11 +58,9 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
             attackType = nil
 
             if (characterInstance.didFollowUp) or (characterInstance.comboCounter and characterInstance.comboCounter > 1) or (characterInstance.lastReceiveData and characterInstance.lastReceiveData.Animation:GetAttribute("SyncBlockFinisher") and characterInstance.lastReceiveData.IsPlaying) then
-                warn("Followup")
                 -- if characterInstance.pairedAttack and characterInstance.pairedAttack.IsPlaying then -- runs for the attacker
                         
                 --     characterInstance.pairedAttack:Stop()
-                    print("Ayy we sync blockin", characterInstance.pairedChain)
                     if characterInstance.pairedChain == 3 then
 
                         -- This should be managed by the enemyInstance so they can have a lvl 3 receive attack of their own custom.
@@ -108,7 +106,6 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
                 -- end
 
             else -- for non-followup attacks
-                warn("non followup")
 
                 if (characterInstance.animPair and characterInstance.animPair[1] == 1) or (characterInstance.animPair and characterInstance.animPair[1] == 1) then
                     if (characterInstance.animPair and characterInstance.animPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then

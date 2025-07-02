@@ -46,6 +46,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 characterInstance.humanoidRootPart.CFrame.LookVector * 8,
                 characterInstance.lockOnRayParams
             ) -- Raycast in front of player to find an enemy
+
+            characterInstance.raycastInstance = characterInstance.raycastResult.Instance
             
             if not characterInstance.raycastResult then
                 characterInstance.lockOnDebounce.Value = false
@@ -63,7 +65,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             --     },
             --     characterInstance.raycastResult.Instance, 
             --     characterInstance.raycastResult.Instance.Parent,
-            --     characterInstance.raycastResult.Instance.Parent.Parent
+            --     characterInstance..Parent.Parent
             -- )
             end
             
@@ -74,14 +76,14 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             -- elseif characterInstance.raycastResult.Instance.Parent.Parent:FindFirstChildWhichIsA("Humanoid") or characterInstance.raycastResult.Instance:GetAttribute("ReceiveBox") then
             --     characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent.Parent
             -- end
-            if characterInstance.raycastResult.Instance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
-                characterInstance.enemyChar = characterInstance.raycastResult.Instance:FindFirstAncestorWhichIsA("Model")
+            if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
+                characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
             end
 
             if not characterInstance.lockOnDebounce.Value -- can't be locked on already
             and characterInstance.enemyChar
-            and characterInstance.raycastResult.Instance
-            and characters:GetCharacterObjectByCharacter(characterInstance.raycastResult.Instance:FindFirstAncestorWhichIsA("Model"))
+            and characterInstance.raycastInstance
+            and characters:GetCharacterObjectByCharacter(characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"))
             and active
             then -- We found an alive enemy to lock onto (that has a characterInstance, making them a fighter. The tavern keeper, for example, doesn't have a characterInstance.).
                 
@@ -168,7 +170,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         and characterInstance.lockOnDebounce.Value 
         and characterInstance.pairedChain <= characterInstance.PairedChainMAX 
         and characterInstance.boolCheck({isBlocking = characterInstance.isBlocking}) 
-        and (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
+        and (characterInstance.raycastInstance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
         -- and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
         then
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
@@ -193,7 +195,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
             else
                 characterInstance.followUpCount += 1
-                characterInstance.distanceBetween = (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude
+                characterInstance.distanceBetween = (characterInstance.raycastInstance.Position - characterInstance.humanoidRootPart.Position).Magnitude
                 
                 -- if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                 --     characterInstance.pairedChain += 1
@@ -260,7 +262,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             isBlocking = characterInstance.isBlocking, 
             isCountering = characterInstance.isCountering, 
             isGettingHit = characterInstance.isGettingHit, 
-            isGrappling = characterInstance.isGrappling})
+            isGrappling = characterInstance.isGrappling,})
+        and characterInstance.lockOnDebounce.Value
         then
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             characterInstance:grab(enemyInstance, nil)

@@ -40,7 +40,7 @@ local function getNextId() --[[ Local function that will get an available ID, re
     local i, charId = next(available_character_id_table)
 
     if charId ~= nil then
-        print("Table of avaliable IDs.. " .. tostring(available_character_id_table), "Current ID: " .. tostring(charId))
+        print("Table of avaliable IDs.. ", available_character_id_table, "Current ID: " .. tostring(charId))
         table.remove(available_character_id_table, i)
         return charId
     else -- The available IDs table somehow ran out of values. This shouldn't happen.
@@ -234,6 +234,8 @@ function Character:receive(receiveType, data) --[[ The character will receive an
         self.character_receive:receiveParry(data)
     elseif receiveType == "grabAttempt" then
         return self.character_receive:receiveGrabAttempt(data)
+    elseif receiveType == "receiveGrabExecution" then
+        self.character_receive:receiveGrabExecution(data)
     end
 
 end

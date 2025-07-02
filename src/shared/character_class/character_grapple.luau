@@ -25,8 +25,8 @@ local function getGrabAnimation(characterInstance)
         return characterInstance.randomAnimation(characterInstance.AT_GrabAttacks)
         -- return AnimationInstances.FC_GrabAttack1
     elseif grabType == "execute" then
-        
-    elseif grabType == "end" then
+        return AnimationInstances.FC_GrabExecute1
+    elseif grabType == "breakout" then
         return AnimationInstances.FC_EndGrab1
     end
 end
@@ -61,17 +61,20 @@ local function setupGrabAnimation(characterInstance : table, enemyInstance : any
     return trackData
 end
 
-local function playGrabAnimation(characterInstance, trackData)
+local function playGrabAnimation(characterInstance, trackData, bool : boolean?)
     if characterInstance.player then
-        characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "playGrabAnimation")
+        characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "playGrabAnimation", {bool = bool})
     else 
         -- is an AI. Send directly to animation_centric instead of to the client then to centric.
 
     end
 
     characterInstance.simulateIsPlayingOfLastData(false)
-    trackData.IsPlaying = true
-    characterInstance.manageAnimation(trackData)
+
+    if bool == nil then
+        trackData.IsPlaying = true
+        characterInstance.manageAnimation(trackData)
+    end
 
 end
 
@@ -92,24 +95,47 @@ function Character_Grapple:Attempt(enemyInstance) --[[ The character goes to att
 end
 
 function Character_Grapple:EndGrab(enemyInstance)
-    grabType = "end"
-    self.characterInstance.isInGrappleSuccess = false
-    local trackData = setupGrabAnimation(self.characterInstance)
-    playGrabAnimation(self.characterInstance, trackData)
-    enemyInstance:receive("repelGrab", self.characterInstance)
 
+    if self.characterInstance.isGrappling then     
+        grabType = "breakout"
+        local trackData = setupGrabAnimation(self.characterInstance)
+        playGrabAnimation(self.characterInstance, trackData)
+        enemyInstance:receive("repelGrab", self.characterInstance)
+    else
+        grabType = "complete"
+        playGrabAnimation(self.characterInstance, self.characterInstance.currentGrab_trackData, false)
+        self.characterInstance.reset()
+
+    end
+    
+    self.characterInstance.isInGrappleSuccess = false
+end
+
+function Character_Grapple:Execute(enemyInstance)
+    grabType = "execute"
+    local trackData = setupGrabAnimation(self.characterInstance)
+    self.characterInstance.humanoidRootPart:FindFirstChild("grabWeld").Enabled = false
+    self.characterInstance.isGrappling = false
+
+
+    playGrabAnimation(self.characterInstance, trackData)
+    enemyInstance:receive("receiveGrabExecution", self.characterInstance)
 end
 
 function Character_Grapple:Success(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. We'll now strike the enemy to transition into :Secure() ]]
     grabType = "success"
-    self.characterInstance.isInGrappleSuccess = true
     local trackData = setupGrabAnimation(self.characterInstance)
-    
-    playGrabAnimation(self.characterInstance, trackData)
-    enemyInstance:receive("receiveGrabSuccess", self.characterInstance)
-    
-    while trackData.IsPlaying do task.wait() end
-    return true
+    self.characterInstance.isInGrappleSuccess = true
+
+    if grabType == "execute" then -- if the enemy has low enough HP to kill them with a single attack, then we will just execute them instead
+        self:Execute(enemyInstance)
+    else
+        playGrabAnimation(self.characterInstance, trackData)
+        enemyInstance:receive("receiveGrabSuccess", self.characterInstance)
+        
+        while trackData.IsPlaying do task.wait() end
+        return true
+    end
 end
 
 function Character_Grapple:Secure_TurnLeft(enemyInstance)
@@ -123,10 +149,14 @@ end
 function Character_Grapple:GrabAttack(enemyInstance)
     grabType = "attack"
     local trackData = setupGrabAnimation(self.characterInstance, enemyInstance)
-    playGrabAnimation(self.characterInstance, trackData)
-    self.characterInstance.lastAttackData = trackData
-    enemyInstance:receive("receiveGrabAttack", self.characterInstance)
     
+    if grabType == "execute" then -- if the enemy has low enough HP to kill them with a single attack, then we will just execute them instead
+        self:Execute(enemyInstance)
+    else
+        playGrabAnimation(self.characterInstance, trackData)
+        self.characterInstance.lastAttackData = trackData
+        enemyInstance:receive("receiveGrabAttack", self.characterInstance)
+    end
 end
 
 function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. Now they can begin throwing blows and what not at the enemy while grappled on, and the enemy cant do anything about it except try to break free. ]]
@@ -148,7 +178,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     enemyInstance.humanoid.PlatformStand = true
     -- enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
     -- grabWeld.Enabled = true
-    while enemyInstance.isInSecureGrapple do
+    while enemyInstance.isInSecureGrapple and self.characterInstance.isGrappling do
         task.wait()
         if self.characterInstance.movingDirection == "left" then
             Character_Grapple:Secure_TurnLeft()
@@ -162,7 +192,6 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     enemyInstance.humanoid.PlatformStand = false
     grabWeld.Enabled = false
     grabWeld:Destroy()
-
     return false
 end
 

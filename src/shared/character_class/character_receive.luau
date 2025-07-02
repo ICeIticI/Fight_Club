@@ -166,6 +166,8 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
     
     elseif trackData.receivingType == "repelGrab" then
         return AnimationInstances.FC_EndGrab1RECEIVER
+    elseif trackData.receivingType == "grabExecution" then
+        return AnimationInstances.FC_GrabExecute1RECEIVER
     end
 
     return warn("No receive animation found with the given attacker's animation.")
@@ -278,9 +280,13 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
 
     -- lock us onto the attacker (if not done already): 
     if not characterInstance.lockOnDebounce.Value then
+        local attacker_characterInstance = characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
+
+        characterInstance.raycastInstance = attacker_characterInstance.character.HumanoidRootPart
+        characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
+        characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
 
         characterInstance.lockOnDebounce.Value = true
-        local attacker_characterInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
         characterInstance.enemyHumanoidRootPart = attacker_characterInstance.character:WaitForChild("HumanoidRootPart")
         characterInstance.SetSpeed(true)
         
@@ -494,6 +500,13 @@ function Character_Receive:repelGrab(attacker_characterInstance) --[[ Either we 
     local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
 
     local trackData = setupReceiveAnimation(self.characterInstance, "repelGrab", attackerAnim)
+    playReceivingTrack(self.characterInstance, trackData)
+end
+
+function Character_Receive:receiveGrabExecution(attacker_characterInstance)
+    local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
+
+    local trackData = setupReceiveAnimation(self.characterInstance, "grabExecution", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
 end
 

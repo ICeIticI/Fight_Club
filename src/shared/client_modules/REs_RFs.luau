@@ -33,7 +33,7 @@ function REs_RFs.init()
         elseif protocol == "setupGrabAnimation" then
             Animation_Centric.setupGrabAnimation(ClientVariables, data)
         elseif protocol == "playGrabAnimation" then
-            Animation_Centric.playGrabAnimation(ClientVariables)
+            Animation_Centric.playGrabAnimation(ClientVariables, data)
         elseif protocol == "playBlockStartAnimation" then
             Animation_Centric.playBlockStartAnimation(ClientVariables)
         elseif protocol == "playBlockAnimation" then

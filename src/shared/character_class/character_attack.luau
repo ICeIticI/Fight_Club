@@ -254,7 +254,7 @@ function Character_Attack:syncBlock(attacker_characterInstance) --[[ Attack an e
         self.characterInstance.SetSpeed(false)
         -- self.characterInstance.currentAttack = self.characterInstance.pairedAttack.Animation
         if self.characterInstance.distanceBetween ~= 3 then -- we want the sync to happen at three studs ideally
-            local enemyRoot = self.characterInstance.raycastResult.Instance:FindFirstAncestorWhichIsA("Model").HumanoidRootPart
+            local enemyRoot = self.characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model").HumanoidRootPart
             
             local direction = enemyRoot.Position - self.characterInstance.humanoidRootPart.Position -- the direction toward the enemy from the player
             local normalizedDirection = direction.Unit -- makes the unit measuring toward the player equal to 1. It is the |absolute value|

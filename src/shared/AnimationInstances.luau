@@ -549,6 +549,22 @@ AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("Grapple", false)
 AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_EndGrab1RECEIVER:SetAttribute("AttackLevel", 3)
 
+AnimationInstances.FC_GrabExecute1 = Instance.new("Animation")
+AnimationInstances.FC_GrabExecute1.Name = "FC_GrabExecute1"
+AnimationInstances.FC_GrabExecute1.AnimationId = "rbxassetid://72230394937912"
+AnimationInstances.FC_GrabExecute1:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabExecute1:SetAttribute("Grapple", true) -- a false grapple means it ends the grappling session between attacker and receiver.
+AnimationInstances.FC_GrabExecute1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabExecute1:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabExecute1RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_GrabExecute1RECEIVER.Name = "FC_GrabExecute1RECEIVER"
+AnimationInstances.FC_GrabExecute1RECEIVER.AnimationId = "rbxassetid://104310579398458"
+AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("Grapple", true)
+AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("AttackLevel", 3)
+
 -- Temporarly creating tracks to store the length of said track for management:
 
 -- local temporaryAnimationController = Instance.new("AnimationController") -- for temporarily loading animation tracks to return a length of the track. Needed to parent the animator.

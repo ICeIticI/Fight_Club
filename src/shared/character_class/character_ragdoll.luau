@@ -37,14 +37,17 @@ function RagdollSystem:InitializeCharacter()
 		ragdollFunction.setupRagdoll(self.characterInstance.character, self.characterInstance.id)
 	-- end
 
-	humanoid.Died:Connect(function() -- to ragdoll the character on death
+	humanoid.HealthChanged:Connect(function(newHealth) -- to ragdoll the character on death
 		
-		-- if self.characterInstance.player then
-		-- 	setCharacterNetworkOwnershipTo(self.characterInstance.character, self.characterInstance.player)
-		-- 	self.characterInstance.GlobalRemoteEvent:FireAllClients("ragdoll", {character = self.characterInstance.character, id = self.characterInstance.id, ragdollBool = true})
-		-- else -- NPC. Run on server right here
+		if newHealth == 0 then
+			-- if self.characterInstance.player then
+			-- 	setCharacterNetworkOwnershipTo(self.characterInstance.character, self.characterInstance.player)
+			-- 	self.characterInstance.GlobalRemoteEvent:FireAllClients("ragdoll", {character = self.characterInstance.character, id = self.characterInstance.id, ragdollBool = true})
+			-- else -- NPC. Run on server right here
 			ragdollFunction.ragdoll(self.characterInstance.character, self.characterInstance.id, true)
-		-- end		
+			-- end	
+				
+		end
 	end)
 end
 

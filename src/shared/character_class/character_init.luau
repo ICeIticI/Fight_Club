@@ -438,11 +438,15 @@ function Character_Init.init(charModel)
 			return A1Damage
 		elseif trackData.attackLvl == 2 then
 			return A2Damage
+		elseif trackData.attackLvl == 3 then
+			return self.enemyChar.Humanoid.Health -- we deal as much damage to the enemy as they have health remaining, since it's an execution.
 		elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true or trackData.Animation:GetAttribute("SyncBlockFinisher") == false then
 			return syncBlockDamage
 		elseif trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then
 			return counterAttackDamage
 		end
+
+		return warn("No attack damage found with the given data:", trackData)
 	end
 
 	function characterInstance.manageAnimation(trackData)

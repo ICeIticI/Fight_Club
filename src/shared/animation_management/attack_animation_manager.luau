@@ -31,8 +31,7 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
         else
 
             -- Disables the grapple weld before killing the enemy if they're about to die, or else the attacker will also die for some reason:
-            if characterInstance.isGrappling and (characterInstance.enemyChar.Humanoid.Health - characterInstance.attackDamage <= 0) then
-                print("disabling weld before kill to prevent death for both..")
+            if characterInstance.isGrappling and (characterInstance.enemyChar.Humanoid:GetState() == Enum.HumanoidStateType.Dead) then
                 characterInstance.humanoidRootPart:FindFirstChild("grabWeld").Enabled = false
                 characterInstance.isGrappling = false
                 -- characterInstance.lockOnDebounce.Value = false
@@ -147,6 +146,15 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
                 warn("Resetting")
                 self.characterInstance.reset()
             else
+                warn("hi")
+                if trackData.attackLvl == 3 then
+                    self.characterInstance.isGrappling = false
+                    self.characterInstance.lockOnDebounce.Value = false
+
+                self.characterInstance.enemyChar.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                self.characterInstance.enemyChar.Humanoid.Health = 0
+                end
+
                 self.characterInstance.waitingToAttack = false
                 self.characterInstance.canFollowUp = false
                 self.characterInstance.SetSpeed(true)

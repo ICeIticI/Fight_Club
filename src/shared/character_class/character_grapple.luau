@@ -39,7 +39,7 @@ local function setupGrabAnimation(characterInstance : table, enemyInstance : any
     trackData.AnimationId = trackData.Animation.AnimationId
     
     if trackData.Animation:GetAttribute("AnimType") == 1 then
-        trackData.attackLvl = 1
+        trackData.attackLvl = trackData.Animation:GetAttribute("AttackLevel") or 1 -- only few grab attacks have an attacklevel thats not 1, so when we assign attacklevel to those few animations, its always different than 1
         characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
         if enemyInstance and enemyInstance.humanoid.Health <= characterInstance.attackDamage then
             grabType = "execute"
@@ -103,6 +103,7 @@ function Character_Grapple:EndGrab(enemyInstance)
         enemyInstance:receive("repelGrab", self.characterInstance)
     else
         grabType = "complete"
+        print(grabType)
         playGrabAnimation(self.characterInstance, self.characterInstance.currentGrab_trackData, false)
         self.characterInstance.reset()
 
@@ -114,8 +115,13 @@ end
 function Character_Grapple:Execute(enemyInstance)
     grabType = "execute"
     local trackData = setupGrabAnimation(self.characterInstance)
+    self.characterInstance.setCharacterMassless(enemyInstance.character, false)
+    enemyInstance.humanoid.PlatformStand = false
     self.characterInstance.humanoidRootPart:FindFirstChild("grabWeld").Enabled = false
-    self.characterInstance.isGrappling = false
+
+    enemyInstance.character:FindFirstChild("Health").Enabled = false -- disables the health script inside the character, which regenerates their health.
+    enemyInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    -- self.characterInstance.isGrappling = false
 
 
     playGrabAnimation(self.characterInstance, trackData)
@@ -178,6 +184,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     enemyInstance.humanoid.PlatformStand = true
     -- enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
     -- grabWeld.Enabled = true
+    self.characterInstance.isAttacking.Value = false
     while enemyInstance.isInSecureGrapple and self.characterInstance.isGrappling do
         task.wait()
         if self.characterInstance.movingDirection == "left" then
@@ -187,6 +194,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
         end
         -- enemyInstance.character:SetPrimaryPartCFrame(self.characterInstance.humanoidRootPart.CFrame * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0))
     end
+    print("Not grappling?")
 
     self.characterInstance.setCharacterMassless(enemyInstance.character, false)
     enemyInstance.humanoid.PlatformStand = false

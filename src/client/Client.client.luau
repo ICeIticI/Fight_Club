@@ -79,7 +79,7 @@ UserInputService.InputBegan:Connect(function(input)
                 lockOn.Lock(publicVariables)
             end
             input_check_FUNCTION:InvokeServer(inputTable)
-            lockOn.Unlock() -- will run as soon as the player stops qualifying to be able to lock on (such as walking away or pressing Q again)
+            -- lockOn.Unlock() -- will run as soon as the player stops qualifying to be able to lock on (such as walking away or pressing Q again)
         end
     end
 end)

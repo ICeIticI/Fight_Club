@@ -84,12 +84,13 @@ function LockOn.Lock(publicVariables)
 	faceEnemy(ClientVariables.subject)
 	while ClientVariables.lockOnDebounce.Value == true 
 	and workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 8, ClientVariables.lockOnRayParams) ~= nil 
-	and ClientVariables.enemyHumanoid.Health > 0 
-	and ClientVariables.humanoid.Health > 0 
+	and not (ClientVariables.enemyHumanoid:GetState() == Enum.HumanoidStateType.Dead)
+	and not (ClientVariables.humanoid:GetState() == Enum.HumanoidStateType.Dead)
 	do -- constantly keeps the player facing the enemy
 		-- Constantly having the player face the enemy when locked on
 
 		task.wait()
+		print("facin")
 		faceEnemy(ClientVariables.subject)
 	end
 
@@ -99,21 +100,22 @@ function LockOn.Lock(publicVariables)
 		ClientVariables[varName] = nil
 	end
 
-	return
+	return LockOn.Unlock()
 end
 
 function LockOn.Unlock()
-    if ClientVariables.humanoid.Health <= 0 or ClientVariables.enemyHumanoid and ClientVariables.enemyHumanoid.Health <= 0 then -- if the player or enemy dies, then we want to stop locking on.
-		task.wait(0.5)
-		ClientVariables.lockOnDebounce.Value = false
-	end
-
-	if not workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 7, ClientVariables.lockOnRayParams) then -- When the while loop above ends, we want to check if its because the player got too far. If so, then we want to set the lockOnDebounce to false
-		ClientVariables.lockOnDebounce.Value = false
-	end
+    -- if ClientVariables.humanoid.Health <= 0 or ClientVariables.enemyHumanoid and ClientVariables.enemyHumanoid.Health <= 0 then -- if the player or enemy dies, then we want to stop locking on.
+	-- 	task.wait(0.5)
+	-- 	ClientVariables.lockOnDebounce.Value = false
 	-- end
+
+	-- if not workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 7, ClientVariables.lockOnRayParams) then -- When the while loop above ends, we want to check if its because the player got too far. If so, then we want to set the lockOnDebounce to false
+	-- 	ClientVariables.lockOnDebounce.Value = false
+	-- end
+	-- end
+	print(ClientVariables.lockOnDebounce.Value)
 	
-	if ClientVariables.lockOnDebounce.Value == false then
+	-- if ClientVariables.lockOnDebounce.Value == false then
 		-- Stop locking onto enemy
 		
 		ClientVariables.stopAnimations()
@@ -127,7 +129,7 @@ function LockOn.Unlock()
 		-- ClientVariables.Camera.Focus = ClientVariables.originalCamFocus
 		ClientVariables.Camera.CameraSubject = ClientVariables.humanoid
 		ClientVariables.Camera.CameraType = Enum.CameraType.Custom
-	end
+	-- end
 end
 warn("Make sure to make camera lock mouse center before publishing")
 return LockOn

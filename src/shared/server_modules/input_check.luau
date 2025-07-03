@@ -47,7 +47,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 characterInstance.lockOnRayParams
             ) -- Raycast in front of player to find an enemy
 
-            characterInstance.raycastInstance = characterInstance.raycastResult.Instance
             
             if not characterInstance.raycastResult then
                 characterInstance.lockOnDebounce.Value = false
@@ -68,6 +67,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             --     characterInstance..Parent.Parent
             -- )
             end
+
+            characterInstance.raycastInstance = characterInstance.raycastResult.Instance
             
             -- if not characterInstance.raycastResult then return warn("No result") end
 

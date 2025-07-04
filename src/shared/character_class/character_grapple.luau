@@ -25,7 +25,8 @@ local function getGrabAnimation(characterInstance)
         return characterInstance.randomAnimation(characterInstance.AT_GrabAttacks)
         -- return AnimationInstances.FC_GrabAttack1
     elseif grabType == "execute" then
-        return AnimationInstances.FC_GrabExecute1
+        -- return characterInstance.randomAnimation(characterInstance.AT_GrabExecutions)
+        return AnimationInstances.FC_GrabExecute2
     elseif grabType == "breakout" then
         return AnimationInstances.FC_EndGrab1
     end
@@ -41,6 +42,7 @@ local function setupGrabAnimation(characterInstance : table, enemyInstance : any
     if trackData.Animation:GetAttribute("AnimType") == 1 then
         trackData.attackLvl = trackData.Animation:GetAttribute("AttackLevel") or 1 -- only few grab attacks have an attacklevel thats not 1, so when we assign attacklevel to those few animations, its always different than 1
         characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
+        print(characterInstance.attackDamage, characterInstance.enemyChar.Humanoid.Health)
         if enemyInstance and enemyInstance.humanoid.Health <= characterInstance.attackDamage then
             grabType = "execute"
         end

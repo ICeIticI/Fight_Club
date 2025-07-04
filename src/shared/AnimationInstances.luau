@@ -539,6 +539,22 @@ AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("AttackLevel", 3)
 
+AnimationInstances.FC_GrabExecute2 = Instance.new("Animation")
+AnimationInstances.FC_GrabExecute2.Name = "FC_GrabExecute2"
+AnimationInstances.FC_GrabExecute2.AnimationId = "rbxassetid://102550791435195"
+AnimationInstances.FC_GrabExecute2:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabExecute2:SetAttribute("Grapple", true) -- a false grapple means it ends the grappling session between attacker and receiver.
+AnimationInstances.FC_GrabExecute2:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabExecute2:SetAttribute("AttackLevel", 3)
+
+AnimationInstances.FC_GrabExecute2RECEIVER = Instance.new("Animation")
+AnimationInstances.FC_GrabExecute2RECEIVER.Name = "FC_GrabExecute2RECEIVER"
+AnimationInstances.FC_GrabExecute2RECEIVER.AnimationId = "rbxassetid://104579095504597"
+AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("Paired", true)
+AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("Grapple", true)
+AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("AttackLevel", 3)
+
 -- Temporarly creating tracks to store the length of said track for management:
 
 -- local temporaryAnimationController = Instance.new("AnimationController") -- for temporarily loading animation tracks to return a length of the track. Needed to parent the animator.
@@ -556,10 +572,31 @@ for _, animation in pairs(AnimationInstances) do
     end
     -- print(temporaryTrack.Length)
     task.spawn(function()
-        
+
         animation:SetAttribute("Length", temporaryTrack.Length)
-        local temporaryStartOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("StartOfAttack"):Connect(function()
-            animation:SetAttribute("TimeUntilStartOfAttack", temporaryTrack.TimePosition)
+        local temporaryStartOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("StartOfAttack"):Connect(function(markerParam)
+            
+            -- Will need to be changed on a per ID basis instead of animation for each of the different animations:
+            if not animation:FindFirstChild("attackTimePositions") then
+                local attackTimePositions = Instance.new("Folder")
+                attackTimePositions.Name = "attackTimePositions"
+                attackTimePositions.Parent = animation
+            end
+
+            local attackTimePosition = Instance.new("NumberValue")
+            attackTimePosition.Name = "attackTimePosition"
+            attackTimePosition.Value = temporaryTrack.TimePosition
+            attackTimePosition.Parent = animation.attackTimePositions
+            -- ^ Will need to be changed on a per ID basis instead of animation for each of the different animations:
+
+            -- animation:SetAttribute("TimeUntilStartOfAttack", temporaryTrack.TimePosition)
+
+            -- markerParam in the context of StartOfAttack is how many times the character attacks the enemy in the animation. So we use this value to divide how much damage each hit does.
+            local damageDivider = tonumber(markerParam) -- markerParam stores the number, but as a string value oddly.
+            print(damageDivider)
+            if damageDivider and damageDivider > 1 then
+                animation:SetAttribute("DamageDivider", damageDivider) -- To remain fair, we don't do full damage on each hit on the multi-hit animation, but we divide it, so its only a aesthetic and not an advantage.
+            end
         end)
         local temporaryEndOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("EndOfAttack"):Connect(function()
             animation:SetAttribute("TimeUntilEndOfAttack", temporaryTrack.TimePosition)

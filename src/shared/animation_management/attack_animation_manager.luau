@@ -87,12 +87,15 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
     if trackData.IsPlaying then
 
         -- Schedule a simulation of the AttackFrames marker and handle data accordingly:
-        if trackData.Animation:GetAttribute("TimeUntilStartOfAttack") then -- Some level 3 sync blocks have no damage-dealing, so no StartOfAttack
-            task.delay(trackData.Animation:GetAttribute("TimeUntilStartOfAttack"), function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
-            if trackData.IsPlaying then
-                    runOnAttackFrames(self.characterInstance, trackData)
-                end
-            end)
+        if trackData.Animation:FindFirstChild("attackTimePositions") then -- Some level 3 sync blocks have no damage-dealing, so no StartOfAttack
+            
+            for _, attackTimePosition in pairs(trackData.Animation.attackTimePositions:GetChildren()) do
+                task.delay(attackTimePosition.Value, function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
+                if trackData.IsPlaying then
+                        runOnAttackFrames(self.characterInstance, trackData)
+                    end
+                end)
+            end
         end
 
         -- Schedule a simulation of the EndOfAttack marker:
@@ -146,8 +149,8 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
                 warn("Resetting")
                 self.characterInstance.reset()
             else
-                warn("hi")
                 if trackData.attackLvl == 3 then
+                    warn("hi")
                     self.characterInstance.isGrappling = false
                     self.characterInstance.lockOnDebounce.Value = false
 

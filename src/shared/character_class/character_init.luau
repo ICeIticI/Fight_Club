@@ -434,16 +434,24 @@ function Character_Init.init(charModel)
 	function characterInstance:setupAttackDamage(trackData)
 		if not trackData then return warn("No trackData provided to the :setupAttackDamage function: ", trackData) end
 
+		-- for animations that have multiple points of damage (such as repeatedly hitting the enemy in the animation):
+		local damageDivider = trackData.Animation:GetAttribute("DamageDivider")
+		if not damageDivider then -- if we dont have multiple hits in our animation, then no division is needed. Do full damage on that one hit
+			damageDivider = 1
+		end
+		-- ideally, if there are, say 3 hits in an animation, we'll divide the damage by 3 so after the 3 hits we'll do the same damage as if it were only 1 hit.
+
 		if trackData.attackLvl == 1 then
-			return A1Damage
+			return A1Damage / damageDivider
 		elseif trackData.attackLvl == 2 then
-			return A2Damage
+			return A2Damage / damageDivider
 		elseif trackData.attackLvl == 3 then
-			return self.enemyChar.Humanoid.Health -- we deal as much damage to the enemy as they have health remaining, since it's an execution.
+			-- want them to have 0.1 health by the last hit of the execution before the game kills them for ragdoll:
+			return (self.enemyChar.Humanoid.Health / damageDivider) - (0.1/damageDivider) -- we deal as much damage to the enemy as they have health remaining, since it's an execution. We subtract 0.1 so it doesn't ACTUALLY kill them or set their health to 0 since when their health is 0 they ragdoll and that ruins the execution
 		elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true or trackData.Animation:GetAttribute("SyncBlockFinisher") == false then
-			return syncBlockDamage
+			return syncBlockDamage / damageDivider
 		elseif trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then
-			return counterAttackDamage
+			return counterAttackDamage / damageDivider
 		end
 
 		return warn("No attack damage found with the given data:", trackData)
@@ -562,7 +570,7 @@ function Character_Init.init(charModel)
 	-- AT stands for Animation Table
 
 	characterInstance.AT_GrabAttacks = {AnimationInstances.FC_GrabAttack1, AnimationInstances.FC_GrabAttack2, AnimationInstances.FC_GrabAttack3}
-	
+	characterInstance.AT_GrabExecutions = {AnimationInstances.FC_GrabExecute1, AnimationInstances.FC_GrabExecute2}
 
 	
 	if characterInstance.player ~= nil then

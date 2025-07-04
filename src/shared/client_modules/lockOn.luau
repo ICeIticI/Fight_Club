@@ -90,7 +90,6 @@ function LockOn.Lock(publicVariables)
 		-- Constantly having the player face the enemy when locked on
 
 		task.wait()
-		print("facin")
 		faceEnemy(ClientVariables.subject)
 	end
 

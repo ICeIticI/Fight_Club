@@ -167,7 +167,13 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
     elseif trackData.receivingType == "repelGrab" then
         return AnimationInstances.FC_EndGrab1RECEIVER
     elseif trackData.receivingType == "grabExecution" then
-        return AnimationInstances.FC_GrabExecute1RECEIVER
+        
+        if trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabExecute1.AnimationId then
+            return AnimationInstances.FC_GrabExecute1RECEIVER
+        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabExecute2.AnimationId then
+            return AnimationInstances.FC_GrabExecute2RECEIVER
+        end
+
     end
 
     return warn("No receive animation found with the given attacker's animation.")

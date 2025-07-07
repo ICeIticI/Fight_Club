@@ -16,6 +16,9 @@ local healthChecker
 local loadingScreenFrame
 local loadingLabel
 
+local primaryColor = "#000000" -- black
+local secondaryColor = "#ff2600" -- a red I happen to pick out that we're sticking with
+
 local reverseDots = false
 local function cycleDots(textLabel)
     local noDotString = textLabel.Text:gsub("%.", "") -- Should just return "Loading" without the dots, unless I change it to something else
@@ -80,6 +83,14 @@ function UIManager.manageUI()
 
             staminaChecker, healthChecker = nil, nil
         end
+    end)
+
+    gameFrame.fightingStyles_button.Activated:Connect(function()
+        gameFrame.fightingStyles_screen.Visible = not gameFrame.fightingStyles_screen.Visible
+    end)
+
+    gameFrame.perks_button.Activated:Connect(function()
+        gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
     end)
 
     loadingScreenFrame = ClientVariables.player.PlayerGui.loadingScreen.Frame

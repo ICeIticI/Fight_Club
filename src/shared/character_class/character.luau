@@ -97,6 +97,10 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     self.character_ragdoll:InitializeCharacter()
     
     self.initialized = true
+    if self.player then -- done loading. Get rid of clients loading screen:
+        self.GlobalRemoteEvent:FireClient(self.player, "initialized")
+    end
+
     return self
 end
 

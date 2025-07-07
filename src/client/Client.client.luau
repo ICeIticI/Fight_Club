@@ -32,15 +32,13 @@ end)
 
 if game.Players.LocalPlayer.Character then -- The player may load faster than the script, so this will ensure the player won't skip initializing
     -- Initializes the player
-
-    while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+    -- while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
 
     UIManager.manageUI()
 end
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
     -- Initializes the player
-
     while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
 
     UIManager.manageUI()

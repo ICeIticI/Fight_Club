@@ -25,8 +25,8 @@ local function getGrabAnimation(characterInstance)
         return characterInstance.randomAnimation(characterInstance.AT_GrabAttacks)
         -- return AnimationInstances.FC_GrabAttack1
     elseif grabType == "execute" then
-        -- return characterInstance.randomAnimation(characterInstance.AT_GrabExecutions)
-        return AnimationInstances.FC_GrabExecute2
+        return characterInstance.randomAnimation(characterInstance.AT_GrabExecutions)
+        -- return AnimationInstances.FC_GrabExecute2
     elseif grabType == "breakout" then
         return AnimationInstances.FC_EndGrab1
     end
@@ -190,9 +190,9 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     while enemyInstance.isInSecureGrapple and self.characterInstance.isGrappling do
         task.wait()
         if self.characterInstance.movingDirection == "left" then
-            Character_Grapple:Secure_TurnLeft()
+            -- Character_Grapple:Secure_TurnLeft()
         elseif self.characterInstance.movingDirection == "right" then
-            Character_Grapple:Secure_TurnRight()
+            -- Character_Grapple:Secure_TurnRight()
         end
         -- enemyInstance.character:SetPrimaryPartCFrame(self.characterInstance.humanoidRootPart.CFrame * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0))
     end

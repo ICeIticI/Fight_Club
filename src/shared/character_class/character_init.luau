@@ -4,6 +4,7 @@ Character_Init.__index = Character_Init
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
 local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
+local ragdollFunction = require(game.ReplicatedStorage.Shared.ragdollFunction)
 
 local function createHitbox(bodyPart, characterInstance) --[[ Function that will create a hitbox of a given part for a given player ]]
 
@@ -173,6 +174,7 @@ function Character_Init.init(charModel)
 	
 	characterInstance.character.Humanoid.WalkSpeed = 12
 	characterInstance.character.Humanoid.JumpPower = 0
+	characterInstance.character.Humanoid.MaxSlopeAngle = 40 -- reducing this from 89 so they cant climb well. Will mean they will slip off cliffs if they get too close
 
 	-- "Variable" variables; these values will differ per fighter class the character chooses:
 	characterInstance.escapeGrappleProgressPower = 10 -- How much progress the character has to escaping a grapple each time input is pressed. For NPCs, this will be autonomously applied
@@ -557,6 +559,8 @@ function Character_Init.init(charModel)
 	-- AI-Altered code by Microsoft Copilot ^
 
 
+	-- local fallDamageConnection
+
 	local DiedConnection
 	DiedConnection = characterInstance.humanoid.Died:Connect(function()
 		MoveDirectionConnection:Disconnect()
@@ -564,6 +568,54 @@ function Character_Init.init(charModel)
 		
 		DiedConnection:Disconnect()
 		DiedConnection = nil
+
+		-- fallDamageConnection:Disconnect()
+		-- fallDamageConnection = nil
+	end)
+
+	-- Fall damage:
+	-- local minYVelocity = 20 -- minimum velocity to start taking damage
+	-- local maxYVelocity = 90 -- highest velocity to take damage. If they go faster, they'll just die
+
+	-- local previousYVelocity = 0
+
+	local ragdollYPos = 80 -- if their Y pos go below this point then they ragdoll
+	local deathYPos = 30
+	task.spawn(function()
+		-- Real fall damage:
+		while characterInstance.humanoid.Health > 0 do
+				task.wait()
+			-- 	local newYVelocity = -characterInstance.humanoidRootPart.Velocity.Y
+			-- 	if newYVelocity <= 0 and previousYVelocity <= 0 then continue end
+				
+			-- 	print("we falling!!!!!", newYVelocity, previousYVelocity)
+			-- 	if (previousYVelocity - newYVelocity) > minYVelocity then -- we hard-stopped landed and had some velocity prior. We landed.
+			-- 		-- We landed
+			-- 		if previousYVelocity > maxYVelocity then
+			-- 			print("kill shot")
+			-- 			-- characterInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+			-- 			-- characterInstance.humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+			-- 			-- characterInstance.humanoid.MaxHealth = 0
+			-- 			characterInstance.humanoid.Health = 0
+			-- 			-- print("Dead Enabled:", characterInstance.humanoid:GetStateEnabled(Enum.HumanoidStateType.Dead))
+			-- 		elseif previousYVelocity > minYVelocity then
+			-- 			local fallDamage = newYVelocity - minYVelocity * 1.5
+			-- 			characterInstance.humanoid.Health -= fallDamage
+			-- 		end
+			-- 	end
+			-- 	previousYVelocity = newYVelocity
+			
+			-- Simulated fall damage (if their Y coordinate is low then they ragdoll and die):
+			if characterInstance.humanoidRootPart.CFrame.Y < ragdollYPos then
+				characterInstance.humanoid.PlatformStand = true
+				ragdollFunction.ragdoll(characterInstance.character, characterInstance.id, true)
+			end
+			if characterInstance.humanoidRootPart.CFrame.Y < deathYPos then
+				characterInstance.humanoid.PlatformStand = false
+				characterInstance.humanoid.Health = 0
+			end
+		end
+
 	end)
 
 	-- Putting animations into tables to easily pull from them when needed without having a bunch of attributes for each animation for distinction:

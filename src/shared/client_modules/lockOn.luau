@@ -51,7 +51,7 @@ function LockOn.Lock(publicVariables)
 	
 	-- character changes below:
 	ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
-	-- UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
+	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
 	
 	-- camera subject part
 	ClientVariables.subject = ClientVariables.character:FindFirstChild("subject") or Instance.new("Part") --[[ Subject is the point
@@ -130,5 +130,5 @@ function LockOn.Unlock()
 		ClientVariables.Camera.CameraType = Enum.CameraType.Custom
 	-- end
 end
-warn("Make sure to make camera lock mouse center before publishing")
+-- warn("Make sure to make camera lock mouse center before publishing")
 return LockOn

@@ -48,6 +48,9 @@ function REs_RFs.init()
 
         elseif protocol == "lockOn" then
             lockOn.Lock(data)
+
+        elseif protocol == "initialized" then
+            ClientVariables.initialized = true
         end
     
         --[[ ^ Might put the animation events into the animation_centric script 

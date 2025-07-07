@@ -78,7 +78,8 @@ function ragdollFunction.ragdoll(char : Model, id : number, sentBool : boolean) 
 		current_characterRagdollData.angularVelocity.AngularVelocity = Vector3.new(math.random(1,100), math.random(1,100), math.random(1,100))
 
 
-		humanoid.PlatformStand = true
+		-- Turned off PlatformStand because it prevented death from falls -- just damages them and they would just heal up.
+		-- humanoid.PlatformStand = true
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
 		
 		for _, v in pairs(jointsCache) do

@@ -3,6 +3,13 @@
 * It will rely on module scripts with different purposes to function when called upon.
 ]]
 
+-- Setup GUI for players as soon as server starts:
+for _, child in pairs(game.ReplicatedStorage:GetChildren()) do
+    if child:IsA("ScreenGui") then
+        child.Parent = game.StarterGui-- not originally parented in StarterGui or else I'l have to move it every time I need to configure the game in Studio
+    end
+end
+
 local Players = game:GetService("Players")
 
 -- Modules

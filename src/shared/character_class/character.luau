@@ -182,7 +182,7 @@ function Character:block(sentBool) --[[ The character will get ready to block an
     end
 end
 
-function Character:grab(enemyInstance, success) --[[ The character will attempt to grapple with an enemy ]]
+function Character:grab(enemyInstance) --[[ The character will attempt to grapple with an enemy ]]
     
     -- if success == nil then
         if self.character_grapple:Attempt(enemyInstance) == true then

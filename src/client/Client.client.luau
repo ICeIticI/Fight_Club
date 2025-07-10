@@ -52,12 +52,6 @@ local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -
 
 
 UserInputService.InputBegan:Connect(function(input)
-
-    if (AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode]) and ClientVariables.player.Name == "Player2" then
-        warn("2 seconds till attack...")
-        task.wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
-    end
-
     
     local inputTable = {} -- Because the server wont let us send the input object, we need to create a table representing input that are strings
     inputTable.UserInputType = input.UserInputType
@@ -70,15 +64,21 @@ UserInputService.InputBegan:Connect(function(input)
     or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode])
     -- or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode]) 
     then
-        local protocol, publicVariables = input_check_FUNCTION:InvokeServer(inputTable, true) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes
-        if protocol == "LockOnInput" then
-            -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
-            if publicVariables.lockOnDebounce.Value == true then
-                lockOn.Lock(publicVariables)
-            end
-            input_check_FUNCTION:InvokeServer(inputTable)
-            -- lockOn.Unlock() -- will run as soon as the player stops qualifying to be able to lock on (such as walking away or pressing Q again)
+
+        if ClientVariables.player.Name == "Player2" and (AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode]) then
+            warn("2 seconds till attack...")
+            task.wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
         end
+
+        input_check_FUNCTION:InvokeServer(inputTable, true) -- function returns a table. Contains the protocol and a table of variables to set on the client to sync changes
+        -- if protocol == "LockOnInput" then
+        --     -- Player pressed a button to lock on, got approved by the server, and now we can lock on:
+        --     if publicVariables.lockOnDebounce.Value == true then
+        --         lockOn.Lock(publicVariables)
+        --     end
+        --     input_check_FUNCTION:InvokeServer(inputTable)
+        --     -- lockOn.Unlock() -- will run as soon as the player stops qualifying to be able to lock on (such as walking away or pressing Q again)
+        -- end
     end
 end)
 

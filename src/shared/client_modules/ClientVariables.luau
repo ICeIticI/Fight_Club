@@ -17,12 +17,6 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	-- Bools and Values:
 	
 	ClientVariables.lockOnDebounce = ClientVariables.plrObjectsFolder:FindFirstChild("lockOnDebounce") -- attemps to find lockOnDebounce. If it doesn't exist, then this var will be nil.
-
-	if not ClientVariables.lockOnDebounce then
-		ClientVariables.lockOnDebounce = Instance.new("BoolValue") -- shouldn't this be initialized by the server for more security?
-		ClientVariables.lockOnDebounce.Name = "lockOnDebounce"
-		ClientVariables.lockOnDebounce.Parent = ClientVariables.plrObjectsFolder
-	end
 								
 	ClientVariables.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
 
@@ -31,7 +25,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	ClientVariables.maxStamina = ClientVariables.plrObjectsFolder:WaitForChild("maxStamina")
 
 	-- ClientVariables.initialized = true
-	return print("Initialized the client variables")
+	return
 end
 
 ClientVariables.Camera = game.Workspace.CurrentCamera
@@ -69,7 +63,7 @@ end)
 
  -- find a way to make sure these two Init() functions don't both run. Only one Init() should run when the player character spawns in.
 
- if ClientVariables.player.Character then
+if ClientVariables.player.Character then
 	if canInit then
 		Init()
 		canInit = false

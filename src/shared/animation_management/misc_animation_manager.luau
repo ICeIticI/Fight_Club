@@ -164,7 +164,8 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             -- Parry receiver animation stopped playing
             self.characterInstance.canFollowUp = false
             task.wait(0.4)
-            self.characterInstance.comboCounter = 0 -- Reset combo counter to prevent continuing the attack chain
+            self.characterInstance.reset()
+            -- self.characterInstance.comboCounter = 0 -- Reset combo counter to prevent continuing the attack chain
             -- self.characterInstance.isAttacking.Value = false
             -- self.characterInstance.hitDebounce = false
         

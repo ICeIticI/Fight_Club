@@ -17,7 +17,14 @@ function REs_RFs.init()
     
     ClientVariables.GlobalRemoteFunction.OnClientInvoke = function(protocol, data)
         if protocol == "createAnimationTracks" then -- initializes animations on character creation
-            Animation_Centric.initialize_animations(ClientVariables)        
+            Animation_Centric.initialize_animations(ClientVariables)
+            
+        elseif protocol == "lockOn" then
+            if data.lockOnDebounce.Value == true then
+                lockOn.Lock(data)
+            else
+                lockOn.Unlock()
+            end
         end
     end
     
@@ -45,9 +52,6 @@ function REs_RFs.init()
             ragdollFunction.setupRagdoll(data.character, data.id)
         elseif protocol == "ragdoll" then
             ragdollFunction.ragdoll(data.character, data.id, data.ragdollBool)
-
-        elseif protocol == "lockOn" then
-            lockOn.Lock(data)
 
         elseif protocol == "initialized" then
             ClientVariables.initialized = true

@@ -319,6 +319,7 @@ function Character_Init.init(charModel)
 	end
 
 	function characterInstance.SetSpeed(bool) -- Function that manages the character speed based on the character circumstances. Adding 'true' into the parameter will allow the character to move while adding 'false' will not allow movement.
+		characterInstance.speedSet = false -- A status variable. When true, it means the character's speed was set. This is useful so when we use .repositionInFrontOfEnemy, they wont be able to move cause we'll wait till this variable is true before proceeding with that strand of code.
 		if bool == true then
 			-- we allow the player the ability to move
 
@@ -339,6 +340,7 @@ function Character_Init.init(charModel)
 			-- we take the player's ability to move away
 			characterInstance.humanoid.WalkSpeed = 0
 		end
+		characterInstance.speedSet = true
 	end
 
 	function characterInstance.reset() --[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back. ]]--
@@ -447,13 +449,13 @@ function Character_Init.init(charModel)
 			return A1Damage / damageDivider
 		elseif trackData.attackLvl == 2 then
 			return A2Damage / damageDivider
+		elseif trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then
+			return counterAttackDamage / damageDivider
+		elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true or trackData.Animation:GetAttribute("SyncBlockFinisher") == false then
+			return syncBlockDamage / damageDivider
 		elseif trackData.attackLvl == 3 then
 			-- want them to have 0.1 health by the last hit of the execution before the game kills them for ragdoll:
 			return (self.enemyChar.Humanoid.Health / damageDivider) - (0.1/damageDivider) -- we deal as much damage to the enemy as they have health remaining, since it's an execution. We subtract 0.1 so it doesn't ACTUALLY kill them or set their health to 0 since when their health is 0 they ragdoll and that ruins the execution
-		elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true or trackData.Animation:GetAttribute("SyncBlockFinisher") == false then
-			return syncBlockDamage / damageDivider
-		elseif trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then
-			return counterAttackDamage / damageDivider
 		end
 
 		return warn("No attack damage found with the given data:", trackData)
@@ -613,7 +615,40 @@ function Character_Init.init(charModel)
 			if characterInstance.humanoidRootPart.CFrame.Y < deathYPos then
 				characterInstance.humanoid.PlatformStand = false
 				characterInstance.humanoid.Health = 0
+				break
 			end
+		end
+
+	end)
+
+	characterInstance.lockOnDebounce:GetPropertyChangedSignal("Value"):Connect(function()
+
+		characterInstance.SetSpeed(true)
+		-- Turn off AutoRotate if we're locked on, and vice versa:
+		characterInstance.humanoid.AutoRotate = not characterInstance.lockOnDebounce.Value
+
+
+		if characterInstance.lockOnDebounce.Value == true then
+			
+        	characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
+			characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
+
+			characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "lockOn", {
+				lockOnDebounce = characterInstance.lockOnDebounce, 
+				enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart,
+				enemyHumanoid = characterInstance.enemyHumanoid,
+				lockOnRayParams = characterInstance.lockOnRayParams
+			})
+			characterInstance.lockOnDebounce.Value = false
+
+		else
+			characterInstance.enemyChar = nil
+			characterInstance.enemyHumanoid = nil
+        	characterInstance.enemyHumanoidRootPart = nil
+
+			characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "lockOn", {
+				lockOnDebounce = characterInstance.lockOnDebounce
+			})
 		end
 
 	end)

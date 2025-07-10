@@ -152,10 +152,10 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
                 if trackData.attackLvl == 3 then
                     warn("hi")
                     self.characterInstance.isGrappling = false
-                    self.characterInstance.lockOnDebounce.Value = false
+                    self.characterInstance.enemyChar.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                    self.characterInstance.enemyChar.Humanoid.Health = 0
 
-                self.characterInstance.enemyChar.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
-                self.characterInstance.enemyChar.Humanoid.Health = 0
+                    self.characterInstance.lockOnDebounce.Value = false
                 end
 
                 self.characterInstance.waitingToAttack = false

@@ -168,12 +168,19 @@ function Animation_Centric.setupGrabAnimation(moduleTbl, data)
 end
 
 function Animation_Centric.playGrabAnimation(moduleTbl, data: any?)
-    if not moduleTbl.currentGrabTRACK then return warn("Failed to play grab animation track, as it doesn't exist.") end
+    if not moduleTbl.currentGrabTRACK and not moduleTbl.currentReceiveGrabSecureTRACK then return warn("Failed to play grab animation track, as it doesn't exist.") end
 
     if data and data.bool == false then
         moduleTbl.isGrappling = false
-        moduleTbl.currentGrabTRACK:Stop()
-        moduleTbl.currentGrabSecureTRACK:Stop()
+
+        if moduleTbl.currentGrabSecureTRACK then
+            moduleTbl.currentGrabTRACK:Stop()
+            moduleTbl.currentGrabSecureTRACK:Stop()
+        end
+
+        if moduleTbl.currentReceiveGrabSecureTRACK then
+            moduleTbl.currentReceiveGrabSecureTRACK:Stop()
+        end
     else
         moduleTbl.currentGrabTRACK:Play()
         

@@ -59,6 +59,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         end
 
         if not self.characterInstance.isGrappling then
+            print("resetngfdgdf")
             self.characterInstance.reset()
         end
         if not self.characterInstance.isBlockBeingPressed and self.characterInstance.isBlocking then

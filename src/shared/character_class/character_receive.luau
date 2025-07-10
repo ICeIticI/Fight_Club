@@ -290,11 +290,8 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
 
         characterInstance.raycastInstance = attacker_characterInstance.character.HumanoidRootPart
         characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
-        characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
 
         characterInstance.lockOnDebounce.Value = true
-        characterInstance.enemyHumanoidRootPart = attacker_characterInstance.character:WaitForChild("HumanoidRootPart")
-        characterInstance.SetSpeed(true)
         
         if characterInstance.player then
             -- is a player. Send to client for lock on:
@@ -479,6 +476,7 @@ function Character_Receive:receiveCounter(attacker_characterInstance) --[[ We tr
     playReceivingTrack(self.characterInstance, trackData)
 end
 
+
 function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ An enemy is attempting to grab us ]]
     local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
 
@@ -494,7 +492,7 @@ function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ A
 
     while trackData.IsPlaying do task.wait() end -- wait for the whole grab attempt to end before returning true or false (which means we succeeded or not with tryna grab the enemy)
     
-    if self.characterInstance.nextInput == "attack" then
+    if self.characterInstance.nextInput == "grab" and not self.characterInstance.isBlocking then
         return true -- we successfully defended against the grab attempt
     else
         return false

@@ -36,6 +36,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         and not characterInstance.isDodging
         and not characterInstance.isBlocking 
         and not characterInstance.waitingToAttack
+        and not characterInstance.isGrappling
         then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
             characterInstance.lockOnRayParams = RaycastParams.new()
             characterInstance.lockOnRayParams.FilterDescendantsInstances = characterInstance.character:GetChildren()
@@ -81,15 +82,17 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
             end
 
+            local potentialEnemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"))
+
             if not characterInstance.lockOnDebounce.Value -- can't be locked on already
             and characterInstance.enemyChar
             and characterInstance.raycastInstance
-            and characters:GetCharacterObjectByCharacter(characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"))
+            and potentialEnemyInstance and not potentialEnemyInstance.isGrappling
+            
             and active
             then -- We found an alive enemy to lock onto (that has a characterInstance, making them a fighter. The tavern keeper, for example, doesn't have a characterInstance.).
-                
                 -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
-                characterInstance.enemyHumanoid = characterInstance.enemyChar:FindFirstChild("Humanoid")
+                -- characterInstance.enemyHumanoid = characterInstance.enemyChar:FindFirstChild("Humanoid")
                 characterInstance.lockOnDebounce.Value = not characterInstance.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
                     
                     
@@ -108,49 +111,30 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 not active
             )
             then -- no enemy detected by raycast
-               
                 characterInstance.lockOnDebounce.Value = false
-                
             end
         
             -- GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value
             
-            if characterInstance.lockOnDebounce.Value == true 
-                -- and characterInstance.raycastResult.Instance.Parent:FindFirstChild("Humanoid")
-            then -- Runs when the player locks onto somebody
-                -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
-                characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
-                characterInstance.SetSpeed(true)
-            -- Passed the lock-on check. Activate the lock-on code:
+            -- if characterInstance.lockOnDebounce.Value == true then -- Runs when the player locks onto somebody
+            -- -- Passed the lock-on check. Activate the lock-on code:
 
-                return "LockOnInput", {
-                    lockOnDebounce = characterInstance.lockOnDebounce, 
-                    enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart,
-                    enemyHumanoid = characterInstance.enemyHumanoid,
-                    lockOnRayParams = characterInstance.lockOnRayParams
-                }
 
-            end
+            -- end
 
-            if characterInstance.lockOnDebounce.Value == false 
-            or workspace:Raycast(characterInstance.humanoidRootPart.Position,
-                                characterInstance.humanoidRootPart.CFrame.LookVector * 7,
-                                characterInstance.lockOnRayParams) 
-            then
-                characterInstance.lockOnDebounce.Value = false
-                characterInstance.SetSpeed(true)
-                characterInstance.enemyChar = nil
-                return "LockOnInput", {
-                    lockOnDebounce = characterInstance.lockOnDebounce
-                }
-            end
+            -- if workspace:Raycast(characterInstance.humanoidRootPart.Position,
+            --                     characterInstance.humanoidRootPart.CFrame.LookVector * 7,
+            --                     characterInstance.lockOnRayParams) 
+            -- then
+            --     characterInstance.lockOnDebounce.Value = false
+            -- end
         end
 
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
         
-        if not characterInstance.nextInput then
-            characterInstance.nextInput = "attack"
-        end
+        -- if not characterInstance.nextInput then
+        --     characterInstance.nextInput = "attack"
+        -- end
 
         if characterInstance.isInSecureGrapple then
             characterInstance.escapeGrappleProgress += characterInstance.escapeGrappleProgressPower
@@ -258,6 +242,10 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
     elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
         
+        if not characterInstance.nextInput then
+            characterInstance.nextInput = "grab"
+        end
+
         if characterInstance.boolCheck({
             isAttacking = characterInstance.isAttacking.Value, 
             isBlocking = characterInstance.isBlocking, 
@@ -265,6 +253,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             isGettingHit = characterInstance.isGettingHit, 
             isGrappling = characterInstance.isGrappling,})
         and characterInstance.lockOnDebounce.Value
+        and characterInstance.enemyChar.Humanoid.Health > 0
         then
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             characterInstance:grab(enemyInstance, nil)
@@ -281,6 +270,11 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
             if not characterInstance.nextInput then
                 characterInstance.nextInput = "block"
+            end
+            -- if the character isInSecureGrapple, that means THEY'RE the one GETTING grappled, not the one doing it. When doing a secure grapple to an enemy, this variable will be true for the enemy.
+            if characterInstance.isGrappling and not characterInstance.isInSecureGrapple then
+                characterInstance.isGrappling = false
+                return
             end
             -- print("block input")
             -- If the player is holding the block button, we store that as a variable:

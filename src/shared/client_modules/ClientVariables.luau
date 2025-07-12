@@ -69,9 +69,12 @@ if ClientVariables.player.Character then
 		canInit = false
 	end
 
-	ClientVariables.humanoid.Died:Connect(function()
+	humanoidDiedConnect = ClientVariables.humanoid.Died:Connect(function()
 		canInit = true
 		ClientVariables.initialized = false
+		
+		-- Disconnect the .Died event so we don't have .Died connects of the player's past dead humanoids running, which will be re-initialized on next player character spawn:
+		humanoidDiedConnect:Disconnect()
 	 end)
 
 end
@@ -89,7 +92,20 @@ ClientVariables.originalCamSubject = ClientVariables.Camera.CameraSubject
 
 -- functions
 function ClientVariables.stopAnimations() -- add params? Perhaps we could change function to "changeAnimations" with the first parameter being whether we should stop or play, and add animations in following parameters
-	ClientVariables.FC_IdleTRACK:Stop()
+	local tracksToStop = {
+		ClientVariables.FC_IdleTRACK,
+		ClientVariables.currentReceiveAnimTRACK,
+		ClientVariables.currentGrabSecureTRACK,
+		ClientVariables.currentReceiveGrabSecureTRACK,
+		ClientVariables.currentGrabTRACK,
+	}
+
+	for _, track in pairs(tracksToStop) do
+		if track then
+			track:Stop()
+		end
+	end
+	
 end
 
 return ClientVariables

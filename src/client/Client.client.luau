@@ -51,8 +51,10 @@ local GrappleInputs = {[Enum.KeyCode.R] = true, [Enum.KeyCode.ButtonY] = true}
 local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -- May have LockOnInputs for each system
 
 
-UserInputService.InputBegan:Connect(function(input)
-    
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end -- Player is typing in chat or UI
+
+
     local inputTable = {} -- Because the server wont let us send the input object, we need to create a table representing input that are strings
     inputTable.UserInputType = input.UserInputType
     inputTable.KeyCode = input.KeyCode
@@ -82,7 +84,9 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
-UserInputService.InputEnded:Connect(function(input)
+UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end -- Player is typing in chat or UI
+
 
     local inputTable = {} -- Because the server wont let us send the input object, we need to create a table representing input that are strings
     inputTable.UserInputType = input.UserInputType

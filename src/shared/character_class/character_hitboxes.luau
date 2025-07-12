@@ -89,6 +89,9 @@ function Character_Hitboxes:manageHitboxes()
     for _, v in pairs(self.characterInstance.attackHitboxes) do
         
         local touchedConnection = v.Touched:Connect(function(touchedObject)
+            if not self.characterInstance.isAttacking then return end
+            
+            
             if self.characterInstance.isAttacking.Value then -- Begin checling for potentialEnemy stuff only if we're attacking, otherwise it'll check for every single .Touched no matter the circumstance, which is very processing.
                 potentialEnemyChar = touchedObject:FindFirstAncestorWhichIsA("Model")
                 potentialEnemyInstance = Characters:GetCharacterObjectByCharacter(potentialEnemyChar)

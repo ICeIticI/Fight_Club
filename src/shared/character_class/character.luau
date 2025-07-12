@@ -188,7 +188,9 @@ function Character:grab(enemyInstance) --[[ The character will attempt to grappl
         if self.character_grapple:Attempt(enemyInstance) == true then
             -- we succeeded with our grab
             self.character_grapple:Success(enemyInstance)
-            self.character_grapple:Secure(enemyInstance)
+            if self.character_grapple:Secure(enemyInstance) then -- if it returns true, then its an execution. Don't run :EndGrab.
+                return
+            end
         end
         self.character_grapple:EndGrab(enemyInstance)
 

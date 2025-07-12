@@ -56,10 +56,10 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         if trackData.Animation:GetAttribute("AttackLevel") == 3 then -- level 3 grapple attacks are for executions. When the animation ends, kill the character.
             self.characterInstance.isGrappling = false
             self.characterInstance.humanoid.Health = 0
+            self.characterInstance.lockOnDebounce.Value = false
         end
 
         if not self.characterInstance.isGrappling then
-            print("resetngfdgdf")
             self.characterInstance.reset()
         end
         if not self.characterInstance.isBlockBeingPressed and self.characterInstance.isBlocking then

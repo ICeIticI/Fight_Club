@@ -6,6 +6,7 @@ local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.Cli
 local LockOn = {}
 
 local function getCenteredSubjectCFrame() --[[ When the character locks onto the enemy, a 'subject' will be created, which will act as the point where the camera focuses on. So wherever the subject goes, the Camera goes as well. So the subject will start at the camera's current CFrame, and will smoothly go in-between the character and their enemy. This function will return the center position between the character and enemy. ]]
+
 	return CFrame.new(
 		(ClientVariables.humanoidRootPart.Position.X + ClientVariables.enemyHumanoidRootPart.Position.X) / 2,
 		ClientVariables.subject.CFrame.Y,
@@ -24,9 +25,7 @@ local function faceEnemy(subject)
 	end
 	
 	if ClientVariables.subjectTween.PlaybackState ~= Enum.PlaybackState.Playing then
-		
 		subject.CFrame = getCenteredSubjectCFrame()
-		
 	end
 
 end
@@ -82,10 +81,8 @@ function LockOn.Lock(publicVariables)
 
 	-- ClientVariables.subjectTween.Completed:Wait()
 	faceEnemy(ClientVariables.subject)
-	while ClientVariables.lockOnDebounce.Value == true 
-	and workspace:Raycast(ClientVariables.humanoidRootPart.Position, ClientVariables.humanoidRootPart.CFrame.LookVector * 8, ClientVariables.lockOnRayParams) ~= nil 
-	and not (ClientVariables.enemyHumanoid:GetState() == Enum.HumanoidStateType.Dead)
-	and not (ClientVariables.humanoid:GetState() == Enum.HumanoidStateType.Dead)
+	while ClientVariables.lockOnDebounce.Value == true
+	and (ClientVariables.humanoidRootPart.Position - ClientVariables.enemyHumanoidRootPart.Position).Magnitude < 8
 	do -- constantly keeps the player facing the enemy
 		-- Constantly having the player face the enemy when locked on
 
@@ -93,16 +90,21 @@ function LockOn.Lock(publicVariables)
 		faceEnemy(ClientVariables.subject)
 	end
 
+	return
+end
+
+function LockOn.Unlock(publicVariables)
+
 	-- No-longer locked-on. Ensure old, irrelevant data doesn't get used
 	for varName, _ in pairs(publicVariables) do -- public variables aint useful after lock-off
 		if varName == "lockOnDebounce" then continue end -- Dont wanna make lockOnDebounce nil. We handle that already.
 		ClientVariables[varName] = nil
 	end
 
-	return
-end
+	ClientVariables.isGrappling = false
 
-function LockOn.Unlock()
+	-- print("we not locked on anymore")
+
     -- if ClientVariables.humanoid.Health <= 0 or ClientVariables.enemyHumanoid and ClientVariables.enemyHumanoid.Health <= 0 then -- if the player or enemy dies, then we want to stop locking on.
 	-- 	task.wait(0.5)
 	-- 	ClientVariables.lockOnDebounce.Value = false

@@ -17,6 +17,7 @@ block_trackData.IsPlaying = false
 function Character_Block:enable() --[[ Raise our guard and prepare to get hit ]]
     
     if not self.characterInstance.isBlocking then -- blockStart
+    self.characterInstance.isBlocking = true
         blockStart_trackData.IsPlaying = true
         self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "playBlockStartAnimation")
         self.characterInstance.manageAnimation(blockStart_trackData)

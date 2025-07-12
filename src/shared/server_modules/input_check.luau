@@ -27,6 +27,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
     local characterInstance = characters:GetCharacterObjectByPlayer(plr)
     if not characterInstance then return end
     if characterInstance.humanoid.Health <= 0 then return end
+    if characterInstance.isGrappling and not characterInstance.isInGrappleSuccess and not characterInstance.isInSecureGrapple then return end
 
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
 
@@ -34,12 +35,11 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         and not characterInstance.isGettingHit 
         and not characterInstance.pairedPlaying 
         and not characterInstance.isDodging
-        and not characterInstance.isBlocking 
         and not characterInstance.waitingToAttack
         and not characterInstance.isGrappling
         then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
             characterInstance.lockOnRayParams = RaycastParams.new()
-            characterInstance.lockOnRayParams.FilterDescendantsInstances = characterInstance.character:GetChildren()
+            characterInstance.lockOnRayParams.FilterDescendantsInstances = {characterInstance.character} -- Instead of doing :GetChildren(), this filters the entire character, so the decendants of the children of the character cant bypass the filter.
             characterInstance.lockOnRayParams.FilterType = Enum.RaycastFilterType.Exclude
             
             characterInstance.raycastResult = workspace:Raycast(
@@ -79,7 +79,49 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             --     characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent.Parent
             -- end
             if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
-                characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
+                print(characterInstance.raycastInstance)
+                --[[ we may have raycasted their arm that could potentially be 
+                sticking through a wall. Dont wanna lock onto an enemy behind a 
+                wall, so we will re-raycast, but this time, DIRECTLY to the HRP.
+                If there is somehow no raycast, it means they're probably just
+                behind a wall and their arm was sticking through it or something.]]
+
+                local targetRootPart = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model").HumanoidRootPart
+                if not targetRootPart then return error("Not sure how theres not HRP for the target you selected, even though we already made sure, but here we are I guess we screwed up somehow lol") end
+
+                -- Filter out everything of our target except their HRP:
+                local newFilter = characterInstance.lockOnRayParams.FilterDescendantsInstances
+                -- table.insert(newFilter, characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"))
+
+                for _, child in pairs(characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):GetChildren()) do
+                    if child ~= targetRootPart then
+                        table.insert(newFilter, child)
+                    end
+                end
+
+                characterInstance.lockOnRayParams.FilterDescendantsInstances = newFilter
+
+
+                -- Then raycast again. Should only get their HRP in the raycast if anything:
+
+                characterInstance.raycastResult = workspace:Raycast(
+                    characterInstance.humanoidRootPart.Position,
+                    (targetRootPart.Position - characterInstance.humanoidRootPart.Position).Unit * ((targetRootPart.Position - characterInstance.humanoidRootPart.Position).Magnitude + 0.1), -- Adds 0.1 extra length to the end to make sure we have enough length to reach the HRP
+                    characterInstance.lockOnRayParams
+                )
+
+                if not characterInstance.raycastResult then error("No instance found on this second cast to lock onto the enemy!") end
+
+                characterInstance.raycastInstance = characterInstance.raycastResult.Instance
+
+                local potentialEnemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
+
+                if potentialEnemyChar:FindFirstChildWhichIsA("Humanoid") then
+                    characterInstance.enemyChar = potentialEnemyChar
+                else
+                    warn("The character is behind a wall or something.. cant lock on.")
+                    characterInstance.enemyChar = nil
+                end
             end
 
             local potentialEnemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"))
@@ -141,6 +183,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
             if characterInstance.escapeGrappleProgress >= 100 then -- the character broke free from a secure grapple
                 characterInstance.isInSecureGrapple = false
+                -- characters:GetCharacterObjectByCharacter(characterInstance.enemyChar):EndGrab(characterInstance)
             end
         end
         -- print("attack input gate 0", {
@@ -166,7 +209,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                     
                     characterInstance.waitingToAttack = true
                     while characterInstance.lastReceiveData.IsPlaying do -- wait for entire dodge attack to end
-                        task.wait()
+                        task.wait(0.1)
                         -- print("waiting for dodge to end..")
                     end
 
@@ -272,7 +315,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 characterInstance.nextInput = "block"
             end
             -- if the character isInSecureGrapple, that means THEY'RE the one GETTING grappled, not the one doing it. When doing a secure grapple to an enemy, this variable will be true for the enemy.
-            if characterInstance.isGrappling and not characterInstance.isInSecureGrapple then
+            if characterInstance.isGrappling and not characterInstance.isInSecureGrapple and not characterInstance.isAttacking.Value then
                 characterInstance.isGrappling = false
                 return
             end
@@ -283,7 +326,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             if characterInstance.lockOnDebounce.Value 
             and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGrappling = characterInstance.isGrappling}) 
             and not characterInstance.pairedPlaying
-            and characterInstance.stamina and characterInstance.stamina.Value > 0 then
+            and characterInstance.stamina and characterInstance.stamina.Value > 0 
+            then
                 characterInstance:block(true)
             end
         else

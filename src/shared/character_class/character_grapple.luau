@@ -88,7 +88,7 @@ function Character_Grapple:Attempt(enemyInstance) --[[ The character goes to att
 
     self.characterInstance.isGrappling = true
     self.characterInstance.SetSpeed(false)
-    while not self.characterInstance.SetSpeed do task.wait(0.1) end -- wait for the speed to get set before proceeding.
+    while not self.characterInstance.speedSet do task.wait(0.1) end -- wait for the speed to get set before proceeding.
 
     -- to prevent positional glitches with grappling (such as going through walls), only reposition the grappler to the receiver if they're facing eachother. Otherwise, move the receiver to the grappler.
     -- This is until we get back grapples post alpha
@@ -133,7 +133,7 @@ function Character_Grapple:Execute(enemyInstance)
     self.characterInstance.setCharacterMassless(enemyInstance.character, false)
     enemyInstance.isInSecureGrapple = false
     enemyInstance.humanoid.PlatformStand = false
-    self.characterInstance.humanoidRootPart:FindFirstChild("grabWeld").Enabled = false
+    -- self.characterInstance.humanoidRootPart:FindFirstChild("grabMotor").Enabled = false
 
     enemyInstance.character:FindFirstChild("Health").Enabled = false -- disables the health script inside the character, which regenerates their health.
     enemyInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
@@ -142,6 +142,8 @@ function Character_Grapple:Execute(enemyInstance)
 
     playGrabAnimation(self.characterInstance, trackData)
     enemyInstance:receive("receiveGrabExecution", self.characterInstance)
+
+    self.characterInstance.isInGrappleSuccess = false
 end
 
 function Character_Grapple:Success(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. We'll now strike the enemy to transition into :Secure() ]]
@@ -155,7 +157,7 @@ function Character_Grapple:Success(enemyInstance) --[[ The character attempted t
         playGrabAnimation(self.characterInstance, trackData)
         enemyInstance:receive("receiveGrabSuccess", self.characterInstance)
         
-        while trackData.IsPlaying do task.wait(0.1) end
+        while trackData.IsPlaying do task.wait() end
         return true
     end
 end
@@ -189,23 +191,35 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
 
     -- local offset = Vector3.new(0, 1, -3)
     -- setCharacterNetworkOwnershipTo(enemyInstance.character, self.characterInstance.player)
-    enemyInstance.repositionInFrontOfEnemy()
-    local grabWeld = Instance.new("WeldConstraint")
-    grabWeld.Name = "grabWeld"
-    -- grabWeld.Enabled = false
-    grabWeld.Parent = self.characterInstance.humanoidRootPart
-    grabWeld.Part0 = self.characterInstance.character["Left Arm"]
-    grabWeld.Part1 = enemyInstance.humanoidRootPart
-    -- grabWeld.C1 = CFrame.new(0,0,-3) * CFrame.Angles(0,math.rad(180), 0)
+    enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
+    -- local grabWeld = Instance.new("WeldConstraint")
+    -- grabWeld.Name = "grabWeld"
+    -- -- grabWeld.Enabled = false
+    -- grabWeld.Parent = self.characterInstance.humanoidRootPart
+    -- grabWeld.Part0 = self.characterInstance.character["Left Arm"]
+    -- grabWeld.Part1 = enemyInstance.humanoidRootPart
+
+    local grabMotor = Instance.new("Motor6D")
+    grabMotor.Name = "grabMotor"
+    grabMotor.Part0 = self.characterInstance.grapplePart
+    grabMotor.Part1 = enemyInstance.humanoidRootPart
+    -- grabMotor.Parent = grabMotor.Part0
+    -- motor.C0 = self.characterInstance.humanoidRootPart.CFrame:ToObjectSpace(enemyInstance.humanoidRootPart.CFrame)
+    -- motor.C1 = CFrame.new() -- usually identity
+    -- motor.Parent = self.characterInstance.humanoidRootPart
+
+
     self.characterInstance.setCharacterMassless(enemyInstance.character, true)
-    enemyInstance.humanoid.PlatformStand = true
-    -- enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
+    self.characterInstance.humanoidRootPart.CanCollide = false
+    enemyInstance.humanoidRootPart.CanCollide = false
+    
+    -- enemyInstance.humanoid.PlatformStand = true
     -- grabWeld.Enabled = true
     self.characterInstance.isAttacking.Value = false
 
     while enemyInstance.isInSecureGrapple 
     and self.characterInstance.isGrappling do
-        task.wait()
+        task.wait(0.1)
         if self.characterInstance.movingDirection == "left" then
             -- Character_Grapple:Secure_TurnLeft()
         elseif self.characterInstance.movingDirection == "right" then
@@ -220,12 +234,14 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
         end
     end
     
-    print("Not grappling?")
-    if grabType ~= "execute" then
-        self.characterInstance.setCharacterMassless(enemyInstance.character, false)
-        enemyInstance.humanoid.PlatformStand = false
-        grabWeld.Enabled = false
-        grabWeld:Destroy()
+    self.characterInstance.setCharacterMassless(enemyInstance.character, false)
+    enemyInstance.humanoid.PlatformStand = false
+    -- grabWeld.Enabled = false
+    -- grabWeld:Destroy()
+    print(grabType)
+    if grabType == "execute" then
+        return true
+    else
         return false
     end
 end

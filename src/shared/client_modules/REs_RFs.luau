@@ -23,7 +23,7 @@ function REs_RFs.init()
             if data.lockOnDebounce.Value == true then
                 lockOn.Lock(data)
             else
-                lockOn.Unlock()
+                lockOn.Unlock(data)
             end
         end
     end

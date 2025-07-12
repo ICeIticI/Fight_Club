@@ -212,10 +212,28 @@ function Character_Init.init(charModel)
 	local lvAttachment = Instance.new("Attachment")
 	lvAttachment.Name = "lvAttachment"
 	-- lvAttachment.CFrame = CFrame.Angles(0, math.rad(90), 0)
+	-- lvAttachment.CFrame = CFrame.new(0,0,-3) * CFrame.Angles(0,math.rad(180),0)
 	lvAttachment.Parent = characterInstance.character.HumanoidRootPart
 
 	linearVelocity.Attachment0 = lvAttachment
-		
+
+	characterInstance.grapplePart = Instance.new("Part")
+	characterInstance.grapplePart.Name = "grapplePart"
+	characterInstance.grapplePart.Size = Vector3.new(1,1,1)
+	characterInstance.grapplePart.Transparency = 1
+	characterInstance.grapplePart.CFrame = lvAttachment.CFrame 
+	characterInstance.grapplePart.CanCollide = false
+	characterInstance.grapplePart.CanTouch = false
+	characterInstance.grapplePart.CanQuery = false
+
+	local grapplePartConnector = Instance.new("Motor6D") -- keeps the grapplePart from moving from the front of the character
+	grapplePartConnector.Name = "grapplePartConnector"
+	grapplePartConnector.Part0 = characterInstance.grapplePart
+	grapplePartConnector.Part1 = characterInstance.humanoidRootPart
+	grapplePartConnector.C1 = lvAttachment.CFrame * CFrame.new(0,0,-3) * CFrame.Angles(0, math.rad(180), 0)
+	grapplePartConnector.Parent = characterInstance.grapplePart
+
+	characterInstance.grapplePart.Parent = characterInstance.humanoidRootPart
 
 	local charAnimator = Instance.new("Animator")
 	charAnimator.Name = "charAnimator"
@@ -586,7 +604,7 @@ function Character_Init.init(charModel)
 	task.spawn(function()
 		-- Real fall damage:
 		while characterInstance.humanoid.Health > 0 do
-				task.wait()
+				task.wait(0.1)
 			-- 	local newYVelocity = -characterInstance.humanoidRootPart.Velocity.Y
 			-- 	if newYVelocity <= 0 and previousYVelocity <= 0 then continue end
 				
@@ -629,6 +647,18 @@ function Character_Init.init(charModel)
 
 
 		if characterInstance.lockOnDebounce.Value == true then
+			warn("Lock on true for:", characterInstance.character.Name)
+
+			-- built-in enemyChar-retrieving code if we dont have enemyChar yet:
+			if not characterInstance.enemyChar then
+				if not characterInstance.raycastInstance then return error("No enemychar nor raycastInstance. Are you even locked-on?") end
+				
+				if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
+                	characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
+				else
+					error({"No humanoid found with the given raycastInstance: ", characterInstance.raycastInstance, "their parent:", characterInstance.raycastInstance.Parent})
+            	end
+			end
 			
         	characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
 			characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
@@ -639,15 +669,33 @@ function Character_Init.init(charModel)
 				enemyHumanoid = characterInstance.enemyHumanoid,
 				lockOnRayParams = characterInstance.lockOnRayParams
 			})
-			characterInstance.lockOnDebounce.Value = false
+
+			-- check to make sure they're qualified to lock-off since the duration of their lock-on is client-controlled:
+			if not characterInstance.isAttacking.Value
+			and not characterInstance.isGettingHit 
+			and not characterInstance.pairedPlaying 
+			and not characterInstance.isDodging
+			and not characterInstance.waitingToAttack
+			and not characterInstance.isGrappling
+			then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
+				characterInstance.lockOnDebounce.Value = false
+			end
 
 		else
+
+			warn("No more lock on for:", characterInstance.character.Name)
+
+			characterInstance:block(false)
+			
 			characterInstance.enemyChar = nil
 			characterInstance.enemyHumanoid = nil
         	characterInstance.enemyHumanoidRootPart = nil
 
 			characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "lockOn", {
-				lockOnDebounce = characterInstance.lockOnDebounce
+				lockOnDebounce = characterInstance.lockOnDebounce,
+				enemyChar = characterInstance.enemyChar,
+				enemyHumanoid = characterInstance.enemyHumanoid,
+				enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart
 			})
 		end
 

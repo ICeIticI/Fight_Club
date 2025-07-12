@@ -32,7 +32,7 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
 
             -- Disables the grapple weld before killing the enemy if they're about to die, or else the attacker will also die for some reason:
             if characterInstance.isGrappling and (characterInstance.enemyChar.Humanoid:GetState() == Enum.HumanoidStateType.Dead) then
-                characterInstance.humanoidRootPart:FindFirstChild("grabWeld").Enabled = false
+                characterInstance.humanoidRootPart:FindFirstChild("grabMotor").Enabled = false
                 characterInstance.isGrappling = false
                 -- characterInstance.lockOnDebounce.Value = false
                 -- characterInstance.SetSpeed(true)

@@ -597,6 +597,11 @@ for _, animation in pairs(AnimationInstances) do
                 animation:SetAttribute("DamageDivider", damageDivider) -- To remain fair, we don't do full damage on each hit on the multi-hit animation, but we divide it, so its only a aesthetic and not an advantage.
             end
         end)
+
+        local temporaryStartOfParryConnection = temporaryTrack:GetMarkerReachedSignal("StartOfParry"):Connect(function()
+            animation:SetAttribute("TimeUntilStartOfParry", temporaryTrack.TimePosition)
+        end)
+
         local temporaryEndOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("EndOfAttack"):Connect(function()
             animation:SetAttribute("TimeUntilEndOfAttack", temporaryTrack.TimePosition)
             temporaryTrack:Stop()
@@ -609,11 +614,13 @@ for _, animation in pairs(AnimationInstances) do
         task.wait(temporaryTrack.Length)
         temporaryTrack:Stop()
         temporaryStartOfAttackConnection:Disconnect()
+        temporaryStartOfParryConnection:Disconnect()
         temporaryEndOfAttackConnection:Disconnect()
         temporaryIsBlockingConnection:Disconnect()
         temporaryTrack:Destroy()
     
         temporaryStartOfAttackConnection = nil
+        temporaryStartOfParryConnection = nil
         temporaryEndOfAttackConnection = nil
         temporaryIsBlockingConnection = nil
         temporaryTrack = nil

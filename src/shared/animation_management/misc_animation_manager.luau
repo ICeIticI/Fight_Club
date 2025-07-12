@@ -52,13 +52,18 @@ end
 function Misc_Animation_Management:runOnIsPlaying(trackData)
 
     if trackData.IsPlaying then
-
         
         if trackData.Animation:GetAttribute("TimeUntilIsBlocking") then
             task.delay(trackData.Animation:GetAttribute("TimeUntilIsBlocking"), function()
                 if trackData.IsPlaying then -- we simulate the track playing, so we need to manually check if the track is even playing
                     runOnIsBlocking(self.characterInstance)
                 end
+            end)
+        end
+
+        if trackData.Animation:GetAttribute("TimeUntilStartOfParry") then
+            task.delay(trackData.Animation:GetAttribute("TimeUntilStartOfParry"), function()
+                self.characterInstance.isBlocking = false -- cant be blocking for the parry, must be false
             end)
         end
 

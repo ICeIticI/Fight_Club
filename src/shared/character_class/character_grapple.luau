@@ -203,7 +203,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     grabMotor.Name = "grabMotor"
     grabMotor.Part0 = self.characterInstance.grapplePart
     grabMotor.Part1 = enemyInstance.humanoidRootPart
-    -- grabMotor.Parent = grabMotor.Part0
+    grabMotor.Parent = grabMotor.Part0
     -- motor.C0 = self.characterInstance.humanoidRootPart.CFrame:ToObjectSpace(enemyInstance.humanoidRootPart.CFrame)
     -- motor.C1 = CFrame.new() -- usually identity
     -- motor.Parent = self.characterInstance.humanoidRootPart
@@ -213,7 +213,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     self.characterInstance.humanoidRootPart.CanCollide = false
     enemyInstance.humanoidRootPart.CanCollide = false
     
-    -- enemyInstance.humanoid.PlatformStand = true
+    enemyInstance.humanoid.PlatformStand = true
     -- grabWeld.Enabled = true
     self.characterInstance.isAttacking.Value = false
 

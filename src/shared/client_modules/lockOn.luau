@@ -1,5 +1,6 @@
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
 
@@ -77,7 +78,9 @@ function LockOn.Lock(publicVariables)
 	
 	-- character changes below:
 	-- ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
-	-- UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
+	if not RunService:IsStudio() then -- only locks on when not in studio, to make developing easier.
+		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter -- Because roblox player scripts are currently broke and we are also testing still, we disable this for now until we're done.
+	end
 	
 	-- camera subject part
 	ClientVariables.subject = ClientVariables.character:FindFirstChild("subject") or Instance.new("Part") --[[ Subject is the point

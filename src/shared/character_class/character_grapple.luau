@@ -117,9 +117,7 @@ function Character_Grapple:EndGrab(enemyInstance)
     else
         grabType = "complete"
         print(grabType)
-        playGrabAnimation(self.characterInstance, self.characterInstance.currentGrab_trackData, false)
         self.characterInstance.reset()
-        playGrabAnimation(enemyInstance, enemyInstance.currentGrab_trackData, false)
         enemyInstance.reset()
 
     end
@@ -199,6 +197,10 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     -- grabWeld.Part0 = self.characterInstance.character["Left Arm"]
     -- grabWeld.Part1 = enemyInstance.humanoidRootPart
 
+    enemyInstance.humanoid.PlatformStand = true
+    self.characterInstance.setCharacterMassless(enemyInstance.character, true)
+
+
     local grabMotor = Instance.new("Motor6D")
     grabMotor.Name = "grabMotor"
     grabMotor.Part0 = self.characterInstance.grapplePart
@@ -208,21 +210,29 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     -- motor.C1 = CFrame.new() -- usually identity
     -- motor.Parent = self.characterInstance.humanoidRootPart
 
-
-    self.characterInstance.setCharacterMassless(enemyInstance.character, true)
     self.characterInstance.humanoidRootPart.CanCollide = false
     enemyInstance.humanoidRootPart.CanCollide = false
     
-    enemyInstance.humanoid.PlatformStand = true
     -- grabWeld.Enabled = true
     self.characterInstance.isAttacking.Value = false
 
     while enemyInstance.isInSecureGrapple 
     and self.characterInstance.isGrappling do
-        task.wait(0.1)
-        if self.characterInstance.movingDirection == "left" then
+        
+        if self.characterInstance.movingDirection.Value == "right" then
+            enemyInstance.movingDirection.Value = "left"
+        elseif self.characterInstance.movingDirection.Value == "left" then	
+            enemyInstance.movingDirection.Value = "right"
+        elseif self.characterInstance.movingDirection.Value == "forwards" then
+            enemyInstance.movingDirection.Value = "backwards"
+        elseif self.characterInstance.movingDirection.Value == "backwards" then
+            enemyInstance.movingDirection.Value = "forwards"
+        elseif self.characterInstance.movingDirection.Value == "none" then
+            enemyInstance.movingDirection.Value = "none"
+        end
+        if self.characterInstance.movingDirection.Value == "left" then
             -- Character_Grapple:Secure_TurnLeft()
-        elseif self.characterInstance.movingDirection == "right" then
+        elseif self.characterInstance.movingDirection.Value == "right" then
             -- Character_Grapple:Secure_TurnRight()
         end
         -- enemyInstance.character:SetPrimaryPartCFrame(self.characterInstance.humanoidRootPart.CFrame * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0))
@@ -232,13 +242,23 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
             self.characterInstance.isGrappling = false
 
         end
+
+        task.wait(0.1)
     end
+
     
+    grabMotor:Destroy()
     self.characterInstance.setCharacterMassless(enemyInstance.character, false)
     enemyInstance.humanoid.PlatformStand = false
+    -- setCharacterNetworkOwnershipTo(enemyInstance.character, nil)
     -- grabWeld.Enabled = false
     -- grabWeld:Destroy()
     print(grabType)
+
+    playGrabAnimation(self.characterInstance, trackData, false)
+
+
+
     if grabType == "execute" then
         return true
     else

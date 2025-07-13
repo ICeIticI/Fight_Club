@@ -17,7 +17,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	-- Bools and Values:
 	
 	ClientVariables.lockOnDebounce = ClientVariables.plrObjectsFolder:FindFirstChild("lockOnDebounce") -- attemps to find lockOnDebounce. If it doesn't exist, then this var will be nil.
-								
+	ClientVariables.movingDirection = ClientVariables.plrObjectsFolder:FindFirstChild("movingDirection")							
+
 	ClientVariables.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
 
 

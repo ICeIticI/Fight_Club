@@ -191,7 +191,7 @@ local function getDodgeInfo(characterInstance, trackData)
     local vectorVelocity = Vector3.zero -- When dodging, we obviously want the player to move, so this will be the moving part of the dodge. Depending on the dodge, this will equal a vector3 value.
     local direction = nil -- Will be set depending on the direction the character is going
 
-    if characterInstance.movingDirection == "right" then -- character is moving right
+    if characterInstance.movingDirection.Value == "right" then -- character is moving right
         distanceToTravel = 2
         animTime = 0.53
         vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
@@ -201,7 +201,7 @@ local function getDodgeInfo(characterInstance, trackData)
         -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
         -- GameVariables.dodgeAttackTrack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Right", "DodgeAttack", true)
     
-    elseif characterInstance.movingDirection == "left" then -- character is moving left
+    elseif characterInstance.movingDirection.Value == "left" then -- character is moving left
         distanceToTravel = -2
         animTime = 0.53 
         vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
@@ -211,7 +211,7 @@ local function getDodgeInfo(characterInstance, trackData)
         -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
         -- GameVariables.dodgeAttackTrack = GameVariables.randomAnimationTrack(GameVariables.pairedAttacksTable, "AnimDirection", "Left", "DodgeAttack", true)
     else
-        if characterInstance.movingDirection == "backwards" then -- character is moving backwards
+        if characterInstance.movingDirection.Value == "backwards" then -- character is moving backwards
             distanceToTravel = 2
             animTime = 0.23
             vectorVelocity = Vector3.new(0, 0, distanceToTravel / animTime)

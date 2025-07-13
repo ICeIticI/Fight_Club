@@ -74,11 +74,18 @@ function Character_Init.init(charModel)
 	
 	characterInstance.previousHealth = characterInstance.humanoid.Health -- This var is used to determine how much damage the character takes.
 	characterInstance.lockOnDebounce = characterInstance.plrObjectsFolder:FindFirstChild("lockOnDebounce") -- attemps to find lockOnDebounce. If it doesn't exist, then this var will be nil.
-
+	characterInstance.movingDirection = characterInstance.plrObjectsFolder:FindFirstChild("movingDirection")
+	
 	if not characterInstance.lockOnDebounce then
 		characterInstance.lockOnDebounce = Instance.new("BoolValue") -- shouldn't this be initialized by the server for more security?
 		characterInstance.lockOnDebounce.Name = "lockOnDebounce"
 		characterInstance.lockOnDebounce.Parent = characterInstance.plrObjectsFolder
+	end
+
+	if not characterInstance.movingDirection then
+		characterInstance.movingDirection = Instance.new("StringValue")
+		characterInstance.movingDirection.Name = "movingDirection"
+		characterInstance.movingDirection.Parent = characterInstance.plrObjectsFolder
 	end
 
 	characterInstance.lockOnDebounce.Value = false
@@ -565,15 +572,15 @@ function Character_Init.init(charModel)
 		local rightDot = moveDir:Dot(rightVector) -- rightDotProduct, like forwardDotProduct, will return a value it compares from the right side of where the character's facing. > 0 is right, < 0 is left.
 
 		if rightDot > 0.5 and frontDot > -0.5 then -- 0.5 makes our range of momentum we consider right, left, etc more strict than 0, otherwise every little movement in a direction will make the movingDirection that direction. We dont want unintentional direction momentum.
-			characterInstance.movingDirection = "right"
+			characterInstance.movingDirection.Value = "right"
 		elseif rightDot < -0.5 and frontDot > -0.5 then
-			characterInstance.movingDirection = "left"
+			characterInstance.movingDirection.Value = "left"
 		elseif frontDot < -0.5 then
-			characterInstance.movingDirection = "backwards"
+			characterInstance.movingDirection.Value = "backwards"
 		elseif frontDot > 0.5 then
-			characterInstance.movingDirection = "forwards"
+			characterInstance.movingDirection.Value = "forwards"
 		else
-			characterInstance.movingDirection = "none"
+			characterInstance.movingDirection.Value = "none"
 		end
 	end)
 	-- AI-Altered code by Microsoft Copilot ^

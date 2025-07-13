@@ -6,6 +6,14 @@ AnimationInstances.FC_Idle.Name = "FC_Idle"
 AnimationInstances.FC_Idle.AnimationId = "rbxassetid://16976891984"
 AnimationInstances.FC_Idle:SetAttribute("EventCategory", "bAttack") -- For simplicity, we split the remote events into two different functions: bAttackEvents (basic attacks), miscEvents (anything else).
 
+AnimationInstances.FC_StraightMomentum = Instance.new("Animation")
+AnimationInstances.FC_StraightMomentum.Name = "FC_StraightMomentum"
+AnimationInstances.FC_StraightMomentum.AnimationId = "rbxassetid://138157582424707"
+
+AnimationInstances.FC_SideMomentum = Instance.new("Animation")
+AnimationInstances.FC_SideMomentum.Name = "FC_SideMomentum"
+AnimationInstances.FC_SideMomentum.AnimationId = "rbxassetid://93968967383189"
+
 AnimationInstances.FC_BlockStart = Instance.new("Animation")
 AnimationInstances.FC_BlockStart.Name = "FC_BlockStart"
 AnimationInstances.FC_BlockStart.AnimationId = "rbxassetid://18266066281"

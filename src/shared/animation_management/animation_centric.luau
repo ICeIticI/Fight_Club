@@ -174,7 +174,7 @@ function Animation_Centric.playGrabAnimation(moduleTbl, data: any?)
         moduleTbl.isGrappling = false
 
         if moduleTbl.currentGrabSecureTRACK then
-            moduleTbl.currentGrabTRACK:Stop()
+            -- moduleTbl.currentGrabTRACK:Stop()
             moduleTbl.currentGrabSecureTRACK:Stop()
         end
 

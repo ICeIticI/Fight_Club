@@ -33,12 +33,19 @@ end
 
 local function createSubject(subject) --[[Creates a invisible part (subject) between the player and the enemy that the camera will be focused on]]
 	subject.Name = "subject"
-			subject.Size = Vector3.new(0.1, 0.1, 0.1)
-			subject.Transparency = 0.75
-			subject.CanCollide = false
-			subject.Anchored = true
-			subject.Parent = ClientVariables.character
+	subject.Size = Vector3.new(0.1, 0.1, 0.1)
+	subject.Transparency = 0.75
+	subject.CanCollide = false
+	subject.Anchored = true
+	subject.Parent = ClientVariables.character
 end
+
+local function stopMovementAnimations()
+	ClientVariables.FC_StraightMomentumTRACK:Stop()
+	ClientVariables.FC_SideMomentumTRACK:Stop()
+end
+
+local movementConnection
 
 function LockOn.Lock(publicVariables)
 	-- sync public variables to client:
@@ -47,6 +54,26 @@ function LockOn.Lock(publicVariables)
 	end
 		
 	ClientVariables.FC_IdleTRACK:Play()
+
+	movementConnection = ClientVariables.movingDirection:GetPropertyChangedSignal("Value"):Connect(function()
+		print(ClientVariables.movingDirection.Value)
+		if ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude > 0 or (ClientVariables.isInSecureGrapple) then
+			
+			stopMovementAnimations()
+
+			if ClientVariables.movingDirection.Value == "right" then
+				ClientVariables.FC_SideMomentumTRACK:Play()
+			elseif ClientVariables.movingDirection.Value == "left" then	
+				ClientVariables.FC_SideMomentumTRACK:AdjustSpeed(-1)
+				ClientVariables.FC_SideMomentumTRACK:Play()
+			elseif ClientVariables.movingDirection.Value == "forwards" then
+				ClientVariables.FC_StraightMomentumTRACK:Play()
+			elseif ClientVariables.movingDirection.Value == "backwards" then
+				ClientVariables.FC_StraightMomentumTRACK:AdjustSpeed(-1)
+				ClientVariables.FC_StraightMomentumTRACK:Play()
+			end
+		end
+	end)
 	
 	-- character changes below:
 	-- ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
@@ -90,6 +117,12 @@ function LockOn.Lock(publicVariables)
 		faceEnemy(ClientVariables.subject)
 	end
 
+	if movementConnection then
+		movementConnection:Disconnect()
+		movementConnection = nil
+		stopMovementAnimations()
+	end
+
 	return
 end
 
@@ -102,6 +135,12 @@ function LockOn.Unlock(publicVariables)
 	end
 
 	ClientVariables.isGrappling = false
+
+	if movementConnection then
+		movementConnection:Disconnect()
+		movementConnection = nil
+		stopMovementAnimations()
+	end
 
 	-- print("we not locked on anymore")
 

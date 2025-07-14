@@ -9,7 +9,7 @@
 local REs_RFs = {}
 
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
-local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
+local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_centric)
 local ragdollFunction = require(game.ReplicatedStorage.Shared.ragdollFunction)
 local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
 

@@ -3,8 +3,9 @@ Character_Init.__index = Character_Init
 
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
 local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
-local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_management.animation_centric)
+local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_centric)
 local ragdollFunction = require(game.ReplicatedStorage.Shared.ragdollFunction)
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
 
 local function createHitbox(bodyPart, characterInstance) --[[ Function that will create a hitbox of a given part for a given player ]]
 
@@ -670,40 +671,14 @@ function Character_Init.init(charModel)
         	characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
 			characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
 
-			characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "lockOn", {
-				lockOnDebounce = characterInstance.lockOnDebounce, 
-				enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart,
-				enemyHumanoid = characterInstance.enemyHumanoid,
-				lockOnRayParams = characterInstance.lockOnRayParams
-			})
-
-			-- check to make sure they're qualified to lock-off since the duration of their lock-on is client-controlled:
-			if not characterInstance.isAttacking.Value
-			and not characterInstance.isGettingHit 
-			and not characterInstance.pairedPlaying 
-			and not characterInstance.isDodging
-			and not characterInstance.waitingToAttack
-			and not characterInstance.isGrappling
-			then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
-				characterInstance.lockOnDebounce.Value = false
-			end
-
+			utilities.sendLockOnSignal(characterInstance)
 		else
 
 			warn("No more lock on for:", characterInstance.character.Name)
 
 			characterInstance:block(false)
 			
-			characterInstance.enemyChar = nil
-			characterInstance.enemyHumanoid = nil
-        	characterInstance.enemyHumanoidRootPart = nil
-
-			characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "lockOn", {
-				lockOnDebounce = characterInstance.lockOnDebounce,
-				enemyChar = characterInstance.enemyChar,
-				enemyHumanoid = characterInstance.enemyHumanoid,
-				enemyHumanoidRootPart = characterInstance.enemyHumanoidRootPart
-			})
+			utilities.sendLockOnSignal(characterInstance)
 		end
 
 	end)

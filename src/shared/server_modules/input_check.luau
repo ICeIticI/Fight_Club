@@ -79,7 +79,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             --     characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent.Parent
             -- end
             if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
-                print(characterInstance.raycastInstance)
+                print(characterInstance.raycastInstance, characterInstance.lockOnDebounce.Value)
                 --[[ we may have raycasted their arm that could potentially be 
                 sticking through a wall. Dont wanna lock onto an enemy behind a 
                 wall, so we will re-raycast, but this time, DIRECTLY to the HRP.

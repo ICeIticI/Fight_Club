@@ -19,9 +19,9 @@ local character_receive = require(game.ReplicatedStorage.Shared.character_class.
 local character_hitboxes = require(game.ReplicatedStorage.Shared.character_class.character_hitboxes)
 local character_ragdoll = require(game.ReplicatedStorage.Shared.character_class.character_ragdoll)
 
-local Attack_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.attack_animation_manager)
-local Receive_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.receive_animation_manager)
-local Misc_Animation_Manager = require(game.ReplicatedStorage.Shared.animation_management.misc_animation_manager)
+local Attack_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.attack_animation_manager)
+local Receive_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.receive_animation_manager)
+local Misc_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.misc_animation_manager)
 
 local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 local Character = {}

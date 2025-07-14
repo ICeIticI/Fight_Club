@@ -2,16 +2,9 @@ local Character_Grapple = {}
 Character_Grapple.__index = Character_Grapple
 
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
 
 local grabType = nil 
-
-local function setCharacterNetworkOwnershipTo(character, owner)
-    for _, child in pairs(character:GetChildren()) do
-        if child:IsA("BasePart") then
-            child:SetNetworkOwner(owner)
-        end
-    end
-end
 
 
 local function getGrabAnimation(characterInstance)
@@ -188,7 +181,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     enemyInstance:receive("receiveGrabSecure", self.characterInstance)
 
     -- local offset = Vector3.new(0, 1, -3)
-    -- setCharacterNetworkOwnershipTo(enemyInstance.character, self.characterInstance.player)
+    utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, self.characterInstance.player)
     enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
     -- local grabWeld = Instance.new("WeldConstraint")
     -- grabWeld.Name = "grabWeld"
@@ -250,7 +243,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     grabMotor:Destroy()
     self.characterInstance.setCharacterMassless(enemyInstance.character, false)
     enemyInstance.humanoid.PlatformStand = false
-    -- setCharacterNetworkOwnershipTo(enemyInstance.character, nil)
+    utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, enemyInstance.player)
     -- grabWeld.Enabled = false
     -- grabWeld:Destroy()
     print(grabType)

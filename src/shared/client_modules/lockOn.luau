@@ -9,7 +9,8 @@ local LockOn = {}
 local function getCenteredSubjectCFrame() --[[ When the character locks onto the enemy, a 'subject' will be created, which will act as the point where the camera focuses on. So wherever the subject goes, the Camera goes as well. So the subject will start at the camera's current CFrame, and will smoothly go in-between the character and their enemy. This function will return the center position between the character and enemy. ]]
 
 	return CFrame.new(
-		(ClientVariables.humanoidRootPart.Position.X + ClientVariables.enemyHumanoidRootPart.Position.X) / 2,
+		(ClientVariables.humanoidRootPart.Position.X 
+		+ ClientVariables.enemyHumanoidRootPart.Position.X) / 2,
 		ClientVariables.subject.CFrame.Y,
 		(ClientVariables.humanoidRootPart.Position.Z + ClientVariables.enemyHumanoidRootPart.Position.Z) / 2)
 	end
@@ -51,6 +52,7 @@ local movementConnection
 function LockOn.Lock(publicVariables)
 	-- sync public variables to client:
 	for varName, value in pairs(publicVariables) do
+		print(varName, value)
 		ClientVariables[varName] = value
 	end
 		

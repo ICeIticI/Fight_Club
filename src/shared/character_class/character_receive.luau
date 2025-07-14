@@ -3,6 +3,7 @@ Character_Receive.__index = Character_Receive
 
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
 local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
 
 
 local function getReceiveAnimation(characterInstance, trackData) --[[ Will return the receiver animation that gets played based on what specific attack the enemy did. ]]
@@ -295,14 +296,7 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
         
         if characterInstance.player then
             -- is a player. Send to client for lock on:
-            characterInstance.GlobalRemoteEvent:FireClient(
-            characterInstance.player,
-            "lockOn", {
-                lockOnDebounce = characterInstance.lockOnDebounce, 
-                enemyHumanoidRootPart = attacker_characterInstance.humanoidRootPart,
-                enemyHumanoid = attacker_characterInstance.humanoid,
-                lockOnRayParams = characterInstance.lockOnRayParams
-            })
+            utilities.sendLockOnSignal(characterInstance)
         else
             --Is an AI. Send to server:
 

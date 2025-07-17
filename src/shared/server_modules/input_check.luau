@@ -11,6 +11,7 @@
 -- Modules:
 
 local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
 
 local Input_Check = {}
 
@@ -38,9 +39,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         and not characterInstance.waitingToAttack
         and not characterInstance.isGrappling
         then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
-            characterInstance.lockOnRayParams = RaycastParams.new()
-            characterInstance.lockOnRayParams.FilterDescendantsInstances = {characterInstance.character} -- Instead of doing :GetChildren(), this filters the entire character, so the decendants of the children of the character cant bypass the filter.
-            characterInstance.lockOnRayParams.FilterType = Enum.RaycastFilterType.Exclude
+            characterInstance.lockOnRayParams = utilities.initializeLockOnRayParams(characterInstance)
             
             characterInstance.raycastResult = workspace:Raycast(
                 characterInstance.humanoidRootPart.Position,
@@ -79,13 +78,14 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             --     characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent.Parent
             -- end
             if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
-                print(characterInstance.raycastInstance, characterInstance.lockOnDebounce.Value)
                 --[[ we may have raycasted their arm that could potentially be 
                 sticking through a wall. Dont wanna lock onto an enemy behind a 
                 wall, so we will re-raycast, but this time, DIRECTLY to the HRP.
                 If there is somehow no raycast, it means they're probably just
                 behind a wall and their arm was sticking through it or something.]]
 
+                if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model").Humanoid.deadState.Value == true then return end
+                
                 local targetRootPart = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model").HumanoidRootPart
                 if not targetRootPart then return error("Not sure how theres not HRP for the target you selected, even though we already made sure, but here we are I guess we screwed up somehow lol") end
 
@@ -186,13 +186,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 -- characters:GetCharacterObjectByCharacter(characterInstance.enemyChar):EndGrab(characterInstance)
             end
         end
-        -- print("attack input gate 0", {
-        -- not characterInstance.waitingToAttack,
-        --  characterInstance.lockOnDebounce.Value ,
-        --  characterInstance.pairedChain <= characterInstance.PairedChainMAX ,
-        --  characterInstance.boolCheck({isBlocking = characterInstance.isBlocking}) ,
-        --  (characterInstance.raycastResult.Instance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7,
-        -- })
         
         if not characterInstance.waitingToAttack 
         and characterInstance.lockOnDebounce.Value 
@@ -210,7 +203,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                     characterInstance.waitingToAttack = true
                     while characterInstance.lastReceiveData.IsPlaying do -- wait for entire dodge attack to end
                         task.wait(0.1)
-                        -- print("waiting for dodge to end..")
                     end
 
                     -- do the dodge attack (if not already):
@@ -228,12 +220,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 -- if characterInstance.isEnemyHoldingBlock and characterInstance.pairedChain <= characterInstance.PairedChainMAX then
                 --     characterInstance.pairedChain += 1
                 -- end
-                -- print("will we attk?", {
-                -- characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}),
-                -- not characterInstance.waitingToAttack ,
-                -- not characterInstance.canFollowUp,
-                -- not (characterInstance.pairedPlaying and not characterInstance.isGrappling)
-                -- })
                 
                 if characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGettingHit = characterInstance.isGettingHit}) 
                 and not characterInstance.waitingToAttack 
@@ -267,6 +253,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then
+                        print(characterInstance.followUpCount)
                         if characterInstance.pairedChain < characterInstance.PairedChainMAX then -- The third paired attack, we wanna have the receiver determine the anim so it will be calculated by them, after this player's characterInstance checks its the max value in character_attack.
                             -- characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                             --[[
@@ -284,8 +271,9 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         end
 
     elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
-        
+        print(characterInstance.nextInput)
         if not characterInstance.nextInput then
+            print("next input is grab")
             characterInstance.nextInput = "grab"
         end
 
@@ -297,6 +285,8 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             isGrappling = characterInstance.isGrappling,})
         and characterInstance.lockOnDebounce.Value
         and characterInstance.enemyChar.Humanoid.Health > 0
+        and not characterInstance.isInSecureGrapple
+        and not characterInstance.isInGrappleSuccess
         then
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             characterInstance:grab(enemyInstance, nil)
@@ -319,10 +309,9 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 characterInstance.isGrappling = false
                 return
             end
-            -- print("block input")
             -- If the player is holding the block button, we store that as a variable:
             characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
-            
+            print(characterInstance.stamina)
             if characterInstance.lockOnDebounce.Value 
             and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGrappling = characterInstance.isGrappling}) 
             and not characterInstance.pairedPlaying

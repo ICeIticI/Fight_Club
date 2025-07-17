@@ -42,25 +42,35 @@ local function getNextId() --[[ Local function that will get an available ID, re
     if charId ~= nil then
         print("Table of avaliable IDs.. ", available_character_id_table, "Current ID: " .. tostring(charId))
         table.remove(available_character_id_table, i)
-        return charId
     else -- The available IDs table somehow ran out of values. This shouldn't happen.
         for id = id_amount, id_amount * 2 do -- create a new set of IDs following after the initial set
             table.insert(available_character_id_table, id)
         end
         id_amount *= 2 -- permanently increase the id_amount in case this happens again.
         charId = next(available_character_id_table)
-        return charId
     end
+    return charId
 end
 
 
 -- constructor function for Character:
 function Character.new(charModel) --[[ Constructor function that will create a new instance of a character. ]]
     
+    local characterInstancesFolder = game.Workspace:FindFirstChild("Characters") 
+    or (function()
+        -- Creates a characterInstancesFolder if it doesn't exist yet:
+        local newCharacterInstancesFolder = Instance.new("Folder")
+        newCharacterInstancesFolder.Name = "Characters"
+        newCharacterInstancesFolder.Parent = game.Workspace
+        return newCharacterInstancesFolder
+    end)() -- <- Immediately call the function since this 'or' statement returns the actual function. It never runs until we call it like we do here.
+    charModel.Parent = characterInstancesFolder
+
     local self = setmetatable(character_init.init(charModel), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
     -- while not self.initialized do task.wait() end
     
-    self.id = getNextId()
+    self.character:SetAttribute("id", getNextId())
+    self.id = self.character:GetAttribute("id")
     
     self.character_attack = setmetatable({}, { __index = character_attack })
     self.character_block = setmetatable({}, { __index = character_block })
@@ -186,6 +196,7 @@ function Character:grab(enemyInstance) --[[ The character will attempt to grappl
     
     -- if success == nil then
         if self.character_grapple:Attempt(enemyInstance) == true then
+            print("we succeeded")
             -- we succeeded with our grab
             self.character_grapple:Success(enemyInstance)
             if self.character_grapple:Secure(enemyInstance) then -- if it returns true, then its an execution. Don't run :EndGrab.

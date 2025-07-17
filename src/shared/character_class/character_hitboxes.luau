@@ -28,7 +28,6 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
             -- If the player gets hit while the blockstart track is playing, then they will perform a parry
             -- handleBlocking(currentAttack)
             receiver_characterInstance:receive("parry", attacker_characterInstance)
-            print("receiveParry")
             attacker_characterInstance:receive("receiveParry", receiver_characterInstance)
         elseif receiver_characterInstance.Protocol ~= "Counter" -- Checks before countering:
         and receiver_characterInstance.currentAttack_trackData -- Make sure the attack exists for countering
@@ -95,7 +94,6 @@ function Character_Hitboxes:manageHitboxes()
             if self.characterInstance.isAttacking.Value then -- Begin checling for potentialEnemy stuff only if we're attacking, otherwise it'll check for every single .Touched no matter the circumstance, which is very processing.
                 potentialEnemyChar = touchedObject:FindFirstAncestorWhichIsA("Model")
                 potentialEnemyInstance = Characters:GetCharacterObjectByCharacter(potentialEnemyChar)
-                -- print(potentialEnemyInstance.hitDebounce[self.characterInstance.id])
                 
                 -- print(
                 --     self.characterInstance.isAttacking.Value ,
@@ -105,7 +103,6 @@ function Character_Hitboxes:manageHitboxes()
                 --     not touchedObject:IsAncestorOf(self.characterInstance.character),
                 --     not potentialEnemyInstance.hitDebounce[self.characterInstance.id]
                 -- )
-                -- print(potentialEnemyInstance.character.Name, potentialEnemyInstance.hitDebounce)
             end
         
             if self.characterInstance.isAttacking.Value 
@@ -139,7 +136,6 @@ function Character_Hitboxes:manageHitboxes()
                 end
 
                 if not self.characterInstance.attackFrames then -- Will wait for an attack to end before attacking again
-                    -- print("waiting for attack to end...")
                     repeat task.wait()
                     until self.characterInstance.attackFrames or not self.characterInstance.isAttacking.Value
                 end

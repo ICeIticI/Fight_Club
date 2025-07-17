@@ -50,8 +50,7 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
                     --         return characterInstance.FC_SyncBlock3R2RECEIVERTRACK
                     --     end
                     -- end
-                    -- print("You pick your lvl 3 receive sync block!")
-                    -- error("Add a level 3 sync block. This char instance must pick it")
+                    -- error("Pick your lvl 3 sync block")
 
                 else
                     if trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock1L.AnimationId then
@@ -291,16 +290,12 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
 
         characterInstance.raycastInstance = attacker_characterInstance.character.HumanoidRootPart
         characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
-
-        characterInstance.lockOnDebounce.Value = true
         
-        if characterInstance.player then
-            -- is a player. Send to client for lock on:
-            utilities.sendLockOnSignal(characterInstance)
-        else
-            --Is an AI. Send to server:
-
-        end
+        characterInstance.enemyHumanoid = characterInstance.enemyChar:WaitForChild("Humanoid")
+        characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar.HumanoidRootPart
+        if not characterInstance.lockOnRayParams then characterInstance.lockOnRayParams = utilities.initializeLockOnRayParams(characterInstance) end
+        
+        characterInstance.lockOnDebounce.Value = true
     end
 
     return trackData
@@ -349,6 +344,10 @@ function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an e
     -- end
 
     playReceivingTrack(self.characterInstance, trackData)
+
+    -- while trackData.IsPlaying do task.wait() end
+    -- print("are we blocking?: ", self.characterInstance.isBlockBeingPressed)
+    -- self.characterInstance:block(self.characterInstance.isBlockBeingPressed)
 end
 
 function Character_Receive:dodge(attacker_characterInstance) --[[ Dodge away from an incoming strike ]]
@@ -468,6 +467,9 @@ function Character_Receive:receiveCounter(attacker_characterInstance) --[[ We tr
     
     local trackData = setupReceiveAnimation(self.characterInstance, "counterAttack", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
+
+    while trackData.IsPlaying do task.wait() end
+    attacker_characterInstance.isAttacking.Value = false
 end
 
 
@@ -476,19 +478,22 @@ function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ A
 
     self.characterInstance.attackingChar = attacker_characterInstance.character
 
+    self.characterInstance.isGrappling = true
     local trackData = setupReceiveAnimation(self.characterInstance, "grabAttempt", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
 
-    self.characterInstance.isGrappling = true
     -- Detect next input. If its the attack button in the window of time they can deny a grab, then it will allow them to deny.
     -- If its the block button, then their opportunity is gone. No matter what button they press now, even pressed in the time frame, will mean they will get grapped.
     self.characterInstance.nextInput = nil -- will be set on their next action input
-
+    print(self.characterInstance.character.Name .. " is receiving a grab")
     while trackData.IsPlaying do task.wait() end -- wait for the whole grab attempt to end before returning true or false (which means we succeeded or not with tryna grab the enemy)
     
+    print(self.characterInstance.character.Name .. " is no longer getting grabbed")
     if self.characterInstance.nextInput == "grab" and not self.characterInstance.isBlocking then
+        print("grab defend successful")
         return true -- we successfully defended against the grab attempt
     else
+        print("failed to defend grab attempt against enemy")
         return false
     end
 
@@ -499,6 +504,11 @@ function Character_Receive:repelGrab(attacker_characterInstance) --[[ Either we 
 
     local trackData = setupReceiveAnimation(self.characterInstance, "repelGrab", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
+
+    while trackData.IsPlaying do task.wait() end
+
+    self.characterInstance.reset()
+    attacker_characterInstance.reset()
 end
 
 function Character_Receive:receiveGrabExecution(attacker_characterInstance)

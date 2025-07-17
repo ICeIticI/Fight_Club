@@ -3,6 +3,8 @@ ClientVariables.__index = ClientVariables
 
 ClientVariables.player = game:GetService("Players").LocalPlayer
 ClientVariables.initialized = false
+local canInit = true -- local variable that dictates when the script is able to initialize the Init() function. We don't want it running twice, as that will just be creating unnecessairy load times.
+
 
 local function Init() -- The .CharacterAdded event doesn't always track when a player character is added. Sometimes the character spawns and beats the event. So just in case, this function was created to initialize (or reinitialize) variables that are crutial for the game to work.
 	ClientVariables.initialized = false
@@ -24,7 +26,26 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 
 	ClientVariables.stamina = ClientVariables.plrObjectsFolder:WaitForChild("stamina")
 	ClientVariables.maxStamina = ClientVariables.plrObjectsFolder:WaitForChild("maxStamina")
+	
+	local humanoidDiedConnect -- the :Connect() event for when the player's current humanoid dies.
+	humanoidDiedConnect = ClientVariables.humanoid.Died:Connect(function()
+		canInit = true
+		ClientVariables.initialized = false
+		
+		-- Disconnect the .Died event so we don't have .Died connects of the player's past dead humanoids running, which will be re-initialized on next player character spawn:
+		humanoidDiedConnect:Disconnect()
+	 end)
 
+	 -- Constantly record the velocity of the character and stop leg movement animation when its around 0:
+	task.spawn(function()
+		while ClientVariables.humanoid.Health > 0 do
+			task.wait()
+			ClientVariables.velocityMagnitude = ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude
+			if ClientVariables.velocityMagnitude < 0.1 then
+				ClientVariables.stopMovementAnimations()
+			end
+		end
+	end)
 	-- ClientVariables.initialized = true
 	return
 end
@@ -43,41 +64,19 @@ ClientVariables.GrappleInputs = {[Enum.KeyCode.R] = true, [Enum.KeyCode.ButtonY]
 ClientVariables.LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -- May have LockOnInputs for each system
 
 --ClientVariables.humanoid = nil -- we need this here because the script doesn't know what is connected to the .Died event until the .Init() function runs, but this :Connect will begin checking as soon as the script reaches it, so we need it to at least exist as a variable before using it in a built-in event.
-local canInit = true -- local variable that dictates when the script is able to initialize the Init() function. We don't want it running twice, as that will just be creating unnecessairy load times.
-local humanoidDiedConnect -- the :Connect() event for when the player's current humanoid dies.
 
 ClientVariables.player.CharacterAdded:Connect(function()
 	if canInit then
 		Init()
 		canInit = false
 	end
-
-	humanoidDiedConnect = ClientVariables.humanoid.Died:Connect(function()
-		canInit = true
-		ClientVariables.initialized = false
-		
-		-- Disconnect the .Died event so we don't have .Died connects of the player's past dead humanoids running, which will be re-initialized on next player character spawn:
-		humanoidDiedConnect:Disconnect()
-	 end)
-
 end)
-
- -- find a way to make sure these two Init() functions don't both run. Only one Init() should run when the player character spawns in.
 
 if ClientVariables.player.Character then
 	if canInit then
 		Init()
 		canInit = false
 	end
-
-	humanoidDiedConnect = ClientVariables.humanoid.Died:Connect(function()
-		canInit = true
-		ClientVariables.initialized = false
-		
-		-- Disconnect the .Died event so we don't have .Died connects of the player's past dead humanoids running, which will be re-initialized on next player character spawn:
-		humanoidDiedConnect:Disconnect()
-	 end)
-
 end
 
 while not ClientVariables.humanoid do -- will wait until the humanoid exists.
@@ -107,6 +106,13 @@ function ClientVariables.stopAnimations() -- add params? Perhaps we could change
 		end
 	end
 	
+end
+
+function ClientVariables.stopMovementAnimations()
+	if not ClientVariables.FC_SideMomentumTRACK or not ClientVariables.FC_StraightMomentumTRACK then return end
+
+	ClientVariables.FC_StraightMomentumTRACK:Stop()
+	ClientVariables.FC_SideMomentumTRACK:Stop()
 end
 
 return ClientVariables

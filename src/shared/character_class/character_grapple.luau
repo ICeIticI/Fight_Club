@@ -35,7 +35,6 @@ local function setupGrabAnimation(characterInstance : table, enemyInstance : any
     if trackData.Animation:GetAttribute("AnimType") == 1 then
         trackData.attackLvl = trackData.Animation:GetAttribute("AttackLevel") or 1 -- only few grab attacks have an attacklevel thats not 1, so when we assign attacklevel to those few animations, its always different than 1
         characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
-        -- print(characterInstance.attackDamage, characterInstance.enemyChar.Humanoid.Health)
         if enemyInstance and enemyInstance.humanoid.Health <= characterInstance.attackDamage then
             grabType = "execute"
         end
@@ -78,18 +77,16 @@ function Character_Grapple:Attempt(enemyInstance) --[[ The character goes to att
     grabType = "attempt"
     
     local trackData = setupGrabAnimation(self.characterInstance)
-
     self.characterInstance.isGrappling = true
+    
     self.characterInstance.SetSpeed(false)
     while not self.characterInstance.speedSet do task.wait(0.1) end -- wait for the speed to get set before proceeding.
 
     -- to prevent positional glitches with grappling (such as going through walls), only reposition the grappler to the receiver if they're facing eachother. Otherwise, move the receiver to the grappler.
     -- This is until we get back grapples post alpha
     if self.characterInstance.humanoidRootPart.CFrame.LookVector:Dot(enemyInstance.humanoidRootPart.CFrame.LookVector) < -0.9 then
-        print("They facing eachother")
         self.characterInstance.repositionInFrontOfEnemy(enemyInstance.character)
     else
-        print("they are not facing eahcw")
         enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
     end
 
@@ -110,12 +107,16 @@ function Character_Grapple:EndGrab(enemyInstance)
     else
         grabType = "complete"
         print(grabType)
+        self.characterInstance.isGrappling = false
+        enemyInstance.isGrappling = false
         self.characterInstance.reset()
         enemyInstance.reset()
 
     end
     
     self.characterInstance.isInGrappleSuccess = false
+    playGrabAnimation(enemyInstance, enemyInstance.lastReceiveData, false)
+
 end
 
 function Character_Grapple:Execute(enemyInstance)
@@ -123,7 +124,6 @@ function Character_Grapple:Execute(enemyInstance)
     local trackData = setupGrabAnimation(self.characterInstance)
     self.characterInstance.setCharacterMassless(enemyInstance.character, false)
     enemyInstance.isInSecureGrapple = false
-    enemyInstance.humanoid.PlatformStand = false
     -- self.characterInstance.humanoidRootPart:FindFirstChild("grabMotor").Enabled = false
 
     enemyInstance.character:FindFirstChild("Health").Enabled = false -- disables the health script inside the character, which regenerates their health.
@@ -139,6 +139,9 @@ end
 
 function Character_Grapple:Success(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. We'll now strike the enemy to transition into :Secure() ]]
     grabType = "success"
+
+    enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
+
     local trackData = setupGrabAnimation(self.characterInstance)
     self.characterInstance.isInGrappleSuccess = true
 
@@ -240,13 +243,14 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     end
 
     
-    grabMotor:Destroy()
     self.characterInstance.setCharacterMassless(enemyInstance.character, false)
     enemyInstance.humanoid.PlatformStand = false
     utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, enemyInstance.player)
+    grabMotor:Destroy()
+    grabMotor = nil
     -- grabWeld.Enabled = false
     -- grabWeld:Destroy()
-    print(grabType)
+    print("We broke out of the loop. Our current grab type:" , grabType)
 
     playGrabAnimation(self.characterInstance, trackData, false)
 

@@ -56,7 +56,6 @@ function ragdollFunction.setupRagdoll(char : Model, id : number)
 
 	charactersRagdollData[id].jointsCache = GetMotor6Ds(char) -- getting the Motor6Ds of the given player and storing it in as it's own key in this table.
 
-	print("ragdoll init finished")
 end
 
 function ragdollFunction.ragdoll(char : Model, id : number, sentBool : boolean) --[[this will be the function that.. well.. ragdolls the character ]]

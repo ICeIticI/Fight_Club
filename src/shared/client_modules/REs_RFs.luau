@@ -55,6 +55,10 @@ function REs_RFs.init()
 
         elseif protocol == "initialized" then
             ClientVariables.initialized = true
+
+        elseif protocol == "updateMyDeadState" then
+            data.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, data.stateEnabled)
+            print(data.humanoid.Parent.Name .. " dead state enabled: ", data.stateEnabled)
         end
     
         --[[ ^ Might put the animation events into the animation_centric script 

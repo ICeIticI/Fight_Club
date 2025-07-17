@@ -155,6 +155,7 @@ function Animation_Centric.playReceiveAnimation(moduleTbl)
         end
 
     end
+    print("receive animation playing. Are we grappling?:" , moduleTbl.isGrappling)
 end
 
 function Animation_Centric.setupGrabAnimation(moduleTbl, data)
@@ -194,7 +195,7 @@ function Animation_Centric.playGrabAnimation(moduleTbl, data: any?)
             end
     
         end
-
+        print("grab animation playing. Are we grappling?:" , moduleTbl.isGrappling)
     end
 end
 

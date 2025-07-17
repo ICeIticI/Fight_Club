@@ -29,7 +29,6 @@ require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check
 
 -- GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 --     if Protocol == "Hook" or Protocol == "Haymaker" then -- Used to check which set of remote events should play. When doing basic striking, no animPair nor sentValue is sent in the parameters, unlike doing other misc. events, which is how we distinguish, splitting the events into two to make the code easier to understand.
---         -- print("Basic attack reached server.")
 --         ServerEvents.bAttackEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, nil, nil, plrIsBlocking, isAI) -- Will damage the hitCharacter on the server, as well as sending the other player a remote event to make their character react to the hit.
 --     else
 --         ServerEvents.miscEvents(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI) -- Will execute misc things such as parrying and sync block damage.

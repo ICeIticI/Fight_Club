@@ -15,14 +15,15 @@ local function getCenteredSubjectCFrame() --[[ When the character locks onto the
 		(ClientVariables.humanoidRootPart.Position.Z + ClientVariables.enemyHumanoidRootPart.Position.Z) / 2)
 	end
 	
-local function faceEnemy(subject)	
-	
+local function faceEnemy(subject, enemyHRP)
+	if not enemyHRP then return end
+
 	if not ClientVariables.isGrappling then
 		ClientVariables.humanoidRootPart.CFrame = CFrame.lookAt(
 			ClientVariables.humanoidRootPart.Position, 
-			Vector3.new(ClientVariables.enemyHumanoidRootPart.Position.X, 
+			Vector3.new(enemyHRP.Position.X, 
 			ClientVariables.humanoidRootPart.Position.Y, 
-			ClientVariables.enemyHumanoidRootPart.Position.Z)
+			enemyHRP.Position.Z)
 		) -- makes sure the player character is always facing the enemy character.
 	end
 	
@@ -42,27 +43,27 @@ local function createSubject(subject) --[[Creates a invisible part (subject) bet
 	subject.Parent = ClientVariables.character
 end
 
-local function stopMovementAnimations()
-	ClientVariables.FC_StraightMomentumTRACK:Stop()
-	ClientVariables.FC_SideMomentumTRACK:Stop()
-end
-
 local movementConnection
 
 function LockOn.Lock(publicVariables)
 	-- sync public variables to client:
 	for varName, value in pairs(publicVariables) do
-		print(varName, value)
 		ClientVariables[varName] = value
 	end
 		
 	ClientVariables.FC_IdleTRACK:Play()
 
 	movementConnection = ClientVariables.movingDirection:GetPropertyChangedSignal("Value"):Connect(function()
-		print(ClientVariables.movingDirection.Value)
-		if ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude > 0 or (ClientVariables.isInSecureGrapple) then
+
+		local currentVelocityMagnitude = ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude
+		ClientVariables.stopMovementAnimations()
+
+		if currentVelocityMagnitude > 0 or (ClientVariables.isInSecureGrapple) then
 			
-			stopMovementAnimations()
+			-- Wait until we move before playing a momentum animation:
+			while ClientVariables.velocityMagnitude and ClientVariables.velocityMagnitude < 0.1 do task.wait() end
+			-- If the velocity has changed since we waited then disregard this connection, as a newer one is active:
+			if not ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude == currentVelocityMagnitude then return end
 
 			if ClientVariables.movingDirection.Value == "right" then
 				ClientVariables.FC_SideMomentumTRACK:Play()
@@ -110,22 +111,22 @@ function LockOn.Lock(publicVariables)
 
 	ClientVariables.subjectTween = TweenService:Create(ClientVariables.subject, subjectTweenInfo, subjectTweenGoal)
 	ClientVariables.subjectTween:Play()
-
 	-- ClientVariables.subjectTween.Completed:Wait()
 	faceEnemy(ClientVariables.subject)
 	while ClientVariables.lockOnDebounce.Value == true
 	and (ClientVariables.humanoidRootPart.Position - ClientVariables.enemyHumanoidRootPart.Position).Magnitude < 8
+	and not ClientVariables.enemyHumanoid.deadState.Value
 	do -- constantly keeps the player facing the enemy
 		-- Constantly having the player face the enemy when locked on
 
 		task.wait()
-		faceEnemy(ClientVariables.subject)
+		faceEnemy(ClientVariables.subject, ClientVariables.enemyHumanoidRootPart)
 	end
 
 	if movementConnection then
 		movementConnection:Disconnect()
 		movementConnection = nil
-		stopMovementAnimations()
+		ClientVariables.stopMovementAnimations()
 	end
 
 	return
@@ -144,10 +145,9 @@ function LockOn.Unlock(publicVariables)
 	if movementConnection then
 		movementConnection:Disconnect()
 		movementConnection = nil
-		stopMovementAnimations()
+		ClientVariables.stopMovementAnimations()
 	end
 
-	-- print("we not locked on anymore")
 
     -- if ClientVariables.humanoid.Health <= 0 or ClientVariables.enemyHumanoid and ClientVariables.enemyHumanoid.Health <= 0 then -- if the player or enemy dies, then we want to stop locking on.
 	-- 	task.wait(0.5)

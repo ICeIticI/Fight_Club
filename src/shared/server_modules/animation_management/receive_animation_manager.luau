@@ -52,11 +52,12 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         if trackData.Animation:GetAttribute("Grapple") == false then -- a false grapple, which means it ends the grappling session
             self.characterInstance.isGrappling = false
         end
-
+        print(trackData.Animation)
         if trackData.Animation:GetAttribute("AttackLevel") == 3 then -- level 3 grapple attacks are for executions. When the animation ends, kill the character.
+            print("DIEEEEEEE")
             self.characterInstance.isGrappling = false
-            self.characterInstance.humanoid.Health = 0
             self.characterInstance.lockOnDebounce.Value = false
+            self.characterInstance.humanoid.Health = 0
         end
 
         if not self.characterInstance.isGrappling then

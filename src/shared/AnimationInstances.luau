@@ -578,7 +578,6 @@ for _, animation in pairs(AnimationInstances) do
             animation:SetAttribute("Looped", true)
             -- continue 
         end
-    -- print(temporaryTrack.Length)
 
         animation:SetAttribute("Length", temporaryTrack.Length)
         local temporaryStartOfAttackConnection = temporaryTrack:GetMarkerReachedSignal("StartOfAttack"):Connect(function(markerParam)
@@ -600,7 +599,6 @@ for _, animation in pairs(AnimationInstances) do
 
             -- markerParam in the context of StartOfAttack is how many times the character attacks the enemy in the animation. So we use this value to divide how much damage each hit does.
             local damageDivider = tonumber(markerParam) -- markerParam stores the number, but as a string value oddly.
-            -- print(damageDivider)
             if damageDivider and damageDivider > 1 then
                 animation:SetAttribute("DamageDivider", damageDivider) -- To remain fair, we don't do full damage on each hit on the multi-hit animation, but we divide it, so its only a aesthetic and not an advantage.
             end

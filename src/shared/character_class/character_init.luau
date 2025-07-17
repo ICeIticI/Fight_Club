@@ -2,7 +2,7 @@ local Character_Init = {}
 Character_Init.__index = Character_Init
 
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
-local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_centric)
 local ragdollFunction = require(game.ReplicatedStorage.Shared.ragdollFunction)
 local utilities = require(game.ReplicatedStorage.Shared.utilities)
@@ -99,7 +99,7 @@ function Character_Init.init(charModel)
 				
 				rawset(t, i, v)
 
-				local isAttacking = Characters:GetCharacterObjectById(i).isAttacking
+				local isAttacking = characters:GetCharacterObjectById(i).isAttacking
 				isAttacking:GetPropertyChangedSignal("Value"):Connect(function()
 					rawset(t, i, nil)
 				end)
@@ -108,29 +108,7 @@ function Character_Init.init(charModel)
 			-- 	rawset(t, i, nil)
 			end
 		end
-
-		-- __index = function(t, i) -- runs when hitDebounce tries to access a value that doesn't exist. The table will initially be empty so every index will have to run
-		-- 	-- 'i' should be a characterInstance ID
-		-- 	if not i or not type(i) == "number" then
-		-- 		return warn("the hitDebounce table should only take characterInstance IDs as indexes. However, the index attempted is: " .. tostring(i))
-		-- 	end
-
-		-- 	-- local isAttacking = Characters:GetCharacterObjectById(i).isAttacking
-		-- 	-- local connection
-		-- 	-- warn(isAttacking.Value)
-		-- 	-- if isAttacking.Value and not connection then
-		-- 		-- print("we attckn")
-		-- 		-- t[i] = true
-		-- 		-- connection = isAttacking:GetPropertyChangedSignal("Value"):Connect(function()
-		-- 			print("we no longer attcn")
-		-- 			-- t[i] = nil
-		-- 			-- connection:Disconnect()
-		-- 		-- end)
-		-- 	-- end
-
-		-- 	return nil -- this __index runs because we tried indexing something thats not there.. meaning theres no hitDebounce for this character already.
-		-- end
-	}
+		}
 
 	setmetatable(characterInstance.hitDebounce, characterInstance.hitDebounce_metatable)
 	
@@ -539,7 +517,6 @@ function Character_Init.init(charModel)
 
 		if not soundId then 
 			warn("Current trackData: ")
-			print(trackData)
 			return error("playHitSFX function: The specified attack level of the given trackData isn't specified to get a sound for the hit SFX.") 
 		end
 		
@@ -589,13 +566,24 @@ function Character_Init.init(charModel)
 
 	-- local fallDamageConnection
 
+	local deadState = Instance.new("BoolValue")
+	deadState.Name = "deadState"
+	deadState.Value = false
+	deadState.Parent = characterInstance.humanoid
+
 	local DiedConnection
 	DiedConnection = characterInstance.humanoid.Died:Connect(function()
+		-- characterInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) -- To trigger the StateEnabledChange event, which fires only when the :SetStateEnabled method is used.
+		
 		MoveDirectionConnection:Disconnect()
 		MoveDirectionConnection = nil
 		
 		DiedConnection:Disconnect()
 		DiedConnection = nil
+
+		task.delay(0.5, function()
+			deadState.Value = true
+		end)
 
 		-- fallDamageConnection:Disconnect()
 		-- fallDamageConnection = nil
@@ -647,6 +635,15 @@ function Character_Init.init(charModel)
 
 	end)
 
+
+	characterInstance.humanoid.StateEnabledChanged:Connect(function(stateType, stateEnabled)
+		print(stateType)
+		if stateType ~= Enum.HumanoidStateType.Dead then return end -- make sure we're working with the Dead state type
+		-- characterInstance.GlobalRemoteEvent:FireAllClients("updateMyDeadState", {humanoid = characterInstance.humanoid, stateEnabled = stateEnabled})
+		print("Dead")
+		deadState.Value = stateEnabled
+	end)
+
 	characterInstance.lockOnDebounce:GetPropertyChangedSignal("Value"):Connect(function()
 
 		characterInstance.SetSpeed(true)
@@ -671,15 +668,11 @@ function Character_Init.init(charModel)
         	characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
 			characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
 
-			utilities.sendLockOnSignal(characterInstance)
 		else
-
 			warn("No more lock on for:", characterInstance.character.Name)
-
 			characterInstance:block(false)
-			
-			utilities.sendLockOnSignal(characterInstance)
 		end
+		utilities.sendLockOnSignal(characterInstance)
 
 	end)
 

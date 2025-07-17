@@ -31,9 +31,7 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
         else
 
             -- Disables the grapple weld before killing the enemy if they're about to die, or else the attacker will also die for some reason:
-            print("motor?")
             if characterInstance.isGrappling and trackData.attackLvl == 3 then
-                print("disabling motor")
                 -- characterInstance.humanoidRootPart:FindFirstChild("grapplePart"):FindFirstChild("grabMotor"):Destroy()
                 -- characterInstance.isGrappling = false
                 -- characterInstance.lockOnDebounce.Value = false

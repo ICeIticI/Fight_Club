@@ -23,7 +23,6 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
                     end
                 end
                 -- moduleTbl.attackTrack = randomAnimationTrack(moduleTbl.attack1Table, "AttackSeries", trackData.attackType)
-                -- print(moduleTbl.attackTrack)
             else
                 -- same attack as last time
                 return characterInstance.currentAttack_trackData.Animation -- use the previous attack animation because we got the random chance of doing same attack again.
@@ -88,8 +87,7 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
 
 
 
-                        print("The enemy will pick their lvl 3 receive sync block.")
-                        error("Add a level 3 sync block. Enemy must pick it")
+                        error("Enemy didnt pick ther")
                         
                     else
                         if characterInstance.lastAttackData.Animation.AnimationId == AnimationInstances.FC_SyncBlock1L.AnimationId then
@@ -233,7 +231,6 @@ function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or
 end
 
 function Character_Attack:level2() --[[ Throw a level 2 attack, such as a haymaker ]]
-    print("lvl 2 attack")
     local trackData = setupAttackAnimation(2, self.characterInstance)
     playAttackAnimation(self.characterInstance, trackData)
     self.characterInstance.comboCounter += 1

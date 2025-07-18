@@ -360,7 +360,11 @@ function Character_Receive:dodge(attacker_characterInstance) --[[ Dodge away fro
     -- no need for attackerAnim this time. We dont depend on it for dodges.
     local trackData = setupReceiveAnimation(self.characterInstance, "Dodge", nil)
     self.characterInstance.iFrames = true
-    self.characterInstance:block(false)
+    print("block??")
+    task.spawn(function()
+        self.characterInstance:block(false)
+    end)
+    print("not blocking")
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance:setLinearVelocity(self.characterInstance.dodgeVelocity, self.characterInstance.dodgeLength)
     self.characterInstance.SetSpeed(false)

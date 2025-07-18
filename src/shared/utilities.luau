@@ -10,7 +10,6 @@ function Utilities.sendLockOnSignal(moduleTbl)
     if moduleTbl.player then
         -- is a player. Send to client for lock on:
         moduleTbl.GlobalRemoteFunction:InvokeClient(moduleTbl.player, "lockOn", {
-        lockOnDebounce = moduleTbl.lockOnDebounce, 
         enemyHumanoid = moduleTbl.enemyHumanoid,
         enemyHumanoidRootPart = moduleTbl.enemyHumanoidRootPart,
         lockOnRayParams = moduleTbl.lockOnRayParams,

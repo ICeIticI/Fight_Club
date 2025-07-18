@@ -45,15 +45,8 @@ end
 
 local movementConnection
 
-function LockOn.Lock(publicVariables)
-	-- sync public variables to client:
-	for varName, value in pairs(publicVariables) do
-		ClientVariables[varName] = value
-	end
-		
-	ClientVariables.FC_IdleTRACK:Play()
-
-	movementConnection = ClientVariables.movingDirection:GetPropertyChangedSignal("Value"):Connect(function()
+movementConnection = ClientVariables.movingDirection:GetPropertyChangedSignal("Value"):Connect(function()
+	if not ClientVariables.lockOnDebounce.Value then return end
 
 		local currentVelocityMagnitude = ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude
 		ClientVariables.stopMovementAnimations()
@@ -64,6 +57,10 @@ function LockOn.Lock(publicVariables)
 			while ClientVariables.velocityMagnitude and ClientVariables.velocityMagnitude < 0.1 do task.wait() end
 			-- If the velocity has changed since we waited then disregard this connection, as a newer one is active:
 			if not ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude == currentVelocityMagnitude then return end
+			if not movementConnection then
+				ClientVariables.stopMovementAnimations()
+				return
+			end
 
 			if ClientVariables.movingDirection.Value == "right" then
 				ClientVariables.FC_SideMomentumTRACK:Play()
@@ -78,6 +75,15 @@ function LockOn.Lock(publicVariables)
 			end
 		end
 	end)
+
+function LockOn.Lock(publicVariables)
+	-- sync public variables to client:
+	for varName, value in pairs(publicVariables) do
+		ClientVariables[varName] = value
+	end
+	print("Ho")
+		
+	ClientVariables.FC_IdleTRACK:Play()
 	
 	-- character changes below:
 	-- ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
@@ -116,6 +122,7 @@ function LockOn.Lock(publicVariables)
 	while ClientVariables.lockOnDebounce.Value == true
 	and (ClientVariables.humanoidRootPart.Position - ClientVariables.enemyHumanoidRootPart.Position).Magnitude < 8
 	and not ClientVariables.enemyHumanoid.deadState.Value
+	and not ClientVariables.humanoid.deadState.Value
 	do -- constantly keeps the player facing the enemy
 		-- Constantly having the player face the enemy when locked on
 
@@ -124,10 +131,12 @@ function LockOn.Lock(publicVariables)
 	end
 
 	if movementConnection then
+		print(movementConnection)
 		movementConnection:Disconnect()
 		movementConnection = nil
 		ClientVariables.stopMovementAnimations()
 	end
+	warn(movementConnection)
 
 	return
 end

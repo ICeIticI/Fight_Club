@@ -20,7 +20,7 @@ function REs_RFs.init()
             Animation_Centric.initialize_animations(ClientVariables)
             
         elseif protocol == "lockOn" then
-            if data.lockOnDebounce.Value == true then
+            if ClientVariables.lockOnDebounce.Value == true then
                 lockOn.Lock(data)
             else
                 lockOn.Unlock(data)

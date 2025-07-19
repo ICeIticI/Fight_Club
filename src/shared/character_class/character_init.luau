@@ -91,8 +91,13 @@ function Character_Init.init(charModel)
 
 	characterInstance.lockOnDebounce.Value = false
 
+	local connects = {}
+
+	connects.isAttackingConnect = nil
+
 	characterInstance.hitDebounce = {} -- Dictates whether or not we can take damage. This will ideally be a table of characters who hit us, and their name gets removed after their attack is finished.
 	characterInstance.hitDebounce_metatable = {
+
 
 		__newindex = function(t, i, v) -- runs when a table value gets changed that does NOT exist
 			if v == true then
@@ -100,7 +105,7 @@ function Character_Init.init(charModel)
 				rawset(t, i, v)
 
 				local isAttacking = characters:GetCharacterObjectById(i).isAttacking
-				isAttacking:GetPropertyChangedSignal("Value"):Connect(function()
+				connects.isAttackingConnect = isAttacking:GetPropertyChangedSignal("Value"):Connect(function()
 					rawset(t, i, nil)
 				end)
 				
@@ -371,6 +376,9 @@ function Character_Init.init(charModel)
 		characterInstance.canSyncBlock = true
 		characterInstance.pairedPlaying = false
 		characterInstance.pairedChain = 0
+
+		characterInstance.isInSecureGrapple = false
+        characterInstance.isInGrappleSuccess = false
 		-- end
 		-- if self.currentReceiveAnimTRACK and not self.currentReceiveAnimTRACK.IsPlaying then
 		-- 	self.currentReceiveAnimTRACK = nil
@@ -538,8 +546,8 @@ function Character_Init.init(charModel)
 	end
 
 	-- AI-Altered code by Microsoft Copilot:
-	local MoveDirectionConnection
-	MoveDirectionConnection = characterInstance.humanoid:GetPropertyChangedSignal("MoveDirection"):Connect(function()
+	connects.MoveDirectionConnection = nil
+	connects.MoveDirectionConnection = characterInstance.humanoid:GetPropertyChangedSignal("MoveDirection"):Connect(function()
 		local root = characterInstance.character:WaitForChild("HumanoidRootPart")
 		local moveDir = characterInstance.humanoid.MoveDirection
 
@@ -563,30 +571,87 @@ function Character_Init.init(charModel)
 	end)
 	-- AI-Altered code by Microsoft Copilot ^
 
-
-	-- local fallDamageConnection
-
 	local deadState = Instance.new("BoolValue")
 	deadState.Name = "deadState"
 	deadState.Value = false
 	deadState.Parent = characterInstance.humanoid
 
-	local DiedConnection
-	DiedConnection = characterInstance.humanoid.Died:Connect(function()
+	connects.deadStateConnect = nil
+	connects.deadStateConnect = characterInstance.humanoid.StateEnabledChanged:Connect(function(stateType, stateEnabled)
+		print(stateType)
+		if stateType ~= Enum.HumanoidStateType.Dead then return end -- make sure we're working with the Dead state type
+		-- characterInstance.GlobalRemoteEvent:FireAllClients("updateMyDeadState", {humanoid = characterInstance.humanoid, stateEnabled = stateEnabled})
+		print("Dead")
+		deadState.Value = stateEnabled
+	end)
+
+	connects.lockOnConnect = nil
+	connects.lockOnConnect = characterInstance.lockOnDebounce:GetPropertyChangedSignal("Value"):Connect(function()
+
+		characterInstance.SetSpeed(true)
+		-- Turn off AutoRotate if we're locked on, and vice versa:
+		characterInstance.humanoid.AutoRotate = not characterInstance.lockOnDebounce.Value
+
+
+		if characterInstance.lockOnDebounce.Value == true then
+			warn("Lock on true for:", characterInstance.character.Name)
+
+			-- built-in enemyChar-retrieving code if we dont have enemyChar yet:
+			if not characterInstance.enemyChar then
+				if not characterInstance.raycastInstance then return error("No enemychar nor raycastInstance. Are you even locked-on?") end
+				
+				if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
+                	characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
+				else
+					error({"No humanoid found with the given raycastInstance: ", characterInstance.raycastInstance, "their parent:", characterInstance.raycastInstance.Parent})
+            	end
+			end
+			
+        	characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
+			characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
+
+		else
+			warn("No more lock on for:", characterInstance.character.Name)
+			characterInstance:block(false)
+		end
+		utilities.sendLockOnSignal(characterInstance)
+
+	end)
+
+	-- local fallDamageConnection
+
+	connects.DiedConnection = nil
+	connects.DiedConnection = characterInstance.humanoid.Died:Connect(function()
 		-- characterInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) -- To trigger the StateEnabledChange event, which fires only when the :SetStateEnabled method is used.
 		
-		MoveDirectionConnection:Disconnect()
-		MoveDirectionConnection = nil
+		-- connects.MoveDirectionConnection:Disconnect()
+		-- connects.MoveDirectionConnection = nil
 		
-		DiedConnection:Disconnect()
-		DiedConnection = nil
+		
+		-- connects.isAttackingConnect:Disconnect()
+		-- connects.isAttackingConnect = nil
+		
+		-- connects.lockOnConnect:Disconnect()
+		-- connects.lockOnConnect = nil
+		-- warn(connects.lockOnConnect)
 
+		for _, connection in pairs(connects) do
+			if connection then
+				connection:Disconnect()
+				connection = nil
+			end
+		end
+		
+		setmetatable(characterInstance.hitDebounce, nil)
+		
 		task.delay(0.5, function()
 			deadState.Value = true
+			connects.deadStateConnect:Disconnect()
+			connects.deadStateConnect = nil
 		end)
-
-		-- fallDamageConnection:Disconnect()
-		-- fallDamageConnection = nil
+		
+		-- connects.DiedConnection:Disconnect()
+		-- connects.DiedConnection = nil
 	end)
 
 	-- Fall damage:
@@ -623,6 +688,7 @@ function Character_Init.init(charModel)
 			
 			-- Simulated fall damage (if their Y coordinate is low then they ragdoll and die):
 			if characterInstance.humanoidRootPart.CFrame.Y < ragdollYPos then
+				characterInstance.lockOnDebounce.Value = false
 				characterInstance.humanoid.PlatformStand = true
 				ragdollFunction.ragdoll(characterInstance.character, characterInstance.id, true)
 			end
@@ -632,47 +698,6 @@ function Character_Init.init(charModel)
 				break
 			end
 		end
-
-	end)
-
-
-	characterInstance.humanoid.StateEnabledChanged:Connect(function(stateType, stateEnabled)
-		print(stateType)
-		if stateType ~= Enum.HumanoidStateType.Dead then return end -- make sure we're working with the Dead state type
-		-- characterInstance.GlobalRemoteEvent:FireAllClients("updateMyDeadState", {humanoid = characterInstance.humanoid, stateEnabled = stateEnabled})
-		print("Dead")
-		deadState.Value = stateEnabled
-	end)
-
-	characterInstance.lockOnDebounce:GetPropertyChangedSignal("Value"):Connect(function()
-
-		characterInstance.SetSpeed(true)
-		-- Turn off AutoRotate if we're locked on, and vice versa:
-		characterInstance.humanoid.AutoRotate = not characterInstance.lockOnDebounce.Value
-
-
-		if characterInstance.lockOnDebounce.Value == true then
-			warn("Lock on true for:", characterInstance.character.Name)
-
-			-- built-in enemyChar-retrieving code if we dont have enemyChar yet:
-			if not characterInstance.enemyChar then
-				if not characterInstance.raycastInstance then return error("No enemychar nor raycastInstance. Are you even locked-on?") end
-				
-				if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
-                	characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
-				else
-					error({"No humanoid found with the given raycastInstance: ", characterInstance.raycastInstance, "their parent:", characterInstance.raycastInstance.Parent})
-            	end
-			end
-			
-        	characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar:WaitForChild("HumanoidRootPart")
-			characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
-
-		else
-			warn("No more lock on for:", characterInstance.character.Name)
-			characterInstance:block(false)
-		end
-		utilities.sendLockOnSignal(characterInstance)
 
 	end)
 

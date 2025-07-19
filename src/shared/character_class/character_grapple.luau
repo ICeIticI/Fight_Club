@@ -76,11 +76,14 @@ end
 function Character_Grapple:Attempt(enemyInstance) --[[ The character goes to attempt to grab an enemy. If this succeeds, then it'll transition to the :Secure() method. ]]
     grabType = "attempt"
     
-    local trackData = setupGrabAnimation(self.characterInstance)
     self.characterInstance.isGrappling = true
+    self.characterInstance.grappleDelay = true -- Character should NOT be able to spam grapple, such as letting the enemy go and immediately grappling again. Thats absolute B.S (Bad Science for the record)
+    
+    local trackData = setupGrabAnimation(self.characterInstance)
+    print(self.characterInstance.character, self.characterInstance.isGrappling)
     
     self.characterInstance.SetSpeed(false)
-    while not self.characterInstance.speedSet do task.wait(0.1) end -- wait for the speed to get set before proceeding.
+    while not self.characterInstance.speedSet or not enemyInstance.SetSpeed do task.wait(0.1) end -- wait for the speed to get set before proceeding.
 
     -- to prevent positional glitches with grappling (such as going through walls), only reposition the grappler to the receiver if they're facing eachother. Otherwise, move the receiver to the grappler.
     -- This is until we get back grapples post alpha
@@ -111,11 +114,14 @@ function Character_Grapple:EndGrab(enemyInstance)
         enemyInstance.isGrappling = false
         self.characterInstance.reset()
         enemyInstance.reset()
-
     end
     
     self.characterInstance.isInGrappleSuccess = false
     playGrabAnimation(enemyInstance, enemyInstance.lastReceiveData, false)
+
+    task.delay(2, function()
+        self.characterInstance.grappleDelay = false
+    end)
 
 end
 
@@ -178,6 +184,8 @@ function Character_Grapple:GrabAttack(enemyInstance)
 end
 
 function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. Now they can begin throwing blows and what not at the enemy while grappled on, and the enemy cant do anything about it except try to break free. ]]
+    if enemyInstance.humanoid.Health <= 0 or self.characterInstance.humanoid.Health <= 0 then return end
+    
     grabType = "secure"
     local trackData = setupGrabAnimation(self.characterInstance)
     playGrabAnimation(self.characterInstance, trackData)
@@ -201,7 +209,9 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     grabMotor.Name = "grabMotor"
     grabMotor.Part0 = self.characterInstance.grapplePart
     grabMotor.Part1 = enemyInstance.humanoidRootPart
-    grabMotor.Parent = grabMotor.Part0
+    if not game:GetService("RunService"):IsStudio() then
+        grabMotor.Parent = grabMotor.Part0
+    end
     -- motor.C0 = self.characterInstance.humanoidRootPart.CFrame:ToObjectSpace(enemyInstance.humanoidRootPart.CFrame)
     -- motor.C1 = CFrame.new() -- usually identity
     -- motor.Parent = self.characterInstance.humanoidRootPart
@@ -213,7 +223,8 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     self.characterInstance.isAttacking.Value = false
 
     while enemyInstance.isInSecureGrapple 
-    and self.characterInstance.isGrappling do
+    and self.characterInstance.isGrappling
+    and self.characterInstance.lockOnDebounce.Value do
         
         if self.characterInstance.movingDirection.Value == "right" then
             enemyInstance.movingDirection.Value = "left"
@@ -241,7 +252,6 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
 
         task.wait(0.1)
     end
-
     
     self.characterInstance.setCharacterMassless(enemyInstance.character, false)
     enemyInstance.humanoid.PlatformStand = false

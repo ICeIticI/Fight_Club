@@ -28,7 +28,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
     local characterInstance = characters:GetCharacterObjectByPlayer(plr)
     if not characterInstance then return end
     if characterInstance.humanoid.Health <= 0 then return end
-    if characterInstance.isGrappling and not characterInstance.isInGrappleSuccess and not characterInstance.isInSecureGrapple then return end
+    -- if characterInstance.isGrappling and not characterInstance.isInGrappleSuccess and not characterInstance.isInSecureGrapple then return end
 
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
 
@@ -39,6 +39,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         and not characterInstance.waitingToAttack
         and not characterInstance.isGrappling
         then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
+
             characterInstance.lockOnRayParams = utilities.initializeLockOnRayParams(characterInstance)
             
             characterInstance.raycastResult = workspace:Raycast(
@@ -253,7 +254,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then
-                        print(characterInstance.followUpCount)
                         if characterInstance.pairedChain < characterInstance.PairedChainMAX then -- The third paired attack, we wanna have the receiver determine the anim so it will be calculated by them, after this player's characterInstance checks its the max value in character_attack.
                             -- characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                             --[[
@@ -279,15 +279,19 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
         if characterInstance.boolCheck({
             isAttacking = characterInstance.isAttacking.Value, 
-            isBlocking = characterInstance.isBlocking, 
-            isCountering = characterInstance.isCountering, 
+            isBlocking = characterInstance.isBlocking,
+            isCountering = characterInstance.isCountering,
+            isDodging = characterInstance.isDodging,
             isGettingHit = characterInstance.isGettingHit, 
             isGrappling = characterInstance.isGrappling,})
         and characterInstance.lockOnDebounce.Value
         and characterInstance.enemyChar.Humanoid.Health > 0
         and not characterInstance.isInSecureGrapple
         and not characterInstance.isInGrappleSuccess
+
+        and not characterInstance.grappleDelay
         then
+            print(characterInstance.character, characterInstance.isGrappling)
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             characterInstance:grab(enemyInstance, nil)
             -- if enemyInstance:receive("grabAttempt", characterInstance) == false then
@@ -300,18 +304,19 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
     elseif BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
         
         if active then
-
             if not characterInstance.nextInput then
                 characterInstance.nextInput = "block"
+                print("changed nextInput to BLOCK")
             end
+
             -- if the character isInSecureGrapple, that means THEY'RE the one GETTING grappled, not the one doing it. When doing a secure grapple to an enemy, this variable will be true for the enemy.
-            if characterInstance.isGrappling and not characterInstance.isInSecureGrapple and not characterInstance.isAttacking.Value then
+            if characterInstance.isGrappling and characterInstance.grappleDelay and not characterInstance.isInSecureGrapple and not characterInstance.isAttacking.Value then
+                print("y u do this 2 me")
                 characterInstance.isGrappling = false
                 return
             end
             -- If the player is holding the block button, we store that as a variable:
             characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
-            print(characterInstance.stamina)
             if characterInstance.lockOnDebounce.Value 
             and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGrappling = characterInstance.isGrappling}) 
             and not characterInstance.pairedPlaying

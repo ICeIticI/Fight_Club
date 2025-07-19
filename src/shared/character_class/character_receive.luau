@@ -480,9 +480,10 @@ end
 function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ An enemy is attempting to grab us ]]
     local attackerAnim = attacker_characterInstance.currentGrab_trackData.Animation
 
+    self.characterInstance.isGrappling = true
+    self.characterInstance.SetSpeed(false)
     self.characterInstance.attackingChar = attacker_characterInstance.character
 
-    self.characterInstance.isGrappling = true
     local trackData = setupReceiveAnimation(self.characterInstance, "grabAttempt", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
 
@@ -490,9 +491,11 @@ function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ A
     -- If its the block button, then their opportunity is gone. No matter what button they press now, even pressed in the time frame, will mean they will get grapped.
     self.characterInstance.nextInput = nil -- will be set on their next action input
     print(self.characterInstance.character.Name .. " is receiving a grab")
+    print(self.characterInstance.nextInput)
     while trackData.IsPlaying do task.wait() end -- wait for the whole grab attempt to end before returning true or false (which means we succeeded or not with tryna grab the enemy)
     
     print(self.characterInstance.character.Name .. " is no longer getting grabbed")
+    print(self.characterInstance.nextInput)
     if self.characterInstance.nextInput == "grab" and not self.characterInstance.isBlocking then
         print("grab defend successful")
         return true -- we successfully defended against the grab attempt

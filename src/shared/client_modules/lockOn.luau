@@ -81,7 +81,6 @@ function LockOn.Lock(publicVariables)
 	for varName, value in pairs(publicVariables) do
 		ClientVariables[varName] = value
 	end
-	print("Ho")
 		
 	ClientVariables.FC_IdleTRACK:Play()
 	
@@ -118,6 +117,12 @@ function LockOn.Lock(publicVariables)
 	ClientVariables.subjectTween = TweenService:Create(ClientVariables.subject, subjectTweenInfo, subjectTweenGoal)
 	ClientVariables.subjectTween:Play()
 	-- ClientVariables.subjectTween.Completed:Wait()
+	-- print({ClientVariables.lockOnDebounce.Value, 
+	-- ClientVariables.humanoidRootPart, 
+	-- (ClientVariables.humanoidRootPart.Position - ClientVariables.enemyHumanoidRootPart.Position).Magnitude < 8,
+	-- not ClientVariables.enemyHumanoid.deadState.Value,
+	-- not ClientVariables.humanoid.deadState.Value})
+
 	faceEnemy(ClientVariables.subject)
 	while ClientVariables.lockOnDebounce.Value == true
 	and (ClientVariables.humanoidRootPart.Position - ClientVariables.enemyHumanoidRootPart.Position).Magnitude < 8
@@ -131,12 +136,16 @@ function LockOn.Lock(publicVariables)
 	end
 
 	if movementConnection then
-		print(movementConnection)
-		movementConnection:Disconnect()
-		movementConnection = nil
+		-- movementConnection:Disconnect()
+		-- movementConnection = nil
 		ClientVariables.stopMovementAnimations()
 	end
 	warn(movementConnection)
+
+	-- No-longer locked-on. Ensure old, irrelevant data doesn't get used
+	for varName, _ in pairs(publicVariables) do -- public variables aint useful after lock-off
+		ClientVariables[varName] = nil
+	end
 
 	return
 end

@@ -14,6 +14,12 @@ local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.Cli
 local UIManager = require(game.ReplicatedStorage.Shared.client_modules.UIManager)
 
 -- New Modules:
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
+
+ClientVariables.isOnMobile = -- Will be either true or false if they're on mobile or not
+    UserInputService.TouchEnabled
+	and not UserInputService.KeyboardEnabled
+	and not UserInputService.MouseEnabled
 
 local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
 require(game.ReplicatedStorage.Shared.client_modules.REs_RFs).init()
@@ -45,19 +51,18 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char
 end)
 
 -- User Input Types
-local AttackInputs = {[Enum.UserInputType.MouseButton1] = true, [Enum.UserInputType.Touch] = true, [Enum.KeyCode.ButtonB] = true} -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
-local BlockInputs = {[Enum.UserInputType.MouseButton2] = true, [Enum.KeyCode.ButtonX] = true}
-local GrappleInputs = {[Enum.KeyCode.R] = true, [Enum.KeyCode.ButtonY] = true}
-local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -- May have LockOnInputs for each system
+local AttackInputs = utilities.userInputTypes.AttackInputs -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
+local BlockInputs = utilities.userInputTypes.BlockInputs
+local GrappleInputs = utilities.userInputTypes.GrappleInputs
+local LockOnInputs = utilities.userInputTypes.LockOnInputs -- May have LockOnInputs for each system
 
-
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+local function onInputBegan(input, gameProcessedEvent)
     if gameProcessedEvent then return end -- Player is typing in chat or UI
-
 
     local inputTable = {} -- Because the server wont let us send the input object, we need to create a table representing input that are strings
     inputTable.UserInputType = input.UserInputType
     inputTable.KeyCode = input.KeyCode
+
     
     -- Making sure the given input is what we're looking for. This can get exploited since its on the client, but all that will do is make the server performance lessen.
     if (LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode])
@@ -82,11 +87,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         --     -- lockOn.Unlock() -- will run as soon as the player stops qualifying to be able to lock on (such as walking away or pressing Q again)
         -- end
     end
-end)
+end
 
-UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
+local function onInputEnded(input, gameProcessedEvent)
     if gameProcessedEvent then return end -- Player is typing in chat or UI
-
 
     local inputTable = {} -- Because the server wont let us send the input object, we need to create a table representing input that are strings
     inputTable.UserInputType = input.UserInputType
@@ -99,5 +103,28 @@ UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
     --     ReceivingAndCountering.EndBlock(input)
     --     -- receiveCommand:CallEndBlock(input)
         input_check_FUNCTION:InvokeServer(inputTable, false)
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    onInputBegan(input, gameProcessedEvent)
+end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
+    onInputEnded(input, gameProcessedEvent)
+end)
+
+while not ClientVariables.LocalBindableEvent do task.wait() end
+
+ClientVariables.LocalBindableEvent.Event:Connect(function(protocol, data)
+    if protocol == "mobileInputBegan" then
+        if ClientVariables.isAttackButtonHeld and ClientVariables.isBlockButtonHeld then
+            data.input.UserInputType = "mobile_grabButton"
+        end
+        print(data.input.UserInputType)
+
+        onInputBegan(data.input)
+    elseif protocol == "mobileInputEnded" then
+        onInputEnded(data.input)
     end
 end)

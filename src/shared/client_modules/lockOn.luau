@@ -37,52 +37,55 @@ end
 local function createSubject(subject) --[[Creates a invisible part (subject) between the player and the enemy that the camera will be focused on]]
 	subject.Name = "subject"
 	subject.Size = Vector3.new(0.1, 0.1, 0.1)
-	subject.Transparency = 0.75
+	subject.Transparency = 1
 	subject.CanCollide = false
 	subject.Anchored = true
 	subject.Parent = ClientVariables.character
 end
 
+
 local movementConnection
 
-movementConnection = ClientVariables.movingDirection:GetPropertyChangedSignal("Value"):Connect(function()
+local function lockOnMovement()
 	if not ClientVariables.lockOnDebounce.Value then return end
 
-		local currentVelocityMagnitude = ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude
-		ClientVariables.stopMovementAnimations()
+	local currentVelocityMagnitude = ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude
+	ClientVariables.stopMovementAnimations()
 
-		if currentVelocityMagnitude > 0 or (ClientVariables.isInSecureGrapple) then
-			
-			-- Wait until we move before playing a momentum animation:
-			while ClientVariables.velocityMagnitude and ClientVariables.velocityMagnitude < 0.1 do task.wait() end
-			-- If the velocity has changed since we waited then disregard this connection, as a newer one is active:
-			if not ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude == currentVelocityMagnitude then return end
-			if not movementConnection then
-				ClientVariables.stopMovementAnimations()
-				return
-			end
-
-			if ClientVariables.movingDirection.Value == "right" then
-				ClientVariables.FC_SideMomentumTRACK:Play()
-			elseif ClientVariables.movingDirection.Value == "left" then	
-				ClientVariables.FC_SideMomentumTRACK:AdjustSpeed(-1)
-				ClientVariables.FC_SideMomentumTRACK:Play()
-			elseif ClientVariables.movingDirection.Value == "forwards" then
-				ClientVariables.FC_StraightMomentumTRACK:Play()
-			elseif ClientVariables.movingDirection.Value == "backwards" then
-				ClientVariables.FC_StraightMomentumTRACK:AdjustSpeed(-1)
-				ClientVariables.FC_StraightMomentumTRACK:Play()
-			end
+	if currentVelocityMagnitude > 0 or (ClientVariables.isInSecureGrapple) then
+		
+		-- Wait until we move before playing a momentum animation:
+		while ClientVariables.velocityMagnitude and ClientVariables.velocityMagnitude < 0.1 do task.wait() end
+		-- If the velocity has changed since we waited then disregard this connection, as a newer one is active:
+		if not ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude == currentVelocityMagnitude then return end
+		if not movementConnection then
+			ClientVariables.stopMovementAnimations()
+			return
 		end
-	end)
+
+		if ClientVariables.movingDirection.Value == "right" then
+			ClientVariables.FC_SideMomentumTRACK:Play()
+		elseif ClientVariables.movingDirection.Value == "left" then	
+			ClientVariables.FC_SideMomentumTRACK:AdjustSpeed(-1)
+			ClientVariables.FC_SideMomentumTRACK:Play()
+		elseif ClientVariables.movingDirection.Value == "forwards" then
+			ClientVariables.FC_StraightMomentumTRACK:Play()
+		elseif ClientVariables.movingDirection.Value == "backwards" then
+			ClientVariables.FC_StraightMomentumTRACK:AdjustSpeed(-1)
+			ClientVariables.FC_StraightMomentumTRACK:Play()
+		end
+	end
+end
+
 
 function LockOn.Lock(publicVariables)
 	-- sync public variables to client:
 	for varName, value in pairs(publicVariables) do
 		ClientVariables[varName] = value
 	end
-		
+	
 	ClientVariables.FC_IdleTRACK:Play()
+	movementConnection = ClientVariables.movingDirection:GetPropertyChangedSignal("Value"):Connect(lockOnMovement)
 	
 	-- character changes below:
 	-- ClientVariables.humanoid.AutoRotate = false -- doesnt allow the player to rotate themself while locked on.
@@ -136,8 +139,8 @@ function LockOn.Lock(publicVariables)
 	end
 
 	if movementConnection then
-		-- movementConnection:Disconnect()
-		-- movementConnection = nil
+		movementConnection:Disconnect()
+		movementConnection = nil
 		ClientVariables.stopMovementAnimations()
 	end
 	warn(movementConnection)

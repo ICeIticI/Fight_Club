@@ -10,6 +10,9 @@ local healthFrameLabel
 local staminaBar
 local staminaFrameLabel
 
+local mobile_attackButton
+local mobile_blockButton
+
 local staminaChecker
 local healthChecker
 
@@ -58,6 +61,34 @@ function UIManager.manageUI()
     healthFrameLabel = gameFrame.healthFrameLabel
     staminaBar = gameFrame.staminaLabel
     staminaFrameLabel = gameFrame.staminaFrameLabel
+
+    -- mobile UI:
+    if ClientVariables.isOnMobile then
+        
+        gameFrame.mobile_controls.Visible = true
+
+        mobile_attackButton = gameFrame.mobile_controls.attackButton
+        mobile_blockButton = gameFrame.mobile_controls.blockButton
+    
+        mobile_attackButton.InputBegan:Connect(function()
+            ClientVariables.isAttackButtonHeld = true
+            -- ClientVariables.isBlockButtonHeld = true
+
+            ClientVariables.LocalBindableEvent:Fire("mobileInputBegan", {input = {UserInputType = "mobile_attackButton"}})
+        end)
+        mobile_attackButton.InputEnded:Connect(function()
+            ClientVariables.isAttackButtonHeld = false
+        end)
+    
+        mobile_blockButton.InputBegan:Connect(function()
+            ClientVariables.isBlockButtonHeld = true
+            ClientVariables.LocalBindableEvent:Fire("mobileInputBegan", {input = {UserInputType = "mobile_blockButton"}})
+        end)
+        mobile_blockButton.InputEnded:Connect(function()
+            ClientVariables.isBlockButtonHeld = false
+            ClientVariables.LocalBindableEvent:Fire("mobileInputEnded", {input = {UserInputType = "mobile_blockButton"}})
+        end)
+    end
 
     -- local drainRate = 1 -- how much stamina gets drained per wait()
     -- local regenRate = 1 -- how much stamina gets regenerated per wait()

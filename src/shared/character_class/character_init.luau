@@ -263,10 +263,11 @@ function Character_Init.init(charModel)
 	-- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 	characterInstance.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
-	characterInstance.LocalBindableEvent = Instance.new("BindableEvent")
-	characterInstance.LocalBindableEvent.Name = "LocalBindableEvent"
-	characterInstance.LocalBindableEvent.Parent = game.ReplicatedStorage
-	
+	characterInstance.LocalBindableEvent = game.ReplicatedStorage:FindFirstChild("LocalBindableEvent") or (function()
+		characterInstance.LocalBindableEvent = Instance.new("BindableEvent")
+		characterInstance.LocalBindableEvent.Name = "LocalBindableEvent"
+		characterInstance.LocalBindableEvent.Parent = game.ReplicatedStorage
+	end)()
 	function characterInstance.boolCheck(boolTable) --[[ Function that will check the given boolean values. If any of them are true, then this will return false. If none of them are true, then this will return true. ]]
 		local trueBoolTbl = {} -- Table that will store bools that are true, which will mean the boolCheck failed
 

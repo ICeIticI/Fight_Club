@@ -157,7 +157,7 @@ function Character:basicAttack(enemyInstance) --[[ The character will do some so
                 self:setLinearVelocity(Vector3.new(0, 0, speed), timeToArrive)
             end
 
-        if self.comboCounter <= 2 and self.enemyHumanoid.Health > 10 then
+        if self.comboCounter <= 2 and self.enemyChar.Humanoid.Health > 10 then
             -- character_attack.level1()
             self.character_attack:level1()
         elseif self.comboCounter >= 3 or self.enemyHumanoid.Health <= 10 then

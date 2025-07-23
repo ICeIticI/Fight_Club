@@ -16,10 +16,10 @@ local utilities = require(game.ReplicatedStorage.Shared.utilities)
 local Input_Check = {}
 
 -- User Input Types
-local AttackInputs = {[Enum.UserInputType.MouseButton1] = true, [Enum.UserInputType.Touch] = true, [Enum.KeyCode.ButtonB] = true} -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
-local BlockInputs = {[Enum.UserInputType.MouseButton2] = true, [Enum.KeyCode.ButtonX] = true}
-local GrappleInputs = {[Enum.KeyCode.R] = true, [Enum.KeyCode.ButtonY] = true}
-local LockOnInputs = {[Enum.KeyCode.Q] = true, [Enum.KeyCode.ButtonL2] = true} -- May have LockOnInputs for each system
+local AttackInputs = utilities.userInputTypes.AttackInputs -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
+local BlockInputs = utilities.userInputTypes.BlockInputs
+local GrappleInputs = utilities.userInputTypes.GrappleInputs
+local LockOnInputs = utilities.userInputTypes.LockOnInputs -- May have LockOnInputs for each system
 
 
 local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
@@ -32,152 +32,17 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
     if LockOnInputs[input.UserInputType] or LockOnInputs[input.KeyCode] then
 
-        if not characterInstance.isAttacking.Value
-        and not characterInstance.isGettingHit 
-        and not characterInstance.pairedPlaying 
-        and not characterInstance.isDodging
-        and not characterInstance.waitingToAttack
-        and not characterInstance.isGrappling
-        then -- the player should not be able to lock off when in action, whether thats attacking, blocking, dodging, countering, etc
-
-            characterInstance.lockOnRayParams = utilities.initializeLockOnRayParams(characterInstance)
-            
-            characterInstance.raycastResult = workspace:Raycast(
-                characterInstance.humanoidRootPart.Position,
-                characterInstance.humanoidRootPart.CFrame.LookVector * 8,
-                characterInstance.lockOnRayParams
-            ) -- Raycast in front of player to find an enemy
-
-            
-            if not characterInstance.raycastResult then
-                characterInstance.lockOnDebounce.Value = false
-                return warn("nothing in the raycast result found")
-            -- else
-            --     warn(
-            --         {
-            --         not characterInstance.isAttacking.Value,
-            --         not characterInstance.isGettingHit,
-            --         not characterInstance.pairedPlaying, 
-            --         not characterInstance.isDodging,
-            --         not characterInstance.isBlocking, 
-            --         not characterInstance.waitingToAttack,
-            --         not characterInstance.lockOnDebounce.Value
-            --     },
-            --     characterInstance.raycastResult.Instance, 
-            --     characterInstance.raycastResult.Instance.Parent,
-            --     characterInstance..Parent.Parent
-            -- )
-            end
-
-            characterInstance.raycastInstance = characterInstance.raycastResult.Instance
-            
-            -- if not characterInstance.raycastResult then return warn("No result") end
-
-            -- if characterInstance.raycastResult.Instance.Parent:FindFirstChildWhichIsA("Humanoid") then
-            --     characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
-            -- elseif characterInstance.raycastResult.Instance.Parent.Parent:FindFirstChildWhichIsA("Humanoid") or characterInstance.raycastResult.Instance:GetAttribute("ReceiveBox") then
-            --     characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent.Parent
-            -- end
-            if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):FindFirstChildWhichIsA("Humanoid") then
-                --[[ we may have raycasted their arm that could potentially be 
-                sticking through a wall. Dont wanna lock onto an enemy behind a 
-                wall, so we will re-raycast, but this time, DIRECTLY to the HRP.
-                If there is somehow no raycast, it means they're probably just
-                behind a wall and their arm was sticking through it or something.]]
-
-                if characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model").Humanoid.deadState.Value == true then return end
-                
-                local targetRootPart = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model").HumanoidRootPart
-                if not targetRootPart then return error("Not sure how theres not HRP for the target you selected, even though we already made sure, but here we are I guess we screwed up somehow lol") end
-
-                -- Filter out everything of our target except their HRP:
-                local newFilter = characterInstance.lockOnRayParams.FilterDescendantsInstances
-                -- table.insert(newFilter, characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"))
-
-                for _, child in pairs(characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"):GetChildren()) do
-                    if child ~= targetRootPart then
-                        table.insert(newFilter, child)
-                    end
-                end
-
-                characterInstance.lockOnRayParams.FilterDescendantsInstances = newFilter
-
-
-                -- Then raycast again. Should only get their HRP in the raycast if anything:
-
-                characterInstance.raycastResult = workspace:Raycast(
-                    characterInstance.humanoidRootPart.Position,
-                    (targetRootPart.Position - characterInstance.humanoidRootPart.Position).Unit * ((targetRootPart.Position - characterInstance.humanoidRootPart.Position).Magnitude + 0.1), -- Adds 0.1 extra length to the end to make sure we have enough length to reach the HRP
-                    characterInstance.lockOnRayParams
-                )
-
-                if not characterInstance.raycastResult then error("No instance found on this second cast to lock onto the enemy!") end
-
-                characterInstance.raycastInstance = characterInstance.raycastResult.Instance
-
-                local potentialEnemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
-
-                if potentialEnemyChar:FindFirstChildWhichIsA("Humanoid") then
-                    characterInstance.enemyChar = potentialEnemyChar
-                else
-                    warn("The character is behind a wall or something.. cant lock on.")
-                    characterInstance.enemyChar = nil
-                end
-            end
-
-            local potentialEnemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model"))
-
-            if not characterInstance.lockOnDebounce.Value -- can't be locked on already
-            and characterInstance.enemyChar
-            and characterInstance.raycastInstance
-            and potentialEnemyInstance and not potentialEnemyInstance.isGrappling
-            
-            and active
-            then -- We found an alive enemy to lock onto (that has a characterInstance, making them a fighter. The tavern keeper, for example, doesn't have a characterInstance.).
-                -- characterInstance.enemyChar = characterInstance.raycastResult.Instance.Parent
-                -- characterInstance.enemyHumanoid = characterInstance.enemyChar:FindFirstChild("Humanoid")
-                characterInstance.lockOnDebounce.Value = not characterInstance.lockOnDebounce.Value -- always assures lockOnDebouce is opposite of itself to change. Saves me lines of code
-                    
-                    
-                -- if not game.Players:GetPlayerFromCharacter(characterInstance.enemyChar) then -- then our target isn't a player. We'll send a bindable event to the character
-                --     if characterInstance.enemyChar.Name == "TestDummy" then
-                --         characterInstance.LocalBindableEvent:Fire(characterInstance.lockOnDebounce)
-                --     end
-                -- end
-                
-            elseif (
-                characterInstance.lockOnDebounce.Value
-            ) or (
-                characterInstance.raycastResult == nil
-                and characterInstance.lockOnDebounce.Value == true
-            ) or (
-                not active
-            )
-            then -- no enemy detected by raycast
-                characterInstance.lockOnDebounce.Value = false
-            end
-        
-            -- GameVariables.lockOnDebounce.Value = not GameVariables.lockOnDebounce.Value
-            
-            -- if characterInstance.lockOnDebounce.Value == true then -- Runs when the player locks onto somebody
-            -- -- Passed the lock-on check. Activate the lock-on code:
-
-
-            -- end
-
-            -- if workspace:Raycast(characterInstance.humanoidRootPart.Position,
-            --                     characterInstance.humanoidRootPart.CFrame.LookVector * 7,
-            --                     characterInstance.lockOnRayParams) 
-            -- then
-            --     characterInstance.lockOnDebounce.Value = false
-            -- end
-        end
+        utilities.activateLockOn(characterInstance, utilities, characters, active)
 
     elseif AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode] then
         
         -- if not characterInstance.nextInput then
         --     characterInstance.nextInput = "attack"
         -- end
+
+        if not characterInstance.lockOnDebounce.Value then
+            utilities.activateLockOn(characterInstance, utilities, characters, active)
+        end
 
         if characterInstance.isInSecureGrapple then
             characterInstance.escapeGrappleProgress += characterInstance.escapeGrappleProgressPower
@@ -304,6 +169,11 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
     elseif BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
         
         if active then
+
+            if not characterInstance.lockOnDebounce.Value then
+                utilities.activateLockOn(characterInstance, utilities, characters, active)
+            end
+
             if not characterInstance.nextInput then
                 characterInstance.nextInput = "block"
                 print("changed nextInput to BLOCK")
@@ -315,6 +185,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 characterInstance.isGrappling = false
                 return
             end
+
             -- If the player is holding the block button, we store that as a variable:
             characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
             if characterInstance.lockOnDebounce.Value 
@@ -326,9 +197,9 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             end
         else
             -- If the player is holding the block button, we store that as a variable:
-            if BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
+            -- if BlockInputs[input.UserInputType] or BlockInputs[input.KeyCode] then
                 characterInstance.isBlockBeingPressed = false
-            end
+            -- end
 
             if 
             (characterInstance.BlockStartAnimPlaying 

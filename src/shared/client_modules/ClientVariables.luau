@@ -55,8 +55,14 @@ ClientVariables.plrObjectsFolder = ClientVariables.player:WaitForChild(ClientVar
 
 -- Global Remote Event - Because each player having their own remote event is redundant.
 ClientVariables.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
+
 -- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 ClientVariables.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
+
+-- Local Remote Event:
+ClientVariables.LocalBindableEvent = game.ReplicatedStorage:WaitForChild("LocalBindableEvent")
+
+
 -- User Input Types
 ClientVariables.AttackInputs = {[Enum.UserInputType.MouseButton1] = true, [Enum.UserInputType.Touch] = true, [Enum.KeyCode.ButtonB] = true} -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
 ClientVariables.BlockInputs = {[Enum.UserInputType.MouseButton2] = true, [Enum.KeyCode.ButtonX] = true}

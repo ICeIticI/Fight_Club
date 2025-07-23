@@ -176,16 +176,21 @@ function Character_Init.init(charModel)
 
 	-- Stamina management:
 
-	characterInstance.maxStamina = Instance.new("IntValue") -- the maximum stamina of the character. This value will likely change depending on what abilities the character has that grant them more or less stamina
-	characterInstance.maxStamina.Name = "maxStamina"
-	characterInstance.maxStamina.Value = 100
-	characterInstance.maxStamina.Parent = characterInstance.plrObjectsFolder
+	characterInstance.maxStamina = characterInstance.plrObjectsFolder:FindFirstChild("maxStamina") or (function()
+		characterInstance.maxStamina = Instance.new("IntValue") -- the maximum stamina of the character. This value will likely change depending on what abilities the character has that grant them more or less stamina
+		characterInstance.maxStamina.Name = "maxStamina"
+		characterInstance.maxStamina.Value = 100
+		characterInstance.maxStamina.Parent = characterInstance.plrObjectsFolder
+		return characterInstance.maxStamina
+	end)()
 
-
-	characterInstance.stamina = Instance.new("IntValue") -- the stamina of the player. If they get 0 they wont be able to block or parry
-	characterInstance.stamina.Name = "stamina"
-	characterInstance.stamina.Value = characterInstance.maxStamina.Value -- start out with max stamina
-	characterInstance.stamina.Parent = characterInstance.plrObjectsFolder
+	characterInstance.stamina = characterInstance.plrObjectsFolder:FindFirstChild("stamina") or (function()
+		characterInstance.stamina = Instance.new("IntValue") -- the stamina of the player. If they get 0 they wont be able to block or parry
+		characterInstance.stamina.Name = "stamina"
+		characterInstance.stamina.Value = characterInstance.maxStamina.Value -- start out with max stamina
+		characterInstance.stamina.Parent = characterInstance.plrObjectsFolder
+		return characterInstance.stamina
+	end)()
 
 
 	local linearVelocity = Instance.new("LinearVelocity")
@@ -354,6 +359,7 @@ function Character_Init.init(charModel)
 
 	function characterInstance.reset() --[[ Will set variables of the player back to what they were origianlly, giving the player their default controls back. ]]--
 		characterInstance.isDodging = false
+		characterInstance.isBlocking = false
 		characterInstance.isCountering = false
 		characterInstance.isGettingHit = false
 		
@@ -373,6 +379,7 @@ function Character_Init.init(charModel)
 		characterInstance.followUpCount = 0
 		characterInstance.comboCounter = 0
 		characterInstance.isAttacking.Value = false
+		characterInstance.BlockStartAnimPlaying = false
 		characterInstance.canSyncBlock = true
 		characterInstance.pairedPlaying = false
 		characterInstance.pairedChain = 0
@@ -612,6 +619,7 @@ function Character_Init.init(charModel)
 
 		else
 			warn("No more lock on for:", characterInstance.character.Name)
+			characterInstance.reset()
 			characterInstance:block(false)
 		end
 		utilities.sendLockOnSignal(characterInstance)

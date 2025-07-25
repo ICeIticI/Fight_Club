@@ -32,12 +32,8 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
             
         else
 
-            -- Disables the grapple weld before killing the enemy if they're about to die, or else the attacker will also die for some reason:
-            if characterInstance.isGrappling and trackData.attackLvl == 3 then
-                -- characterInstance.humanoidRootPart:FindFirstChild("grapplePart"):FindFirstChild("grabMotor"):Destroy()
-                -- characterInstance.isGrappling = false
-                -- characterInstance.lockOnDebounce.Value = false
-                -- characterInstance.SetSpeed(true)
+            if characterInstance.isGrappling then -- grapple attacks dont inherently make the camera shake so we gotta do it here
+                characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "shakeCamera", {type = "Strike"})
             end
             print(trackData)
             characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)

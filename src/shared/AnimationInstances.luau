@@ -104,36 +104,42 @@ AnimationInstances.FC_LeftHook1RECEIVER.Name = "FC_LeftHook1RECEIVER"
 AnimationInstances.FC_LeftHook1RECEIVER.AnimationId = "rbxassetid://17012688911"
 AnimationInstances.FC_LeftHook1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_LeftHook1RECEIVER:SetAttribute("EventCategory", "bAttack")
+AnimationInstances.FC_LeftHook1RECEIVER:SetAttribute("AnimDirection", "Left")
 
 AnimationInstances.FC_RightHook1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_RightHook1RECEIVER.Name = "FC_RightHook1RECEIVER"
 AnimationInstances.FC_RightHook1RECEIVER.AnimationId = "rbxassetid://17149671845"
 AnimationInstances.FC_RightHook1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_RightHook1RECEIVER:SetAttribute("EventCategory", "bAttack")
+AnimationInstances.FC_RightHook1RECEIVER:SetAttribute("AnimDirection", "Right")
 
 AnimationInstances.FC_LeftUppercutRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_LeftUppercutRECEIVER.Name = "FC_LeftUppercutRECEIVER"
 AnimationInstances.FC_LeftUppercutRECEIVER.AnimationId = "rbxassetid://18224267835"
 AnimationInstances.FC_LeftUppercutRECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_LeftUppercutRECEIVER:SetAttribute("EventCategory", "bAttack")
+AnimationInstances.FC_LeftUppercutRECEIVER:SetAttribute("AnimDirection", "Left")
 
 AnimationInstances.FC_RightUppercutRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_RightUppercutRECEIVER.Name = "FC_RightUppercutRECEIVER"
 AnimationInstances.FC_RightUppercutRECEIVER.AnimationId = "rbxassetid://18224216460"
 AnimationInstances.FC_RightUppercutRECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_RightUppercutRECEIVER:SetAttribute("EventCategory", "bAttack")
+AnimationInstances.FC_RightUppercutRECEIVER:SetAttribute("AnimDirection", "Right")
 
 AnimationInstances.FC_LeftHaymakerRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_LeftHaymakerRECEIVER.Name = "FC_LeftHaymakerRECEIVER"
 AnimationInstances.FC_LeftHaymakerRECEIVER.AnimationId = "rbxassetid://18195570469"
 AnimationInstances.FC_LeftHaymakerRECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_LeftHaymakerRECEIVER:SetAttribute("EventCategory", "bAttack")
+AnimationInstances.FC_LeftHaymakerRECEIVER:SetAttribute("AnimDirection", "Left")
 
 AnimationInstances.FC_RightHaymakerRECEIVER = Instance.new("Animation")
 AnimationInstances.FC_RightHaymakerRECEIVER.Name = "FC_RightHaymakerRECEIVER"
 AnimationInstances.FC_RightHaymakerRECEIVER.AnimationId = "rbxassetid://17231536892"
 AnimationInstances.FC_RightHaymakerRECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_RightHaymakerRECEIVER:SetAttribute("EventCategory", "bAttack")
+AnimationInstances.FC_RightHaymakerRECEIVER:SetAttribute("AnimDirection", "Right")
 
 
 
@@ -453,6 +459,7 @@ AnimationInstances.FC_GrabSuccess1.AnimationId = "rbxassetid://94042116341448"
 AnimationInstances.FC_GrabSuccess1:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabSuccess1:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabSuccess1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabSuccess1:SetAttribute("AnimDirection", "None") -- we have a "None" value so when we shake the camera for the receiver, it randomizes
 
 AnimationInstances.FC_GrabSuccess1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabSuccess1RECEIVER.Name = "FC_GrabSuccess1RECEIVER"
@@ -460,6 +467,7 @@ AnimationInstances.FC_GrabSuccess1RECEIVER.AnimationId = "rbxassetid://807701484
 AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabSuccess1RECEIVER:SetAttribute("AnimDirection", "None") -- we have a "None" value so when we shake the camera for the receiver, it randomizes
 
 AnimationInstances.FC_GrabSecure1 = Instance.new("Animation")
 AnimationInstances.FC_GrabSecure1.Name = "FC_GrabSecure1"
@@ -481,6 +489,7 @@ AnimationInstances.FC_GrabAttack1.AnimationId = "rbxassetid://127844448562647"
 AnimationInstances.FC_GrabAttack1:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabAttack1:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack1:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabAttack1:SetAttribute("AnimDirection", "None")
 
 AnimationInstances.FC_GrabAttack1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabAttack1RECEIVER.Name = "FC_GrabAttack1RECEIVER"
@@ -488,6 +497,7 @@ AnimationInstances.FC_GrabAttack1RECEIVER.AnimationId = "rbxassetid://1197890737
 AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabAttack1RECEIVER:SetAttribute("AnimDirection", "None")
 
 AnimationInstances.FC_GrabAttack2 = Instance.new("Animation")
 AnimationInstances.FC_GrabAttack2.Name = "FC_GrabAttack2"
@@ -495,6 +505,8 @@ AnimationInstances.FC_GrabAttack2.AnimationId = "rbxassetid://89135848497992"
 AnimationInstances.FC_GrabAttack2:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabAttack2:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack2:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabAttack2:SetAttribute("AnimDirection", "None")
+
 
 AnimationInstances.FC_GrabAttack2RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabAttack2RECEIVER.Name = "FC_GrabAttack2RECEIVER"
@@ -502,6 +514,7 @@ AnimationInstances.FC_GrabAttack2RECEIVER.AnimationId = "rbxassetid://1124904894
 AnimationInstances.FC_GrabAttack2RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabAttack2RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack2RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabAttack2RECEIVER:SetAttribute("AnimDirection", "None")
 
 AnimationInstances.FC_GrabAttack3 = Instance.new("Animation")
 AnimationInstances.FC_GrabAttack3.Name = "FC_GrabAttack3"
@@ -509,6 +522,7 @@ AnimationInstances.FC_GrabAttack3.AnimationId = "rbxassetid://92386968277312"
 AnimationInstances.FC_GrabAttack3:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabAttack3:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack3:SetAttribute("AnimType", 1)
+AnimationInstances.FC_GrabAttack3:SetAttribute("AnimDirection", "None")
 
 AnimationInstances.FC_GrabAttack3RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabAttack3RECEIVER.Name = "FC_GrabAttack3RECEIVER"
@@ -516,6 +530,7 @@ AnimationInstances.FC_GrabAttack3RECEIVER.AnimationId = "rbxassetid://1353168754
 AnimationInstances.FC_GrabAttack3RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabAttack3RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabAttack3RECEIVER:SetAttribute("AnimType", 2)
+AnimationInstances.FC_GrabAttack3RECEIVER:SetAttribute("AnimDirection", "None")
 
 AnimationInstances.FC_EndGrab1 = Instance.new("Animation")
 AnimationInstances.FC_EndGrab1.Name = "FC_EndGrab1"
@@ -538,6 +553,7 @@ AnimationInstances.FC_GrabExecute1:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabExecute1:SetAttribute("Grapple", true) -- a false grapple means it ends the grappling session between attacker and receiver.
 AnimationInstances.FC_GrabExecute1:SetAttribute("AnimType", 1)
 AnimationInstances.FC_GrabExecute1:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_GrabExecute1:SetAttribute("AnimDirection", "None")
 
 AnimationInstances.FC_GrabExecute1RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabExecute1RECEIVER.Name = "FC_GrabExecute1RECEIVER"
@@ -546,6 +562,7 @@ AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_GrabExecute1RECEIVER:SetAttribute("AnimDirection", "None")
 
 AnimationInstances.FC_GrabExecute2 = Instance.new("Animation")
 AnimationInstances.FC_GrabExecute2.Name = "FC_GrabExecute2"
@@ -554,6 +571,7 @@ AnimationInstances.FC_GrabExecute2:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabExecute2:SetAttribute("Grapple", true) -- a false grapple means it ends the grappling session between attacker and receiver.
 AnimationInstances.FC_GrabExecute2:SetAttribute("AnimType", 1)
 AnimationInstances.FC_GrabExecute2:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_GrabExecute2:SetAttribute("AnimDirection", "None")
 
 AnimationInstances.FC_GrabExecute2RECEIVER = Instance.new("Animation")
 AnimationInstances.FC_GrabExecute2RECEIVER.Name = "FC_GrabExecute2RECEIVER"
@@ -562,6 +580,7 @@ AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("Paired", true)
 AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("Grapple", true)
 AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("AnimType", 2)
 AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("AttackLevel", 3)
+AnimationInstances.FC_GrabExecute2RECEIVER:SetAttribute("AnimDirection", "None")
 
 -- Temporarly creating tracks to store the length of said track for management:
 

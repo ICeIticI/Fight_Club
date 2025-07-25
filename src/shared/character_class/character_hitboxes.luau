@@ -75,8 +75,8 @@ local function attackHandler(attacker_characterInstance, receiver_characterInsta
     )
     and not receiver_characterInstance.isGrappling
     then
+        attacker_characterInstance.GlobalRemoteEvent:FireClient(attacker_characterInstance.player, "shakeCamera", {type = "Strike"})
         receive(receiver_characterInstance, attacker_characterInstance)
-	
     end
 end
 

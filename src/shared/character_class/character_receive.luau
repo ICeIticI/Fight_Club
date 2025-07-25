@@ -1,3 +1,4 @@
+local TweenService = game:GetService("TweenService")
 local Character_Receive = {}
 Character_Receive.__index = Character_Receive
 
@@ -7,7 +8,7 @@ local utilities = require(game.ReplicatedStorage.Shared.utilities)
 
 
 local function getReceiveAnimation(characterInstance, trackData) --[[ Will return the receiver animation that gets played based on what specific attack the enemy did. ]]
-    if trackData.receivingType == "Dodge" then
+    if trackData.type == "Dodge" then
 
         if trackData.DodgeDirection == "Right" then
             return AnimationInstances.FC_RightDodge
@@ -17,7 +18,7 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_BackDodge
         end
 
-    elseif trackData.receivingType == "bracingBlock" then
+    elseif trackData.type == "bracingBlock" then
 
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             return AnimationInstances.FC_BracingBlockR
@@ -25,7 +26,7 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_BracingBlockL
         end
 
-    elseif trackData.receivingType == "syncBlock" then
+    elseif trackData.type == "syncBlock" then
         if characterInstance.pairedChain <= characterInstance.PairedChainMAX and characterInstance.canSyncBlock then
 
             -- if trackData.lastReceiveData and trackData.lastReceiveData.IsPlaying then -- runs for the receiver
@@ -73,7 +74,7 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             -- end
         end
     
-    elseif trackData.receivingType == "Level1" then
+    elseif trackData.type == "Level1" then
 
         if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftHook1.AnimationId or trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftJab.AnimationId then
             return AnimationInstances.FC_LeftHook1RECEIVER
@@ -85,13 +86,13 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
         elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightUppercut.AnimationId then
             return AnimationInstances.FC_RightUppercutRECEIVER
         end
-    elseif trackData.receivingType == "Level2" then
+    elseif trackData.type == "Level2" then
         if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftHaymaker.AnimationId then
             return AnimationInstances.FC_LeftHaymakerRECEIVER
         elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightHaymaker.AnimationId then
             return AnimationInstances.FC_RightHaymakerRECEIVER
         end
-    elseif trackData.receivingType == "Parry" then
+    elseif trackData.type == "Parry" then
         
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             -- Perform a left parry
@@ -102,14 +103,14 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             warn("ParryR")
             return AnimationInstances.FC_LeftParry
         end
-    elseif trackData.receivingType == "gettingParried" then
+    elseif trackData.type == "gettingParried" then
         -- characterInstance.attackTrack:Stop()
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             return AnimationInstances.FC_LeftParryRECEIVER
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
             return AnimationInstances.FC_RightParryRECEIVER
         end
-    elseif trackData.receivingType == "dodgeAttack" then
+    elseif trackData.type == "dodgeAttack" then
 
         -- We will get dodge-attacked
             
@@ -125,7 +126,7 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_BDodgeAttack1RECEIVER
         end
 
-    elseif trackData.receivingType == "counterAttack" then
+    elseif trackData.type == "counterAttack" then
         -- We are gonna get countered
             
         -- GameVariables.repositionInFrontOfEnemy()
@@ -148,13 +149,13 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
                 return AnimationInstances.FC_RightCounter2RECEIVER
             end
         end
-    elseif trackData.receivingType == "grabAttempt" then
+    elseif trackData.type == "grabAttempt" then
         return AnimationInstances.FC_GrabAttempt1RECEIVER
-    elseif trackData.receivingType == "grabSuccess" then
+    elseif trackData.type == "grabSuccess" then
         return AnimationInstances.FC_GrabSuccess1RECEIVER
-    elseif trackData.receivingType == "grabSecure" then
+    elseif trackData.type == "grabSecure" then
         return AnimationInstances.FC_GrabSecure1RECEIVER
-    elseif trackData.receivingType == "grabAttack" then
+    elseif trackData.type == "grabAttack" then
 
         if trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabAttack1.AnimationId then
             return AnimationInstances.FC_GrabAttack1RECEIVER
@@ -164,9 +165,9 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
             return AnimationInstances.FC_GrabAttack3RECEIVER
         end
     
-    elseif trackData.receivingType == "repelGrab" then
+    elseif trackData.type == "repelGrab" then
         return AnimationInstances.FC_EndGrab1RECEIVER
-    elseif trackData.receivingType == "grabExecution" then
+    elseif trackData.type == "grabExecution" then
         
         if trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabExecute1.AnimationId then
             return AnimationInstances.FC_GrabExecute1RECEIVER
@@ -254,7 +255,7 @@ end
 
 local function setupTrackData(receivingType, attackerAnim) --[[ Because tracks are played on the client, we kinda just have to replicate the attributes of the track when forming the animation here on the server. ]]
     local trackData = {
-        receivingType = receivingType,
+        type = receivingType,
         attackerAnim = attackerAnim
         }
 
@@ -326,6 +327,7 @@ function Character_Receive:bracingBlock(attacker_characterInstance) --[[ Block a
     local trackData = setupReceiveAnimation(self.characterInstance, "bracingBlock", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
+    self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "shakeCamera", {type = "BracingBlock", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
 end
 
 function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an enemy attack in smooth syncronization ]]
@@ -345,9 +347,9 @@ function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an e
 
     playReceivingTrack(self.characterInstance, trackData)
 
-    -- while trackData.IsPlaying do task.wait() end
-    -- print("are we blocking?: ", self.characterInstance.isBlockBeingPressed)
-    -- self.characterInstance:block(self.characterInstance.isBlockBeingPressed)
+    while trackData.IsPlaying do task.wait() end
+    print("are we blocking?: ", self.characterInstance.isBlockBeingPressed)
+    self.characterInstance:block(self.characterInstance.isBlockBeingPressed)
 end
 
 function Character_Receive:dodge(attacker_characterInstance) --[[ Dodge away from an incoming strike ]]
@@ -390,6 +392,7 @@ function Character_Receive:parry(attacker_characterInstance) --[[ Parry an incom
     local trackData = setupReceiveAnimation(self.characterInstance, "Parry", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
+    self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "shakeCamera", {type = "Parry", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
     self.characterInstance.playHitSFX(trackData)
     -- Move the below damage code to the receive parry
     attacker_characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
@@ -422,6 +425,7 @@ function Character_Receive:receiveLevel1(attacker_characterInstance) --[[ Get hi
     local trackData = setupReceiveAnimation(self.characterInstance, "Level1", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage)
+    self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "shakeCamera", {type = trackData.type, AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
     self.characterInstance.playHitSFX(trackData)
 end
 
@@ -439,6 +443,7 @@ function Character_Receive:receiveLevel2(attacker_characterInstance) --[[ Get hi
     local trackData = setupReceiveAnimation(self.characterInstance, "Level2", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage)
+    self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "shakeCamera", {type = trackData.type, AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
     self.characterInstance.playHitSFX(trackData)
 end
 

@@ -26,7 +26,9 @@ local function getGrabAnimation(characterInstance)
 end
 
 local function setupGrabAnimation(characterInstance : table, enemyInstance : any?)
-    local trackData = {}
+    local trackData = {
+        type = "GrabAttack"
+    }
     
     
     trackData.Animation = getGrabAnimation(characterInstance)
@@ -207,9 +209,9 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
 
     local grabMotor = Instance.new("Motor6D")
     grabMotor.Name = "grabMotor"
-    grabMotor.Part0 = self.characterInstance.grapplePart
-    grabMotor.Part1 = enemyInstance.humanoidRootPart
     if not game:GetService("RunService"):IsStudio() then
+        grabMotor.Part0 = self.characterInstance.grapplePart
+        grabMotor.Part1 = enemyInstance.humanoidRootPart
         grabMotor.Parent = grabMotor.Part0
     end
     -- motor.C0 = self.characterInstance.humanoidRootPart.CFrame:ToObjectSpace(enemyInstance.humanoidRootPart.CFrame)

@@ -12,6 +12,7 @@ local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.Cli
 local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_centric)
 local ragdollFunction = require(game.ReplicatedStorage.Shared.ragdollFunction)
 local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
 
 function REs_RFs.init()
     
@@ -59,6 +60,9 @@ function REs_RFs.init()
         elseif protocol == "updateMyDeadState" then
             data.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, data.stateEnabled)
             print(data.humanoid.Parent.Name .. " dead state enabled: ", data.stateEnabled)
+        
+        elseif protocol == "shakeCamera" then
+            utilities.shakeCamera(game:GetService("TweenService"), game.Workspace.CurrentCamera, data)
         end
     
         --[[ ^ Might put the animation events into the animation_centric script 

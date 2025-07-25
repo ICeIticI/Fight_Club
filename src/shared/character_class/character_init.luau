@@ -387,6 +387,8 @@ function Character_Init.init(charModel)
 
 		characterInstance.isInSecureGrapple = false
         characterInstance.isInGrappleSuccess = false
+		characterInstance.nextInput = nil
+
 		-- end
 		-- if self.currentReceiveAnimTRACK and not self.currentReceiveAnimTRACK.IsPlaying then
 		-- 	self.currentReceiveAnimTRACK = nil
@@ -422,10 +424,10 @@ function Character_Init.init(charModel)
 	end
 
 	-- Damage types:
-	local A1Damage = 5 -- default damage for lvl 1 attacks
-	local A2Damage = 11 -- default damage for lvl 2 attacks
-	local syncBlockDamage = 2.5 -- damage for sync blocks
-	local counterAttackDamage = 8
+	local A1Damage = 7 -- default damage for lvl 1 attacks
+	local A2Damage = 14 -- default damage for lvl 2 attacks
+	local syncBlockDamage = 3.5 -- damage for sync blocks
+	local counterAttackDamage = 10
 	characterInstance.attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
 
 	local sound1, sound2, sound3 = 
@@ -522,12 +524,12 @@ function Character_Init.init(charModel)
 
 	function characterInstance.playHitSFX(trackData)
 		local soundId
-		if trackData.receivingType == "Level1"
+		if trackData.type == "Level1"
 		or trackData.Paired_Attribute
-		or (trackData.receivingType and trackData.receivingType == "Parry") -- parrys should have their own special SFX at some point
+		or (trackData.type and trackData.type == "Parry") -- parrys should have their own special SFX at some point
 		then
 			soundId = SFXTable[math.random(1, #SFXTable)]
-		elseif trackData.receivingType == "Level2" then
+		elseif trackData.type == "Level2" then
 			soundId = "rbxassetid://112444846023457"
 		end
 

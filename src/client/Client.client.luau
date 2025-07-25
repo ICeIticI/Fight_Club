@@ -118,6 +118,7 @@ while not ClientVariables.LocalBindableEvent do task.wait() end
 
 ClientVariables.LocalBindableEvent.Event:Connect(function(protocol, data)
     if protocol == "mobileInputBegan" then
+        task.wait(0.03)
         if ClientVariables.isAttackButtonHeld and ClientVariables.isBlockButtonHeld then
             data.input.UserInputType = "mobile_grabButton"
         end

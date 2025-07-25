@@ -204,4 +204,85 @@ function Utilities.initializeLockOnRayParams(moduleTbl : table) --[[ Setup rayca
     return lockOnRayParams
 end
 
+local cameraShakePresets = {
+    Level1 = {
+        shakeDuration = 0.2,
+        shakeOffset = CFrame.new(.4, 0, 0)
+    },
+
+    Level2 = {
+        shakeDuration = 0.4,
+        shakeOffset = CFrame.new(1, .5, 0)
+    },
+
+    SyncBlock = {
+        shakeDuration = 0.2,
+        shakeOffset = CFrame.new(0.2, 0, 0)
+    },
+
+    Parry = {
+        shakeDuration = 0.2,
+        shakeOffset = CFrame.new(0.2, 0, 0)
+    },
+
+    BracingBlock = {
+        shakeDuration = 0.2,
+        shakeOffset = CFrame.new(0.5, 0, 0)
+    },
+
+    CounterAttack = {
+        shakeDuration = 0.3,
+        shakeOffset = CFrame.new(0.8, 0, 0)
+    },
+
+    DodgeAttack = {
+        shakeDuration = 0.3,
+        shakeOffset = CFrame.new(0.8, 0, 0)
+    },
+
+    GrabAttack = {
+        shakeDuration = 0.4,
+        shakeOffset = CFrame.new(2, 1, 0)
+    },
+
+
+    -- Camera shake due to you attacking:
+
+    Strike = {
+        shakeDuration = 0.2,
+        shakeOffset = CFrame.new(0, 0, -0.4)
+    }
+}
+
+local cameraShakeMultiplierByDirection = {
+    Left = function()
+        return -1
+    end,
+    Right = function()
+        return 1
+    end,
+    None = function() -- random value for attacks that dont have an attack direction
+        local randShakeDirectionTbl = {1 , -1}
+        return randShakeDirectionTbl[math.random(1, #randShakeDirectionTbl)]
+    end
+}
+
+function Utilities.shakeCamera(TweenService, camera, data)
+    print(data)
+
+    if not data.AnimDirection then
+        data.AnimDirection = "None"
+    end
+
+    local currentShakeData = cameraShakePresets[data.type]
+    local directionMultiply = cameraShakeMultiplierByDirection[data.AnimDirection]()
+
+    local tweenInfo = TweenInfo.new(currentShakeData.shakeDuration, Enum.EasingStyle.Bounce, Enum.EasingDirection.InOut, 0, true)
+    local goal = {CFrame = camera.CFrame * (CFrame.new(currentShakeData.shakeOffset.X * directionMultiply,
+                                                       currentShakeData.shakeOffset.Y * directionMultiply,
+                                                       currentShakeData.shakeOffset.Z * directionMultiply
+                                                    ))}
+    TweenService:Create(camera, tweenInfo, goal):Play()
+end
+
 return Utilities

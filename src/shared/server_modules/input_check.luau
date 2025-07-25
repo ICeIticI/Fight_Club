@@ -142,6 +142,18 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             characterInstance.nextInput = "grab"
         end
 
+        if not characterInstance.lockOnDebounce.Value then
+            utilities.activateLockOn(characterInstance, utilities, characters, active)
+        end
+
+        print(
+            not characterInstance.isInSecureGrapple,
+            not characterInstance.isInGrappleSuccess,
+            characterInstance.lockOnDebounce.Value,
+            characterInstance.enemyChar.Humanoid.Health > 0,
+            not characterInstance.grappleDelay
+        )
+
         if characterInstance.boolCheck({
             isAttacking = characterInstance.isAttacking.Value, 
             isBlocking = characterInstance.isBlocking,
@@ -170,15 +182,16 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         
         if active then
 
-            if not characterInstance.lockOnDebounce.Value then
-                utilities.activateLockOn(characterInstance, utilities, characters, active)
-            end
-
+            characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
+            
             if not characterInstance.nextInput then
                 characterInstance.nextInput = "block"
                 print("changed nextInput to BLOCK")
             end
-
+            
+            if not characterInstance.lockOnDebounce.Value then
+                utilities.activateLockOn(characterInstance, utilities, characters, active)
+            end
             -- if the character isInSecureGrapple, that means THEY'RE the one GETTING grappled, not the one doing it. When doing a secure grapple to an enemy, this variable will be true for the enemy.
             if characterInstance.isGrappling and characterInstance.grappleDelay and not characterInstance.isInSecureGrapple and not characterInstance.isAttacking.Value then
                 print("y u do this 2 me")
@@ -187,7 +200,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             end
 
             -- If the player is holding the block button, we store that as a variable:
-            characterInstance.isBlockBeingPressed = true -- bool that lets us know if the block button is being held down. This does NOT mean they are blocking though, as this is used to check if the button itself is being held down.
             if characterInstance.lockOnDebounce.Value 
             and characterInstance.boolCheck({isAttacking = characterInstance.isAttacking.Value, isBlocking = characterInstance.isBlocking, isCountering = characterInstance.isCountering, isGrappling = characterInstance.isGrappling}) 
             and not characterInstance.pairedPlaying

@@ -21,9 +21,11 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
         -- -- elseif trackData.DodgeAttack_Attribute then
         if (trackData.Animation:GetAttribute("SyncBlockFinisher") == true) or (trackData.Animation:GetAttribute("Grapple") == false) then -- can be true or false, all we know is its a sync block of some sort
             characterInstance.humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "shakeCamera", {type = "SyncBlock", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
             characterInstance.playHitSFX(trackData)
         elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == false then -- can be true or false, all we know is its a sync block of some sort
             characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.GlobalRemoteEvent:FireClient(game.Players:GetPlayerFromCharacter(characterInstance.enemyChar), "shakeCamera", {type = "SyncBlock", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
             characterInstance.playHitSFX(trackData)
             characterInstance.canFollowUp = true
         -- elseif trackData.Animation:GetAttribute("Grapple") == false then
@@ -37,8 +39,9 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
                 -- characterInstance.lockOnDebounce.Value = false
                 -- characterInstance.SetSpeed(true)
             end
-
+            print(trackData)
             characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.GlobalRemoteEvent:FireClient(game.Players:GetPlayerFromCharacter(characterInstance.enemyChar), "shakeCamera", {type = trackData.type, AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
             characterInstance.playHitSFX(trackData)
         end
 
@@ -152,7 +155,9 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
                 if trackData.attackLvl == 3 then
                     warn("hi")
                     self.characterInstance.isGrappling = false
+                    self.characterInstance.grappleDelay = false
                     self.characterInstance.enemyChar.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                    self.characterInstance.GlobalRemoteEvent:FireClient(game.Players:GetPlayerFromCharacter(self.characterInstance.enemyChar), "shakeCamera", {type = trackData.type, AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
                     self.characterInstance.enemyChar.Humanoid.Health = 0
 
                     self.characterInstance.lockOnDebounce.Value = false

@@ -10,13 +10,13 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
     if trackData.attackLvl == 1 then
         
         if not characterInstance.currentAttack_trackData then
-            return characterInstance.randomAnimation(AnimationInstances, {AttackSeries = trackData.attackType})
+            return characterInstance.randomAnimation(AnimationInstances, {AttackSeries = characterInstance.AttackSeries})
         else
             local sameAttackChance = math.random(1, 100)
-            if sameAttackChance > 10 or characterInstance.currentAttack_trackData.attackType == "Uppercuts" then
+            if sameAttackChance > 10 or characterInstance.currentAttack_trackData.AttackSeries == "Uppercuts" then
                 -- opposite attack of the same attack type
                 for _, v in pairs(AnimationInstances) do
-                    if v.AnimationId ~= characterInstance.currentAttack_trackData.AnimationId and v:GetAttribute("AttackSeries") == characterInstance.currentAttack_trackData.attackType then
+                    if v.AnimationId ~= characterInstance.currentAttack_trackData.AnimationId and v:GetAttribute("AttackSeries") == characterInstance.AttackSeries then
                         return v
                         -- warn("Random attack track found.")
                         -- break
@@ -132,7 +132,8 @@ end
 
 local function setupTrackData(attackLvl) --[[ Because tracks are played on the client, we kinda just have to replicate the attributes of the track when forming the animation here on the server. ]]
     local trackData = {
-        attackLvl = attackLvl
+        attackLvl = attackLvl,
+        type = attackType
         }
 
     if attackLvl == 1 or attackLvl == 2 then
@@ -166,11 +167,11 @@ local function setupAttackAnimation(attackLvl, characterInstance, enemy_characte
     if characterInstance.comboCounter == 0 and trackData.attackLvl == 1 then -- Randomize attackType for a new combo:
         -- Store the current attackType in characterInstance so it doesn't get forgotten when we attack in the future (for throwing the same type of attack again. If we throw a hook, we wanna followup with another hook):
         characterInstance.currentAttack_trackData = nil
-        characterInstance.attackType = setRandomAttackType(characterInstance.didFollowUp)
+        characterInstance.AttackSeries = setRandomAttackType(characterInstance.didFollowUp)
 
     end
     -- Whether or not we are starting a new series of attacks (such as jabs, or hooks) or not, we want our attackType to be what's already stored.
-    trackData.attackType = characterInstance.attackType
+    -- trackData.type = characterInstance.type
     trackData.Animation = getAnimation(characterInstance, trackData, enemy_characterInstance)
     trackData.AnimationId = trackData.Animation.AnimationId
     if attackLvl == 3 then -- beyond the lvl 1's and 2's:

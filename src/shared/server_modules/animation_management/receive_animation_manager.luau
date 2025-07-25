@@ -64,7 +64,8 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.reset()
         end
         if not self.characterInstance.isBlockBeingPressed and self.characterInstance.isBlocking then
-            self.characterInstance.block(false)
+            print("no block nowwewwfdsa")
+            self.characterInstance:block(false)
         end
 
         if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then

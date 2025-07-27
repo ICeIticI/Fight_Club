@@ -633,6 +633,7 @@ function Character_Init.init(charModel)
 
 	connects.DiedConnection = nil
 	connects.DiedConnection = characterInstance.humanoid.Died:Connect(function()
+		game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Takedowns.Value += 1
 		-- characterInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) -- To trigger the StateEnabledChange event, which fires only when the :SetStateEnabled method is used.
 		
 		-- connects.MoveDirectionConnection:Disconnect()
@@ -724,6 +725,8 @@ function Character_Init.init(charModel)
 	else -- not a player. We wanna create animations on server
 		Animation_Centric.initialize_animations(Character_Init)
 	end
+
+	print(characterInstance.player.UserId)
 
     return characterInstance
 end

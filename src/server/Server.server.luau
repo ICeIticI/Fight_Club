@@ -80,3 +80,11 @@ end
 Players.PlayerAdded:Connect(function(player)
     setupPlayer(player)
 end)
+
+Players.PlayerRemoving:Connect(function(player)
+    ServerInit.RemovePlayer(player)
+end)
+
+game:BindToClose(function()
+    ServerInit.ShutdownServer()
+end)

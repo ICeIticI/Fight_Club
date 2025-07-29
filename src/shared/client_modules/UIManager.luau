@@ -1,3 +1,5 @@
+local MarketplaceService = game:GetService("MarketplaceService")
+
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
 
 local UIManager = {}
@@ -18,6 +20,8 @@ local healthChecker
 
 local loadingScreenFrame
 local loadingLabel
+
+local donateButtons = {}
 
 local primaryColor = "#000000" -- black
 local secondaryColor = "#ff2600" -- a red I happen to pick out that we're sticking with
@@ -61,6 +65,23 @@ function UIManager.manageUI()
     healthFrameLabel = gameFrame.healthFrameLabel
     staminaBar = gameFrame.staminaLabel
     staminaFrameLabel = gameFrame.staminaFrameLabel
+
+    donateButtons = (function()
+        local buttons = {}
+        for _, child in pairs(gameFrame.donateOptions:GetChildren()) do
+            if child:IsA("TextButton") or child:IsA("ImageButton") then
+                table.insert(buttons, child)
+            end
+        end
+        return buttons
+    end)()
+    
+    for _, button in pairs(donateButtons) do
+        button.Activated:Connect(function()
+            local productId = button:GetAttribute("productId")
+            MarketplaceService:PromptProductPurchase(ClientVariables.player, productId)
+        end)
+    end
 
     -- mobile UI:
     if ClientVariables.isOnMobile then
@@ -118,12 +139,23 @@ function UIManager.manageUI()
         end
     end)
 
-    gameFrame.fightingStyles_button.Activated:Connect(function()
+    -- Deactivated until its added to the game
+    --[[
+    gameFrame.buttons.fightingStyles_button.Activated:Connect(function()
         gameFrame.fightingStyles_screen.Visible = not gameFrame.fightingStyles_screen.Visible
     end)
 
-    gameFrame.perks_button.Activated:Connect(function()
+    gameFrame.buttons.perks_button.Activated:Connect(function()
         gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
+    end)
+    --]]
+
+    gameFrame.buttons.donation_button.Activated:Connect(function()
+        gameFrame.donateOptions.Visible = not gameFrame.donateOptions.Visible
+    end)
+
+    gameFrame.buttons.howToPlay_button.Activated:Connect(function()
+        gameFrame.howToPlay_screen.Visible = not gameFrame.howToPlay_screen.Visible
     end)
 
     loadingScreenFrame = ClientVariables.player.PlayerGui.loadingScreen.Frame

@@ -1,4 +1,5 @@
 local MarketplaceService = game:GetService("MarketplaceService")
+local SocialService = game:GetService("SocialService")
 
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
 
@@ -150,12 +151,34 @@ function UIManager.manageUI()
     end)
     --]]
 
-    gameFrame.buttons.donation_button.Activated:Connect(function()
+    gameFrame.buttons2.donation_button.Activated:Connect(function()
         gameFrame.donateOptions.Visible = not gameFrame.donateOptions.Visible
     end)
 
-    gameFrame.buttons.howToPlay_button.Activated:Connect(function()
+    gameFrame.buttons2.howToPlay_button.Activated:Connect(function()
         gameFrame.howToPlay_screen.Visible = not gameFrame.howToPlay_screen.Visible
+    end)
+
+    local inviteDebounce = false -- makes sure invites cant be spam-sent.
+    local originalImage, originalHoverImage = "rbxassetid://110647224004441", "rbxassetid://121072355246741"
+    
+    gameFrame.buttons2.inviteFriends_button.Activated:Connect(function()
+        if not inviteDebounce then
+            inviteDebounce = true
+            local canInvite = SocialService:CanSendCallInviteAsync(ClientVariables.player)
+            if canInvite then
+                SocialService:PromptGameInvite(ClientVariables.player)
+                wait(1)
+                inviteDebounce = false
+            elseif not canInvite then
+                gameFrame.buttons.inviteFriends_button.Image = "rbxassetid://87462560606638"
+                gameFrame.buttons.inviteFriends_button.HoverImage = ""
+                task.wait(5)
+                gameFrame.buttons.inviteFriends_button.Image = originalImage
+                gameFrame.buttons.inviteFriends_button.HoverImage = originalHoverImage
+                inviteDebounce = false
+            end
+        end
     end)
 
     loadingScreenFrame = ClientVariables.player.PlayerGui.loadingScreen.Frame

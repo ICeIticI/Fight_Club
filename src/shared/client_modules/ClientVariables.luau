@@ -42,6 +42,8 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 			task.wait()
 			ClientVariables.velocityMagnitude = ClientVariables.humanoidRootPart.AssemblyLinearVelocity.Magnitude
 			if ClientVariables.velocityMagnitude < 0.1 then
+				-- while not ClientVariables.velocityMagnitude do task.wait() end
+				
 				ClientVariables.stopMovementAnimations()
 			end
 		end

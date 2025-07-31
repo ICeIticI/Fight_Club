@@ -633,7 +633,11 @@ function Character_Init.init(charModel)
 
 	connects.DiedConnection = nil
 	connects.DiedConnection = characterInstance.humanoid.Died:Connect(function()
-		game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Takedowns.Value += 1
+
+		if characterInstance.attackingChar then
+			game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Tokens.Value += 2
+			game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Takedowns.Value += 1
+		end
 		-- characterInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) -- To trigger the StateEnabledChange event, which fires only when the :SetStateEnabled method is used.
 		
 		-- connects.MoveDirectionConnection:Disconnect()
@@ -674,10 +678,23 @@ function Character_Init.init(charModel)
 
 	local ragdollYPos = 80 -- if their Y pos go below this point then they ragdoll
 	local deathYPos = 30
+
+	local moneyCount = 0 -- variable that goes up 1 every 0.1 second until 2 minutes reaches, then it rewards the player with money, and resets.
+	local minutesUntilToken = 2
 	task.spawn(function()
 		-- Real fall damage:
 		while characterInstance.humanoid.Health > 0 do
 				task.wait(0.1)
+
+				if characterInstance.player then
+					moneyCount += 1
+	
+					if moneyCount >= (minutesUntilToken * 60) / 0.1 then
+						characterInstance.player.leaderstats.Tokens.Value += 1
+						moneyCount = 0
+					end
+				end
+
 			-- 	local newYVelocity = -characterInstance.humanoidRootPart.Velocity.Y
 			-- 	if newYVelocity <= 0 and previousYVelocity <= 0 then continue end
 				

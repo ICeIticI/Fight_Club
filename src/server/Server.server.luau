@@ -6,9 +6,9 @@
 -- Setup GUI for players as soon as server starts:
 for _, child in pairs(game.ReplicatedStorage:GetChildren()) do
     if child:IsA("ScreenGui") then
-        if child.Name == "loadingScreen" and game:GetService("RunService"):IsStudio() then
-            child.Enabled = false
-        end
+        -- if child.Name == "loadingScreen" and game:GetService("RunService"):IsStudio() then
+        --     child.Enabled = false
+        -- end
         child.Parent = game.StarterGui-- not originally parented in StarterGui or else I'l have to move it every time I need to configure the game in Studio
     end
 end

@@ -3,6 +3,7 @@
 local MarketplaceService = game:GetService("MarketplaceService")
 local DataStoreService = game:GetService("DataStoreService")
 local KillsStore = DataStoreService:GetOrderedDataStore("KillsStore")
+local MoneyStore = DataStoreService:GetOrderedDataStore("MoneyStore")
 local DonationsStore = DataStoreService:GetOrderedDataStore("DonationsStore")
 
 local GlobalRemoteEvent = Instance.new("RemoteEvent") -- used by each client in a server for communication with server-client or client to server
@@ -73,12 +74,10 @@ function ServerInit.InitializePlayer(player)
 
 	-- retrieving the player's kills and donations via DataStore:
 	local kills_key = "id_" .. player.UserId .. "_kills"
+	local money_key = "id_" .. player.UserId .. "_money"
 	local donations_key = "id_" .. player.UserId .. "_donations"
 	
 	local success, data = pcall(function()
-		-- KillsStore:RemoveAsync("id_" .. "-1" .. "_kills")
-		-- KillsStore:RemoveAsync("id_" .. "-2" .. "_kills")
-		-- print("removed IDs 1 and 2")
 		return KillsStore:GetAsync(kills_key)
 	end)
 
@@ -96,13 +95,33 @@ function ServerInit.InitializePlayer(player)
 		donations.Value = data or 0
 	end
 
+	success, data = pcall(function()
+		return MoneyStore:GetAsync(money_key)
+	end)
+
+	if success then
+		money.Value = data or 0
+	end
+
 end
 
 function ServerInit.RemovePlayer(player)
+
+	
 	local kills_key = "id_" .. player.UserId .. "_kills"
+	local money_key = "id_" .. player.UserId .. "_money"
 	local donations_key = "id_" .. player.UserId .. "_donations"
+
 	local kills = player.leaderstats.Takedowns
+	local money = player.leaderstats.Tokens
 	local donations = player.Donations
+	
+	if player.UserId < 1 then
+		DonationsStore:RemoveAsync(donations_key)
+		KillsStore:RemoveAsync(kills_key, kills.Value)
+		MoneyStore:RemoveAsync(money_key)
+		return warn("player ID not valid to save: " .. player.UserId) 
+	end
 
 	local success, result = pcall(function()
 		return KillsStore:SetAsync(kills_key, kills.Value)
@@ -114,6 +133,14 @@ function ServerInit.RemovePlayer(player)
 
 	success, result = pcall(function()
 		return DonationsStore:SetAsync(donations_key, donations.Value)
+	end)
+
+	if not success then
+		warn(result)
+	end
+
+	success, result = pcall(function()
+		return MoneyStore:SetAsync(money_key, money.Value)
 	end)
 
 	if not success then

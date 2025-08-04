@@ -97,7 +97,7 @@ function UIManager.manageUI()
     -- Health management:
     
     local healthFraction
-    
+    while not ClientVariables.stamina do task.wait() end
     staminaChecker = ClientVariables.stamina:GetPropertyChangedSignal("Value"):Connect(function()
         healthFraction = ClientVariables.stamina.Value/ClientVariables.maxStamina.Value
         staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, healthFraction * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
@@ -107,11 +107,11 @@ function UIManager.manageUI()
 
     -- Deactivated until its added to the game
     --[[
-    gameFrame.buttons.fightingStyles_button.Activated:Connect(function()
+    gameFrame.buttons1.fightingStyles_button.Activated:Connect(function()
         gameFrame.fightingStyles_screen.Visible = not gameFrame.fightingStyles_screen.Visible
     end)
 
-    gameFrame.buttons.perks_button.Activated:Connect(function()
+    gameFrame.buttons1.perks_button.Activated:Connect(function()
         gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
     end)
     --]]
@@ -136,11 +136,11 @@ function UIManager.manageUI()
                 task.wait(1)
                 inviteDebounce = false
             elseif not canInvite then
-                gameFrame.buttons.inviteFriends_button.Image = "rbxassetid://87462560606638"
-                gameFrame.buttons.inviteFriends_button.HoverImage = ""
+                gameFrame.buttons2.inviteFriends_button.Image = "rbxassetid://87462560606638"
+                gameFrame.buttons2.inviteFriends_button.HoverImage = ""
                 task.wait(5)
-                gameFrame.buttons.inviteFriends_button.Image = originalImage
-                gameFrame.buttons.inviteFriends_button.HoverImage = originalHoverImage
+                gameFrame.buttons2.inviteFriends_button.Image = originalImage
+                gameFrame.buttons2.inviteFriends_button.HoverImage = originalHoverImage
                 inviteDebounce = false
             end
         end

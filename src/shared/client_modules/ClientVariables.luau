@@ -25,6 +25,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 
 
 	ClientVariables.stamina = ClientVariables.plrObjectsFolder:WaitForChild("stamina")
+	print(ClientVariables.stamina)
 	ClientVariables.maxStamina = ClientVariables.plrObjectsFolder:WaitForChild("maxStamina")
 	
 	local humanoidDiedConnect -- the :Connect() event for when the player's current humanoid dies.

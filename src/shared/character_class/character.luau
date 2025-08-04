@@ -55,7 +55,7 @@ end
 
 -- constructor function for Character:
 function Character.new(charModel) --[[ Constructor function that will create a new instance of a character. ]]
-    
+
     local characterInstancesFolder = game.Workspace:FindFirstChild("Characters") 
     or (function()
         -- Creates a characterInstancesFolder if it doesn't exist yet:
@@ -71,7 +71,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     
     self.character:SetAttribute("id", getNextId())
     self.id = self.character:GetAttribute("id")
-    
+
     self.character_attack = setmetatable({}, { __index = character_attack })
     self.character_block = setmetatable({}, { __index = character_block })
     self.character_grapple = setmetatable({}, { __index = character_grapple })

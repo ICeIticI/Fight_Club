@@ -3,15 +3,10 @@
 * It will rely on module scripts with different purposes to function when called upon.
 ]]
 
--- Setup GUI for players as soon as server starts:
-for _, child in pairs(game.ReplicatedStorage:GetChildren()) do
-    if child:IsA("ScreenGui") then
-        -- if child.Name == "loadingScreen" and game:GetService("RunService"):IsStudio() then
-        --     child.Enabled = false
-        -- end
-        child.Parent = game.StarterGui-- not originally parented in StarterGui or else I'l have to move it every time I need to configure the game in Studio
-    end
-end
+local serverInitialized = Instance.new("BoolValue") -- allows other scripts to know if the server is all setup.
+serverInitialized.Name = "serverInitialized"
+serverInitialized.Value = false
+serverInitialized.Parent = game.ReplicatedStorage
 
 local Players = game:GetService("Players")
 
@@ -43,34 +38,38 @@ require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check
 -- end
 
 local function setupPlayer(player)
-    ServerInit.InitializePlayer(player) -- initializes player's public objects
-    
-    -- local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()
-
-    local characterInstance
-    if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.
+    task.spawn(function()
+        while not serverInitialized.Value do task.wait() end
+        print("we init")
+        ServerInit.InitializePlayer(player) -- initializes player's public objects
         
-        characterInstance = Character.new(player.Character)
+        -- local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()
     
-        -- ServerInit.InitializeCharacter(player.Character)
-        -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], player.Character) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
-
-    end
-
-    player.CharacterAdded:Connect(function(char)
-        -- Initialize character-related stuff on spawn.
-
-        characterInstance = Character.new(char)
+        local characterInstance
+        if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.
+            
+            characterInstance = Character.new(player.Character)
         
-        -- ServerInit.InitializeCharacter(char)
-        -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], char) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
-    end)
-
-    player.CharacterRemoving:Connect(function()
-        -- We want to delete the instance of the character class from the old character
-        if characterInstance then
-            characterInstance:erase()
+            -- ServerInit.InitializeCharacter(player.Character)
+            -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], player.Character) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
+    
         end
+    
+        player.CharacterAdded:Connect(function(char)
+            -- Initialize character-related stuff on spawn.
+    
+            characterInstance = Character.new(char)
+            
+            -- ServerInit.InitializeCharacter(char)
+            -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], char) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
+        end)
+    
+        player.CharacterRemoving:Connect(function()
+            -- We want to delete the instance of the character class from the old character
+            if characterInstance then
+                characterInstance:erase()
+            end
+        end)
     end)
 end
 
@@ -88,3 +87,5 @@ end)
 game:BindToClose(function()
     ServerInit.ShutdownServer()
 end)
+
+serverInitialized.Value = true

@@ -3,6 +3,16 @@
 * This will depend on module scripts with different purposes to be used in this script for functionality.
 ]]
 
+-- -- Setup GUI for players as soon as server starts:
+-- for _, child in pairs(game.ReplicatedStorage:GetChildren()) do
+--     if child:IsA("ScreenGui") and child.Name == "loadingScreen" then
+--         -- if child.Name == "loadingScreen" and game:GetService("RunService"):IsStudio() then
+--         --     child.Enabled = false
+--         -- end
+--         child.Parent = game.Players.LocalPlayer.PlayerGui-- not originally parented in StarterGui or else I'l have to move it every time I need to configure the game in Studio
+--     end
+-- end
+
 local UserInputService = game:GetService("UserInputService") -- Gets the user input
 
 -- Modules
@@ -12,7 +22,8 @@ local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.Cli
 -- local BasicStriking = require(game.ReplicatedStorage.Shared.BasicStriking)
 -- local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAndCountering)
 local UIManager = require(game.ReplicatedStorage.Shared.client_modules.UIManager)
-
+print("managing?")
+UIManager.manageUI()
 -- New Modules:
 local utilities = require(game.ReplicatedStorage.Shared.utilities)
 
@@ -21,6 +32,7 @@ ClientVariables.isOnMobile = -- Will be either true or false if they're on mobil
 	and not UserInputService.KeyboardEnabled
 	and not UserInputService.MouseEnabled
 
+    print("hi")
 local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
 require(game.ReplicatedStorage.Shared.client_modules.REs_RFs).init()
 
@@ -39,14 +51,12 @@ end)
 if game.Players.LocalPlayer.Character then -- The player may load faster than the script, so this will ensure the player won't skip initializing
     -- Initializes the player
     -- while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
-
-    UIManager.manageUI()
 end
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
     -- Initializes the player
-    while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
-
+    -- while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+    print("managing?")
     UIManager.manageUI()
 end)
 

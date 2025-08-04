@@ -18,8 +18,13 @@ local mobile_blockButton
 
 local staminaChecker
 local healthChecker
+local donation_buttonActivated
+local howToPlay_buttonActivated
+local inviteFriends_buttonActivated
+local fightingStyles_buttonActivated
+local perks_buttonActivated
 
-local loadingScreenFrame
+local loadingScreen
 local loadingLabel
 
 local donateButtons = {}
@@ -27,41 +32,12 @@ local donateButtons = {}
 local primaryColor = "#000000" -- black
 local secondaryColor = "#ff2600" -- a red I happen to pick out that we're sticking with
 
-local reverseDots = false
-local function cycleDots(textLabel)
-    local noDotString = textLabel.Text:gsub("%.", "") -- Should just return "Loading" without the dots, unless I change it to something else
-
-	local dotCount = textLabel.Text:gsub("[^%.]", "") -- Returns only dots and gets rid of anything else.  %a = letters, %s = whitespace
-    if dotCount == "" then
-        reverseDots = false
-        textLabel.Text = noDotString .. "."
-
-	elseif dotCount == "." then
-        if not reverseDots then
-            textLabel.Text = noDotString .. ".."
-        else
-            textLabel.Text = noDotString .. ""
-        end
-
-	elseif dotCount == ".." then
-        if not reverseDots then
-            textLabel.Text = noDotString .. "..."
-        else
-            textLabel.Text = noDotString .. "."
-        end
-        
-	elseif dotCount == "..." then
-		reverseDots = true
-        textLabel.Text = noDotString .. ".."
-	end
-
-    task.wait(0.2)
-end
-
-
 function UIManager.manageUI()
 
-    gameFrame = ClientVariables.player.PlayerGui.gameGUI.Frame
+    loadingScreen = ClientVariables.player.PlayerGui.loadingScreen 
+    loadingScreen.Enabled = true
+
+    gameFrame = ClientVariables.player.PlayerGui:WaitForChild("gameGUI").Frame
     healthBar = gameFrame.healthLabel
     healthFrameLabel = gameFrame.healthFrameLabel
     staminaBar = gameFrame.staminaLabel
@@ -129,17 +105,6 @@ function UIManager.manageUI()
     
     local staminaFraction
 
-    healthChecker = ClientVariables.humanoid.HealthChanged:Connect(function(health)
-        staminaFraction = health / ClientVariables.humanoid.MaxHealth
-        healthBar.Size = UDim2.new(healthBar.Size.X.Scale, healthBar.Size.X.Offset, staminaFraction * healthFrameLabel.Size.Y.Scale, healthBar.Size.Y.Offset)
-        if health <= 0 then
-            staminaChecker:Disconnect()
-            healthChecker:Disconnect()
-
-            staminaChecker, healthChecker = nil, nil
-        end
-    end)
-
     -- Deactivated until its added to the game
     --[[
     gameFrame.buttons.fightingStyles_button.Activated:Connect(function()
@@ -151,24 +116,24 @@ function UIManager.manageUI()
     end)
     --]]
 
-    gameFrame.buttons2.donation_button.Activated:Connect(function()
+    donation_buttonActivated = gameFrame.buttons2.donation_button.Activated:Connect(function()
         gameFrame.donateOptions.Visible = not gameFrame.donateOptions.Visible
     end)
 
-    gameFrame.buttons2.howToPlay_button.Activated:Connect(function()
+    howToPlay_buttonActivated = gameFrame.buttons2.howToPlay_button.Activated:Connect(function()
         gameFrame.howToPlay_screen.Visible = not gameFrame.howToPlay_screen.Visible
     end)
 
     local inviteDebounce = false -- makes sure invites cant be spam-sent.
     local originalImage, originalHoverImage = "rbxassetid://110647224004441", "rbxassetid://121072355246741"
     
-    gameFrame.buttons2.inviteFriends_button.Activated:Connect(function()
+    inviteFriends_buttonActivated = gameFrame.buttons2.inviteFriends_button.Activated:Connect(function()
         if not inviteDebounce then
             inviteDebounce = true
             local canInvite = SocialService:CanSendCallInviteAsync(ClientVariables.player)
             if canInvite then
                 SocialService:PromptGameInvite(ClientVariables.player)
-                wait(1)
+                task.wait(1)
                 inviteDebounce = false
             elseif not canInvite then
                 gameFrame.buttons.inviteFriends_button.Image = "rbxassetid://87462560606638"
@@ -181,14 +146,28 @@ function UIManager.manageUI()
         end
     end)
 
-    loadingScreenFrame = ClientVariables.player.PlayerGui.loadingScreen.Frame
-    loadingLabel = loadingScreenFrame.loadingLabel
+    healthChecker = ClientVariables.humanoid.HealthChanged:Connect(function(health)
+        staminaFraction = health / ClientVariables.humanoid.MaxHealth
+        healthBar.Size = UDim2.new(healthBar.Size.X.Scale, healthBar.Size.X.Offset, staminaFraction * healthFrameLabel.Size.Y.Scale, healthBar.Size.Y.Offset)
+        if health <= 0 then
+            staminaChecker:Disconnect()
+            healthChecker:Disconnect()
+            donation_buttonActivated:Disconnect()
+            howToPlay_buttonActivated:Disconnect()
+            inviteFriends_buttonActivated:Disconnect()
 
-    while not ClientVariables.initialized do
-        task.wait()
-        cycleDots(loadingLabel)
-    end
-    loadingScreenFrame.Parent.Enabled = false
+            staminaChecker, healthChecker = nil, nil
+        end
+    end)
+
+    print(loadingScreen)
+
+    task.spawn(function()
+        while not ClientVariables.initialized do task.wait() end
+    
+        loadingScreen.Enabled = false
+        print(loadingScreen.Enabled)
+    end)
 
 end
 

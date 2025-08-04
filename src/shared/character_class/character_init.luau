@@ -60,6 +60,8 @@ local function disableDefaultTouchDetections(givenChar) --[[ This function will 
 end
 
 function Character_Init.init(charModel)
+
+	while not charModel.Humanoid do task.wait() end -- makes sure the humanoid gets created before going through with the init
     local characterInstance = {}
 
 	characterInstance.initialized = false -- bool that identifies whether or not the characterInstance finished it's init.

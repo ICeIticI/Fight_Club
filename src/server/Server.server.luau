@@ -37,6 +37,7 @@ require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check
 --     return ServerEvents.RFInvokes(sendingPlayer, Protocol, object1)
 -- end
 
+game.Players.CharacterAutoLoads = false
 local function setupPlayer(player)
     task.spawn(function()
         while not serverInitialized.Value do task.wait() end
@@ -70,6 +71,22 @@ local function setupPlayer(player)
                 characterInstance:erase()
             end
         end)
+
+        local characterModel
+        if player.Name == "Player1" then
+            characterModel = game.ReplicatedStorage:WaitForChild("PlayerRig")
+        else
+            characterModel = game.ReplicatedStorage:WaitForChild("EnemyRig")
+        end
+
+        local customCharacter = characterModel:Clone()
+        customCharacter.Name = player.Name
+        customCharacter.Parent = workspace
+
+        player.Character = customCharacter
+        player:LoadCharacter()
+
+
     end)
 end
 

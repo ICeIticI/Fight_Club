@@ -237,6 +237,9 @@ function Character_Init.init(charModel)
 	charAnimator.Name = "charAnimator"
 	charAnimator.Parent = characterInstance.character:WaitForChild("Humanoid")
 
+	-- get rid of old animator
+	characterInstance.character.Humanoid.Animator:Destroy()
+
     -- Defining the hitboxes when character spawns
 	local hbFolder = Instance.new("Folder") --[[ folder to store hitboxes to prevent false 
 	   referances of player objects. ]]

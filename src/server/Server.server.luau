@@ -37,6 +37,32 @@ require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check
 --     return ServerEvents.RFInvokes(sendingPlayer, Protocol, object1)
 -- end
 
+local function tempCharFunc(player)
+    local character = player.Character
+    -- Wait for HumanoidRootPart to ensure it's fully loaded
+		local hrp = character:WaitForChild("HumanoidRootPart", 5)
+		if not hrp then return end
+
+    -- Clone your custom model
+    
+    local customModel
+    if player.Name == "Player1" then
+        customModel = game.ReplicatedStorage:WaitForChild("PlayerChar"):Clone()
+    elseif player.Name == "Player2" then
+        customModel = game.ReplicatedStorage:WaitForChild("EnemyChar"):Clone()
+    end
+    customModel.Name = player.Name
+    customModel.Parent = workspace
+
+    -- Optional: Position the new model where the original spawned
+    customModel:PivotTo(character:GetPivot())
+
+    -- Replace the character
+    player.Character = customModel
+    character:Destroy()
+
+end
+
 local function setupPlayer(player)
     task.spawn(function()
         while not serverInitialized.Value do task.wait() end
@@ -48,6 +74,7 @@ local function setupPlayer(player)
         local characterInstance
         if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.
             
+            -- tempCharFunc(player)
             characterInstance = Character.new(player.Character)
         
             -- ServerInit.InitializeCharacter(player.Character)
@@ -58,6 +85,7 @@ local function setupPlayer(player)
         player.CharacterAdded:Connect(function(char)
             -- Initialize character-related stuff on spawn.
     
+            -- tempCharFunc(player)
             characterInstance = Character.new(char)
             
             -- ServerInit.InitializeCharacter(char)
@@ -70,6 +98,7 @@ local function setupPlayer(player)
                 characterInstance:erase()
             end
         end)
+
 
     end)
 end

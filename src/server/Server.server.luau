@@ -37,31 +37,31 @@ require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check
 --     return ServerEvents.RFInvokes(sendingPlayer, Protocol, object1)
 -- end
 
-local function tempCharFunc(player)
-    local character = player.Character
-    -- Wait for HumanoidRootPart to ensure it's fully loaded
-		local hrp = character:WaitForChild("HumanoidRootPart", 5)
-		if not hrp then return end
+-- local function tempCharFunc(player)
+--     local character = player.Character
+--     -- Wait for HumanoidRootPart to ensure it's fully loaded
+-- 		local hrp = character:WaitForChild("HumanoidRootPart", 5)
+-- 		if not hrp then return end
 
-    -- Clone your custom model
+--     -- Clone your custom model
     
-    local customModel
-    if player.Name == "Player1" then
-        customModel = game.ReplicatedStorage:WaitForChild("PlayerChar"):Clone()
-    elseif player.Name == "Player2" then
-        customModel = game.ReplicatedStorage:WaitForChild("EnemyChar"):Clone()
-    end
-    customModel.Name = player.Name
-    customModel.Parent = workspace
+--     local customModel
+--     if player.Name == "Player1" then
+--         customModel = game.ReplicatedStorage:WaitForChild("PlayerChar"):Clone()
+--     elseif player.Name == "Player2" then
+--         customModel = game.ReplicatedStorage:WaitForChild("EnemyChar"):Clone()
+--     end
+--     customModel.Name = player.Name
+--     customModel.Parent = workspace
 
-    -- Optional: Position the new model where the original spawned
-    customModel:PivotTo(character:GetPivot())
+--     -- Optional: Position the new model where the original spawned
+--     customModel:PivotTo(character:GetPivot())
 
-    -- Replace the character
-    player.Character = customModel
-    character:Destroy()
+--     -- Replace the character
+--     player.Character = customModel
+--     character:Destroy()
 
-end
+-- end
 
 local function setupPlayer(player)
     task.spawn(function()

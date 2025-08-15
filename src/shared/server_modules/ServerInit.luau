@@ -1,10 +1,18 @@
 --[[  ]]
 
 local MarketplaceService = game:GetService("MarketplaceService")
-local DataStoreService = game:GetService("DataStoreService")
-local KillsStore = DataStoreService:GetOrderedDataStore("KillsStore")
-local MoneyStore = DataStoreService:GetOrderedDataStore("MoneyStore")
-local DonationsStore = DataStoreService:GetOrderedDataStore("DonationsStore")
+local BadgeService = game:GetService("BadgeService")
+
+local DataStoreService
+local KillsStore
+local MoneyStore
+local DonationsStore
+if game.PlaceId ~= 0 then -- project must be published to use DatStores
+	DataStoreService = game:GetService("DataStoreService")
+	KillsStore = DataStoreService:GetOrderedDataStore("KillsStore")
+	MoneyStore = DataStoreService:GetOrderedDataStore("MoneyStore")
+	DonationsStore = DataStoreService:GetOrderedDataStore("DonationsStore")
+end
 
 local GlobalRemoteEvent = Instance.new("RemoteEvent") -- used by each client in a server for communication with server-client or client to server
 GlobalRemoteEvent.Name = "GlobalRemoteEvent"
@@ -39,10 +47,47 @@ end
 
 local ServerInit = {}
 
+local function rewardForKills(player)
+	local kills = player.leaderstats.Takedowns
+
+	print(kills, BadgeService:UserHasBadgeAsync(player.UserId, 1102891297529600))
+	if kills.Value >= 1 and not BadgeService:UserHasBadgeAsync(player.UserId, 1102891297529600) then
+		BadgeService:AwardBadge(player.UserId, 1102891297529600)
+	end
+
+	if kills.Value >= 5 and not BadgeService:UserHasBadgeAsync(player.UserId, 	611484439045336) then
+		BadgeService:AwardBadge(player.UserId, 	611484439045336)
+	end
+
+	if kills.Value >= 10 and not BadgeService:UserHasBadgeAsync(player.UserId, 	1092644572406442) then
+		BadgeService:AwardBadge(player.UserId, 	1092644572406442)
+	end
+end
+
+local function setupNewPlayer(player)
+	if BadgeService:UserHasBadgeAsync(player.UserId, 1214839343920223) then return end
+
+	BadgeService:AwardBadge(player.UserId, 4315096651447293)
+end
+
+local function rewardForPlayingAlpha(player)
+	if BadgeService:UserHasBadgeAsync(player.UserId, 1214839343920223) then return end
+	
+	BadgeService:AwardBadge(player.UserId, 1214839343920223)
+end
+
+local EarlyAccessSupporterUserIds = {
+	[132236406] = true, -- me (for testing)
+
+}
+
 
 ServerInit.playerInstances = {} -- Making this a module variable so ServerEvents can access this when it needs to get playerInstances
 
 function ServerInit.InitializePlayer(player)
+
+	setupNewPlayer(player)
+	rewardForPlayingAlpha(player)
 	--[[ Initializes a player when one joins the game ]]
 
 	-- local playerInstance = newPlayer(player) -- newPlayer() is returned a table of public variables of the player
@@ -67,10 +112,16 @@ function ServerInit.InitializePlayer(player)
 	kills.Name = "Takedowns"
 	kills.Parent = leaderstats
 
+	kills:GetPropertyChangedSignal("Value"):Connect(function()
+		rewardForKills(player)
+	end)
+
 	
 	local donations = Instance.new("IntValue")
 	donations.Name = "Donations"
 	donations.Parent = player
+
+	if game.PlaceId == 0 then return warn("Can't access curent-player's saved data as this project is not published.") end
 
 	-- retrieving the player's kills and donations via DataStore:
 	local kills_key = "id_" .. player.UserId .. "_kills"
@@ -83,6 +134,9 @@ function ServerInit.InitializePlayer(player)
 
 	if success then
 		kills.Value = data or 0
+		rewardForKills(player)
+	else
+		warn(data)
 	end
 
 	success = nil
@@ -93,6 +147,8 @@ function ServerInit.InitializePlayer(player)
 
 	if success then
 		donations.Value = data or 0
+	else
+		warn(data)
 	end
 
 	success, data = pcall(function()
@@ -101,11 +157,20 @@ function ServerInit.InitializePlayer(player)
 
 	if success then
 		money.Value = data or 0
+	else
+		warn(data)
+	end
+
+	if EarlyAccessSupporterUserIds[player.UserId] then -- this player is a early-access supporter. They were promised rewards in my promotion.
+		local EASupporterScreen = game.ServerStorage.EASupporterGreeting:Clone()
+		EASupporterScreen.Parent = player.PlayerGui
 	end
 
 end
 
 function ServerInit.RemovePlayer(player)
+
+	if game.PlaceId == 0 then return end
 
 	
 	local kills_key = "id_" .. player.UserId .. "_kills"

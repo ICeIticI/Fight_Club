@@ -2,6 +2,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local SocialService = game:GetService("SocialService")
 
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
+local perkButton = require(game.ReplicatedStorage.Shared.client_modules.perkButton)
 
 local UIManager = {}
 
@@ -12,6 +13,8 @@ local healthBar
 local healthFrameLabel
 local staminaBar
 local staminaFrameLabel
+
+local EASupporterGreeting
 
 local mobile_attackButton
 local mobile_blockButton
@@ -42,6 +45,8 @@ function UIManager.manageUI()
     healthFrameLabel = gameFrame.healthFrameLabel
     staminaBar = gameFrame.staminaLabel
     staminaFrameLabel = gameFrame.staminaFrameLabel
+
+    EASupporterGreeting = ClientVariables.player.PlayerGui:FindFirstChild("EASupporterGreeting")
 
     donateButtons = (function()
         local buttons = {}
@@ -110,11 +115,15 @@ function UIManager.manageUI()
     gameFrame.buttons1.fightingStyles_button.Activated:Connect(function()
         gameFrame.fightingStyles_screen.Visible = not gameFrame.fightingStyles_screen.Visible
     end)
-
+    
     gameFrame.buttons1.perks_button.Activated:Connect(function()
-        gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
-    end)
-    --]]
+    gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
+end)
+--]]
+
+    local perksScreen = gameFrame.perks_screen
+
+    local damageBuffPerk = perkButton.new("Iron Knuckles", "Increases attack damage")
 
     donation_buttonActivated = gameFrame.buttons2.donation_button.Activated:Connect(function()
         gameFrame.donateOptions.Visible = not gameFrame.donateOptions.Visible
@@ -159,6 +168,12 @@ function UIManager.manageUI()
             staminaChecker, healthChecker = nil, nil
         end
     end)
+
+    if EASupporterGreeting then
+        EASupporterGreeting.Frame.Close.Activated:Connect(function()
+            EASupporterGreeting.Frame.Parent.Enabled = false
+        end)
+    end
 
     print(loadingScreen)
 

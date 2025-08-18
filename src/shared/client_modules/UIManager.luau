@@ -2,7 +2,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local SocialService = game:GetService("SocialService")
 
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
-local perkButton = require(game.ReplicatedStorage.Shared.client_modules.perkButton)
+-- local perkButton = require(game.ReplicatedStorage.Shared.client_modules.perkButton)
 
 local UIManager = {}
 
@@ -121,9 +121,9 @@ function UIManager.manageUI()
 end)
 --]]
 
-    local perksScreen = gameFrame.perks_screen
+    -- local perksScreen = gameFrame.perks_screen
 
-    local damageBuffPerk = perkButton.new("Iron Knuckles", "Increases attack damage")
+    -- local damageBuffPerk = perkButton.new("Iron Knuckles", "Increases attack damage")
 
     donation_buttonActivated = gameFrame.buttons2.donation_button.Activated:Connect(function()
         gameFrame.donateOptions.Visible = not gameFrame.donateOptions.Visible

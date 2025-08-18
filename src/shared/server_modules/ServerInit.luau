@@ -78,6 +78,7 @@ end
 
 local EarlyAccessSupporterUserIds = {
 	[132236406] = true, -- me (for testing)
+	[8671423836] = true
 
 }
 

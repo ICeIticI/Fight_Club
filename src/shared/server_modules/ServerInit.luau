@@ -77,8 +77,11 @@ local function rewardForPlayingAlpha(player)
 end
 
 local EarlyAccessSupporterUserIds = {
-	[132236406] = true, -- me (for testing)
-	[8671423836] = true
+	[132236406] = true, -- me (cause i said so)
+	[8671423836] = true, -- kai.bangstat
+	[4970028999] = true, -- shadowfirenew
+	[6045827681] = true, -- nightshade_bro (one of shadows friends)
+	[1025234589] = true
 
 }
 

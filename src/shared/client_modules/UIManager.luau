@@ -175,6 +175,15 @@ end)
         end)
     end
 
+    local propsTextButton = game:GetService("Workspace"):WaitForChild("tavern"):WaitForChild("CreditsBoard"):WaitForChild("SurfaceGui"):WaitForChild("Frame"):WaitForChild("PropsFrame"):WaitForChild("Frame"):WaitForChild("TextButton")
+
+        -- since they may change their username or whatever, this will just pull their name whenever a session starts
+    local contributorId = 2259676713 -- wolf
+    local contributorName = game.Players:GetNameFromUserIdAsync(contributorId)
+
+    propsTextButton.Text = "Glass bottles created by " .. contributorName
+
+
     print(loadingScreen)
 
     task.spawn(function()

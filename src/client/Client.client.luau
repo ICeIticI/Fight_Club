@@ -22,7 +22,6 @@ local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.Cli
 -- local BasicStriking = require(game.ReplicatedStorage.Shared.BasicStriking)
 -- local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAndCountering)
 local UIManager = require(game.ReplicatedStorage.Shared.client_modules.UIManager)
-print("managing?")
 UIManager.manageUI()
 -- New Modules:
 local utilities = require(game.ReplicatedStorage.Shared.utilities)
@@ -32,7 +31,6 @@ ClientVariables.isOnMobile = -- Will be either true or false if they're on mobil
 	and not UserInputService.KeyboardEnabled
 	and not UserInputService.MouseEnabled
 
-    print("hi")
 local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
 require(game.ReplicatedStorage.Shared.client_modules.REs_RFs).init()
 
@@ -56,7 +54,6 @@ end
 game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
     -- Initializes the player
     -- while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
-    print("managing?")
     UIManager.manageUI()
 end)
 
@@ -132,7 +129,6 @@ ClientVariables.LocalBindableEvent.Event:Connect(function(protocol, data)
         if ClientVariables.isAttackButtonHeld and ClientVariables.isBlockButtonHeld then
             data.input.UserInputType = "mobile_grabButton"
         end
-        print(data.input.UserInputType)
 
         onInputBegan(data.input)
     elseif protocol == "mobileInputEnded" then

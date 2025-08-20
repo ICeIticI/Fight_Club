@@ -96,11 +96,9 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
         
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             -- Perform a left parry
-            warn("ParryL")
             return AnimationInstances.FC_RightParry
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
             -- Perform a right parry
-            warn("ParryR")
             return AnimationInstances.FC_LeftParry
         end
     elseif trackData.type == "gettingParried" then
@@ -348,7 +346,6 @@ function Character_Receive:syncBlock(attacker_characterInstance) --[[ Block an e
     playReceivingTrack(self.characterInstance, trackData)
 
     while trackData.IsPlaying do task.wait() end
-    print("are we blocking?: ", self.characterInstance.isBlockBeingPressed)
     self.characterInstance:block(self.characterInstance.isBlockBeingPressed)
 end
 
@@ -362,11 +359,9 @@ function Character_Receive:dodge(attacker_characterInstance) --[[ Dodge away fro
     -- no need for attackerAnim this time. We dont depend on it for dodges.
     local trackData = setupReceiveAnimation(self.characterInstance, "Dodge", nil)
     self.characterInstance.iFrames = true
-    print("block??")
     task.spawn(function()
         self.characterInstance:block(false)
     end)
-    print("not blocking")
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance:setLinearVelocity(self.characterInstance.dodgeVelocity, self.characterInstance.dodgeLength)
     self.characterInstance.SetSpeed(false)
@@ -380,15 +375,6 @@ end
 function Character_Receive:parry(attacker_characterInstance) --[[ Parry an incoming strike ]]
     local attackerAnim = attacker_characterInstance.currentAttack_trackData.Animation    
     
-    -- if attackerAnim:GetAttribute("AnimDirection") == "Left" then
-    --     -- Perform a left parry
-    --     warn("ParryL")
-    --     self.characterInstance.currentReceiveAnimTRACK = self.characterInstance.FC_RightParryTRACK
-    -- elseif attackerAnim:GetAttribute("AnimDirection") == "Right" then
-    --     -- Perform a right parry
-    --     warn("ParryR")
-    --     self.characterInstance.currentReceiveAnimTRACK = self.characterInstance.FC_LeftParryTRACK
-    -- end
     local trackData = setupReceiveAnimation(self.characterInstance, "Parry", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
     self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
@@ -495,17 +481,11 @@ function Character_Receive:receiveGrabAttempt(attacker_characterInstance) --[[ A
     -- Detect next input. If its the attack button in the window of time they can deny a grab, then it will allow them to deny.
     -- If its the block button, then their opportunity is gone. No matter what button they press now, even pressed in the time frame, will mean they will get grapped.
     self.characterInstance.nextInput = nil -- will be set on their next action input
-    print(self.characterInstance.character.Name .. " is receiving a grab")
-    print(self.characterInstance.nextInput)
     while trackData.IsPlaying do task.wait() end -- wait for the whole grab attempt to end before returning true or false (which means we succeeded or not with tryna grab the enemy)
     
-    print(self.characterInstance.character.Name .. " is no longer getting grabbed")
-    print(self.characterInstance.nextInput)
     if self.characterInstance.nextInput == "grab" and not self.characterInstance.isBlocking then
-        print("grab defend successful")
         return true -- we successfully defended against the grab attempt
     else
-        print("failed to defend grab attempt against enemy")
         return false
     end
 

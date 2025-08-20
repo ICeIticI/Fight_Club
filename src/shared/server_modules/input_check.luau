@@ -136,9 +136,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
         end
 
     elseif GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode] then
-        print(characterInstance.nextInput)
         if not characterInstance.nextInput then
-            print("next input is grab")
             characterInstance.nextInput = "grab"
         end
 
@@ -146,13 +144,13 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             utilities.activateLockOn(characterInstance, utilities, characters, active)
         end
 
-        print(
-            not characterInstance.isInSecureGrapple,
-            not characterInstance.isInGrappleSuccess,
-            characterInstance.lockOnDebounce.Value,
-            characterInstance.enemyChar.Humanoid.Health > 0,
-            not characterInstance.grappleDelay
-        )
+        -- print(
+        --     not characterInstance.isInSecureGrapple,
+        --     not characterInstance.isInGrappleSuccess,
+        --     characterInstance.lockOnDebounce.Value,
+        --     characterInstance.enemyChar.Humanoid.Health > 0,
+        --     not characterInstance.grappleDelay
+        -- )
 
         if characterInstance.boolCheck({
             isAttacking = characterInstance.isAttacking.Value, 
@@ -168,7 +166,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
 
         and not characterInstance.grappleDelay
         then
-            print(characterInstance.character, characterInstance.isGrappling)
             local enemyInstance = characters:GetCharacterObjectByCharacter(characterInstance.enemyChar)
             characterInstance:grab(enemyInstance, nil)
             -- if enemyInstance:receive("grabAttempt", characterInstance) == false then
@@ -186,7 +183,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             
             if not characterInstance.nextInput then
                 characterInstance.nextInput = "block"
-                print("changed nextInput to BLOCK")
             end
             
             if not characterInstance.lockOnDebounce.Value then
@@ -194,7 +190,6 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
             end
             -- if the character isInSecureGrapple, that means THEY'RE the one GETTING grappled, not the one doing it. When doing a secure grapple to an enemy, this variable will be true for the enemy.
             if characterInstance.isGrappling and characterInstance.grappleDelay and not characterInstance.isInSecureGrapple and not characterInstance.isAttacking.Value then
-                print("y u do this 2 me")
                 characterInstance.isGrappling = false
                 return
             end

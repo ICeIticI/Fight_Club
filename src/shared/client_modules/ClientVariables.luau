@@ -13,8 +13,9 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	ClientVariables.humanoid = ClientVariables.character:WaitForChild("Humanoid")
 	-- ClientVariables.previousHealth = ClientVariables.humanoid.Health -- This var is used to determine how much damage the character takes.
 
-	ClientVariables.charAnimator = ClientVariables.character:WaitForChild("Humanoid"):WaitForChild("charAnimator")
+	ClientVariables.charAnimator = ClientVariables.character:WaitForChild("Humanoid"):WaitForChild("Animator")
 	ClientVariables.humanoidRootPart = ClientVariables.character:WaitForChild("HumanoidRootPart")
+	print("hrp: ", ClientVariables.humanoidRootPart, ClientVariables.humanoidRootPart.Parent.Humanoid.Health)
 
 	-- Bools and Values:
 	
@@ -25,7 +26,6 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 
 
 	ClientVariables.stamina = ClientVariables.plrObjectsFolder:WaitForChild("stamina")
-	print(ClientVariables.stamina)
 	ClientVariables.maxStamina = ClientVariables.plrObjectsFolder:WaitForChild("maxStamina")
 	
 	local humanoidDiedConnect -- the :Connect() event for when the player's current humanoid dies.

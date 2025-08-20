@@ -40,7 +40,6 @@ function RagdollSystem:InitializeCharacter()
 	humanoid.HealthChanged:Connect(function(newHealth) -- to ragdoll the character on death
 		
 		if newHealth == 0 then
-			print("ragd")
 			-- if self.characterInstance.player then
 			-- 	setCharacterNetworkOwnershipTo(self.characterInstance.character, self.characterInstance.player)
 			-- 	self.characterInstance.GlobalRemoteEvent:FireAllClients("ragdoll", {character = self.characterInstance.character, id = self.characterInstance.id, ragdollBool = true})

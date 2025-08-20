@@ -34,12 +34,10 @@ MarketplaceService.ProcessReceipt = function(receiptInfo) -- Runs when a player 
 	
 	
 	if not player then -- player left before we can do anything with this purchase
-		print("Player left")
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	
 	-- if the script makes it here, then the player is still in the game and we can do stuff in return because of their purchase
-	print(receiptInfo.CurrencySpent)
 	player.Donations.Value += receiptInfo.CurrencySpent
 
 	return Enum.ProductPurchaseDecision.PurchaseGranted -- We can now safely close the purchase
@@ -50,7 +48,6 @@ local ServerInit = {}
 local function rewardForKills(player)
 	local kills = player.leaderstats.Takedowns
 
-	print(kills, BadgeService:UserHasBadgeAsync(player.UserId, 1102891297529600))
 	if kills.Value >= 1 and not BadgeService:UserHasBadgeAsync(player.UserId, 1102891297529600) then
 		BadgeService:AwardBadge(player.UserId, 1102891297529600)
 	end
@@ -81,7 +78,7 @@ local EarlyAccessSupporterUserIds = {
 	[8671423836] = true, -- kai.bangstat
 	[4970028999] = true, -- shadowfirenew
 	[6045827681] = true, -- nightshade_bro (one of shadows friends)
-	[1025234589] = true
+	[1025234589] = true -- boris2015cash (another friend of shadow)
 
 }
 

@@ -82,7 +82,6 @@ function Character_Grapple:Attempt(enemyInstance) --[[ The character goes to att
     self.characterInstance.grappleDelay = true -- Character should NOT be able to spam grapple, such as letting the enemy go and immediately grappling again. Thats absolute B.S (Bad Science for the record)
     
     local trackData = setupGrabAnimation(self.characterInstance)
-    print(self.characterInstance.character, self.characterInstance.isGrappling)
     
     self.characterInstance.SetSpeed(false)
     while not self.characterInstance.speedSet or not enemyInstance.SetSpeed do task.wait(0.1) end -- wait for the speed to get set before proceeding.
@@ -104,14 +103,12 @@ end
 function Character_Grapple:EndGrab(enemyInstance)
 
     if self.characterInstance.isGrappling then     
-        print("breakin out")
         grabType = "breakout"
         local trackData = setupGrabAnimation(self.characterInstance)
         playGrabAnimation(self.characterInstance, trackData)
         enemyInstance:receive("repelGrab", self.characterInstance)
     else
         grabType = "complete"
-        print(grabType)
         self.characterInstance.isGrappling = false
         enemyInstance.isGrappling = false
         self.characterInstance.reset()
@@ -262,7 +259,6 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     grabMotor = nil
     -- grabWeld.Enabled = false
     -- grabWeld:Destroy()
-    print("We broke out of the loop. Our current grab type:" , grabType)
 
     playGrabAnimation(self.characterInstance, trackData, false)
 

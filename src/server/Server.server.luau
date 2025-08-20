@@ -66,7 +66,6 @@ require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check
 local function setupPlayer(player)
     task.spawn(function()
         while not serverInitialized.Value do task.wait() end
-        print("we init")
         ServerInit.InitializePlayer(player) -- initializes player's public objects
         
         -- local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()

@@ -233,9 +233,9 @@ function Character_Init.init(charModel)
 
 	characterInstance.grapplePart.Parent = characterInstance.humanoidRootPart
 
-	local charAnimator = Instance.new("Animator")
-	charAnimator.Name = "charAnimator"
-	charAnimator.Parent = characterInstance.character:WaitForChild("Humanoid")
+	-- local charAnimator = Instance.new("Animator")
+	-- charAnimator.Name = "charAnimator"
+	-- charAnimator.Parent = characterInstance.character:WaitForChild("Humanoid")
 
     -- Defining the hitboxes when character spawns
 	local hbFolder = Instance.new("Folder") --[[ folder to store hitboxes to prevent false 
@@ -590,10 +590,8 @@ function Character_Init.init(charModel)
 
 	connects.deadStateConnect = nil
 	connects.deadStateConnect = characterInstance.humanoid.StateEnabledChanged:Connect(function(stateType, stateEnabled)
-		print(stateType)
 		if stateType ~= Enum.HumanoidStateType.Dead then return end -- make sure we're working with the Dead state type
 		-- characterInstance.GlobalRemoteEvent:FireAllClients("updateMyDeadState", {humanoid = characterInstance.humanoid, stateEnabled = stateEnabled})
-		print("Dead")
 		deadState.Value = stateEnabled
 	end)
 
@@ -606,8 +604,6 @@ function Character_Init.init(charModel)
 
 
 		if characterInstance.lockOnDebounce.Value == true then
-			warn("Lock on true for:", characterInstance.character.Name)
-
 			-- built-in enemyChar-retrieving code if we dont have enemyChar yet:
 			if not characterInstance.enemyChar then
 				if not characterInstance.raycastInstance then return error("No enemychar nor raycastInstance. Are you even locked-on?") end
@@ -623,10 +619,10 @@ function Character_Init.init(charModel)
 			characterInstance.enemyHumanoid = characterInstance.enemyChar.Humanoid
 
 		else
-			warn("No more lock on for:", characterInstance.character.Name)
 			characterInstance.reset()
 			characterInstance:block(false)
 		end
+		print("sending lock-on signal")
 		utilities.sendLockOnSignal(characterInstance)
 
 	end)
@@ -636,7 +632,7 @@ function Character_Init.init(charModel)
 	connects.DiedConnection = nil
 	connects.DiedConnection = characterInstance.humanoid.Died:Connect(function()
 
-		if characterInstance.attackingChar then
+		if characterInstance.attackingChar and game.Players:GetPlayerFromCharacter(characterInstance.attackingChar) then
 			game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Tokens.Value += 2
 			game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Takedowns.Value += 1
 		end
@@ -746,13 +742,12 @@ function Character_Init.init(charModel)
 	end
 
 
-	pcall(function()
-		if characterInstance.character:FindFirstChild("Animator") then		
-			characterInstance.character.Humanoid.Animator:Destroy()
-		end
-	end)
+	-- pcall(function()
+	-- 	if characterInstance.character:FindFirstChild("Animator") then		
+	-- 		characterInstance.character.Humanoid.Animator:Destroy()
+	-- 	end
+	-- end)
 
-	print(characterInstance.player.UserId)
 
     return characterInstance
 end

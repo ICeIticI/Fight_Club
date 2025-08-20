@@ -35,7 +35,6 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
             if characterInstance.isGrappling then -- grapple attacks dont inherently make the camera shake so we gotta do it here
                 characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "shakeCamera", {type = "Strike"})
             end
-            print(trackData)
             characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
             characterInstance.GlobalRemoteEvent:FireClient(game.Players:GetPlayerFromCharacter(characterInstance.enemyChar), "shakeCamera", {type = trackData.type, AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
             characterInstance.playHitSFX(trackData)
@@ -145,11 +144,9 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
             -- end
             
             if not self.characterInstance.isGrappling then
-                warn("Resetting")
                 self.characterInstance.reset()
             else
                 if trackData.attackLvl == 3 then
-                    warn("hi")
                     self.characterInstance.isGrappling = false
                     self.characterInstance.grappleDelay = false
                     self.characterInstance.enemyChar.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)

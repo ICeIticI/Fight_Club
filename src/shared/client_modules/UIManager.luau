@@ -75,7 +75,6 @@ function UIManager.manageUI()
     
         mobile_attackButton.InputBegan:Connect(function()
             ClientVariables.isAttackButtonHeld = true
-            print(ClientVariables.isAttackButtonHeld)
             -- ClientVariables.isBlockButtonHeld = true
 
             ClientVariables.LocalBindableEvent:Fire("mobileInputBegan", {input = {UserInputType = "mobile_attackButton"}})
@@ -86,7 +85,6 @@ function UIManager.manageUI()
     
         mobile_blockButton.InputBegan:Connect(function()
             ClientVariables.isBlockButtonHeld = true
-            print(ClientVariables.isBlockButtonHeld)
             ClientVariables.LocalBindableEvent:Fire("mobileInputBegan", {input = {UserInputType = "mobile_blockButton"}})
         end)
         mobile_blockButton.InputEnded:Connect(function()
@@ -183,14 +181,10 @@ end)
 
     propsTextButton.Text = "Glass bottles created by " .. contributorName
 
-
-    print(loadingScreen)
-
     task.spawn(function()
         while not ClientVariables.initialized do task.wait() end
     
         loadingScreen.Enabled = false
-        print(loadingScreen.Enabled)
     end)
 
 end

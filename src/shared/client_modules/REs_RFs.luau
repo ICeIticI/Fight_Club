@@ -58,7 +58,6 @@ function REs_RFs.init()
 
         elseif protocol == "updateMyDeadState" then
             data.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, data.stateEnabled)
-            print(data.humanoid.Parent.Name .. " dead state enabled: ", data.stateEnabled)
         
         elseif protocol == "shakeCamera" then
             utilities.shakeCamera(game:GetService("TweenService"), game.Workspace.CurrentCamera, data)

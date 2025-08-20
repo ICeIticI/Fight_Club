@@ -56,7 +56,6 @@ local function receive(receiver_characterInstance, attacker_characterInstance)
         end
     
     elseif receiver_characterInstance.isBlocking and not receiver_characterInstance.pairedPlaying then
-        warn("We is blocking")
         receiver_characterInstance.canSyncBlock = false
         receiver_characterInstance:receive("bracingBlock", attacker_characterInstance)
     end

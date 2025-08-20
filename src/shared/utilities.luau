@@ -103,7 +103,7 @@ function Utilities.activateLockOn(characterInstance, utilities, characters, acti
             if potentialEnemyChar:FindFirstChildWhichIsA("Humanoid") then
                 characterInstance.enemyChar = potentialEnemyChar
             else
-                warn("The character is behind a wall or something.. cant lock on.")
+                -- warn("The character is behind a wall or something.. cant lock on.")
                 characterInstance.enemyChar = nil
             end
         end
@@ -268,7 +268,6 @@ local cameraShakeMultiplierByDirection = {
 }
 
 function Utilities.shakeCamera(TweenService, camera, data)
-    print(data)
 
     if not data.AnimDirection then
         data.AnimDirection = "None"

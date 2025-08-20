@@ -143,7 +143,6 @@ function LockOn.Lock(publicVariables)
 		movementConnection = nil
 		ClientVariables.stopMovementAnimations()
 	end
-	warn(movementConnection)
 
 	-- No-longer locked-on. Ensure old, irrelevant data doesn't get used
 	for varName, _ in pairs(publicVariables) do -- public variables aint useful after lock-off

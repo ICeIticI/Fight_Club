@@ -43,7 +43,6 @@ function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize
 
             -- moduleTbl[obj.Name] = obj
             moduleTbl[obj.Name .. "TRACK"] = moduleTbl.charAnimator:LoadAnimation(obj)
-            print(moduleTbl[obj.Name .. "TRACK"])
 
             -- Set animation priority based on attributes
             if obj:GetAttribute("Paired") and obj:GetAttribute("AnimType") then

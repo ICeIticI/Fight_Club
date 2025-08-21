@@ -25,6 +25,8 @@ function REs_RFs.init()
             else
                 lockOn.Unlock(data)
             end
+        elseif protocol == "getPerk" then
+            
         end
     end
     

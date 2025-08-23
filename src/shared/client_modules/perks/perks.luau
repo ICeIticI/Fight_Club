@@ -74,11 +74,11 @@ local instancesMT = { -- stores metamethods like tracking each new item added to
 }
 setmetatable(perkButton.instances, instancesMT)
 
-local PerksRemoteFunction = game.ReplicatedStorage:WaitForChild("PerksRemoteFunction")
+-- local PerksRemoteFunction = game.ReplicatedStorage:WaitForChild("PerksRemoteFunction")
 
 equipPurchase_screen.Yes.Activated:Connect(function()
 
-    ClientVariables.GlobalRemoteFunction:InvokeServer("getPerk", currentlySelectedPerk.name)
+    if not ClientVariables.GlobalRemoteFunction:InvokeServer("getPerk", {name = currentlySelectedPerk.name}) then return end
 
     if currentlySelectedPerk.isEquipped then
         unequipPerk(currentlySelectedPerk)
@@ -98,15 +98,21 @@ equipPurchase_screen.No.Activated:Connect(function()
     equipPurchase_screen.Visible = false
 end)
 
-local damageBuffPerk = perkButton.new("Iron Fists", "Increases attack damage")
-unequipPerk(damageBuffPerk)
-local blockBuffPerk = perkButton.new("Unbreakable", "Increases block absorption")
-unequipPerk(blockBuffPerk)
-local staminaBuffPerk = perkButton.new("Cardiosaurus Rex", "Decreases stamina degradation")
-unequipPerk(staminaBuffPerk)
-local attackSpeedBuffPerk = perkButton.new("Full-Auto", "Increases attack speed")
-unequipPerk(attackSpeedBuffPerk)
-local healthBuffPerk = perkButton.new("Meat Head", "Increases health")
-unequipPerk(healthBuffPerk)
+local perksFolder = game.ReplicatedStorage:WaitForChild("perksFolder")
+local equippedPerks = ClientVariables.player:WaitForChild("equippedPerks")
+local unequippedPerks = ClientVariables.player:WaitForChild("unequippedPerks")
+
+for _, perk in pairs(perksFolder:GetChildren()) do
+    local locked = false
+
+    if not equippedPerks:FindFirstChild(perk.Name) 
+    and not unequippedPerks:FindFirstChild(perk.Name) 
+    then
+        locked = true
+    end
+
+    local newPerk = perkButton.new(perk.Name, perk.Value, locked)
+    unequipPerk(newPerk)
+end
 
 return Perks

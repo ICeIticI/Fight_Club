@@ -24,6 +24,7 @@ local Character = require(game.ReplicatedStorage.Shared.character_class.characte
 local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
 require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check will run on it's own, but we don't need to store it as it will be unused.
+require(game.ReplicatedStorage.Shared.server_modules.serverEvents)
 
 -- GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 --     if Protocol == "Hook" or Protocol == "Haymaker" then -- Used to check which set of remote events should play. When doing basic striking, no animPair nor sentValue is sent in the parameters, unlike doing other misc. events, which is how we distinguish, splitting the events into two to make the code easier to understand.

@@ -22,7 +22,16 @@ local function initializeButton(self) --[[ After creating a button object, we ar
     return button
 end
 
-function PerkButton.new(name, description)
+local function lockButton(button)
+    local lockImg = Instance.new("ImageLabel")
+    lockImg.BackgroundTransparency = 1
+    lockImg.ImageTransparency = 0.7
+    lockImg.Image = "rbxassetid://84160492794704"
+    lockImg.Size = UDim2.fromScale(1,1)
+    lockImg.Parent = button
+end
+
+function PerkButton.new(name, description, locked)
     local self = setmetatable({}, PerkButton)
         self.name = name
         self.description = description
@@ -31,6 +40,10 @@ function PerkButton.new(name, description)
         self.instance = initializeButton(self)
         self.colorsInverted = false
         
+    if locked then
+        lockButton(self.instance)
+    end
+
     PerkButton.instances[#PerkButton.instances+1] = self -- like table.insert, but will allow metatable __newindex to trigger
     return self
 end

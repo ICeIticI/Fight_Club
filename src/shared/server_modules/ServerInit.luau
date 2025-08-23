@@ -2,16 +2,22 @@
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local BadgeService = game:GetService("BadgeService")
+-- local HttpService = game:GetService("HttpService") -- used for encoding our tables into JSON format as a string since datastores are gay and dont accept tables as a format
+
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
+local perks = require(game.ReplicatedStorage.Shared.server_modules.perks)
 
 local DataStoreService
 local KillsStore
 local MoneyStore
+local PerksStore
 local DonationsStore
 if game.PlaceId ~= 0 then -- project must be published to use DatStores
 	DataStoreService = game:GetService("DataStoreService")
 	KillsStore = DataStoreService:GetOrderedDataStore("KillsStore")
 	MoneyStore = DataStoreService:GetOrderedDataStore("MoneyStore")
 	DonationsStore = DataStoreService:GetOrderedDataStore("DonationsStore")
+	PerksStore = DataStoreService:GetDataStore("PerksStore") -- ordered datastores are for leaderboard and numeric stuff, everything else can use normal datastores
 end
 
 local GlobalRemoteEvent = Instance.new("RemoteEvent") -- used by each client in a server for communication with server-client or client to server
@@ -122,11 +128,20 @@ function ServerInit.InitializePlayer(player)
 	donations.Name = "Donations"
 	donations.Parent = player
 
+	local equippedPerks = Instance.new("Folder")
+	equippedPerks.Name = "equippedPerks"
+	equippedPerks.Parent = player
+
+	local unequippedPerks = Instance.new("Folder")
+	unequippedPerks.Name = "unequippedPerks"
+	unequippedPerks.Parent = player
+
 	if game.PlaceId == 0 then return warn("Can't access curent-player's saved data as this project is not published.") end
 
 	-- retrieving the player's kills and donations via DataStore:
 	local kills_key = "id_" .. player.UserId .. "_kills"
 	local money_key = "id_" .. player.UserId .. "_money"
+	local perks_key = "id_" .. player.UserId .. "_perks"
 	local donations_key = "id_" .. player.UserId .. "_donations"
 	
 	local success, data = pcall(function()
@@ -162,6 +177,25 @@ function ServerInit.InitializePlayer(player)
 		warn(data)
 	end
 
+	-- perks data:
+
+	success, data = pcall(function()
+		return PerksStore:GetAsync(perks_key)
+	end)
+
+	if success then
+		print(data)
+		if data then
+			perks.getPerks(data.equippedPerks, player.equippedPerks)
+			perks.getPerks(data.unequippedPerks, player.unequippedPerks)
+		else
+			player.equippedPerks = {}
+			player.unequippedPerks = {}
+		end
+	else
+		warn(data)
+	end
+
 	if EarlyAccessSupporterUserIds[player.UserId] then -- this player is a early-access supporter. They were promised rewards in my promotion.
 		local EASupporterScreen = game.ServerStorage.EASupporterGreeting:Clone()
 		EASupporterScreen.Parent = player.PlayerGui
@@ -176,10 +210,12 @@ function ServerInit.RemovePlayer(player)
 	
 	local kills_key = "id_" .. player.UserId .. "_kills"
 	local money_key = "id_" .. player.UserId .. "_money"
+	local perks_key = "id_" .. player.UserId .. "_perks"
 	local donations_key = "id_" .. player.UserId .. "_donations"
 
 	local kills = player.leaderstats.Takedowns
 	local money = player.leaderstats.Tokens
+	local ownedPerks = {equippedPerks = utilities.TurnInstancesToVariables(player.equippedPerks:GetChildren()), unequippedPerks = utilities.TurnInstancesToVariables(player.unequippedPerks:GetChildren())}
 	local donations = player.Donations
 	
 	if player.UserId < 1 then
@@ -207,6 +243,15 @@ function ServerInit.RemovePlayer(player)
 
 	success, result = pcall(function()
 		return MoneyStore:SetAsync(money_key, money.Value)
+	end)
+
+	if not success then
+		warn(result)
+	end
+
+	success, result = pcall(function()
+		print(ownedPerks)
+		return PerksStore:SetAsync(perks_key, ownedPerks)
 	end)
 
 	if not success then

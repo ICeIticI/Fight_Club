@@ -284,4 +284,15 @@ function Utilities.shakeCamera(TweenService, camera, data)
     TweenService:Create(camera, tweenInfo, goal):Play()
 end
 
+function Utilities.TurnInstancesToVariables(tbl)
+    local stringedTbl = {}
+    for _, v in pairs(tbl) do
+        print(tbl)
+        if v:IsA("StringValue") then -- add more value types if needed
+            stringedTbl[v.Name] = v.Value
+        end
+    end
+    return stringedTbl
+end
+
 return Utilities

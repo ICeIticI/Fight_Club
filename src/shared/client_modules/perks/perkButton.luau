@@ -24,6 +24,7 @@ end
 
 local function lockButton(button)
     local lockImg = Instance.new("ImageLabel")
+    lockImg.Name = "lockImage"
     lockImg.BackgroundTransparency = 1
     lockImg.ImageTransparency = 0.7
     lockImg.Image = "rbxassetid://84160492794704"
@@ -31,16 +32,19 @@ local function lockButton(button)
     lockImg.Parent = button
 end
 
-function PerkButton.new(name, description, locked)
+function PerkButton.new(name, description, cost, killsRequired, productId, locked)
     local self = setmetatable({}, PerkButton)
         self.name = name
         self.description = description
         self.equippedSize = UDim2.new(0.2, 0,1, 0)
-        self.unequippedSize =  UDim2.new(0.329, 0,0.2, 0)
+        self.unequippedSize = UDim2.new(0.329, 0,0.2, 0)
         self.instance = initializeButton(self)
-        self.colorsInverted = false
+        self.cost = cost
+        self.killsRequired = killsRequired
+        self.productId = productId
+        self.locked = locked
         
-    if locked then
+    if self.locked then
         lockButton(self.instance)
     end
 
@@ -48,18 +52,20 @@ function PerkButton.new(name, description, locked)
     return self
 end
 
-function PerkButton:invertColors()
-    if not self.colorsInverted then
-        self.instance.BackgroundColor3 = Color3.fromRGB(255, 38, 0)
-        self.instance.BorderColor3 = Color3.fromRGB(0,0,0)
-        self.instance.TextColor3 = Color3.fromRGB(0,0,0)
-        self.colorsInverted = true
-    else
-        self.instance.BackgroundColor3 = Color3.fromRGB(0,0,0)
-        self.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
-        self.instance.TextColor3 = Color3.fromRGB(255, 38, 0)
-        self.colorsInverted = false
+function PerkButton:unlock()
+    self.instance.lockImage:Destroy()
+    self.locked = false
+end
+
+function PerkButton.FindPerkByName(name)
+    for _, perk in pairs(PerkButton.instances) do
+        if perk.name == name then
+            return perk
+        end
     end
+
+    warn(PerkButton.instances)
+    return warn("No perk found with the given name: " .. tostring(name))
 end
 
 return PerkButton

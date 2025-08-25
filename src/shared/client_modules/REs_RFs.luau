@@ -25,8 +25,6 @@ function REs_RFs.init()
             else
                 lockOn.Unlock(data)
             end
-        elseif protocol == "getPerk" then
-            
         end
     end
     
@@ -63,6 +61,9 @@ function REs_RFs.init()
         
         elseif protocol == "shakeCamera" then
             utilities.shakeCamera(game:GetService("TweenService"), game.Workspace.CurrentCamera, data)
+        
+        elseif protocol == "perkPurchased" then
+           ClientVariables.GlobalBindableEvent:Fire(protocol, data)
         end
     
         --[[ ^ Might put the animation events into the animation_centric script 

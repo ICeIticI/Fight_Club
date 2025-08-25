@@ -62,6 +62,9 @@ ClientVariables.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalR
 -- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 ClientVariables.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
+-- Global Bindable Event
+ClientVariables.GlobalBindableEvent = game.ReplicatedStorage:WaitForChild("GlobalBindableEvent")
+
 -- Local Remote Event:
 ClientVariables.LocalBindableEvent = game.ReplicatedStorage:WaitForChild("LocalBindableEvent")
 

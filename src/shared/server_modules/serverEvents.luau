@@ -3,7 +3,7 @@ local ServerEvents = {}
 local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
 GlobalRemoteFunction.OnServerInvoke = function(player, protocol, data)
-    print("Y")
+
     if protocol == "getPerk" then
         local money = player:WaitForChild("leaderstats"):WaitForChild("Tokens")
         local kills = player.leaderstats:WaitForChild("Takedowns")
@@ -30,6 +30,11 @@ GlobalRemoteFunction.OnServerInvoke = function(player, protocol, data)
                     money.Value -= desiredPerk:GetAttribute("Cost")
                     desiredPerk.Parent = player.unequippedPerks
                 else
+                    if kills.Value < desiredPerk:GetAttribute("KillsRequired") then
+                        return "needMoreKills", (desiredPerk:GetAttribute("KillsRequired") - kills.Value)
+                    elseif money.Value < desiredPerk:GetAttribute("Cost") then
+                        return "needMoreMoney", (desiredPerk:GetAttribute("Cost") - kills.Value)
+                    end
                     return false
                 end
             end

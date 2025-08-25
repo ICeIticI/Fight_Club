@@ -28,12 +28,35 @@ local GlobalRemoteFunction = Instance.new("RemoteFunction") -- used for similar 
 GlobalRemoteFunction.Name = "GlobalRemoteFunction"
 GlobalRemoteFunction.Parent = game.ReplicatedStorage
 
+local GlobalBindableEvent = Instance.new("BindableEvent")
+GlobalBindableEvent.Name = "GlobalBindableEvent"
+GlobalBindableEvent.Parent = game.ReplicatedStorage
+
 
 -- Creating specific remote events/functions for client-server communication:
 
 local input_check_FUNCTION = Instance.new("RemoteFunction")
 input_check_FUNCTION.Name = "input_check_FUNCTION"
 input_check_FUNCTION.Parent = game.ReplicatedStorage
+
+local donationProductIds = { -- must have one of these product ids in order to get on the donations board
+	[3349676917] = true,
+	[3349682499] = true,
+	[3349686568] = true,
+	[3349688117] = true,
+	[3349689893] = true,
+	[3350402904] = true,
+	[3350445161] = true,
+}
+
+local perksFolder = game.ReplicatedStorage:WaitForChild("perksFolder")
+local perkProductIds = {
+	[3382902336] = "Iron Fists",
+	[3382903295] = "Meat Head",
+	[3382904079] = "Unbreakable",
+	[3382905392] = "Cardiosaurus Rex",
+	[3382906629] = "Full-Auto"
+}
 
 MarketplaceService.ProcessReceipt = function(receiptInfo) -- Runs when a player presses 'Buy' on a developer product
 	local player = game:GetService("Players"):GetPlayerByUserId(receiptInfo.PlayerId) -- receiptInfo is a dictionary of stuff when the buy button is pressed, which includes the playerId of what player purchased.
@@ -42,9 +65,15 @@ MarketplaceService.ProcessReceipt = function(receiptInfo) -- Runs when a player 
 	if not player then -- player left before we can do anything with this purchase
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
-	
 	-- if the script makes it here, then the player is still in the game and we can do stuff in return because of their purchase
-	player.Donations.Value += receiptInfo.CurrencySpent
+	
+	if donationProductIds[receiptInfo.ProductId] then
+		player.Donations.Value += receiptInfo.CurrencySpent
+	elseif perkProductIds[receiptInfo.ProductId] then
+		local desiredPerk = perksFolder:FindFirstChild(perkProductIds[receiptInfo.ProductId]):Clone()
+		desiredPerk.Parent = player.unequippedPerks
+		GlobalRemoteEvent:FireClient(player, "perkPurchased", {perkName = perkProductIds[receiptInfo.ProductId]})
+	end
 
 	return Enum.ProductPurchaseDecision.PurchaseGranted -- We can now safely close the purchase
 end

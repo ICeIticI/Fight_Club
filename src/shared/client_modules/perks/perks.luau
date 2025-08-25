@@ -1,3 +1,5 @@
+local MarketplaceService = game:GetService("MarketplaceService")
+
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
 local perkButton = require(game.ReplicatedStorage.Shared.client_modules.perks.perkButton)
 
@@ -6,13 +8,13 @@ local Perks = {}
 local gameGUI = ClientVariables.player.PlayerGui.gameGUI
 local perks_screen = gameGUI.Frame.perks_screen
 local perksSelection = perks_screen.perksSelection
-local equippedPerks = perks_screen.equippedPerks
+local equippedPerks_screen = perks_screen.equippedPerks
 local equipPurchase_screen = gameGUI.Frame.perks_screen.equipPurchase_screen
 
 local function equipPerk(perk)
     perk.isEquipped = true
     perk.instance.Size = perk.equippedSize
-    perk.instance.Parent = equippedPerks
+    perk.instance.Parent = equippedPerks_screen
 end
 
 local function unequipPerk(perk)
@@ -21,8 +23,22 @@ local function unequipPerk(perk)
     perk.instance.Parent = perksSelection.perksFrame
 end
 
+local function getPriceOfPerkInRobux(perk)
+    local success, productInfo = pcall(function()
+        return MarketplaceService:GetProductInfo(perk.productId, Enum.InfoType.Product)
+    end)
+
+    if success and productInfo then
+        return productInfo.PriceInRobux
+    else
+        return warn("Failed to get price of robux with the given perk: " .. tostring(perk))
+    end
+end
+
 local currentlyHighlightedPerk = nil -- when our mouse hovers over a perk
 local currentlySelectedPerk = nil -- whenever we select a perk, this will be that perk
+
+local promptToPurchaseRobux = false
 
 -- track each hovered button so we display the description
 local instancesMT = { -- stores metamethods like tracking each new item added to the table
@@ -59,12 +75,19 @@ local instancesMT = { -- stores metamethods like tracking each new item added to
                 v.instance.BorderColor3 = Color3.new(1, 1, 1)
                 currentlySelectedPerk = v
 
-                if currentlySelectedPerk.isEquipped then
+                if currentlySelectedPerk.locked then
+                    equipPurchase_screen.purchaseWithRobuxFrame.PurchaseWithRobuxButton:WaitForChild("Amount").Text = getPriceOfPerkInRobux(currentlySelectedPerk)
+                    equipPurchase_screen.purchaseWithRobuxFrame.Visible = true
+                    equipPurchase_screen.TextLabel.Text = "Would you like to purchase the '" ..tostring(currentlySelectedPerk.name) .. "' perk for " .. tostring(currentlySelectedPerk.cost) .. " Tokens?"
+                elseif currentlySelectedPerk.isEquipped then
+                    equipPurchase_screen.purchaseWithRobuxFrame.Visible = false
                     equipPurchase_screen.TextLabel.Text = "Unequip?"
                 else
+                    equipPurchase_screen.purchaseWithRobuxFrame.Visible = false
                     equipPurchase_screen.TextLabel.Text = "Equip?"
                 end
 
+                promptToPurchaseRobux = false
                 equipPurchase_screen.Visible = true
 
                 return
@@ -76,19 +99,41 @@ setmetatable(perkButton.instances, instancesMT)
 
 -- local PerksRemoteFunction = game.ReplicatedStorage:WaitForChild("PerksRemoteFunction")
 
+
 equipPurchase_screen.Yes.Activated:Connect(function()
 
-    if not ClientVariables.GlobalRemoteFunction:InvokeServer("getPerk", {name = currentlySelectedPerk.name}) then return end
+    if not promptToPurchaseRobux then
+        local getPerk, amountMissingForPurchase = ClientVariables.GlobalRemoteFunction:InvokeServer("getPerk", {name = currentlySelectedPerk.name})
+        if getPerk ~= true then
+            -- they should be prompted to purchase this perk with robux or purchase more tokens
+            if getPerk == "needMoreMoney" then
+                equipPurchase_screen.TextLabel.Text = "You need " ..tostring(amountMissingForPurchase) .. " more Tokens to purchase the '" ..tostring(currentlySelectedPerk.name) .."' perk. Would you like to purchase more Tokens?"
+            elseif getPerk == "needMoreKills" then
+                equipPurchase_screen.TextLabel.Text = "You need " ..tostring(amountMissingForPurchase) .. " more Kills to be able to purchase the '" ..tostring(currentlySelectedPerk.name) .."' perk. Would you like to purchase this perk with Robux?"
+            end
 
-    if currentlySelectedPerk.isEquipped then
-        unequipPerk(currentlySelectedPerk)
+            promptToPurchaseRobux = true
+            return 
+        end
+
+        if currentlySelectedPerk.locked then
+            currentlySelectedPerk:unlock()
+            currentlySelectedPerk.locked = false
+        else
+            if currentlySelectedPerk.isEquipped then
+                unequipPerk(currentlySelectedPerk)
+            else
+                equipPerk(currentlySelectedPerk)
+            end
+        end
+    
+        currentlySelectedPerk.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
+        currentlySelectedPerk = nil
+    
+        equipPurchase_screen.Visible = false
     else
-        equipPerk(currentlySelectedPerk)
+        MarketplaceService:PromptProductPurchase(ClientVariables.player, currentlySelectedPerk.productId)
     end
-    currentlySelectedPerk.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
-    currentlySelectedPerk = nil
-
-    equipPurchase_screen.Visible = false
 end)
 
 equipPurchase_screen.No.Activated:Connect(function()
@@ -98,9 +143,23 @@ equipPurchase_screen.No.Activated:Connect(function()
     equipPurchase_screen.Visible = false
 end)
 
+equipPurchase_screen.purchaseWithRobuxFrame.PurchaseWithRobuxButton.Activated:Connect(function()
+    MarketplaceService:PromptProductPurchase(ClientVariables.player, currentlySelectedPerk.productId)
+end)
+
 local perksFolder = game.ReplicatedStorage:WaitForChild("perksFolder")
 local equippedPerks = ClientVariables.player:WaitForChild("equippedPerks")
 local unequippedPerks = ClientVariables.player:WaitForChild("unequippedPerks")
+
+ClientVariables.GlobalBindableEvent.Event:Connect(function(protocol, data)
+    if protocol == "perkPurchased" then
+        local purchasedPerk = perkButton.FindPerkByName(data.perkName)
+        purchasedPerk:unlock()
+        currentlySelectedPerk.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
+        currentlySelectedPerk = nil
+        equipPurchase_screen.Visible = false
+    end
+end)
 
 for _, perk in pairs(perksFolder:GetChildren()) do
     local locked = false
@@ -111,7 +170,7 @@ for _, perk in pairs(perksFolder:GetChildren()) do
         locked = true
     end
 
-    local newPerk = perkButton.new(perk.Name, perk.Value, locked)
+    local newPerk = perkButton.new(perk.Name, perk.Value, perk:GetAttribute("Cost"), perk:GetAttribute("KillsRequired"), perk:GetAttribute("ProductId"), locked)
     unequipPerk(newPerk)
 end
 

@@ -38,6 +38,20 @@ end
 local currentlyHighlightedPerk = nil -- when our mouse hovers over a perk
 local currentlySelectedPerk = nil -- whenever we select a perk, this will be that perk
 
+
+local function unHighlightPerk()
+    currentlyHighlightedPerk = nil
+    perksSelection.explanationOfPerk.TextLabel.Text = ""
+end
+
+
+local function deselectPerk()
+    currentlySelectedPerk.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
+    currentlySelectedPerk = nil
+    unHighlightPerk()
+end
+
+
 local promptToPurchaseRobux = false
 
 -- track each hovered button so we display the description
@@ -55,10 +69,10 @@ local instancesMT = { -- stores metamethods like tracking each new item added to
 
         v.instance.MouseLeave:Connect(function()
             if currentlySelectedPerk then return end
+            
             v.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
             if currentlyHighlightedPerk ~= v then return end
-            currentlyHighlightedPerk = nil
-            perksSelection.explanationOfPerk.TextLabel.Text = ""
+            unHighlightPerk()
         end)
         
         v.instance.Activated:Connect(function()
@@ -99,6 +113,7 @@ setmetatable(perkButton.instances, instancesMT)
 
 -- local PerksRemoteFunction = game.ReplicatedStorage:WaitForChild("PerksRemoteFunction")
 
+local equippedPerks_folder = ClientVariables.player.equippedPerks
 
 equipPurchase_screen.Yes.Activated:Connect(function()
 
@@ -106,7 +121,16 @@ equipPurchase_screen.Yes.Activated:Connect(function()
         local getPerk, amountMissingForPurchase = ClientVariables.GlobalRemoteFunction:InvokeServer("getPerk", {name = currentlySelectedPerk.name})
         if getPerk ~= true then
             -- they should be prompted to purchase this perk with robux or purchase more tokens
-            if getPerk == "needMoreMoney" then
+            
+            if getPerk == "maxPerksEquipped" then
+                -- they cant equip because they have the max amount of perks equipped
+                equipPurchase_screen.Yes.Visible = false
+                equipPurchase_screen.No.Visible = false
+
+                equipPurchase_screen.Ok.Visible = true
+                equipPurchase_screen.TextLabel.Text = "Failed to equip: Max amount of perks equipped. Unequip at least 1 perk before equipping this one."
+                return
+            elseif getPerk == "needMoreMoney" then
                 equipPurchase_screen.TextLabel.Text = "You need " ..tostring(amountMissingForPurchase) .. " more Tokens to purchase the '" ..tostring(currentlySelectedPerk.name) .."' perk. Would you like to purchase more Tokens?"
             elseif getPerk == "needMoreKills" then
                 equipPurchase_screen.TextLabel.Text = "You need " ..tostring(amountMissingForPurchase) .. " more Kills to be able to purchase the '" ..tostring(currentlySelectedPerk.name) .."' perk. Would you like to purchase this perk with Robux?"
@@ -116,19 +140,21 @@ equipPurchase_screen.Yes.Activated:Connect(function()
             return 
         end
 
+        print(#equippedPerks_folder:GetChildren(), currentlySelectedPerk.isEquipped)
+
         if currentlySelectedPerk.locked then
             currentlySelectedPerk:unlock()
             currentlySelectedPerk.locked = false
         else
             if currentlySelectedPerk.isEquipped then
                 unequipPerk(currentlySelectedPerk)
-            else
+            elseif #equippedPerks_folder:GetChildren() <= 5 then
+                warn("less than 5")
                 equipPerk(currentlySelectedPerk)
             end
         end
     
-        currentlySelectedPerk.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
-        currentlySelectedPerk = nil
+        deselectPerk()
     
         equipPurchase_screen.Visible = false
     else
@@ -137,10 +163,17 @@ equipPurchase_screen.Yes.Activated:Connect(function()
 end)
 
 equipPurchase_screen.No.Activated:Connect(function()
-    currentlySelectedPerk.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
-    currentlySelectedPerk = nil
-    
+    deselectPerk()
     equipPurchase_screen.Visible = false
+end)
+
+equipPurchase_screen.Ok.Activated:Connect(function()
+    deselectPerk()
+    equipPurchase_screen.Visible = false
+
+    equipPurchase_screen.Yes.Visible = true
+    equipPurchase_screen.No.Visible = true
+    equipPurchase_screen.Ok.Visible = false
 end)
 
 equipPurchase_screen.purchaseWithRobuxFrame.PurchaseWithRobuxButton.Activated:Connect(function()
@@ -163,15 +196,23 @@ end)
 
 for _, perk in pairs(perksFolder:GetChildren()) do
     local locked = false
+    local equipped
 
-    if not equippedPerks:FindFirstChild(perk.Name) 
-    and not unequippedPerks:FindFirstChild(perk.Name) 
-    then
+    if equippedPerks:FindFirstChild(perk.Name) then
+        equipped = true
+    elseif unequippedPerks:FindFirstChild(perk.Name) then
+        equipped = false
+    else
         locked = true
     end
 
     local newPerk = perkButton.new(perk.Name, perk.Value, perk:GetAttribute("Cost"), perk:GetAttribute("KillsRequired"), perk:GetAttribute("ProductId"), locked)
-    unequipPerk(newPerk)
+    
+    if equipped then
+        equipPerk(newPerk)
+    else
+        unequipPerk(newPerk)
+    end
 end
 
 return Perks

@@ -1,5 +1,9 @@
 local ServerEvents = {}
 
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
+local perks = require(game.ReplicatedStorage.Shared.server_modules.perks)
+local statModifier = require(game.ReplicatedStorage.Shared.server_modules.StatManager)
+
 local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
 
 GlobalRemoteFunction.OnServerInvoke = function(player, protocol, data)
@@ -17,10 +21,14 @@ GlobalRemoteFunction.OnServerInvoke = function(player, protocol, data)
             local isUnequipped = player.unequippedPerks:FindFirstChild(data.name)
             local isEquipped = player.equippedPerks:FindFirstChild(data.name)
 
-            if isUnequipped then
-                isUnequipped.Parent = player.equippedPerks
-            elseif isEquipped then
+            
+            if isEquipped then
                 isEquipped.Parent = player.unequippedPerks
+            elseif #player.equippedPerks:GetChildren() >= perks.MaxActivePerks then
+                return "maxPerksEquipped"
+            elseif isUnequipped then
+                isUnequipped.Parent = player.equippedPerks
+                statModifier:AddModifier(isUnequipped.Name, isUnequipped.modifierTable)
             else
                 -- make sure they have enough moneys and enough kills:
                 if money.Value >= desiredPerk:GetAttribute("Cost") 

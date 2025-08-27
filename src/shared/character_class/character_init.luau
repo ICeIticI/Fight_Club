@@ -447,10 +447,8 @@ function Character_Init.init(charModel)
 			characterInstance.hitSFX.Name = "hitSFX"
 
 			if characterInstance.currentAttack_trackData and characterInstance.currentAttack_trackData.attackLvl == 1 then
-				-- characterInstance.attackDamage = A1Damage
 				characterInstance.hitSFX.SoundId = tempHitSFXTable[math.random(1, #tempHitSFXTable)]
 			elseif characterInstance.currentAttack_trackData and characterInstance.currentAttack_trackData.attackLvl == 2 then
-				-- characterInstance.attackDamage = A2Damage
 				characterInstance.hitSFX.SoundId = "rbxassetid://112444846023457"
 			else
 				characterInstance.hitSFX.SoundId = math.random(1, #tempHitSFXTable)

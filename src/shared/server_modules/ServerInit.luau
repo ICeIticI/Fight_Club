@@ -4,8 +4,23 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local BadgeService = game:GetService("BadgeService")
 -- local HttpService = game:GetService("HttpService") -- used for encoding our tables into JSON format as a string since datastores are gay and dont accept tables as a format
 
-local utilities = require(game.ReplicatedStorage.Shared.utilities)
-local perks = require(game.ReplicatedStorage.Shared.server_modules.perks)
+local GlobalRemoteEvent = Instance.new("RemoteEvent") -- used by each client in a server for communication with server-client or client to server
+GlobalRemoteEvent.Name = "GlobalRemoteEvent"
+GlobalRemoteEvent.Parent = game.ReplicatedStorage
+
+local GlobalRemoteFunction = Instance.new("RemoteFunction") -- used for similar reasons as the GlobalRemoteEvent, but used when we want something returned
+GlobalRemoteFunction.Name = "GlobalRemoteFunction"
+GlobalRemoteFunction.Parent = game.ReplicatedStorage
+
+local GlobalBindableEvent = Instance.new("BindableEvent")
+GlobalBindableEvent.Name = "GlobalBindableEvent"
+GlobalBindableEvent.Parent = game.ReplicatedStorage
+
+-- Creating specific remote events/functions for client-server communication:
+
+local input_check_FUNCTION = Instance.new("RemoteFunction")
+input_check_FUNCTION.Name = "input_check_FUNCTION"
+input_check_FUNCTION.Parent = game.ReplicatedStorage
 
 local DataStoreService
 local KillsStore
@@ -20,25 +35,6 @@ if game.PlaceId ~= 0 then -- project must be published to use DatStores
 	PerksStore = DataStoreService:GetDataStore("PerksStore") -- ordered datastores are for leaderboard and numeric stuff, everything else can use normal datastores
 end
 
-local GlobalRemoteEvent = Instance.new("RemoteEvent") -- used by each client in a server for communication with server-client or client to server
-GlobalRemoteEvent.Name = "GlobalRemoteEvent"
-GlobalRemoteEvent.Parent = game.ReplicatedStorage
-
-local GlobalRemoteFunction = Instance.new("RemoteFunction") -- used for similar reasons as the GlobalRemoteEvent, but used when we want something returned
-GlobalRemoteFunction.Name = "GlobalRemoteFunction"
-GlobalRemoteFunction.Parent = game.ReplicatedStorage
-
-local GlobalBindableEvent = Instance.new("BindableEvent")
-GlobalBindableEvent.Name = "GlobalBindableEvent"
-GlobalBindableEvent.Parent = game.ReplicatedStorage
-
-
--- Creating specific remote events/functions for client-server communication:
-
-local input_check_FUNCTION = Instance.new("RemoteFunction")
-input_check_FUNCTION.Name = "input_check_FUNCTION"
-input_check_FUNCTION.Parent = game.ReplicatedStorage
-
 local donationProductIds = { -- must have one of these product ids in order to get on the donations board
 	[3349676917] = true,
 	[3349682499] = true,
@@ -49,14 +45,26 @@ local donationProductIds = { -- must have one of these product ids in order to g
 	[3350445161] = true,
 }
 
-local perksFolder = game.ReplicatedStorage:WaitForChild("perksFolder")
 local perkProductIds = {
-	[3382902336] = "Iron Fists",
-	[3382903295] = "Meat Head",
-	[3382904079] = "Unbreakable",
-	[3382905392] = "Cardiosaurus Rex",
-	[3382906629] = "Full-Auto"
+	-- [3382902336] = "Iron Fists",
+	-- [3382903295] = "Meat Head",
+	-- [3382904079] = "Unbreakable",
+	-- [3382905392] = "Cardiosaurus Rex",
+	-- [3382906629] = "Full-Auto"
 }
+
+GlobalBindableEvent.Event:Connect(function(protocol, data)
+	print(protocol)
+	if protocol == "addProductIdToTable" then
+		perkProductIds[data.productId] = data.name
+		print(perkProductIds)
+	end
+end)
+
+local utilities = require(game.ReplicatedStorage.Shared.utilities)
+local perks = require(game.ReplicatedStorage.Shared.server_modules.perks)
+
+local perksFolder = game.ReplicatedStorage:WaitForChild("perksFolder")
 
 MarketplaceService.ProcessReceipt = function(receiptInfo) -- Runs when a player presses 'Buy' on a developer product
 	local player = game:GetService("Players"):GetPlayerByUserId(receiptInfo.PlayerId) -- receiptInfo is a dictionary of stuff when the buy button is pressed, which includes the playerId of what player purchased.
@@ -217,6 +225,18 @@ function ServerInit.InitializePlayer(player)
 		if data then
 			perks.getPerks(data.equippedPerks, player.equippedPerks)
 			perks.getPerks(data.unequippedPerks, player.unequippedPerks)
+
+			-- make sure the player didnt manage to get more than the max amount of equipped perks:
+			if #player.equippedPerks:GetChildren() > perks.MaxActivePerks then
+				for _, perk in pairs(player.equippedPerks:GetChildren()) do
+					perk.Parent = player.unequippedPerks
+					warn(player.Name .. "'s " ..tostring(perk.Name) .. " was moved to unequipped perks because they had too many active perks.")
+					if #player.equippedPerks:GetChildren() <= perks.MaxActivePerks then
+						warn("Now play has the max even")
+						break
+					end
+				end
+			end
 		else
 			player.equippedPerks = {}
 			player.unequippedPerks = {}
@@ -279,7 +299,6 @@ function ServerInit.RemovePlayer(player)
 	end
 
 	success, result = pcall(function()
-		print(ownedPerks)
 		return PerksStore:SetAsync(perks_key, ownedPerks)
 	end)
 

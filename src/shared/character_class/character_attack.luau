@@ -245,7 +245,7 @@ function Character_Attack:syncBlock(attacker_characterInstance) --[[ Attack an e
     
     attackType = "SyncBlock"
 
-    if self.characterInstance.pairedChain <= self.characterInstance.PairedChainMAX and self.characterInstance.canSyncBlock then
+    if self.characterInstance.pairedChain <= (self.characterInstance.pairedChainMAX * self.characterInstance.finalStatValues.pairedChainMAX.Value) and self.characterInstance.canSyncBlock then
         self.characterInstance.pairedChain += 1
 
         self.characterInstance.pairedPlaying = true

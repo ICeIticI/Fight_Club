@@ -141,6 +141,10 @@ function ServerInit.InitializePlayer(player)
 	plrObjectsFolder.Name = player.Name .. "_GameObjects"
 	plrObjectsFolder.Parent = player
 
+	local baseValues = Instance.new("Folder")
+	baseValues.Name = "baseValues"
+	baseValues.Parent = plrObjectsFolder
+
 		-- Creating leaderstats, which will show how much money a player will have in playernames
 	local leaderstats = Instance.new("Folder")
 	leaderstats.Name = "leaderstats"

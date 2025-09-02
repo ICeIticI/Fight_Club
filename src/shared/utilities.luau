@@ -34,7 +34,8 @@ function Utilities.activateLockOn(characterInstance, utilities, characters, acti
         
         if not characterInstance.raycastResult then
             characterInstance.lockOnDebounce.Value = false
-            return warn("nothing in the raycast result found")
+            -- return warn("nothing in the raycast result found")
+            return
         -- else
         --     warn(
         --         {
@@ -292,6 +293,20 @@ function Utilities.TurnInstancesToVariables(tbl)
         end
     end
     return stringedTbl
+end
+
+function Utilities.multiplyTableValuesTogether(tbl)
+    local newProduct = 1 -- will be multiplied, can be less or more than 1
+    for _, value in pairs(tbl) do
+        if typeof(value) == "number" then
+            newProduct*= value
+        else
+            warn(value .. " is not a number! Didn't multiply it")
+        end
+    end
+
+    warn(newProduct)
+    return newProduct
 end
 
 return Utilities

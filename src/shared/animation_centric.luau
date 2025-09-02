@@ -118,7 +118,9 @@ end
 function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attack animation before (using the .setUpAttackAnimation). This will execute that animation.  ]]
     if not moduleTbl.attackTrack then return warn("Failed to play attack track, as it doesn't exist.") end
 
+        print(moduleTbl.finalStatValuesFolder:WaitForChild("attackSpeed").Value)
         moduleTbl.currentAttack = moduleTbl.attackTrack.Animation
+        moduleTbl.attackTrack:AdjustSpeed(moduleTbl.attackTrack.Speed * moduleTbl.finalStatValuesFolder:WaitForChild("attackSpeed").Value)
         moduleTbl.attackTrack:Play()
         -- moduleTbl.lastAttackTrack = moduleTbl.attackTrack
 

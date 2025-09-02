@@ -4,7 +4,7 @@
 
 ]]
 
-local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
 local Attack_Animation_Management = {}
 
@@ -20,11 +20,11 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
         -- if trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then -- counterattack animation
         -- -- elseif trackData.DodgeAttack_Attribute then
         if (trackData.Animation:GetAttribute("SyncBlockFinisher") == true) or (trackData.Animation:GetAttribute("Grapple") == false) then -- can be true or false, all we know is its a sync block of some sort
-            characterInstance.humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.humanoid:TakeDamage(characterInstance.attackDamage / characterInstance.finalStatValues.BlockAbsorption.Value)
             characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "shakeCamera", {type = "SyncBlock", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
             characterInstance.playHitSFX(trackData)
         elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == false then -- can be true or false, all we know is its a sync block of some sort
-            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage)
+            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage / characters:GetCharacterObjectByCharacter(characterInstance.enemyChar).finalStatValues.BlockAbsorption.Value)
             characterInstance.GlobalRemoteEvent:FireClient(game.Players:GetPlayerFromCharacter(characterInstance.enemyChar), "shakeCamera", {type = "SyncBlock", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
             characterInstance.playHitSFX(trackData)
             characterInstance.canFollowUp = true
@@ -88,7 +88,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         if trackData.Animation:FindFirstChild("attackTimePositions") then -- Some level 3 sync blocks have no damage-dealing, so no StartOfAttack
             
             for _, attackTimePosition in pairs(trackData.Animation.attackTimePositions:GetChildren()) do
-                task.delay(attackTimePosition.Value, function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
+                task.delay(attackTimePosition.Value / self.characterInstance.finalStatValues.attackSpeed.Value, function() -- These attributes equal the number (in seconds) until the marker would reach for said animation
                 if trackData.IsPlaying then
                         runOnAttackFrames(self.characterInstance, trackData)
                     end
@@ -98,7 +98,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
 
         -- Schedule a simulation of the EndOfAttack marker:
         if trackData.Animation:GetAttribute("TimeUntilEndOfAttack") then
-            task.delay(trackData.Animation:GetAttribute("TimeUntilEndOfAttack"), function()
+            task.delay(trackData.Animation:GetAttribute("TimeUntilEndOfAttack") / self.characterInstance.finalStatValues.attackSpeed.Value, function()
                 if trackData.IsPlaying then
                     runOnEndOfAttack(self.characterInstance, trackData)
                 end
@@ -106,7 +106,7 @@ function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages char
         end
 
         -- Schedule a simulation of the end of the attacking animation:
-        task.delay(trackData.Animation:GetAttribute("Length"), function()
+        task.delay(trackData.Animation:GetAttribute("Length") / self.characterInstance.finalStatValues.attackSpeed.Value, function()
             if trackData.IsPlaying then
                 trackData.IsPlaying = false
                 trackData.Completed = true

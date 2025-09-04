@@ -87,7 +87,6 @@ function Character_Init.init(charModel)
 	if not characterInstance.statMultipliers then
 		characterInstance.statMultipliers = {
 			MaxHealth_Multiplier = {defaultMultiplier = 1},
-			WalkSpeed_Multiplier = {defaultMultiplier = 1},
 			
 			A1Damage_Multiplier = {defaultMultiplier = 1},
 			A2Damage_Multiplier = {defaultMultiplier = 1},
@@ -99,7 +98,8 @@ function Character_Init.init(charModel)
 			staminaDrainRate_Multiplier = {defaultMultiplier = 1},
 			staminaRegenRate_Multiplier = {defaultMultiplier = 1},
 			BlockAbsorption_Multiplier = {defaultMultiplier = 1},
-			attackSpeed_Multiplier = {defaultMultiplier = 1} -- increase to make attacks faster
+			attackSpeed_Multiplier = {defaultMultiplier = 1}, -- increase to make attacks faster
+			HealthRegen_Multiplier = {defaultMultiplier = 1},
 		}
 	end
 
@@ -215,7 +215,7 @@ function Character_Init.init(charModel)
 	characterInstance.pairedChainMAX = 3 -- The max value for pairedChain.
 	
 	characterInstance.character.Humanoid.Health = characterInstance.humanoid.MaxHealth * characterInstance.finalStatValues.MaxHealth.Value
-	characterInstance.character.Humanoid.WalkSpeed = characterInstance.humanoid.WalkSpeed * characterInstance.finalStatValues.WalkSpeed.Value
+	characterInstance.character.Humanoid.WalkSpeed = characterInstance.humanoid.WalkSpeed
 	characterInstance.character.Humanoid.JumpPower = 0
 	characterInstance.character.Humanoid.MaxSlopeAngle = 40 -- reducing this from 89 so they cant climb well. Will mean they will slip off cliffs if they get too close
 
@@ -681,8 +681,13 @@ function Character_Init.init(charModel)
 	connects.DiedConnection = characterInstance.humanoid.Died:Connect(function()
 
 		if characterInstance.attackingChar and game.Players:GetPlayerFromCharacter(characterInstance.attackingChar) then
-			game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Tokens.Value += 2
-			game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Takedowns.Value += 1
+			local killerInstance = characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
+			
+			killerInstance.player.leaderstats.Tokens.Value += 2
+			killerInstance.player.leaderstats.Takedowns.Value += 1
+			
+			-- Will regen health if they got perk(s) equipped for it
+			killerInstance.humanoid.Health += killerInstance.humanoid.MaxHealth * killerInstance.finalStatValues.HealthRegen.Value
 		end
 		-- characterInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) -- To trigger the StateEnabledChange event, which fires only when the :SetStateEnabled method is used.
 		

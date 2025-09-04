@@ -216,6 +216,10 @@ end
 
 function Character:receive(receiveType, data) --[[ The character will receive an attack ]]
     -- Mitigate attacks:
+
+    self.attackingChar = data.character
+    self.GlobalRemoteEvent:FireClient(self.player, "updateCurrentAttacker", {attackingChar = self.attackingChar})
+
     if receiveType == "bracingBlock" then
         self.character_receive:bracingBlock(data)
     elseif receiveType == "syncBlock" then

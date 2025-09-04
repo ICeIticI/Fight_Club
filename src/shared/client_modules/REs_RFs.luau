@@ -64,6 +64,9 @@ function REs_RFs.init()
         
         elseif protocol == "perkPurchased" then
            ClientVariables.GlobalBindableEvent:Fire(protocol, data)
+
+        elseif protocol == "updateCurrentAttacker" then
+            ClientVariables.attackingChar = data.attackingChar
         end
     
         --[[ ^ Might put the animation events into the animation_centric script 

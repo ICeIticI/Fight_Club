@@ -81,6 +81,7 @@ MarketplaceService.ProcessReceipt = function(receiptInfo) -- Runs when a player 
 		local desiredPerk = perksFolder:FindFirstChild(perkProductIds[receiptInfo.ProductId]):Clone()
 		desiredPerk.Parent = player.unequippedPerks
 		GlobalRemoteEvent:FireClient(player, "perkPurchased", {perkName = perkProductIds[receiptInfo.ProductId]})
+		perks.updatePrices(10)
 	end
 
 	return Enum.ProductPurchaseDecision.PurchaseGranted -- We can now safely close the purchase

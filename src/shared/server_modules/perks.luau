@@ -35,16 +35,17 @@ end
 
 local Perks = {}
 
-local basePrice = 50 -- alot of perks will start out at 50, but when you buy a perk, the baseprice will increase, so it will be another 10 tokens for each
+local basePrice = 100 -- alot of perks will start out at this number, but when you buy a perk, the baseprice will increase, so it will be another 10 tokens for each
+local intermediatePrice = 200
 
 local activePerks = {
-    newPerk("Iron Fists", "Increases attack damage", {A1Damage = 1.2, A2Damage = 1.2, syncBlockDamage = 1.2, counterAttackDamage = 1.2}, basePrice, 15, 3382902336),
-    newPerk("Meat Head", "Increases health", {MaxHealth = 1.25}, basePrice, 30, 3382903295),
+    newPerk("Iron Fists", "Increases attack damage", {A1Damage = 1.2, A2Damage = 1.2, syncBlockDamage = 1.2, counterAttackDamage = 1.2}, basePrice, 20, 3382902336),
+    newPerk("Meat Head", "Increases health", {MaxHealth = 1.25}, basePrice, 35, 3382903295),
     newPerk("Unbreakable", "Increases block absorption", {BlockAbsorption = 1.35}, basePrice, 45, 3382904079),
     newPerk("Cardiosaurus Rex", "Decreases stamina degradation", {staminaDrainRate = 0.1}, basePrice, 60, 3382905392),
-    newPerk("Full-Auto", "Increases attack speed", {attackSpeed = 2.25}, basePrice, 75, 3382906629),
+    newPerk("Full-Auto", "Increases attack speed", {attackSpeed = 1.25}, basePrice, 75, 3382906629),
     newPerk("Retaliation Specialist", "Counters and Dodge Attacks deal more damage", {counterAttackDamage = 1.35}, basePrice, 50, 3383626413),
-    newPerk("Bloodthirsty", "Each Takedown restores health", {Health = 0.2}, basePrice, 80, 3384023927)
+    newPerk("Bloodthirsty", "Each Takedown restores health", {HealthRegen = 0.2}, intermediatePrice, 80, 3384023927)
 }
 
 Perks.MaxActivePerks = 5 -- how many perks a player can equip at once
@@ -65,7 +66,6 @@ function Perks.getPerks(tbl, parent)
 end
 
 Perks.modifierTable = {}
-local calculateTbl = {}
 
 function Perks.applyStatChange(characterInstance, perk)
     -- Getting the stat changes from the int folder parented by the perk:
@@ -87,6 +87,12 @@ function Perks.applyStatChange(characterInstance, perk)
         -- Then apply:
         print(finalStatValueName, characterInstance.finalStatValues[finalStatValueName].Value)
         characterInstance.proxyTable_finalStatValues[finalStatValueName] = characterInstance.finalStatValues[finalStatValueName].Value
+    end
+end
+
+function Perks.updatePrices(additionalCost)
+    for _, perk in pairs(perksFolder:GetChildren()) do
+        perk:SetAttribute("Cost", perk:GetAttribute("Cost") + additionalCost)
     end
 end
 

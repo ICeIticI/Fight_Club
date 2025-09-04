@@ -118,10 +118,10 @@ end
 function Animation_Centric.playAttackAnimation(moduleTbl) --[[ We setup an attack animation before (using the .setUpAttackAnimation). This will execute that animation.  ]]
     if not moduleTbl.attackTrack then return warn("Failed to play attack track, as it doesn't exist.") end
 
-        print(moduleTbl.finalStatValuesFolder:WaitForChild("attackSpeed").Value)
         moduleTbl.currentAttack = moduleTbl.attackTrack.Animation
-        moduleTbl.attackTrack:AdjustSpeed(moduleTbl.attackTrack.Speed * moduleTbl.finalStatValuesFolder:WaitForChild("attackSpeed").Value)
+        print(moduleTbl.attackTrack.Speed)
         moduleTbl.attackTrack:Play()
+        moduleTbl.attackTrack:AdjustSpeed(moduleTbl.attackTrack.Speed * moduleTbl.finalStatValuesFolder:WaitForChild("attackSpeed").Value)
         -- moduleTbl.lastAttackTrack = moduleTbl.attackTrack
 
 end
@@ -132,6 +132,12 @@ function Animation_Centric.setupReceiveAnimation(moduleTbl, data)
     -- if data.receivingType == "grabAttempt" then
     --     moduleTbl.FC_IdleTRACK:Stop()
     -- end
+
+    print(moduleTbl.attackingChar)
+    local enemyPlr = game:GetService("Players"):GetPlayerFromCharacter(moduleTbl.attackingChar)
+    local enemyPlrStatsFolder = enemyPlr:FindFirstChild(enemyPlr.Name.."_GameObjects"):FindFirstChild("baseValues")
+    print(enemyPlrStatsFolder)
+    moduleTbl.enemyAttackSpeed = enemyPlrStatsFolder.attackSpeed.Value
 
     moduleTbl.currentReceiveAnimTRACK = getAnimationTrackById(moduleTbl, data.AnimationId)
 
@@ -144,9 +150,8 @@ end
 function Animation_Centric.playReceiveAnimation(moduleTbl)
     if not moduleTbl.currentReceiveAnimTRACK then return warn("Failed to play receiving animation track, as it doesn't exist.") end
     
-
-    
     moduleTbl.currentReceiveAnimTRACK:Play()
+    moduleTbl.currentReceiveAnimTRACK:AdjustSpeed(moduleTbl.currentReceiveAnimTRACK.Speed * moduleTbl.enemyAttackSpeed)
 
     if moduleTbl.currentReceiveAnimTRACK.Animation:GetAttribute("Grapple") == true then
         moduleTbl.isGrappling = true

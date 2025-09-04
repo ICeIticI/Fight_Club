@@ -18,7 +18,6 @@ Character_Hitboxes.__index = Character_Hitboxes
 -- Function to handle receiving an attack
 local function receive(receiver_characterInstance, attacker_characterInstance)
     -- local currentAttackID = currentAttack.AnimationId
-    receiver_characterInstance.attackingChar = attacker_characterInstance.character
     -- if receiver_characterInstance.currentReceiveAnimTRACK and receiver_characterInstance.currentReceiveAnimTRACK.IsPlaying then
     --     receiver_characterInstance.currentReceiveAnimTRACK:Stop()
     -- end

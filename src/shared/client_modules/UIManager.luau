@@ -183,7 +183,6 @@ function UIManager.manageUI()
     while ClientVariables.humanoid and ClientVariables.humanoid.Health <= 0 do task.wait() end
     local healthChecker
     healthChecker = ClientVariables.humanoid.HealthChanged:Connect(function(health)
-        warn("do u run")
         staminaFraction = health / ClientVariables.humanoid.MaxHealth
         healthBar.Size = UDim2.new(healthBar.Size.X.Scale, healthBar.Size.X.Offset, staminaFraction * healthFrameLabel.Size.Y.Scale, healthBar.Size.Y.Offset)
         if health <= 0 then

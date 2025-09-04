@@ -191,6 +191,10 @@ ClientVariables.GlobalBindableEvent.Event:Connect(function(protocol, data)
         currentlySelectedPerk.instance.BorderColor3 = Color3.fromRGB(255, 38, 0)
         currentlySelectedPerk = nil
         equipPurchase_screen.Visible = false
+
+        for _, perk in pairs(perkButton.instances) do
+            perk.cost = perksFolder:FindFirstChild(perk.name):GetAttribute("Cost")
+        end
     end
 end)
 

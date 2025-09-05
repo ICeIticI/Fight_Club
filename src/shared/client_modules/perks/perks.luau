@@ -116,6 +116,7 @@ setmetatable(perkButton.instances, instancesMT)
 local equippedPerks_folder = ClientVariables.player.equippedPerks
 
 equipPurchase_screen.Yes.Activated:Connect(function()
+    if not ClientVariables.initialized or ClientVariables.humanoid.Health <= 0 then return end
 
     if not promptToPurchaseRobux then
         local getPerk, amountMissingForPurchase = ClientVariables.GlobalRemoteFunction:InvokeServer("getPerk", {name = currentlySelectedPerk.name})
@@ -134,6 +135,8 @@ equipPurchase_screen.Yes.Activated:Connect(function()
                 equipPurchase_screen.TextLabel.Text = "You need " ..tostring(amountMissingForPurchase) .. " more Tokens to purchase the '" ..tostring(currentlySelectedPerk.name) .."' perk. Would you like to purchase more Tokens?"
             elseif getPerk == "needMoreKills" then
                 equipPurchase_screen.TextLabel.Text = "You need " ..tostring(amountMissingForPurchase) .. " more Kills to be able to purchase the '" ..tostring(currentlySelectedPerk.name) .."' perk. Would you like to purchase this perk with Robux?"
+            elseif getPerk == "characterDead" then
+                return
             end
 
             promptToPurchaseRobux = true
@@ -177,6 +180,8 @@ equipPurchase_screen.Ok.Activated:Connect(function()
 end)
 
 equipPurchase_screen.purchaseWithRobuxFrame.PurchaseWithRobuxButton.Activated:Connect(function()
+    -- if not ClientVariables.initialized or ClientVariables.humanoid.Health <= 0 then return end
+    
     MarketplaceService:PromptProductPurchase(ClientVariables.player, currentlySelectedPerk.productId)
 end)
 

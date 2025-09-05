@@ -9,6 +9,8 @@ local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFu
 GlobalRemoteFunction.OnServerInvoke = function(player, protocol, data)
 
     if protocol == "getPerk" then
+        if player.Character.Humanoid.Health <= 0 then return "characterDead" end
+
         local money = player:WaitForChild("leaderstats"):WaitForChild("Tokens")
         local kills = player.leaderstats:WaitForChild("Takedowns")
         

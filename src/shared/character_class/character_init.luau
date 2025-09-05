@@ -68,7 +68,7 @@ local function createBaseValue(characterInstance, name, value)
 	return newBaseValue
 end
 
-function Character_Init.init(charModel)
+function Character_Init.init(charModel, data)
 
 	while not charModel.Humanoid do task.wait() end -- makes sure the humanoid gets created before going through with the init
     local characterInstance = {}
@@ -84,31 +84,34 @@ function Character_Init.init(charModel)
     characterInstance.player = game.Players:GetPlayerFromCharacter(charModel) -- If the character is a player, their player object will be stored here.
 	characterInstance.plrObjectsFolder = characterInstance.player:WaitForChild(characterInstance.player.Name .. "_GameObjects")
 	
-	if not characterInstance.statMultipliers then
-		characterInstance.statMultipliers = {
-			MaxHealth_Multiplier = {defaultMultiplier = 1},
+	-- if not characterInstance.statMultipliers then
+	-- 	characterInstance.statMultipliers = {
+	-- 		MaxHealth_Multiplier = {defaultMultiplier = 1},
 			
-			A1Damage_Multiplier = {defaultMultiplier = 1},
-			A2Damage_Multiplier = {defaultMultiplier = 1},
-			syncBlockDamage_Multiplier = {defaultMultiplier = 1},
-			counterAttackDamage_Multiplier = {defaultMultiplier = 1},
+	-- 		A1Damage_Multiplier = {defaultMultiplier = 1},
+	-- 		A2Damage_Multiplier = {defaultMultiplier = 1},
+	-- 		syncBlockDamage_Multiplier = {defaultMultiplier = 1},
+	-- 		counterAttackDamage_Multiplier = {defaultMultiplier = 1},
 			
-			pairedChainMAX_Multiplier = {defaultMultiplier = 1},
-			escapeGrappleProgressPower_Multiplier = {defaultMultiplier = 1},
-			staminaDrainRate_Multiplier = {defaultMultiplier = 1},
-			staminaRegenRate_Multiplier = {defaultMultiplier = 1},
-			BlockAbsorption_Multiplier = {defaultMultiplier = 1},
-			attackSpeed_Multiplier = {defaultMultiplier = 1}, -- increase to make attacks faster
-			HealthRegen_Multiplier = {defaultMultiplier = 1},
-		}
-	end
+	-- 		pairedChainMAX_Multiplier = {defaultMultiplier = 1},
+	-- 		escapeGrappleProgressPower_Multiplier = {defaultMultiplier = 1},
+	-- 		staminaDrainRate_Multiplier = {defaultMultiplier = 1},
+	-- 		staminaRegenRate_Multiplier = {defaultMultiplier = 1},
+	-- 		BlockAbsorption_Multiplier = {defaultMultiplier = 1},
+	-- 		attackSpeed_Multiplier = {defaultMultiplier = 1}, -- increase to make attacks faster
+	-- 		HealthRegen_Multiplier = {defaultMultiplier = 1},
+	-- 	}
+	-- end
+	
+	characterInstance.statMultipliers = data.statMultipliers -- folder of stats that multiply together to get a result for player stats
 
 	-- need to define this in case moduleTbl in animationCentric is run on server for an npc, which requires the use of this variable found in ClientVariables:
 	characterInstance.finalStatValuesFolder = characterInstance.player:WaitForChild(characterInstance.player.Name .. "_GameObjects"):WaitForChild("baseValues")
 
 	characterInstance.finalStatValues = {}
-	for i, baseValue in pairs(characterInstance.statMultipliers) do
-		characterInstance.finalStatValues[string.gsub(i, "_Multiplier", "")] = createBaseValue(characterInstance, string.gsub(i, "_Multiplier", ""), utilities.multiplyTableValuesTogether(baseValue))
+	for _, baseValue in pairs(characterInstance.statMultipliers:GetChildren()) do
+		print(baseValue, baseValue:GetAttributes())
+		characterInstance.finalStatValues[string.gsub(baseValue.Name, "_Multiplier", "")] = createBaseValue(characterInstance, string.gsub(baseValue.Name, "_Multiplier", ""), utilities.multiplyTableValuesTogether(baseValue:GetAttributes()))
 	end
 
 	characterInstance.proxyTable_finalStatValues = {} -- Everytime a stat gets changed, we'll apply it to the character via proxy table, since there are no metamethods for updating an existing value
@@ -116,7 +119,7 @@ function Character_Init.init(charModel)
 		__newindex = function(_, i, v)
 			-- here we apply the stat change to the character. And we won't use rawset so it can be changed again. We wont actually store data in this table.
 			if i == "MaxHealth" then
-				characterInstance.humanoid[i]*= v
+				characterInstance.humanoid[i] = characterInstance.originalMaxHealth * v
 				print(characterInstance.humanoid.MaxHealth)
 			-- else
 			-- 	characterInstance[i]*= v
@@ -213,9 +216,10 @@ function Character_Init.init(charModel)
 	characterInstance.pairedBlock = nil -- the variable for which paired block the attacker is doing
 	characterInstance.pairedChain = 0 -- The tracker of the character's sync block attack chain. They can only do as many as the max allows
 	characterInstance.pairedChainMAX = 3 -- The max value for pairedChain.
-	
-	characterInstance.character.Humanoid.Health = characterInstance.humanoid.MaxHealth * characterInstance.finalStatValues.MaxHealth.Value
-	characterInstance.character.Humanoid.WalkSpeed = characterInstance.humanoid.WalkSpeed
+	characterInstance.originalMaxHealth = 100
+
+	characterInstance.character.Humanoid.MaxHealth = characterInstance.originalMaxHealth * characterInstance.finalStatValues.MaxHealth.Value
+	characterInstance.character.Humanoid.WalkSpeed = 12
 	characterInstance.character.Humanoid.JumpPower = 0
 	characterInstance.character.Humanoid.MaxSlopeAngle = 40 -- reducing this from 89 so they cant climb well. Will mean they will slip off cliffs if they get too close
 
@@ -229,7 +233,7 @@ function Character_Init.init(charModel)
 	-- Stamina management:
 
 	characterInstance.maxStamina = characterInstance.plrObjectsFolder:FindFirstChild("maxStamina") or (function()
-		characterInstance.maxStamina = Instance.new("IntValue") -- the maximum stamina of the character. This value will likely change depending on what abilities the character has that grant them more or less stamina
+		characterInstance.maxStamina = Instance.new("NumberValue") -- the maximum stamina of the character. This value will likely change depending on what abilities the character has that grant them more or less stamina
 		characterInstance.maxStamina.Name = "maxStamina"
 		characterInstance.maxStamina.Value = 100
 		characterInstance.maxStamina.Parent = characterInstance.plrObjectsFolder
@@ -237,7 +241,7 @@ function Character_Init.init(charModel)
 	end)()
 
 	characterInstance.stamina = characterInstance.plrObjectsFolder:FindFirstChild("stamina") or (function()
-		characterInstance.stamina = Instance.new("IntValue") -- the stamina of the player. If they get 0 they wont be able to block or parry
+		characterInstance.stamina = Instance.new("NumberValue") -- the stamina of the player. If they get 0 they wont be able to block or parry
 		characterInstance.stamina.Name = "stamina"
 		characterInstance.stamina.Value = characterInstance.maxStamina.Value -- start out with max stamina
 		characterInstance.stamina.Parent = characterInstance.plrObjectsFolder

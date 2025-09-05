@@ -28,7 +28,6 @@ GlobalRemoteFunction.OnServerInvoke = function(player, protocol, data)
                 return "maxPerksEquipped"
             elseif isUnequipped then
                 isUnequipped.Parent = player.equippedPerks
-                perks.applyStatChange(characters:GetCharacterObjectByPlayer(player), isUnequipped)
             else
                 -- make sure they have enough moneys and enough kills:
                 if money.Value >= desiredPerk:GetAttribute("Cost") 
@@ -37,6 +36,7 @@ GlobalRemoteFunction.OnServerInvoke = function(player, protocol, data)
                     -- charge and apply perk:
                     money.Value -= desiredPerk:GetAttribute("Cost")
                     desiredPerk.Parent = player.unequippedPerks
+                    perks.updatePrices(10)
                 else
                     if kills.Value < desiredPerk:GetAttribute("KillsRequired") then
                         return "needMoreKills", (desiredPerk:GetAttribute("KillsRequired") - kills.Value)

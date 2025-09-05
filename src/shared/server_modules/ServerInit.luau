@@ -63,6 +63,7 @@ end)
 
 local utilities = require(game.ReplicatedStorage.Shared.utilities)
 local perks = require(game.ReplicatedStorage.Shared.server_modules.perks)
+local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
 local perksFolder = game.ReplicatedStorage:WaitForChild("perksFolder")
 
@@ -81,7 +82,6 @@ MarketplaceService.ProcessReceipt = function(receiptInfo) -- Runs when a player 
 		local desiredPerk = perksFolder:FindFirstChild(perkProductIds[receiptInfo.ProductId]):Clone()
 		desiredPerk.Parent = player.unequippedPerks
 		GlobalRemoteEvent:FireClient(player, "perkPurchased", {perkName = perkProductIds[receiptInfo.ProductId]})
-		perks.updatePrices(10)
 	end
 
 	return Enum.ProductPurchaseDecision.PurchaseGranted -- We can now safely close the purchase
@@ -126,6 +126,17 @@ local EarlyAccessSupporterUserIds = {
 
 }
 
+local function createStatMultiplier(name, parent)
+	local newStatMultiplier = Instance.new("Folder")
+	newStatMultiplier.Name = name
+	newStatMultiplier.Parent = parent
+
+	-- each statMultiplier has one default multiplier of 1 so there is something to multiply and it will just be the same number:
+	newStatMultiplier:SetAttribute("defaultMultiplier", 1)
+
+	return newStatMultiplier
+end
+
 
 ServerInit.playerInstances = {} -- Making this a module variable so ServerEvents can access this when it needs to get playerInstances
 
@@ -165,10 +176,28 @@ function ServerInit.InitializePlayer(player)
 		rewardForKills(player)
 	end)
 
-	
 	local donations = Instance.new("IntValue")
 	donations.Name = "Donations"
 	donations.Parent = player
+
+
+	local statMultipliers = Instance.new("Folder")
+	statMultipliers.Name = "statMultipliers"
+	statMultipliers.Parent = plrObjectsFolder
+	createStatMultiplier("MaxHealth_Multiplier", statMultipliers)
+
+	createStatMultiplier("A1Damage_Multiplier", statMultipliers)
+	createStatMultiplier("A2Damage_Multiplier", statMultipliers)
+	createStatMultiplier("syncBlockDamage_Multiplier", statMultipliers)
+	createStatMultiplier("counterAttackDamage_Multiplier", statMultipliers)
+	
+	createStatMultiplier("pairedChainMAX_Multiplier", statMultipliers)
+	createStatMultiplier("escapeGrappleProgressPower_Multiplier", statMultipliers)
+	createStatMultiplier("staminaDrainRate_Multiplier", statMultipliers)
+	createStatMultiplier("staminaRegenRate_Multiplier", statMultipliers)
+	createStatMultiplier("BlockAbsorption_Multiplier", statMultipliers)
+	createStatMultiplier("attackSpeed_Multiplier", statMultipliers)
+	createStatMultiplier("HealthRegen_Multiplier", statMultipliers)
 
 	local equippedPerks = Instance.new("Folder")
 	equippedPerks.Name = "equippedPerks"
@@ -177,6 +206,18 @@ function ServerInit.InitializePlayer(player)
 	local unequippedPerks = Instance.new("Folder")
 	unequippedPerks.Name = "unequippedPerks"
 	unequippedPerks.Parent = player
+
+	equippedPerks.ChildAdded:Connect(function(child)
+		while not characters:GetCharacterObjectByPlayer(player) do task.wait(0.1) end
+
+		perks.applyStatChange(characters:GetCharacterObjectByPlayer(player), child, true)
+	end)
+
+	unequippedPerks.ChildAdded:Connect(function(child)
+		while not characters:GetCharacterObjectByPlayer(player) do task.wait(0.1) end
+
+		perks.applyStatChange(characters:GetCharacterObjectByPlayer(player), child, false)
+	end)
 
 	if game.PlaceId == 0 then return warn("Can't access curent-player's saved data as this project is not published.") end
 
@@ -242,13 +283,22 @@ function ServerInit.InitializePlayer(player)
 					end
 				end
 			end
-		else
-			player.equippedPerks = {}
-			player.unequippedPerks = {}
+		-- else
+		-- 	player.equippedPerks = {}
+		-- 	player.unequippedPerks = {}
 		end
 	else
 		warn(data)
 	end
+
+	task.spawn(function()
+		while not characters:GetCharacterObjectByPlayer(player) do task.wait(0.1) end
+		
+		-- applying currently-equipped perks:
+		for _, perk in pairs(equippedPerks:GetChildren()) do
+			perks.applyStatChange(characters:GetCharacterObjectByPlayer(player), perk, true)
+		end
+	end)
 
 	if EarlyAccessSupporterUserIds[player.UserId] then -- this player is a early-access supporter. They were promised rewards in my promotion.
 		local EASupporterScreen = game.ServerStorage.EASupporterGreeting:Clone()

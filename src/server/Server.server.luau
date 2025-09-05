@@ -75,7 +75,7 @@ local function setupPlayer(player)
         if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.
             
             -- tempCharFunc(player)
-            characterInstance = Character.new(player.Character)
+            characterInstance = Character.new(player.Character, {statMultipliers = player[player.Name .. "_GameObjects"].statMultipliers})
         
             -- ServerInit.InitializeCharacter(player.Character)
             -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], player.Character) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
@@ -86,7 +86,7 @@ local function setupPlayer(player)
             -- Initialize character-related stuff on spawn.
     
             -- tempCharFunc(player)
-            characterInstance = Character.new(char)
+            characterInstance = Character.new(char, {statMultipliers = player[player.Name .. "_GameObjects"].statMultipliers})
             
             -- ServerInit.InitializeCharacter(char)
             -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], char) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.

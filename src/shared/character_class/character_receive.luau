@@ -27,7 +27,7 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
         end
 
     elseif trackData.type == "syncBlock" then
-        if characterInstance.pairedChain <= characterInstance.PairedChainMAX and characterInstance.canSyncBlock then
+        if characterInstance.pairedChain <= (characterInstance.pairedChainMAX * characterInstance.finalStatValues.pairedChainMAX.Value) and characterInstance.canSyncBlock then
 
             -- if trackData.lastReceiveData and trackData.lastReceiveData.IsPlaying then -- runs for the receiver
                 
@@ -324,7 +324,7 @@ function Character_Receive:bracingBlock(attacker_characterInstance) --[[ Block a
 
     local trackData = setupReceiveAnimation(self.characterInstance, "bracingBlock", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
-    self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
+    self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / (2 * self.characterInstance.finalStatValues.BlockAbsorption.Value))
     self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "shakeCamera", {type = "BracingBlock", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
 end
 
@@ -377,11 +377,11 @@ function Character_Receive:parry(attacker_characterInstance) --[[ Parry an incom
     
     local trackData = setupReceiveAnimation(self.characterInstance, "Parry", attackerAnim)
     playReceivingTrack(self.characterInstance, trackData)
-    self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
+    self.characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / (2 * self.characterInstance.finalStatValues.BlockAbsorption.Value))
     self.characterInstance.GlobalRemoteEvent:FireClient(self.characterInstance.player, "shakeCamera", {type = "Parry", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
     self.characterInstance.playHitSFX(trackData)
     -- Move the below damage code to the receive parry
-    attacker_characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / 2)
+    attacker_characterInstance.humanoid:TakeDamage(attacker_characterInstance.attackDamage / (2 * attacker_characterInstance.finalStatValues.BlockAbsorption.Value))
     -- self.characterInstance.hitSFX:Play()
     -- local Protocol = "Parry"
     -- self.characterInstance.GlobalRemoteEvent:FireServer(GameVariables.enemyChar, Protocol, currentAttack)

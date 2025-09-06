@@ -59,7 +59,16 @@ local function disableDefaultTouchDetections(givenChar) --[[ This function will 
 	end
 end
 
-function Character_Init.init(charModel)
+local function createBaseValue(characterInstance, name, value)
+	local newBaseValue = Instance.new("NumberValue")
+	newBaseValue.Name = name
+	newBaseValue.Value = value
+	newBaseValue.Parent = characterInstance.finalStatValuesFolder
+
+	return newBaseValue
+end
+
+function Character_Init.init(charModel, data)
 
 	while not charModel.Humanoid do task.wait() end -- makes sure the humanoid gets created before going through with the init
     local characterInstance = {}
@@ -75,6 +84,49 @@ function Character_Init.init(charModel)
     characterInstance.player = game.Players:GetPlayerFromCharacter(charModel) -- If the character is a player, their player object will be stored here.
 	characterInstance.plrObjectsFolder = characterInstance.player:WaitForChild(characterInstance.player.Name .. "_GameObjects")
 	
+	-- if not characterInstance.statMultipliers then
+	-- 	characterInstance.statMultipliers = {
+	-- 		MaxHealth_Multiplier = {defaultMultiplier = 1},
+			
+	-- 		A1Damage_Multiplier = {defaultMultiplier = 1},
+	-- 		A2Damage_Multiplier = {defaultMultiplier = 1},
+	-- 		syncBlockDamage_Multiplier = {defaultMultiplier = 1},
+	-- 		counterAttackDamage_Multiplier = {defaultMultiplier = 1},
+			
+	-- 		pairedChainMAX_Multiplier = {defaultMultiplier = 1},
+	-- 		escapeGrappleProgressPower_Multiplier = {defaultMultiplier = 1},
+	-- 		staminaDrainRate_Multiplier = {defaultMultiplier = 1},
+	-- 		staminaRegenRate_Multiplier = {defaultMultiplier = 1},
+	-- 		BlockAbsorption_Multiplier = {defaultMultiplier = 1},
+	-- 		attackSpeed_Multiplier = {defaultMultiplier = 1}, -- increase to make attacks faster
+	-- 		HealthRegen_Multiplier = {defaultMultiplier = 1},
+	-- 	}
+	-- end
+	
+	characterInstance.statMultipliers = data.statMultipliers -- folder of stats that multiply together to get a result for player stats
+
+	-- need to define this in case moduleTbl in animationCentric is run on server for an npc, which requires the use of this variable found in ClientVariables:
+	characterInstance.finalStatValuesFolder = characterInstance.player:WaitForChild(characterInstance.player.Name .. "_GameObjects"):WaitForChild("baseValues")
+
+	characterInstance.finalStatValues = {}
+	for _, baseValue in pairs(characterInstance.statMultipliers:GetChildren()) do
+		print(baseValue, baseValue:GetAttributes())
+		characterInstance.finalStatValues[string.gsub(baseValue.Name, "_Multiplier", "")] = createBaseValue(characterInstance, string.gsub(baseValue.Name, "_Multiplier", ""), utilities.multiplyTableValuesTogether(baseValue:GetAttributes()))
+	end
+
+	characterInstance.proxyTable_finalStatValues = {} -- Everytime a stat gets changed, we'll apply it to the character via proxy table, since there are no metamethods for updating an existing value
+	setmetatable(characterInstance.proxyTable_finalStatValues, {
+		__newindex = function(_, i, v)
+			-- here we apply the stat change to the character. And we won't use rawset so it can be changed again. We wont actually store data in this table.
+			if i == "MaxHealth" then
+				characterInstance.humanoid[i] = characterInstance.originalMaxHealth * v
+				print(characterInstance.humanoid.MaxHealth)
+			-- else
+			-- 	characterInstance[i]*= v
+			end
+		end
+	})
+
 	characterInstance.previousHealth = characterInstance.humanoid.Health -- This var is used to determine how much damage the character takes.
 	characterInstance.lockOnDebounce = characterInstance.plrObjectsFolder:FindFirstChild("lockOnDebounce") -- attemps to find lockOnDebounce. If it doesn't exist, then this var will be nil.
 	characterInstance.movingDirection = characterInstance.plrObjectsFolder:FindFirstChild("movingDirection")
@@ -163,23 +215,25 @@ function Character_Init.init(charModel)
 	characterInstance.pairedAttack = nil -- the variable for which paired attack the attacker is doing
 	characterInstance.pairedBlock = nil -- the variable for which paired block the attacker is doing
 	characterInstance.pairedChain = 0 -- The tracker of the character's sync block attack chain. They can only do as many as the max allows
-	characterInstance.PairedChainMAX = 3 -- The max value for pairedChain.
-	
+	characterInstance.pairedChainMAX = 3 -- The max value for pairedChain.
+	characterInstance.originalMaxHealth = 100
+
+	characterInstance.character.Humanoid.MaxHealth = characterInstance.originalMaxHealth * characterInstance.finalStatValues.MaxHealth.Value
 	characterInstance.character.Humanoid.WalkSpeed = 12
 	characterInstance.character.Humanoid.JumpPower = 0
 	characterInstance.character.Humanoid.MaxSlopeAngle = 40 -- reducing this from 89 so they cant climb well. Will mean they will slip off cliffs if they get too close
 
 	-- "Variable" variables; these values will differ per fighter class the character chooses:
-	characterInstance.escapeGrappleProgressPower = 10 -- How much progress the character has to escaping a grapple each time input is pressed. For NPCs, this will be autonomously applied
+	characterInstance.escapeGrappleProgressPower = 5 -- How much progress the character has to escaping a grapple each time input is pressed. For NPCs, this will be autonomously applied
 
 	characterInstance.previousWalkSpeed = nil -- will be set when we need to know the last known WalkSpeed of the player
 	characterInstance.originalWalkSpeed = characterInstance.humanoid.WalkSpeed
-	characterInstance.lockOnSpeed = characterInstance.originalWalkSpeed / 1.85
+	characterInstance.lockOnSpeed = characterInstance.originalWalkSpeed / 1.85 -- change denominator as needed
 
 	-- Stamina management:
 
 	characterInstance.maxStamina = characterInstance.plrObjectsFolder:FindFirstChild("maxStamina") or (function()
-		characterInstance.maxStamina = Instance.new("IntValue") -- the maximum stamina of the character. This value will likely change depending on what abilities the character has that grant them more or less stamina
+		characterInstance.maxStamina = Instance.new("NumberValue") -- the maximum stamina of the character. This value will likely change depending on what abilities the character has that grant them more or less stamina
 		characterInstance.maxStamina.Name = "maxStamina"
 		characterInstance.maxStamina.Value = 100
 		characterInstance.maxStamina.Parent = characterInstance.plrObjectsFolder
@@ -187,7 +241,7 @@ function Character_Init.init(charModel)
 	end)()
 
 	characterInstance.stamina = characterInstance.plrObjectsFolder:FindFirstChild("stamina") or (function()
-		characterInstance.stamina = Instance.new("IntValue") -- the stamina of the player. If they get 0 they wont be able to block or parry
+		characterInstance.stamina = Instance.new("NumberValue") -- the stamina of the player. If they get 0 they wont be able to block or parry
 		characterInstance.stamina.Name = "stamina"
 		characterInstance.stamina.Value = characterInstance.maxStamina.Value -- start out with max stamina
 		characterInstance.stamina.Parent = characterInstance.plrObjectsFolder
@@ -426,10 +480,10 @@ function Character_Init.init(charModel)
 	end
 
 	-- Damage types:
-	local A1Damage = 7 -- default damage for lvl 1 attacks
-	local A2Damage = 14 -- default damage for lvl 2 attacks
-	local syncBlockDamage = 3.5 -- damage for sync blocks
-	local counterAttackDamage = 10
+	local baseA1Damage = 7 -- default damage for lvl 1 attacks
+	local baseA2Damage = 14 -- default damage for lvl 2 attacks
+	local baseSyncBlockDamage = 3.5 -- damage for sync blocks
+	local baseCounterAttackDamage = 10
 	characterInstance.attackDamage = nil -- How much damage the player's current attack will do. If the enemy isn't blocking, it will just equal the attack damage of whatever category the player's attack is in. If they are blocking, this will divide it.
 
 	local sound1, sound2, sound3 = 
@@ -447,10 +501,8 @@ function Character_Init.init(charModel)
 			characterInstance.hitSFX.Name = "hitSFX"
 
 			if characterInstance.currentAttack_trackData and characterInstance.currentAttack_trackData.attackLvl == 1 then
-				-- characterInstance.attackDamage = A1Damage
 				characterInstance.hitSFX.SoundId = tempHitSFXTable[math.random(1, #tempHitSFXTable)]
 			elseif characterInstance.currentAttack_trackData and characterInstance.currentAttack_trackData.attackLvl == 2 then
-				-- characterInstance.attackDamage = A2Damage
 				characterInstance.hitSFX.SoundId = "rbxassetid://112444846023457"
 			else
 				characterInstance.hitSFX.SoundId = math.random(1, #tempHitSFXTable)
@@ -470,13 +522,13 @@ function Character_Init.init(charModel)
 		-- ideally, if there are, say 3 hits in an animation, we'll divide the damage by 3 so after the 3 hits we'll do the same damage as if it were only 1 hit.
 
 		if trackData.attackLvl == 1 then
-			return A1Damage / damageDivider
+			return (baseA1Damage * characterInstance.finalStatValues.A1Damage.Value) / damageDivider
 		elseif trackData.attackLvl == 2 then
-			return A2Damage / damageDivider
+			return (baseA2Damage * characterInstance.finalStatValues.A2Damage.Value) / damageDivider
 		elseif trackData.Counter_Attribute or trackData.DodgeAttack_Attribute then
-			return counterAttackDamage / damageDivider
+			return (baseCounterAttackDamage * characterInstance.finalStatValues.counterAttackDamage.Value) / damageDivider
 		elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == true or trackData.Animation:GetAttribute("SyncBlockFinisher") == false then
-			return syncBlockDamage / damageDivider
+			return (baseSyncBlockDamage * characterInstance.finalStatValues.syncBlockDamage.Value) / damageDivider
 		elseif trackData.attackLvl == 3 then
 			-- want them to have 0.1 health by the last hit of the execution before the game kills them for ragdoll:
 			return (self.enemyChar.Humanoid.Health / damageDivider) - (0.1/damageDivider) -- we deal as much damage to the enemy as they have health remaining, since it's an execution. We subtract 0.1 so it doesn't ACTUALLY kill them or set their health to 0 since when their health is 0 they ragdoll and that ruins the execution
@@ -633,8 +685,13 @@ function Character_Init.init(charModel)
 	connects.DiedConnection = characterInstance.humanoid.Died:Connect(function()
 
 		if characterInstance.attackingChar and game.Players:GetPlayerFromCharacter(characterInstance.attackingChar) then
-			game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Tokens.Value += 2
-			game.Players:GetPlayerFromCharacter(characterInstance.attackingChar).leaderstats.Takedowns.Value += 1
+			local killerInstance = characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
+			
+			killerInstance.player.leaderstats.Tokens.Value += 2
+			killerInstance.player.leaderstats.Takedowns.Value += 1
+			
+			-- Will regen health if they got perk(s) equipped for it
+			killerInstance.humanoid.Health += killerInstance.humanoid.MaxHealth * killerInstance.finalStatValues.HealthRegen.Value
 		end
 		-- characterInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) -- To trigger the StateEnabledChange event, which fires only when the :SetStateEnabled method is used.
 		
@@ -736,7 +793,9 @@ function Character_Init.init(charModel)
 
 	
 	if characterInstance.player ~= nil then
-		characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "createAnimationTracks")
+		pcall(function()
+			characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "createAnimationTracks")
+		end)
 	else -- not a player. We wanna create animations on server
 		Animation_Centric.initialize_animations(Character_Init)
 	end

@@ -34,7 +34,8 @@ function Utilities.activateLockOn(characterInstance, utilities, characters, acti
         
         if not characterInstance.raycastResult then
             characterInstance.lockOnDebounce.Value = false
-            return warn("nothing in the raycast result found")
+            -- return warn("nothing in the raycast result found")
+            return
         -- else
         --     warn(
         --         {
@@ -161,12 +162,14 @@ function Utilities.sendLockOnSignal(moduleTbl) --[[ Alerts the client to activat
 
     if moduleTbl.player then
         -- is a player. Send to client for lock on:
-        moduleTbl.GlobalRemoteFunction:InvokeClient(moduleTbl.player, "lockOn", {
-        enemyHumanoid = moduleTbl.enemyHumanoid,
-        enemyHumanoidRootPart = moduleTbl.enemyHumanoidRootPart,
-        lockOnRayParams = moduleTbl.lockOnRayParams,
-        isGrappling = moduleTbl.isGrappling
-    })
+        pcall(function()
+                moduleTbl.GlobalRemoteFunction:InvokeClient(moduleTbl.player, "lockOn", {
+                enemyHumanoid = moduleTbl.enemyHumanoid,
+                enemyHumanoidRootPart = moduleTbl.enemyHumanoidRootPart,
+                lockOnRayParams = moduleTbl.lockOnRayParams,
+                isGrappling = moduleTbl.isGrappling
+            })
+        end)
     else
         --Is an AI. Send to server:
 
@@ -282,6 +285,30 @@ function Utilities.shakeCamera(TweenService, camera, data)
                                                        currentShakeData.shakeOffset.Z * directionMultiply
                                                     ))}
     TweenService:Create(camera, tweenInfo, goal):Play()
+end
+
+function Utilities.TurnInstancesToVariables(tbl)
+    local stringedTbl = {}
+    for _, v in pairs(tbl) do
+        if v:IsA("StringValue") then -- add more value types if needed
+            stringedTbl[v.Name] = v.Value
+        end
+    end
+    return stringedTbl
+end
+
+function Utilities.multiplyTableValuesTogether(tbl)
+    local newProduct = 1 -- will be multiplied, can be less or more than 1
+    for _, value in pairs(tbl) do
+        if typeof(value) == "number" then
+            newProduct*= value
+        else
+            warn(value .. " is not a number! Didn't multiply it")
+        end
+    end
+
+    warn(newProduct)
+    return newProduct
 end
 
 return Utilities

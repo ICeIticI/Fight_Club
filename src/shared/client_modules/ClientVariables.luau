@@ -19,7 +19,7 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 
 	-- Bools and Values:
 	
-	ClientVariables.lockOnDebounce = ClientVariables.plrObjectsFolder:FindFirstChild("lockOnDebounce") -- attemps to find lockOnDebounce. If it doesn't exist, then this var will be nil.
+	ClientVariables.lockOnDebounce = ClientVariables.plrObjectsFolder:WaitForChild("lockOnDebounce") -- attemps to find lockOnDebounce. If it doesn't exist, then this var will be nil.
 	ClientVariables.movingDirection = ClientVariables.plrObjectsFolder:FindFirstChild("movingDirection")							
 
 	ClientVariables.currentReceiveAnimTRACK = nil -- what animation the player will do based on the enemy attack anim
@@ -53,14 +53,23 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 	return
 end
 
+
 ClientVariables.Camera = game.Workspace.CurrentCamera
 ClientVariables.plrObjectsFolder = ClientVariables.player:WaitForChild(ClientVariables.player.Name .. "_GameObjects") -- perhaps change it from player.Name to player.playerId for saving and stuff in the future
+
+ClientVariables.finalStatValuesFolder = ClientVariables.plrObjectsFolder:WaitForChild("baseValues")
+-- for _, intV in pairs(ClientVariables.plrObjectsFolder:WaitForChild("baseValues"):GetChildren()) do
+-- 	ClientVariables.finalStatValues[intV.Name] = intV
+-- end
 
 -- Global Remote Event - Because each player having their own remote event is redundant.
 ClientVariables.GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 
 -- Global Remote Function - Like the Global Remote Event, but used when we specifically want something returned
 ClientVariables.GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
+
+-- Global Bindable Event
+ClientVariables.GlobalBindableEvent = game.ReplicatedStorage:WaitForChild("GlobalBindableEvent")
 
 -- Local Remote Event:
 ClientVariables.LocalBindableEvent = game.ReplicatedStorage:WaitForChild("LocalBindableEvent")

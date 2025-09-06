@@ -21,7 +21,7 @@ function Characters:GetCharacterObjectByPlayer(plr) --[[ Method that gets a char
             return potentialCharacterInstance
         end
     end
-    warn("No characterInstance found with the given player: ".. tostring(plr))
+    warn("No characterInstance found with the given player: ".. tostring(plr), self)
     return nil
 end
 

@@ -54,7 +54,7 @@ end
 
 
 -- constructor function for Character:
-function Character.new(charModel) --[[ Constructor function that will create a new instance of a character. ]]
+function Character.new(charModel, data) --[[ Constructor function that will create a new instance of a character. ]]
 
     local characterInstancesFolder = game.Workspace:FindFirstChild("Characters") 
     or (function()
@@ -66,7 +66,7 @@ function Character.new(charModel) --[[ Constructor function that will create a n
     end)() -- <- Immediately call the function since this 'or' statement returns the actual function. It never runs until we call it like we do here.
     charModel.Parent = characterInstancesFolder
 
-    local self = setmetatable(character_init.init(charModel), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
+    local self = setmetatable(character_init.init(charModel, data), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
     -- while not self.initialized do task.wait() end
     
     self.character:SetAttribute("id", getNextId())
@@ -216,6 +216,10 @@ end
 
 function Character:receive(receiveType, data) --[[ The character will receive an attack ]]
     -- Mitigate attacks:
+
+    self.attackingChar = data.character
+    self.GlobalRemoteEvent:FireClient(self.player, "updateCurrentAttacker", {attackingChar = self.attackingChar})
+
     if receiveType == "bracingBlock" then
         self.character_receive:bracingBlock(data)
     elseif receiveType == "syncBlock" then

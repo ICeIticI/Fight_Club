@@ -52,10 +52,12 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                 -- characters:GetCharacterObjectByCharacter(characterInstance.enemyChar):EndGrab(characterInstance)
             end
         end
+
+        print(characterInstance.pairedChainMAX, characterInstance.finalStatValues.pairedChainMAX.Value)
         
         if not characterInstance.waitingToAttack 
         and characterInstance.lockOnDebounce.Value 
-        and characterInstance.pairedChain <= characterInstance.PairedChainMAX 
+        and characterInstance.pairedChain <= (characterInstance.pairedChainMAX * characterInstance.finalStatValues.pairedChainMAX.Value)
         and characterInstance.boolCheck({isBlocking = characterInstance.isBlocking}) 
         and (characterInstance.raycastInstance.Position - characterInstance.humanoidRootPart.Position).Magnitude <= 7
         -- and characterInstance.isDodging ~= true -- gets the public canAttack of the player and makes sure its true before attacking
@@ -96,7 +98,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                     characterInstance.syncBlockFollowup = false
                     
                     characterInstance:basicAttack(enemyInstance)
-                    if characterInstance.pairedChain <= characterInstance.PairedChainMAX then
+                    if characterInstance.pairedChain <= (characterInstance.pairedChainMAX * characterInstance.finalStatValues.pairedChainMAX.Value) then
                         characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                         --[[
                         characterObject.Protocol = "AttackStarted"
@@ -119,7 +121,7 @@ input_check_FUNCTION.OnServerInvoke = function(plr, input, active)
                         task.wait()
                     end
                     if characterInstance.followUpCount > 1 then
-                        if characterInstance.pairedChain < characterInstance.PairedChainMAX then -- The third paired attack, we wanna have the receiver determine the anim so it will be calculated by them, after this player's characterInstance checks its the max value in character_attack.
+                        if characterInstance.pairedChain < (characterInstance.pairedChainMAX * characterInstance.finalStatValues.pairedChainMAX.Value) then -- The third paired attack, we wanna have the receiver determine the anim so it will be calculated by them, after this player's characterInstance checks its the max value in character_attack.
                             -- characterInstance.animPair = {math.random(1, 2), math.random(1, 2)}
                             --[[
                             characterObject.Protocol = "AttackStarted"

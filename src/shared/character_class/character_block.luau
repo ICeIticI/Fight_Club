@@ -24,7 +24,7 @@ local function regenStamina(characterInstance) --[[ Will regenerate stamina, if 
     if not isRegening then
         isRegening = true
         while (not characterInstance.BlockStartAnimPlaying and not characterInstance.holdingBlock) and characterInstance.stamina.Value < 100 do
-            characterInstance.stamina.Value += regenRate
+            characterInstance.stamina.Value += (regenRate * characterInstance.finalStatValues.staminaRegenRate.Value)
             -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, self.characterInstance.stamina/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
             task.wait(0.1)
         end
@@ -44,7 +44,7 @@ local function drainStamina(characterInstance, trackData) --[[ Function that wil
     else
         -- On holding block, we continuously drain their stamina until they stop blocking
         while characterInstance.holdingBlock and characterInstance.stamina.Value > 0 do
-            characterInstance.stamina.Value -= drainRate
+            characterInstance.stamina.Value -= (drainRate * characterInstance.finalStatValues.staminaDrainRate.Value)
             task.wait(0.1)
         end
         characterInstance:block(false)

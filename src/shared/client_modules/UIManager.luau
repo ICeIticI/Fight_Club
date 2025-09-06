@@ -2,8 +2,8 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local SocialService = game:GetService("SocialService")
 
 local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables)
--- local perkButton = require(game.ReplicatedStorage.Shared.client_modules.perkButton)
 local uiButton = require(game.ReplicatedStorage.Shared.client_modules.uiButton)
+local perks = require(game.ReplicatedStorage.Shared.client_modules.perks.perks)
 
 local UIManager = {}
 
@@ -159,14 +159,10 @@ function UIManager.manageUI()
         gameFrame.fightingStyles_screen.Visible = not gameFrame.fightingStyles_screen.Visible
     end)
     
-    gameFrame.buttons1.perks_button.Activated:Connect(function()
-    gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
-end)
---]]
-
-    -- local perksScreen = gameFrame.perks_screen
-
-    -- local damageBuffPerk = perkButton.new("Iron Knuckles", "Increases attack damage")
+    --]]
+    -- gameFrame.buttons1.perks_button.Activated:Connect(function()
+    --     gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
+    -- end)
 
     for _, button in pairs(buttons) do
         button.activatedConnection = button.instance.Activated:Connect(function()
@@ -187,7 +183,6 @@ end)
     while ClientVariables.humanoid and ClientVariables.humanoid.Health <= 0 do task.wait() end
     local healthChecker
     healthChecker = ClientVariables.humanoid.HealthChanged:Connect(function(health)
-        warn("do u run")
         staminaFraction = health / ClientVariables.humanoid.MaxHealth
         healthBar.Size = UDim2.new(healthBar.Size.X.Scale, healthBar.Size.X.Offset, staminaFraction * healthFrameLabel.Size.Y.Scale, healthBar.Size.Y.Offset)
         if health <= 0 then

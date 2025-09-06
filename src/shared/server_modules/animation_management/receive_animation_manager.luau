@@ -1,14 +1,22 @@
 local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
-local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
 
 local Receive_Animation_Management = {}
 
 function Receive_Animation_Management:runOnIsPlaying(trackData)
     
+    local attacker_characterInstance = characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar)
+    local enemyAttackSpeed
+    if attacker_characterInstance then
+        enemyAttackSpeed = attacker_characterInstance.finalStatValues.attackSpeed.Value
+    else
+        enemyAttackSpeed = 1
+    end
+    
     if trackData.IsPlaying then
 
         -- Schedule a simulation of the end of the receiving animation:
-        task.delay(trackData.Animation:GetAttribute("Length"), function()
+        task.delay(trackData.Animation:GetAttribute("Length") * enemyAttackSpeed, function()
             if trackData.IsPlaying then
                 trackData.IsPlaying = false
                 trackData.Completed = true
@@ -22,7 +30,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
         self.characterInstance.SetSpeed(false) -- Prevent the player from moving while being hit
 
         if trackData.Counter_Attribute then
-            task.wait(0.4)
+            task.wait(0.4 * enemyAttackSpeed)
             self.characterInstance.isGettingHit = false
         end
 
@@ -35,7 +43,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             local reactTween = game:GetService("TweenService"):Create(tweenPart, Info, tweenGoals)
             reactTween:Play()
             ]]
-            local enemyCFrame = Characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar).humanoidRootPart.CFrame
+            local enemyCFrame = characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar).humanoidRootPart.CFrame
             local linearForce = self.characterInstance.humanoidRootPart.CFrame:VectorToObjectSpace(enemyCFrame.LookVector.Unit * 3)
             self.characterInstance:setLinearVelocity(linearForce, 0.63)
         end
@@ -67,7 +75,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
 
         if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
             -- Wait before allowing sync blocks again
-            task.wait(1)
+            task.wait(1 * enemyAttackSpeed)
             if not trackData.IsPlaying then
                 self.characterInstance.canSyncBlock = true
             end

@@ -156,7 +156,7 @@ function Character_Grapple:Success(enemyInstance) --[[ The character attempted t
         playGrabAnimation(self.characterInstance, trackData)
         enemyInstance:receive("receiveGrabSuccess", self.characterInstance)
         
-        while trackData.IsPlaying do task.wait() end
+        while trackData and trackData.IsPlaying do task.wait() end
         return true
     end
 end
@@ -221,7 +221,10 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     -- grabWeld.Enabled = true
     self.characterInstance.isAttacking.Value = false
 
-    while enemyInstance.isInSecureGrapple 
+    while self
+    and enemyInstance
+
+    and enemyInstance.isInSecureGrapple 
     and self.characterInstance.isGrappling
     and self.characterInstance.lockOnDebounce.Value do
         
@@ -252,9 +255,11 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
         task.wait(0.1)
     end
     
-    self.characterInstance.setCharacterMassless(enemyInstance.character, false)
-    enemyInstance.humanoid.PlatformStand = false
-    utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, enemyInstance.player)
+    if enemyInstance then
+        self.characterInstance.setCharacterMassless(enemyInstance.character, false)
+        enemyInstance.humanoid.PlatformStand = false
+        utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, enemyInstance.player)
+    end
     grabMotor:Destroy()
     grabMotor = nil
     -- grabWeld.Enabled = false

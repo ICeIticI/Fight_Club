@@ -7,7 +7,6 @@ perksFolder.Parent = game.ReplicatedStorage
 local GlobalBindableEvent = game.ReplicatedStorage:WaitForChild("GlobalBindableEvent")
 
 local function newPerk(name, description, modifierTable, cost, killsRequired, productId)
-    print(modifierTable)
 
     local perk = Instance.new("StringValue")
     perk.Name = name
@@ -21,7 +20,6 @@ local function newPerk(name, description, modifierTable, cost, killsRequired, pr
         newMod.Name = i
         newMod.Value = v
         newMod.Parent = modFolder
-        print(v, newMod.Name, newMod.Value, newMod)
     end
 
     perk:SetAttribute("Cost", cost)

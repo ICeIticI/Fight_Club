@@ -15,7 +15,6 @@ local function Init() -- The .CharacterAdded event doesn't always track when a p
 
 	ClientVariables.charAnimator = ClientVariables.character:WaitForChild("Humanoid"):WaitForChild("Animator")
 	ClientVariables.humanoidRootPart = ClientVariables.character:WaitForChild("HumanoidRootPart")
-	print("hrp: ", ClientVariables.humanoidRootPart, ClientVariables.humanoidRootPart.Parent.Humanoid.Health)
 
 	-- Bools and Values:
 	

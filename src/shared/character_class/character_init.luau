@@ -110,7 +110,6 @@ function Character_Init.init(charModel, data)
 
 	characterInstance.finalStatValues = {}
 	for _, baseValue in pairs(characterInstance.statMultipliers:GetChildren()) do
-		print(baseValue, baseValue:GetAttributes())
 		characterInstance.finalStatValues[string.gsub(baseValue.Name, "_Multiplier", "")] = createBaseValue(characterInstance, string.gsub(baseValue.Name, "_Multiplier", ""), utilities.multiplyTableValuesTogether(baseValue:GetAttributes()))
 	end
 
@@ -120,7 +119,6 @@ function Character_Init.init(charModel, data)
 			-- here we apply the stat change to the character. And we won't use rawset so it can be changed again. We wont actually store data in this table.
 			if i == "MaxHealth" then
 				characterInstance.humanoid[i] = characterInstance.originalMaxHealth * v
-				print(characterInstance.humanoid.MaxHealth)
 			-- else
 			-- 	characterInstance[i]*= v
 			end
@@ -570,10 +568,25 @@ function Character_Init.init(charModel, data)
 		table.insert(hitCacheTable, newSound)
 	end
 
-	local SFXTable = {
+	local SFXTable1 = {
 		"rbxassetid://9118617342",
 		"rbxassetid://82209688846366",
-		"rbxassetid://5507815764"
+		"rbxassetid://5507815764",
+		"rbxassetid://9117969687",
+		"rbxassetid://8595980577",
+		"rbxassetid://8278630896",
+		"rbxassetid://72142112079276",
+		"rbxassetid://140139514810063",
+	}
+
+	local SFXTable2 = {
+		"rbxassetid://112444846023457",
+		"rbxassetid://8595983255",
+		"rbxassetid://8595977193",
+		"rbxassetid://8595984380",
+		"rbxassetid://8701825353",
+		"rbxassetid://86699600703335",
+		"rbxassetid://101093315205711",
 	}
 
 	function characterInstance.playHitSFX(trackData)
@@ -582,9 +595,9 @@ function Character_Init.init(charModel, data)
 		or trackData.Paired_Attribute
 		or (trackData.type and trackData.type == "Parry") -- parrys should have their own special SFX at some point
 		then
-			soundId = SFXTable[math.random(1, #SFXTable)]
+			soundId = SFXTable1[math.random(1, #SFXTable1)]
 		elseif trackData.type == "Level2" then
-			soundId = "rbxassetid://112444846023457"
+			soundId = SFXTable2[math.random(1, #SFXTable2)]
 		end
 
 		if not soundId then 

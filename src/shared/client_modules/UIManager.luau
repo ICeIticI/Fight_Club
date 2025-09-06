@@ -31,7 +31,6 @@ local function waitForLoadingScreen(loadingScreen)
         while not ClientVariables.initialized do task.wait() end
     
         loadingScreen.Enabled = false
-        print(loadingScreen.Enabled)
     end)
 end
 
@@ -128,7 +127,6 @@ function UIManager.manageUI()
 
     -- mobile UI:
     if ClientVariables.isOnMobile then
-        print("we on mobile my g")
         
         gameFrame.mobile_controls.Visible = true
 

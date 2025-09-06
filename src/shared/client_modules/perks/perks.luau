@@ -154,8 +154,6 @@ equipPurchase_screen.Yes.Activated:Connect(function()
             return 
         end
 
-        print(#equippedPerks_folder:GetChildren(), currentlySelectedPerk.isEquipped)
-
         if currentlySelectedPerk.locked then
             currentlySelectedPerk:unlock()
             currentlySelectedPerk.locked = false

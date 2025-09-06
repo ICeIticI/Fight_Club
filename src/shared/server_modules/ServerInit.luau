@@ -54,10 +54,8 @@ local perkProductIds = {
 }
 
 GlobalBindableEvent.Event:Connect(function(protocol, data)
-	print(protocol)
 	if protocol == "addProductIdToTable" then
 		perkProductIds[data.productId] = data.name
-		print(perkProductIds)
 	end
 end)
 

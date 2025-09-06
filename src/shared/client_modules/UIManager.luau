@@ -160,9 +160,9 @@ function UIManager.manageUI()
     end)
     
     --]]
-    gameFrame.buttons1.perks_button.Activated:Connect(function()
-        gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
-    end)
+    -- gameFrame.buttons1.perks_button.Activated:Connect(function()
+    --     gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
+    -- end)
 
     for _, button in pairs(buttons) do
         button.activatedConnection = button.instance.Activated:Connect(function()

@@ -162,12 +162,14 @@ function Utilities.sendLockOnSignal(moduleTbl) --[[ Alerts the client to activat
 
     if moduleTbl.player then
         -- is a player. Send to client for lock on:
-        moduleTbl.GlobalRemoteFunction:InvokeClient(moduleTbl.player, "lockOn", {
-        enemyHumanoid = moduleTbl.enemyHumanoid,
-        enemyHumanoidRootPart = moduleTbl.enemyHumanoidRootPart,
-        lockOnRayParams = moduleTbl.lockOnRayParams,
-        isGrappling = moduleTbl.isGrappling
-    })
+        pcall(function()
+                moduleTbl.GlobalRemoteFunction:InvokeClient(moduleTbl.player, "lockOn", {
+                enemyHumanoid = moduleTbl.enemyHumanoid,
+                enemyHumanoidRootPart = moduleTbl.enemyHumanoidRootPart,
+                lockOnRayParams = moduleTbl.lockOnRayParams,
+                isGrappling = moduleTbl.isGrappling
+            })
+        end)
     else
         --Is an AI. Send to server:
 

@@ -5,7 +5,13 @@ local Receive_Animation_Management = {}
 
 function Receive_Animation_Management:runOnIsPlaying(trackData)
     
-    local enemyAttackSpeed = characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar).finalStatValues.attackSpeed.Value
+    local attacker_characterInstance = characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar)
+    local enemyAttackSpeed
+    if attacker_characterInstance then
+        enemyAttackSpeed = attacker_characterInstance.finalStatValues.attackSpeed.Value
+    else
+        enemyAttackSpeed = 1
+    end
     
     if trackData.IsPlaying then
 

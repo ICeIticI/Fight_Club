@@ -119,7 +119,18 @@ equipPurchase_screen.Yes.Activated:Connect(function()
     if not ClientVariables.initialized or ClientVariables.humanoid.Health <= 0 then return end
 
     if not promptToPurchaseRobux then
-        local getPerk, amountMissingForPurchase = ClientVariables.GlobalRemoteFunction:InvokeServer("getPerk", {name = currentlySelectedPerk.name})
+
+        local getPerk, amountMissingForPurchase
+        local success, result = pcall(function()
+            getPerk, amountMissingForPurchase = ClientVariables.GlobalRemoteFunction:InvokeServer("getPerk", {name = currentlySelectedPerk.name})
+        end)
+
+        if not success then
+            getPerk = false
+            warn(result)
+            return
+        end
+
         if getPerk ~= true then
             -- they should be prompted to purchase this perk with robux or purchase more tokens
             

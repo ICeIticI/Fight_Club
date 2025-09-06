@@ -793,7 +793,9 @@ function Character_Init.init(charModel, data)
 
 	
 	if characterInstance.player ~= nil then
-		characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "createAnimationTracks")
+		pcall(function()
+			characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "createAnimationTracks")
+		end)
 	else -- not a player. We wanna create animations on server
 		Animation_Centric.initialize_animations(Character_Init)
 	end

@@ -704,7 +704,7 @@ function Character_Init.init(charModel, data)
 			killerInstance.player.leaderstats.Takedowns.Value += 1
 			
 			-- Will regen health if they got perk(s) equipped for it
-			killerInstance.humanoid.Health += killerInstance.humanoid.MaxHealth * killerInstance.finalStatValues.HealthRegen.Value
+			killerInstance.humanoid.Health += killerInstance.humanoid.MaxHealth * (killerInstance.finalStatValues.HealthRegen.Value - 1)
 		end
 		-- characterInstance.humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) -- To trigger the StateEnabledChange event, which fires only when the :SetStateEnabled method is used.
 		

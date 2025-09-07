@@ -151,17 +151,6 @@ function UIManager.manageUI()
     
     local staminaFraction
 
-    -- Deactivated until its added to the game
-    --[[
-    gameFrame.buttons1.fightingStyles_button.Activated:Connect(function()
-        gameFrame.fightingStyles_screen.Visible = not gameFrame.fightingStyles_screen.Visible
-    end)
-    
-    --]]
-    -- gameFrame.buttons1.perks_button.Activated:Connect(function()
-    --     gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
-    -- end)
-
     for _, button in pairs(buttons) do
         button.activatedConnection = button.instance.Activated:Connect(function()
             button:Activate()
@@ -194,5 +183,16 @@ function UIManager.manageUI()
     end)
 
 end
+
+-- Deactivated until its added to the game
+--[[
+gameFrame.buttons1.fightingStyles_button.Activated:Connect(function()
+    gameFrame.fightingStyles_screen.Visible = not gameFrame.fightingStyles_screen.Visible
+end)
+
+--]]
+gameFrame.buttons1.perks_button.Activated:Connect(function()
+    gameFrame.perks_screen.Visible = not gameFrame.perks_screen.Visible
+end)
 
 return UIManager

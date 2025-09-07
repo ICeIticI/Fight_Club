@@ -43,7 +43,7 @@ local activePerks = {
     newPerk("Cardiosaurus Rex", "Decreases stamina degradation", {staminaDrainRate = 0.5}, basePrice, 60, 3382905392),
     newPerk("Full-Auto", "Increases attack speed", {attackSpeed = 1.25}, basePrice, 75, 3382906629),
     newPerk("Retaliation Specialist", "Counters and Dodge Attacks deal more damage", {counterAttackDamage = 1.35}, basePrice, 50, 3383626413),
-    newPerk("Bloodthirsty", "Each Takedown restores health", {HealthRegen = 0.2}, intermediatePrice, 80, 3384023927)
+    newPerk("Bloodthirsty", "Each Takedown restores health", {HealthRegen = 1.2}, intermediatePrice, 80, 3384023927)
 }
 
 Perks.MaxActivePerks = 5 -- how many perks a player can equip at once

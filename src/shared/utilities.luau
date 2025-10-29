@@ -307,7 +307,6 @@ function Utilities.multiplyTableValuesTogether(tbl)
         end
     end
 
-    warn(newProduct)
     return newProduct
 end
 

@@ -1,11 +1,14 @@
-local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
-local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local ModuleLoader
 
 local Receive_Animation_Management = {}
 
+function Receive_Animation_Management.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+end
+
 function Receive_Animation_Management:runOnIsPlaying(trackData)
     
-    local attacker_characterInstance = characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar)
+    local attacker_characterInstance = ModuleLoader.characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar)
     local enemyAttackSpeed
     if attacker_characterInstance then
         enemyAttackSpeed = attacker_characterInstance.finalStatValues.attackSpeed.Value
@@ -34,7 +37,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.isGettingHit = false
         end
 
-        if trackData.AnimationId == AnimationInstances.FC_RightHaymakerRECEIVER.AnimationId or trackData.AnimationId == AnimationInstances.FC_LeftHaymakerRECEIVER.AnimationId then
+        if trackData.AnimationId == ModuleLoader.AnimationInstances.FC_RightHaymakerRECEIVER.AnimationId or trackData.AnimationId == ModuleLoader.AnimationInstances.FC_LeftHaymakerRECEIVER.AnimationId then
         -- Tween specific animations like the rightHaymaker
             --[[
             local tweenPart = GameVariables.character:WaitForChild("HumanoidRootPart")
@@ -43,12 +46,12 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             local reactTween = game:GetService("TweenService"):Create(tweenPart, Info, tweenGoals)
             reactTween:Play()
             ]]
-            local enemyCFrame = characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar).humanoidRootPart.CFrame
+            local enemyCFrame = ModuleLoader.characters:GetCharacterObjectByCharacter(self.characterInstance.attackingChar).humanoidRootPart.CFrame
             local linearForce = self.characterInstance.humanoidRootPart.CFrame:VectorToObjectSpace(enemyCFrame.LookVector.Unit * 3)
             self.characterInstance:setLinearVelocity(linearForce, 0.63)
         end
 
-        if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
+        if trackData.AnimationId == ModuleLoader.AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == ModuleLoader.AnimationInstances.FC_BracingBlockR.AnimationId then
             self.characterInstance.isBlocking = true
             self.characterInstance.canSyncBlock = false
         end
@@ -73,7 +76,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance:block(false)
         end
 
-        if trackData.AnimationId == AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == AnimationInstances.FC_BracingBlockR.AnimationId then
+        if trackData.AnimationId == ModuleLoader.AnimationInstances.FC_BracingBlockL.AnimationId or trackData.AnimationId == ModuleLoader.AnimationInstances.FC_BracingBlockR.AnimationId then
             -- Wait before allowing sync blocks again
             task.wait(1 * enemyAttackSpeed)
             if not trackData.IsPlaying then
@@ -91,7 +94,7 @@ function Receive_Animation_Management:runOnIsPlaying(trackData)
     end
 
     -- stop linear velocity if its playing thats not in response to a haymaker:
-    if not (trackData.AnimationId == AnimationInstances.FC_RightHaymakerRECEIVER.AnimationId or trackData.AnimationId == AnimationInstances.FC_LeftHaymakerRECEIVER.AnimationId) then
+    if not (trackData.AnimationId == ModuleLoader.AnimationInstances.FC_RightHaymakerRECEIVER.AnimationId or trackData.AnimationId == ModuleLoader.AnimationInstances.FC_LeftHaymakerRECEIVER.AnimationId) then
         self.characterInstance.humanoidRootPart.FC_LinearVelocity.Enabled = false
     end
 

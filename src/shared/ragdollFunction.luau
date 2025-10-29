@@ -35,6 +35,7 @@ local function solidifyBodyParts(char : Model, sentBool : boolean) -- Function t
 	end
 end
 
+
 local charactersRagdollData = {} -- table holding data for each character for ragdoll purposes
 
 function ragdollFunction.setupRagdoll(char : Model, id : number)

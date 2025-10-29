@@ -16,32 +16,34 @@
 local UserInputService = game:GetService("UserInputService") -- Gets the user input
 
 -- Modules
-local ClientVariables = require(game.ReplicatedStorage.Shared.client_modules.ClientVariables) -- To have access to the client's variables in this script:
+local ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+ModuleLoader.init()
+
+ModuleLoader.ClientVariables.init()
 -- local Animation_Manager = require(game.ReplicatedStorage.Shared.AnimationManager) -- Manages the animations of the character:
 -- local LockOnSystem = require(game.ReplicatedStorage.Shared.LockOnSystem) -- Holds the mechanics for locking onto enemies
 -- local BasicStriking = require(game.ReplicatedStorage.Shared.BasicStriking)
 -- local ReceivingAndCountering = require(game.ReplicatedStorage.Shared.ReceivingAndCountering)
-local UIManager = require(game.ReplicatedStorage.Shared.client_modules.UIManager)
-UIManager.manageUI()
+ModuleLoader.UIManager.init()
+ModuleLoader.animation_centric.init()
 -- New Modules:
-local utilities = require(game.ReplicatedStorage.Shared.utilities)
 
-ClientVariables.isOnMobile = -- Will be either true or false if they're on mobile or not
+ModuleLoader.ClientVariables.isOnMobile = -- Will be either true or false if they're on mobile or not
     UserInputService.TouchEnabled
 	and not UserInputService.KeyboardEnabled
 	and not UserInputService.MouseEnabled
 
-local lockOn = require(game.ReplicatedStorage.Shared.client_modules.lockOn)
-require(game.ReplicatedStorage.Shared.client_modules.REs_RFs).init()
+ModuleLoader.lockOn.init()
+ModuleLoader.REs_RFs.init()
 
 -- New Remote Events/Functions:
 
 local input_check_FUNCTION = game.ReplicatedStorage:WaitForChild("input_check_FUNCTION")
 
-ClientVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
+ModuleLoader.ClientVariables.GlobalRemoteEvent.OnClientEvent:Connect(function(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
     -- Manages the remote events the client receives.
 
-    while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
+    while not ModuleLoader.ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
     
     -- ReceivingAndCountering.Receive(currentAttack, Protocol, sentAnimPair, sentValue, isAI)
 end)
@@ -54,14 +56,15 @@ end
 game.Players.LocalPlayer.CharacterAdded:Connect(function() -- runs when plr char spawns
     -- Initializes the player
     -- while not ClientVariables.initialized do task.wait() end -- We dont want anything being managed before the GameVariables initialization finished, setting variables for the character spawn
-    UIManager.manageUI()
+    
+    -- ModuleLoader.UIManager.manageUI()
 end)
 
 -- User Input Types
-local AttackInputs = utilities.userInputTypes.AttackInputs -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
-local BlockInputs = utilities.userInputTypes.BlockInputs
-local GrappleInputs = utilities.userInputTypes.GrappleInputs
-local LockOnInputs = utilities.userInputTypes.LockOnInputs -- May have LockOnInputs for each system
+local AttackInputs = ModuleLoader.utilities.userInputTypes.AttackInputs -- This table is used for checking what inputs are allowed in the context of attacking. The permitted inputs are actually the index values so we can use the user's input as an index, and if it matches one of the ones in the table, then they pressed an attacking button.
+local BlockInputs = ModuleLoader.utilities.userInputTypes.BlockInputs
+local GrappleInputs = ModuleLoader.utilities.userInputTypes.GrappleInputs
+local LockOnInputs = ModuleLoader.utilities.userInputTypes.LockOnInputs -- May have LockOnInputs for each system
 
 local function onInputBegan(input, gameProcessedEvent)
     if gameProcessedEvent then return end -- Player is typing in chat or UI
@@ -79,7 +82,7 @@ local function onInputBegan(input, gameProcessedEvent)
     -- or (GrappleInputs[input.UserInputType] or GrappleInputs[input.KeyCode]) 
     then
 
-        if ClientVariables.player.Name == "Player2" and (AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode]) then
+        if ModuleLoader.ClientVariables.player.Name == "Player2" and (AttackInputs[input.UserInputType] or AttackInputs[input.KeyCode]) then
             warn("2 seconds till attack...")
             task.wait(2) -- FOR TESTING BRACING BLOCKS, COUNTERS AND PARRYS. DELETE WHEN DONE!!!
         end
@@ -117,12 +120,12 @@ UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
     onInputEnded(input, gameProcessedEvent)
 end)
 
-while not ClientVariables.LocalBindableEvent do task.wait() end
+while not ModuleLoader.ClientVariables.LocalBindableEvent do task.wait() end
 
-ClientVariables.LocalBindableEvent.Event:Connect(function(protocol, data)
+ModuleLoader.ClientVariables.LocalBindableEvent.Event:Connect(function(protocol, data)
     if protocol == "mobileInputBegan" then
         task.wait(0.03)
-        if ClientVariables.isAttackButtonHeld and ClientVariables.isBlockButtonHeld then
+        if ModuleLoader.ClientVariables.isAttackButtonHeld and ModuleLoader.ClientVariables.isBlockButtonHeld then
             data.input.UserInputType = "mobile_grabButton"
         end
 

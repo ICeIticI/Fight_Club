@@ -7,6 +7,9 @@
     on both the server and client, so they need the same functions in this case.
 
 ]]
+
+local ModuleLoader
+
 local Animation_Centric = {}
 Animation_Centric.__index = Animation_Centric
 
@@ -35,26 +38,31 @@ local function getAnimationTrackById(moduleTbl, AnimationId)
     return warn("No AnimationTrack was found with the given AnimationId: " .. tostring(AnimationId))
 end
 
+function Animation_Centric.init() -- initializes this module
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+    ModuleLoader.AnimationInstances.init() -- initialize the animations
+end
 
 function Animation_Centric.initialize_animations(moduleTbl) --[[ Will initialize both the animations and their corresponding tracks ]]
     moduleTbl.AllAnimations = {}
-    for _, obj in pairs(require(game.ReplicatedStorage.Shared.AnimationInstances)) do
-        if obj:IsA("Animation") then
 
-            -- moduleTbl[obj.Name] = obj
-            moduleTbl[obj.Name .. "TRACK"] = moduleTbl.charAnimator:LoadAnimation(obj)
+    for _, obj in pairs(ModuleLoader.AnimationInstances) do
+        if (typeof(obj) ~= "Instance") or (typeof(obj) == "Instance" and not obj:IsA("Animation")) then continue end
 
-            -- Set animation priority based on attributes
-            if obj:GetAttribute("Paired") and obj:GetAttribute("AnimType") then
-                moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action3
-            elseif obj:GetAttribute("Paired") then
-                moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action2
-            elseif obj:GetAttribute("AnimType") and not obj:GetAttribute("Paired") then
-                moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action
-            end
 
-            table.insert(moduleTbl.AllAnimations, moduleTbl[obj.Name .. "TRACK"])
+        -- moduleTbl[obj.Name] = obj
+        moduleTbl[obj.Name .. "TRACK"] = moduleTbl.charAnimator:LoadAnimation(obj)
+
+        -- Set animation priority based on attributes
+        if obj:GetAttribute("Paired") and obj:GetAttribute("AnimType") then
+            moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action3
+        elseif obj:GetAttribute("Paired") then
+            moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action2
+        elseif obj:GetAttribute("AnimType") and not obj:GetAttribute("Paired") then
+            moduleTbl[obj.Name .. "TRACK"].Priority = Enum.AnimationPriority.Action
         end
+
+        table.insert(moduleTbl.AllAnimations, moduleTbl[obj.Name .. "TRACK"])
     end
     -- Sorting all the animations into other animation tables for managing:
 
@@ -159,7 +167,6 @@ function Animation_Centric.playReceiveAnimation(moduleTbl)
         end
 
     end
-    print("receive animation playing. Are we grappling?:" , moduleTbl.isGrappling)
 end
 
 function Animation_Centric.setupGrabAnimation(moduleTbl, data)
@@ -199,7 +206,6 @@ function Animation_Centric.playGrabAnimation(moduleTbl, data: any?)
             end
     
         end
-        print("grab animation playing. Are we grappling?:" , moduleTbl.isGrappling)
     end
 end
 

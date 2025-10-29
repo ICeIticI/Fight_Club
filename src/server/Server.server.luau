@@ -11,20 +11,21 @@ serverInitialized.Parent = game.ReplicatedStorage
 local Players = game:GetService("Players")
 
 -- Modules
-local ServerInit = require(game.ReplicatedStorage.Shared.server_modules.ServerInit)
+local ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+ModuleLoader.init()
+
+-- New modules:
+
+ModuleLoader.ServerInit.init()
+ModuleLoader.AnimationInstances.init()
+ModuleLoader.character.init()
+ModuleLoader.input_check.init() -- input_check will run on it's own, but we don't need to store it as it will be unused.
+ModuleLoader.serverEvents.init()
 -- local ServerEvents = require(game.ReplicatedStorage.Shared.ServerEvents)
 -- local RagdollSystem = require(game.ReplicatedStorage.Shared.RagdollSystem)
 
 -- local GlobalRemoteEvent = game.ReplicatedStorage:WaitForChild("GlobalRemoteEvent")
 -- local GlobalRemoteFunction = game.ReplicatedStorage:WaitForChild("GlobalRemoteFunction")
-
--- New modules:
-
-local Character = require(game.ReplicatedStorage.Shared.character_class.character)
-local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
-
-require(game.ReplicatedStorage.Shared.server_modules.input_check) -- input_check will run on it's own, but we don't need to store it as it will be unused.
-require(game.ReplicatedStorage.Shared.server_modules.serverEvents)
 
 -- GlobalRemoteEvent.OnServerEvent:Connect(function(sendingPlayer, hitCharacter, Protocol, currentAttack, animPair, sentValue, plrIsBlocking, isAI)
 --     if Protocol == "Hook" or Protocol == "Haymaker" then -- Used to check which set of remote events should play. When doing basic striking, no animPair nor sentValue is sent in the parameters, unlike doing other misc. events, which is how we distinguish, splitting the events into two to make the code easier to understand.
@@ -67,7 +68,7 @@ require(game.ReplicatedStorage.Shared.server_modules.serverEvents)
 local function setupPlayer(player)
     task.spawn(function()
         while not serverInitialized.Value do task.wait() end
-        ServerInit.InitializePlayer(player) -- initializes player's public objects
+        ModuleLoader.ServerInit.InitializePlayer(player) -- initializes player's public objects
         
         -- local playerVelocities = RagdollSystem.InitializePlayer() -- from the .InitializePlayer()
     
@@ -75,7 +76,7 @@ local function setupPlayer(player)
         if player.Character then -- There is a known issue in roblox where characters won't trigger the .CharacterAdded event the first time they spawn in because they are loaded before the script can process it.
             
             -- tempCharFunc(player)
-            characterInstance = Character.new(player.Character, {statMultipliers = player[player.Name .. "_GameObjects"].statMultipliers})
+            characterInstance = ModuleLoader.character.new(player.Character, {statMultipliers = player[player.Name .. "_GameObjects"].statMultipliers})
         
             -- ServerInit.InitializeCharacter(player.Character)
             -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], player.Character) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
@@ -86,7 +87,7 @@ local function setupPlayer(player)
             -- Initialize character-related stuff on spawn.
     
             -- tempCharFunc(player)
-            characterInstance = Character.new(char, {statMultipliers = player[player.Name .. "_GameObjects"].statMultipliers})
+            characterInstance = ModuleLoader.character.new(char, {statMultipliers = player[player.Name .. "_GameObjects"].statMultipliers})
             
             -- ServerInit.InitializeCharacter(char)
             -- RagdollSystem.InitializeCharacter(playerVelocities[1], playerVelocities[2], char) -- because playerVelocities equals the returned value of .InitializePlayer() (linear and angular were returned in a table), we will referance those variables via table index. Then we add the current char to the function for referancing them.
@@ -111,11 +112,12 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-    ServerInit.RemovePlayer(player)
+    ModuleLoader.ServerInit.RemovePlayer(player)
 end)
 
 game:BindToClose(function()
-    ServerInit.ShutdownServer()
+    ModuleLoader.ServerInit.ShutdownServer()
 end)
+
 
 serverInitialized.Value = true

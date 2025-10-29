@@ -1,29 +1,26 @@
-local TweenService = game:GetService("TweenService")
+
 local Character_Receive = {}
 Character_Receive.__index = Character_Receive
 
-local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
-local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
-local utilities = require(game.ReplicatedStorage.Shared.utilities)
-
+local ModuleLoader
 
 local function getReceiveAnimation(characterInstance, trackData) --[[ Will return the receiver animation that gets played based on what specific attack the enemy did. ]]
     if trackData.type == "Dodge" then
 
         if trackData.DodgeDirection == "Right" then
-            return AnimationInstances.FC_RightDodge
+            return ModuleLoader.AnimationInstances.FC_RightDodge
         elseif trackData.DodgeDirection == "Left" then
-            return AnimationInstances.FC_LeftDodge
+            return ModuleLoader.AnimationInstances.FC_LeftDodge
         elseif trackData.DodgeDirection == "Back" then
-            return AnimationInstances.FC_BackDodge
+            return ModuleLoader.AnimationInstances.FC_BackDodge
         end
 
     elseif trackData.type == "bracingBlock" then
 
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            return AnimationInstances.FC_BracingBlockR
+            return ModuleLoader.AnimationInstances.FC_BracingBlockR
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
-            return AnimationInstances.FC_BracingBlockL
+            return ModuleLoader.AnimationInstances.FC_BracingBlockL
         end
 
     elseif trackData.type == "syncBlock" then
@@ -54,14 +51,14 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
                     -- error("Pick your lvl 3 sync block")
 
                 else
-                    if trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock1L.AnimationId then
-                        return AnimationInstances.FC_SyncBlock1LRECEIVER
-                    elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock1R.AnimationId then
-                        return AnimationInstances.FC_SyncBlock1RRECEIVER
-                    elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock2L.AnimationId then
-                        return AnimationInstances.FC_SyncBlock2LRECEIVER
-                    elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_SyncBlock2R.AnimationId then
-                        return AnimationInstances.FC_SyncBlock2RRECEIVER
+                    if trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_SyncBlock1L.AnimationId then
+                        return ModuleLoader.AnimationInstances.FC_SyncBlock1LRECEIVER
+                    elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_SyncBlock1R.AnimationId then
+                        return ModuleLoader.AnimationInstances.FC_SyncBlock1RRECEIVER
+                    elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_SyncBlock2L.AnimationId then
+                        return ModuleLoader.AnimationInstances.FC_SyncBlock2LRECEIVER
+                    elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_SyncBlock2R.AnimationId then
+                        return ModuleLoader.AnimationInstances.FC_SyncBlock2RRECEIVER
                     end
                 end
             -- end
@@ -76,37 +73,37 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
     
     elseif trackData.type == "Level1" then
 
-        if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftHook1.AnimationId or trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftJab.AnimationId then
-            return AnimationInstances.FC_LeftHook1RECEIVER
-        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftUppercut.AnimationId then
-            return AnimationInstances.FC_LeftUppercutRECEIVER
+        if trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_LeftHook1.AnimationId or trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_LeftJab.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_LeftHook1RECEIVER
+        elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_LeftUppercut.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_LeftUppercutRECEIVER
 
-        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightHook1.AnimationId or trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightJab.AnimationId then
-            return AnimationInstances.FC_RightHook1RECEIVER
-        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightUppercut.AnimationId then
-            return AnimationInstances.FC_RightUppercutRECEIVER
+        elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_RightHook1.AnimationId or trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_RightJab.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_RightHook1RECEIVER
+        elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_RightUppercut.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_RightUppercutRECEIVER
         end
     elseif trackData.type == "Level2" then
-        if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftHaymaker.AnimationId then
-            return AnimationInstances.FC_LeftHaymakerRECEIVER
-        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightHaymaker.AnimationId then
-            return AnimationInstances.FC_RightHaymakerRECEIVER
+        if trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_LeftHaymaker.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_LeftHaymakerRECEIVER
+        elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_RightHaymaker.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_RightHaymakerRECEIVER
         end
     elseif trackData.type == "Parry" then
         
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
             -- Perform a left parry
-            return AnimationInstances.FC_RightParry
+            return ModuleLoader.AnimationInstances.FC_RightParry
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
             -- Perform a right parry
-            return AnimationInstances.FC_LeftParry
+            return ModuleLoader.AnimationInstances.FC_LeftParry
         end
     elseif trackData.type == "gettingParried" then
         -- characterInstance.attackTrack:Stop()
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            return AnimationInstances.FC_LeftParryRECEIVER
+            return ModuleLoader.AnimationInstances.FC_LeftParryRECEIVER
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
-            return AnimationInstances.FC_RightParryRECEIVER
+            return ModuleLoader.AnimationInstances.FC_RightParryRECEIVER
         end
     elseif trackData.type == "dodgeAttack" then
 
@@ -117,11 +114,11 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
         end
         
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            return AnimationInstances.FC_LDodgeAttack1RECEIVER
+            return ModuleLoader.AnimationInstances.FC_LDodgeAttack1RECEIVER
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
-            return AnimationInstances.FC_RDodgeAttack1RECEIVER
+            return ModuleLoader.AnimationInstances.FC_RDodgeAttack1RECEIVER
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Back" then
-            return AnimationInstances.FC_BDodgeAttack1RECEIVER
+            return ModuleLoader.AnimationInstances.FC_BDodgeAttack1RECEIVER
         end
 
     elseif trackData.type == "counterAttack" then
@@ -133,44 +130,44 @@ local function getReceiveAnimation(characterInstance, trackData) --[[ Will retur
         end
 
         if trackData.attackerAnim:GetAttribute("AnimDirection") == "Left" then
-            if trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftCounter1.AnimationId then
-                return AnimationInstances.FC_LeftCounter1RECEIVER
+            if trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_LeftCounter1.AnimationId then
+                return ModuleLoader.AnimationInstances.FC_LeftCounter1RECEIVER
 
-            elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_LeftCounter2.AnimationId then
-                return AnimationInstances.FC_LeftCounter2RECEIVER
+            elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_LeftCounter2.AnimationId then
+                return ModuleLoader.AnimationInstances.FC_LeftCounter2RECEIVER
             end
         elseif trackData.attackerAnim:GetAttribute("AnimDirection") == "Right" then
-            if trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightCounter1.AnimationId then
-                return AnimationInstances.FC_RightCounter1RECEIVER
+            if trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_RightCounter1.AnimationId then
+                return ModuleLoader.AnimationInstances.FC_RightCounter1RECEIVER
 
-            elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_RightCounter2.AnimationId then
-                return AnimationInstances.FC_RightCounter2RECEIVER
+            elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_RightCounter2.AnimationId then
+                return ModuleLoader.AnimationInstances.FC_RightCounter2RECEIVER
             end
         end
     elseif trackData.type == "grabAttempt" then
-        return AnimationInstances.FC_GrabAttempt1RECEIVER
+        return ModuleLoader.AnimationInstances.FC_GrabAttempt1RECEIVER
     elseif trackData.type == "grabSuccess" then
-        return AnimationInstances.FC_GrabSuccess1RECEIVER
+        return ModuleLoader.AnimationInstances.FC_GrabSuccess1RECEIVER
     elseif trackData.type == "grabSecure" then
-        return AnimationInstances.FC_GrabSecure1RECEIVER
+        return ModuleLoader.AnimationInstances.FC_GrabSecure1RECEIVER
     elseif trackData.type == "grabAttack" then
 
-        if trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabAttack1.AnimationId then
-            return AnimationInstances.FC_GrabAttack1RECEIVER
-        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabAttack2.AnimationId then
-            return AnimationInstances.FC_GrabAttack2RECEIVER
-        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabAttack3.AnimationId then
-            return AnimationInstances.FC_GrabAttack3RECEIVER
+        if trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_GrabAttack1.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_GrabAttack1RECEIVER
+        elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_GrabAttack2.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_GrabAttack2RECEIVER
+        elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_GrabAttack3.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_GrabAttack3RECEIVER
         end
     
     elseif trackData.type == "repelGrab" then
-        return AnimationInstances.FC_EndGrab1RECEIVER
+        return ModuleLoader.AnimationInstances.FC_EndGrab1RECEIVER
     elseif trackData.type == "grabExecution" then
         
-        if trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabExecute1.AnimationId then
-            return AnimationInstances.FC_GrabExecute1RECEIVER
-        elseif trackData.attackerAnim.AnimationId == AnimationInstances.FC_GrabExecute2.AnimationId then
-            return AnimationInstances.FC_GrabExecute2RECEIVER
+        if trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_GrabExecute1.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_GrabExecute1RECEIVER
+        elseif trackData.attackerAnim.AnimationId == ModuleLoader.AnimationInstances.FC_GrabExecute2.AnimationId then
+            return ModuleLoader.AnimationInstances.FC_GrabExecute2RECEIVER
         end
 
     end
@@ -194,7 +191,7 @@ local function getDodgeInfo(characterInstance, trackData)
         distanceToTravel = 2
         animTime = 0.53
         vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
-        trackData.Animation = AnimationInstances.FC_RightDodge
+        trackData.Animation = ModuleLoader.AnimationInstances.FC_RightDodge
         direction = "Right"
 
         -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
@@ -204,7 +201,7 @@ local function getDodgeInfo(characterInstance, trackData)
         distanceToTravel = -2
         animTime = 0.53 
         vectorVelocity = Vector3.new(distanceToTravel / animTime, 0, 0)
-        trackData.Animation = AnimationInstances.FC_LeftDodge
+        trackData.Animation = ModuleLoader.AnimationInstances.FC_LeftDodge
         direction = "Left"
         
         -- we will also get dodge attack here to perform less calculations so we dont have to do it in BasicStriking
@@ -214,7 +211,7 @@ local function getDodgeInfo(characterInstance, trackData)
             distanceToTravel = 2
             animTime = 0.23
             vectorVelocity = Vector3.new(0, 0, distanceToTravel / animTime)
-            trackData.Animation = AnimationInstances.FC_BackDodge
+            trackData.Animation = ModuleLoader.AnimationInstances.FC_BackDodge
             direction = "Back"
         end
     end
@@ -285,14 +282,14 @@ local function setupReceiveAnimation(characterInstance, receivingType, attackerA
 
     -- lock us onto the attacker (if not done already): 
     if not characterInstance.lockOnDebounce.Value then
-        local attacker_characterInstance = characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
+        local attacker_characterInstance = ModuleLoader.characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
 
         characterInstance.raycastInstance = attacker_characterInstance.character.HumanoidRootPart
         characterInstance.enemyChar = characterInstance.raycastInstance:FindFirstAncestorWhichIsA("Model")
         
         characterInstance.enemyHumanoid = characterInstance.enemyChar:WaitForChild("Humanoid")
         characterInstance.enemyHumanoidRootPart = characterInstance.enemyChar.HumanoidRootPart
-        if not characterInstance.lockOnRayParams then characterInstance.lockOnRayParams = utilities.initializeLockOnRayParams(characterInstance) end
+        if not characterInstance.lockOnRayParams then characterInstance.lockOnRayParams = ModuleLoader.utilities.initializeLockOnRayParams(characterInstance) end
         
         characterInstance.lockOnDebounce.Value = true
     end
@@ -317,6 +314,10 @@ local function playReceivingTrack(characterInstance, trackData) --[[ After we de
 end
 
 -- Mitigation methods:
+
+function Character_Receive.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+end
 
 function Character_Receive:bracingBlock(attacker_characterInstance) --[[ Block an enemy attack with a shell guard ]]
     

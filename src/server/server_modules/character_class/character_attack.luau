@@ -2,20 +2,18 @@
 local Character_Attack = {}
 Character_Attack.__index = Character_Attack
 
-local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
-
-local attackType -- When we call an attack function (such as :level1()), we will set this variable to whatever attack that was, such as "level1". This will change with each attack. Then we will set it to nil after detection so it doesn't trip an unwanted attack in the future.
+local ModuleLoader
 
 local function getAnimation(characterInstance, trackData, attacker_characterInstance) --[[ Returns a randomly-chosen animation with the given data about what our animation is planned to be (trackData). Level 3 attacks may need the enemy's characterInstance to see what attack they're doing before getting our own ]]
     if trackData.attackLvl == 1 then
         
         if not characterInstance.currentAttack_trackData then
-            return characterInstance.randomAnimation(AnimationInstances, {AttackSeries = characterInstance.AttackSeries})
+            return characterInstance.randomAnimation(ModuleLoader.AnimationInstances.animations, {AttackSeries = characterInstance.AttackSeries})
         else
             local sameAttackChance = math.random(1, 100)
             if sameAttackChance > 10 or characterInstance.currentAttack_trackData.AttackSeries == "Uppercuts" then
                 -- opposite attack of the same attack type
-                for _, v in pairs(AnimationInstances) do
+                for _, v in pairs(ModuleLoader.AnimationInstances.animations) do
                     if v.AnimationId ~= characterInstance.currentAttack_trackData.AnimationId and v:GetAttribute("AttackSeries") == characterInstance.AttackSeries then
                         return v
                         -- warn("Random attack track found.")
@@ -31,30 +29,30 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
     
     elseif trackData.attackLvl == 2 then
 
-        return characterInstance.randomAnimation(AnimationInstances, {AttackLevel = 2})
+        return characterInstance.randomAnimation(ModuleLoader.AnimationInstances.animations, {AttackLevel = 2})
 
     elseif trackData.attackLvl == 3 then
 
         if not attacker_characterInstance then return warn("You forgot to add the enemy's character instance to this function call") end
         
         
-        if attackType == "DodgeAttack" then
-            attackType = nil
+        if Character_Attack.attackType == "DodgeAttack" then
+            Character_Attack.attackType = nil
 
-            return characterInstance.randomAnimation(AnimationInstances, {DodgeAttack = true, AnimDirection = characterInstance.lastReceiveData.Animation:GetAttribute("AnimDirection"), AnimType = 1})
+            return characterInstance.randomAnimation(ModuleLoader.AnimationInstances.animations, {DodgeAttack = true, AnimDirection = characterInstance.lastReceiveData.Animation:GetAttribute("AnimDirection"), AnimType = 1})
 
-        elseif attackType == "CounterAttack" then
-            attackType = nil
+        elseif Character_Attack.attackType == "CounterAttack" then
+            Character_Attack.attackType = nil
             if attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AnimDirection") == "Left" then
-                return characterInstance.randomAnimation(AnimationInstances, {AnimDirection = "Left", Counter = true})
+                return characterInstance.randomAnimation(ModuleLoader.AnimationInstances.animations, {AnimDirection = "Left", Counter = true})
             elseif attacker_characterInstance.currentAttack_trackData.Animation:GetAttribute("AnimDirection") == "Right" then
-                return characterInstance.randomAnimation(AnimationInstances, {AnimDirection = "Right", Counter = true})
+                return characterInstance.randomAnimation(ModuleLoader.AnimationInstances.animations, {AnimDirection = "Right", Counter = true})
             end
 
             return warn("No left or right counterattack track found!") -- If we get to this point, then something went wrong
         
-        elseif attackType == "SyncBlock" then -- For sync blocks, may need to change this in the future when we start using pairedPlaying more.
-            attackType = nil
+        elseif Character_Attack.attackType == "SyncBlock" then -- For sync blocks, may need to change this in the future when we start using pairedPlaying more.
+            Character_Attack.attackType = nil
 
             if (characterInstance.didFollowUp) or (characterInstance.comboCounter and characterInstance.comboCounter > 1) or (characterInstance.lastReceiveData and characterInstance.lastReceiveData.Animation:GetAttribute("SyncBlockFinisher") and characterInstance.lastReceiveData.IsPlaying) then
                 -- if characterInstance.pairedAttack and characterInstance.pairedAttack.IsPlaying then -- runs for the attacker
@@ -65,23 +63,23 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
                         -- This should be managed by the enemyInstance so they can have a lvl 3 receive attack of their own custom.
                         if attacker_characterInstance.animPair and attacker_characterInstance.animPair[1] == 1 then
                             if attacker_characterInstance.animPair and attacker_characterInstance.animPair[2] == 1 then
-                                attacker_characterInstance.pairedReceive = AnimationInstances.FC_SyncBlock3L1RECEIVER
-                                return AnimationInstances.FC_SyncBlock3L1
+                                attacker_characterInstance.pairedReceive = ModuleLoader.AnimationInstances.FC_SyncBlock3L1RECEIVER
+                                return ModuleLoader.AnimationInstances.FC_SyncBlock3L1
 
                             elseif attacker_characterInstance.animPair and attacker_characterInstance.animPair[2] == 2 then
-                                attacker_characterInstance.pairedReceive = AnimationInstances.FC_SyncBlock3L2RECEIVER
-                                return AnimationInstances.FC_SyncBlock3L2
+                                attacker_characterInstance.pairedReceive = ModuleLoader.AnimationInstances.FC_SyncBlock3L2RECEIVER
+                                return ModuleLoader.AnimationInstances.FC_SyncBlock3L2
                             end
                         
                             elseif attacker_characterInstance.animPair and attacker_characterInstance.animPair[1] == 2 then
                             
                             if attacker_characterInstance.animPair and attacker_characterInstance.animPair[2] == 1 then
-                                attacker_characterInstance.pairedReceive = AnimationInstances.FC_SyncBlock3R1RECEIVER
-                                return AnimationInstances.FC_SyncBlock3R1
+                                attacker_characterInstance.pairedReceive = ModuleLoader.AnimationInstances.FC_SyncBlock3R1RECEIVER
+                                return ModuleLoader.AnimationInstances.FC_SyncBlock3R1
 
                             elseif attacker_characterInstance.animPair and attacker_characterInstance.animPair[2] == 2 then
-                                attacker_characterInstance.pairedReceive = AnimationInstances.FC_SyncBlock3R2RECEIVER
-                                return AnimationInstances.FC_SyncBlock3R2
+                                attacker_characterInstance.pairedReceive = ModuleLoader.AnimationInstances.FC_SyncBlock3R2RECEIVER
+                                return ModuleLoader.AnimationInstances.FC_SyncBlock3R2
                             end
                         end
 
@@ -90,14 +88,14 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
                         error("Enemy didnt pick ther")
                         
                     else
-                        if characterInstance.lastAttackData.Animation.AnimationId == AnimationInstances.FC_SyncBlock1L.AnimationId then
-                            return AnimationInstances.FC_SyncBlock1R
-                        elseif characterInstance.lastAttackData.Animation.AnimationId == AnimationInstances.FC_SyncBlock1R.AnimationId then
-                            return AnimationInstances.FC_SyncBlock1L
-                        elseif characterInstance.lastAttackData.Animation.AnimationId == AnimationInstances.FC_SyncBlock2L.AnimationId then
-                            return AnimationInstances.FC_SyncBlock2R
-                        elseif characterInstance.lastAttackData.Animation.AnimationId == AnimationInstances.FC_SyncBlock2R.AnimationId then
-                            return AnimationInstances.FC_SyncBlock2L
+                        if characterInstance.lastAttackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_SyncBlock1L.AnimationId then
+                            return ModuleLoader.AnimationInstances.FC_SyncBlock1R
+                        elseif characterInstance.lastAttackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_SyncBlock1R.AnimationId then
+                            return ModuleLoader.AnimationInstances.FC_SyncBlock1L
+                        elseif characterInstance.lastAttackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_SyncBlock2L.AnimationId then
+                            return ModuleLoader.AnimationInstances.FC_SyncBlock2R
+                        elseif characterInstance.lastAttackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_SyncBlock2R.AnimationId then
+                            return ModuleLoader.AnimationInstances.FC_SyncBlock2L
                         end
                         return error("No animation found based on last attack track:", characterInstance.lastAttackData)
                     end
@@ -107,19 +105,19 @@ local function getAnimation(characterInstance, trackData, attacker_characterInst
 
                 if (characterInstance.animPair and characterInstance.animPair[1] == 1) or (characterInstance.animPair and characterInstance.animPair[1] == 1) then
                     if (characterInstance.animPair and characterInstance.animPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then
-                        return AnimationInstances.FC_SyncBlock1L
+                        return ModuleLoader.AnimationInstances.FC_SyncBlock1L
                         -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock1LRECEIVER
                     elseif (characterInstance.animPair and characterInstance.animPair[2] == 2) or (characterInstance.animPair and characterInstance.animPair[2] == 2) then
-                        return AnimationInstances.FC_SyncBlock2L
+                        return ModuleLoader.AnimationInstances.FC_SyncBlock2L
                         -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock2LRECEIVER
                     end
                 
                 elseif (characterInstance.animPair and characterInstance.animPair[1] == 2) or (characterInstance.animPair and characterInstance.animPair[1] == 2) then
                     if (characterInstance.animPair and characterInstance.animPair[2] == 1) or (characterInstance.animPair and characterInstance.animPair[2] == 1) then
-                        return AnimationInstances.FC_SyncBlock1R
+                        return ModuleLoader.AnimationInstances.FC_SyncBlock1R
                         -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock1RRECEIVER
                     elseif (characterInstance.animPair and characterInstance.animPair[2] == 2) or (characterInstance.animPair and characterInstance.animPair[2] == 2) then
-                        return AnimationInstances.FC_SyncBlock2R
+                        return ModuleLoader.AnimationInstances.FC_SyncBlock2R
                         -- characterInstance.pairedBlock = AnimationInstances.FC_SyncBlock2RRECEIVER
                     end
                 end
@@ -133,7 +131,7 @@ end
 local function setupTrackData(attackLvl) --[[ Because tracks are played on the client, we kinda just have to replicate the attributes of the track when forming the animation here on the server. ]]
     local trackData = {
         attackLvl = attackLvl,
-        type = attackType
+        type = Character_Attack.attackType
         }
 
     if attackLvl == 1 or attackLvl == 2 then
@@ -218,6 +216,12 @@ end
 -- local attack1_waitTime = 0.45/0.60
 -- local attack2_waitTime = 1
 
+function Character_Attack.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+
+    Character_Attack.attackType = nil -- When we call an attack function (such as :level1()), we will set this variable to whatever attack that was, such as "level1". This will change with each attack. Then we will set it to nil after detection so it doesn't trip an unwanted attack in the future.
+end
+
 function Character_Attack:level1() --[[ Throw a level 1 attack, such as a jab or hook ]]
     
     -- Getting an animation ready on the client to play:
@@ -243,7 +247,7 @@ end
 
 function Character_Attack:syncBlock(attacker_characterInstance) --[[ Attack an enemy holding their block, resulting in a syncronization of clashing attacks & blocks. ]]
     
-    attackType = "SyncBlock"
+    Character_Attack.attackType = "SyncBlock"
 
     if self.characterInstance.pairedChain <= (self.characterInstance.pairedChainMAX * self.characterInstance.finalStatValues.pairedChainMAX.Value) and self.characterInstance.canSyncBlock then
         self.characterInstance.pairedChain += 1
@@ -289,7 +293,7 @@ function Character_Attack:counterAttack(attacker_characterInstance) --[[ Perform
     
     -- local attackerAnim = attacker_characterInstance.currentAttack
 
-    attackType = "CounterAttack"
+    Character_Attack.attackType = "CounterAttack"
 
     self.characterInstance.isCountering = true
     -- attacker_characterInstance.currentReceiveAnimTRACK = nil -- So they don't play their previous animation on accident for the counter receive.
@@ -311,7 +315,7 @@ end
 
 function Character_Attack:dodgeAttack(attacker_characterInstance) --[[ Attempt to evade the attack of the enemy, leaving them open. ]]
     
-    attackType = "DodgeAttack"
+    Character_Attack.attackType = "DodgeAttack"
 
     local trackData = setupAttackAnimation(3, self.characterInstance, attacker_characterInstance)
 
@@ -319,7 +323,7 @@ function Character_Attack:dodgeAttack(attacker_characterInstance) --[[ Attempt t
         self.characterInstance.repositionInFrontOfEnemy() -- We dont reposition for left dodge attack cause it makes it not as cool for some reason
     -- end
     
-    if trackData.Animation.AnimationId == AnimationInstances.FC_LDodgeAttack1.AnimationId then
+    if trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_LDodgeAttack1.AnimationId then
         
         -- self.characterInstance.setCharacterCFrame(self.characterInstance.character, self.characterInstance.humanoidRootPart.CFrame * CFrame.new(2 , 0, 0))
         self.characterInstance.humanoidRootPart.CFrame = self.characterInstance.humanoidRootPart.CFrame * CFrame.new(-2, 0, 0)
@@ -329,7 +333,7 @@ function Character_Attack:dodgeAttack(attacker_characterInstance) --[[ Attempt t
         local travelTime = 0.14/0.60
         self.characterInstance:setLinearVelocity(Vector3.new(moveDistanceX/travelTime, 0, moveDistanceZ/travelTime), travelTime)
     
-    elseif trackData.Animation.AnimationId == AnimationInstances.FC_RDodgeAttack1.AnimationId then
+    elseif trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_RDodgeAttack1.AnimationId then
     
         local moveDistance = 2.5
         local travelTime = 0.26/0.60

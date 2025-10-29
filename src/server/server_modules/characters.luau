@@ -8,7 +8,13 @@
 
 ]]
 
+local ModuleLoader
+
 local Characters = {}
+
+function Characters.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+end
 
 function Characters:GetCharacterObjectByPlayer(plr) --[[ Method that gets a character based off an assigned player. WIll return nil otherwise. ]]
     
@@ -21,7 +27,7 @@ function Characters:GetCharacterObjectByPlayer(plr) --[[ Method that gets a char
             return potentialCharacterInstance
         end
     end
-    warn("No characterInstance found with the given player: ".. tostring(plr), self)
+    -- warn("No characterInstance found with the given player: ".. tostring(plr), self)
     return nil
 end
 

@@ -11,43 +11,60 @@
 ]]
 
 -- modules
-local character_init = require(game.ReplicatedStorage.Shared.character_class.character_init)
-local character_attack = require(game.ReplicatedStorage.Shared.character_class.character_attack) -- contains the attack functions and what not
-local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
-local character_grapple = require(game.ReplicatedStorage.Shared.character_class.character_grapple)
-local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
-local character_hitboxes = require(game.ReplicatedStorage.Shared.character_class.character_hitboxes)
-local character_ragdoll = require(game.ReplicatedStorage.Shared.character_class.character_ragdoll)
+local ModuleLoader
 
-local Attack_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.attack_animation_manager)
-local Receive_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.receive_animation_manager)
-local Misc_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.misc_animation_manager)
+-- -- local character_init = require(game.ReplicatedStorage.Shared.character_class.character_init)
+-- -- local character_attack = require(game.ReplicatedStorage.Shared.character_class.character_attack) -- contains the attack functions and what not
+-- -- local character_block = require(game.ReplicatedStorage.Shared.character_class.character_block)
+-- -- local character_grapple = require(game.ReplicatedStorage.Shared.character_class.character_grapple)
+-- -- local character_receive = require(game.ReplicatedStorage.Shared.character_class.character_receive)
+-- -- local character_hitboxes = require(game.ReplicatedStorage.Shared.character_class.character_hitboxes)
+-- -- local character_ragdoll = require(game.ReplicatedStorage.Shared.character_class.character_ragdoll)
 
-local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+-- -- local Attack_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.attack_animation_manager)
+-- -- local Receive_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.receive_animation_manager)
+-- -- local Misc_Animation_Manager = require(game.ReplicatedStorage.Shared.server_modules.animation_management.misc_animation_manager)
+
+-- local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+
 local Character = {}
 Character.__index = Character
 
+function Character.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
 
--- Create a table that stores IDs for players so we can referance them.
-local available_character_id_table = {} -- Table of usable character IDs
-local id_amount = game.Players.MaxPlayers
+    -- Create a table that stores IDs for players so we can referance them.
+    Character.available_character_id_table = {} -- Table of usable character IDs
+    Character.id_amount = game.Players.MaxPlayers
+    
+    for id = 0, Character.id_amount do -- DOESN'T ACCOUNT FOR NPCS. NEEDS MODIFIED.
+        table.insert(Character.available_character_id_table, id)
+    end
 
-for id = 0, id_amount do -- DOESN'T ACCOUNT FOR NPCS. NEEDS MODIFIED.
-    table.insert(available_character_id_table, id)
+    ModuleLoader.character_attack.init()
+    ModuleLoader.character_block.init()
+    ModuleLoader.character_grapple.init()
+    ModuleLoader.character_receive.init()
+    ModuleLoader.character_ragdoll.init()
+    ModuleLoader.character_hitboxes.init()
+
+    ModuleLoader.attack_animation_manager.init()
+    ModuleLoader.receive_animation_manager.init()
+    ModuleLoader.misc_animation_manager.init()
 end
 
+
 local function getNextId() --[[ Local function that will get an available ID, remove it from the available pool and return it. Should only be used when storing an ID somewhere, otherwise we lose that ID. ]]
-    local i, charId = next(available_character_id_table)
+    local i, charId = next(Character.available_character_id_table)
 
     if charId ~= nil then
-        print("Table of avaliable IDs.. ", available_character_id_table, "Current ID: " .. tostring(charId))
-        table.remove(available_character_id_table, i)
+        table.remove(Character.available_character_id_table, i)
     else -- The available IDs table somehow ran out of values. This shouldn't happen.
-        for id = id_amount, id_amount * 2 do -- create a new set of IDs following after the initial set
-            table.insert(available_character_id_table, id)
+        for id = Character.id_amount, Character.id_amount * 2 do -- create a new set of IDs following after the initial set
+            table.insert(Character.available_character_id_table, id)
         end
-        id_amount *= 2 -- permanently increase the id_amount in case this happens again.
-        charId = next(available_character_id_table)
+        Character.id_amount *= 2 -- permanently increase the id_amount in case this happens again.
+        charId = next(Character.available_character_id_table)
     end
     return charId
 end
@@ -66,23 +83,23 @@ function Character.new(charModel, data) --[[ Constructor function that will crea
     end)() -- <- Immediately call the function since this 'or' statement returns the actual function. It never runs until we call it like we do here.
     charModel.Parent = characterInstancesFolder
 
-    local self = setmetatable(character_init.init(charModel, data), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
+    local self = setmetatable(ModuleLoader.character_init.init(charModel, data), Character) -- Setting the metatable to Character gives it access to inheritance for methods and functions.
     -- while not self.initialized do task.wait() end
     
     self.character:SetAttribute("id", getNextId())
     self.id = self.character:GetAttribute("id")
 
-    self.character_attack = setmetatable({}, { __index = character_attack })
-    self.character_block = setmetatable({}, { __index = character_block })
-    self.character_grapple = setmetatable({}, { __index = character_grapple })
-    self.character_receive = setmetatable({}, { __index = character_receive })
+    self.character_attack = setmetatable({}, { __index = ModuleLoader.character_attack })
+    self.character_block = setmetatable({}, { __index = ModuleLoader.character_block })
+    self.character_grapple = setmetatable({}, { __index = ModuleLoader.character_grapple })
+    self.character_receive = setmetatable({}, { __index = ModuleLoader.character_receive })
     
-    self.attack_animation_manager = setmetatable({}, { __index = Attack_Animation_Manager})
-    self.receive_animation_manager = setmetatable({}, { __index = Receive_Animation_Manager})
-    self.misc_animation_manager = setmetatable({}, { __index = Misc_Animation_Manager })
+    self.attack_animation_manager = setmetatable({}, { __index = ModuleLoader.attack_animation_manager})
+    self.receive_animation_manager = setmetatable({}, { __index = ModuleLoader.receive_animation_manager})
+    self.misc_animation_manager = setmetatable({}, { __index = ModuleLoader.misc_animation_manager })
 
-    self.character_hitboxes = setmetatable({}, { __index = character_hitboxes })
-    self.character_ragdoll = setmetatable({}, { __index = character_ragdoll })
+    self.character_hitboxes = setmetatable({}, { __index = ModuleLoader.character_hitboxes })
+    self.character_ragdoll = setmetatable({}, { __index = ModuleLoader.character_ragdoll })
 
     -- assign the Character instance to the other modules:
 
@@ -101,7 +118,7 @@ function Character.new(charModel, data) --[[ Constructor function that will crea
     self.character_hitboxes.characterInstance = self
     self.character_ragdoll.characterInstance = self
 
-    characters[self.id] = self
+    ModuleLoader.characters[self.id] = self
 
     self.character_hitboxes:manageHitboxes()
     self.character_ragdoll:InitializeCharacter()
@@ -119,7 +136,7 @@ end
 -- end
 
 function Character:erase() --[[ Method that will delete the Character object to free up data and prevent memory leaks. ]]
-    characters[self.id] = nil
+    ModuleLoader.characters[self.id] = nil
     self = nil
 end
 
@@ -144,7 +161,7 @@ function Character:basicAttack(enemyInstance) --[[ The character will do some so
         enemyInstance:receive("syncBlock", self)
     elseif self.isGettingHit then
         return false
-    elseif characters:GetCharacterObjectByCharacter(self.enemyChar) and characters:GetCharacterObjectByCharacter(self.enemyChar).isDodging ~= true and not self.isGrappling then -- gets the public canAttack of the player and makes sure its true before attacking
+    elseif ModuleLoader.characters:GetCharacterObjectByCharacter(self.enemyChar) and ModuleLoader.characters:GetCharacterObjectByCharacter(self.enemyChar).isDodging ~= true and not self.isGrappling then -- gets the public canAttack of the player and makes sure its true before attacking
 
         -- also if they are even further than 3 studs then we can implement a running-ish punch (like in RDR2)
         -- move character closer to enemy if they are a bit too far

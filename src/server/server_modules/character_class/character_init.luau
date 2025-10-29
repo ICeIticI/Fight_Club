@@ -1,11 +1,7 @@
 local Character_Init = {}
 Character_Init.__index = Character_Init
 
-local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
-local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
-local Animation_Centric = require(game.ReplicatedStorage.Shared.animation_centric)
-local ragdollFunction = require(game.ReplicatedStorage.Shared.ragdollFunction)
-local utilities = require(game.ReplicatedStorage.Shared.utilities)
+local ModuleLoader
 
 local function createHitbox(bodyPart, characterInstance) --[[ Function that will create a hitbox of a given part for a given player ]]
 
@@ -69,6 +65,8 @@ local function createBaseValue(characterInstance, name, value)
 end
 
 function Character_Init.init(charModel, data)
+	
+	ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
 
 	while not charModel.Humanoid do task.wait() end -- makes sure the humanoid gets created before going through with the init
     local characterInstance = {}
@@ -110,7 +108,7 @@ function Character_Init.init(charModel, data)
 
 	characterInstance.finalStatValues = {}
 	for _, baseValue in pairs(characterInstance.statMultipliers:GetChildren()) do
-		characterInstance.finalStatValues[string.gsub(baseValue.Name, "_Multiplier", "")] = createBaseValue(characterInstance, string.gsub(baseValue.Name, "_Multiplier", ""), utilities.multiplyTableValuesTogether(baseValue:GetAttributes()))
+		characterInstance.finalStatValues[string.gsub(baseValue.Name, "_Multiplier", "")] = createBaseValue(characterInstance, string.gsub(baseValue.Name, "_Multiplier", ""), ModuleLoader.utilities.multiplyTableValuesTogether(baseValue:GetAttributes()))
 	end
 
 	characterInstance.proxyTable_finalStatValues = {} -- Everytime a stat gets changed, we'll apply it to the character via proxy table, since there are no metamethods for updating an existing value
@@ -156,7 +154,7 @@ function Character_Init.init(charModel, data)
 				
 				rawset(t, i, v)
 
-				local isAttacking = characters:GetCharacterObjectById(i).isAttacking
+				local isAttacking = ModuleLoader.characters:GetCharacterObjectById(i).isAttacking
 				connects.isAttackingConnect = isAttacking:GetPropertyChangedSignal("Value"):Connect(function()
 					rawset(t, i, nil)
 				end)
@@ -328,7 +326,6 @@ function Character_Init.init(charModel, data)
 		for i, v in pairs(boolTable) do
 			if v == true then
 				table.insert(trueBoolTbl, v)
-				warn("boolCheck failed for " .. tostring(characterInstance.character.Name) .. ": " .. tostring(i) .. " is true.")
 			end
 		end
 
@@ -687,8 +684,7 @@ function Character_Init.init(charModel, data)
 			characterInstance.reset()
 			characterInstance:block(false)
 		end
-		print("sending lock-on signal")
-		utilities.sendLockOnSignal(characterInstance)
+		ModuleLoader.utilities.sendLockOnSignal(characterInstance)
 
 	end)
 
@@ -698,7 +694,7 @@ function Character_Init.init(charModel, data)
 	connects.DiedConnection = characterInstance.humanoid.Died:Connect(function()
 
 		if characterInstance.attackingChar and game.Players:GetPlayerFromCharacter(characterInstance.attackingChar) then
-			local killerInstance = characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
+			local killerInstance = ModuleLoader.characters:GetCharacterObjectByCharacter(characterInstance.attackingChar)
 			
 			killerInstance.player.leaderstats.Tokens.Value += 2
 			killerInstance.player.leaderstats.Takedowns.Value += 1
@@ -787,7 +783,7 @@ function Character_Init.init(charModel, data)
 			if characterInstance.humanoidRootPart.CFrame.Y < ragdollYPos then
 				characterInstance.lockOnDebounce.Value = false
 				characterInstance.humanoid.PlatformStand = true
-				ragdollFunction.ragdoll(characterInstance.character, characterInstance.id, true)
+				ModuleLoader.ragdollFunction.ragdoll(characterInstance.character, characterInstance.id, true)
 			end
 			if characterInstance.humanoidRootPart.CFrame.Y < deathYPos then
 				characterInstance.humanoid.PlatformStand = false
@@ -801,8 +797,8 @@ function Character_Init.init(charModel, data)
 	-- Putting animations into tables to easily pull from them when needed without having a bunch of attributes for each animation for distinction:
 	-- AT stands for Animation Table
 
-	characterInstance.AT_GrabAttacks = {AnimationInstances.FC_GrabAttack1, AnimationInstances.FC_GrabAttack2, AnimationInstances.FC_GrabAttack3}
-	characterInstance.AT_GrabExecutions = {AnimationInstances.FC_GrabExecute1, AnimationInstances.FC_GrabExecute2}
+	characterInstance.AT_GrabAttacks = {ModuleLoader.AnimationInstances.FC_GrabAttack1, ModuleLoader.AnimationInstances.FC_GrabAttack2, ModuleLoader.AnimationInstances.FC_GrabAttack3}
+	characterInstance.AT_GrabExecutions = {ModuleLoader.AnimationInstances.FC_GrabExecute1, ModuleLoader.AnimationInstances.FC_GrabExecute2}
 
 	
 	if characterInstance.player ~= nil then
@@ -810,7 +806,7 @@ function Character_Init.init(charModel, data)
 			characterInstance.GlobalRemoteFunction:InvokeClient(characterInstance.player, "createAnimationTracks")
 		end)
 	else -- not a player. We wanna create animations on server
-		Animation_Centric.initialize_animations(Character_Init)
+		ModuleLoader.animation_centric.initialize_animations(Character_Init)
 	end
 
 

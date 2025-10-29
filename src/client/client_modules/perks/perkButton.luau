@@ -64,7 +64,6 @@ function PerkButton.FindPerkByName(name)
         end
     end
 
-    warn(PerkButton.instances)
     return warn("No perk found with the given name: " .. tostring(name))
 end
 

@@ -1,5 +1,3 @@
-local Characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
-
 local Character_Hitboxes = {}
 Character_Hitboxes.__index = Character_Hitboxes
 
@@ -79,8 +77,14 @@ local function attackHandler(attacker_characterInstance, receiver_characterInsta
 end
 
 
+local ModuleLoader
+
 local potentialEnemyChar -- when attacking and hit something, this will store what could potentially be a character, if any.
 local potentialEnemyInstance -- if the potentialEnemyChar is in fact a character and has a characterInstance
+
+function Character_Hitboxes.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+end
 
 function Character_Hitboxes:manageHitboxes()
     for _, v in pairs(self.characterInstance.attackHitboxes) do
@@ -91,7 +95,7 @@ function Character_Hitboxes:manageHitboxes()
             
             if self.characterInstance.isAttacking.Value then -- Begin checling for potentialEnemy stuff only if we're attacking, otherwise it'll check for every single .Touched no matter the circumstance, which is very processing.
                 potentialEnemyChar = touchedObject:FindFirstAncestorWhichIsA("Model")
-                potentialEnemyInstance = Characters:GetCharacterObjectByCharacter(potentialEnemyChar)
+                potentialEnemyInstance = ModuleLoader.characters:GetCharacterObjectByCharacter(potentialEnemyChar)
                 
                 -- print(
                 --     self.characterInstance.isAttacking.Value ,
@@ -150,7 +154,6 @@ function Character_Hitboxes:manageHitboxes()
 
         self.characterInstance.humanoid.Died:Connect(function()
             touchedConnection:Disconnect()
-            print("disconnecting connection")
         end)
     end
 end

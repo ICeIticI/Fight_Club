@@ -1,4 +1,4 @@
-local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
+local ModuleLoader
 
 local Misc_Animation_Management = {}
 
@@ -7,47 +7,10 @@ local function runOnIsBlocking(characterInstance) --[[ Simulates when the isBloc
     characterInstance.isBlocking = true
 end
 
--- Stamina management:
 
--- local drainRate = 1 -- how much stamina gets drained per wait()
--- local regenRate = 1 -- how much stamina gets regenerated per wait()
-
-
--- local blockCost = 5
--- local isRegening = false -- Gets set to true when the character's stamina is regenerating, so it doesn't stack
-
--- local function regenStamina(characterInstance) --[[ Will regenerate stamina, if not doing so already. ]]
---     if not isRegening then
---         isRegening = true
---         while (not characterInstance.BlockStartAnimPlaying and not characterInstance.holdingBlock) and characterInstance.stamina.Value < 100 do
---             characterInstance.stamina.Value += regenRate
---             -- staminaBar.Size = UDim2.new(staminaBar.Size.X.Scale, staminaBar.Size.X.Offset, self.characterInstance.stamina/100 * staminaFrameLabel.Size.Y.Scale, staminaBar.Size.Y.Offset)
---             task.wait(0.1)
---         end
---         isRegening = false
---     end
--- end
-
--- local function drainStamina(characterInstance, trackData) --[[ Function that will drain stamina, depending on whether or not they're blocking in some way. ]]
---     if trackData.AnimationId == AnimationInstances.FC_BlockStart.AnimationId then
---         -- On block start, we just take a one-time chunk of stamina
---         if characterInstance.stamina.Value - blockCost >= 0 then -- If a block occurs when they have less then 10 stamina, then the size of the green bar will not disappear but keep going
---             characterInstance.stamina.Value -= blockCost
---         else
---             characterInstance.stamina.Value = 0
---         end
-
---     elseif trackData.AnimationId == AnimationInstances.FC_Block.AnimationId then
---         -- On holding block, we continuously drain their stamina until they stop blocking
---         while characterInstance.holdingBlock and characterInstance.stamina.Value > 0 do
---             characterInstance.stamina.Value -= drainRate
---             task.wait(0.1)
---         end
---         characterInstance:block(false)
---     end
--- end
-
-
+function Misc_Animation_Management.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+end
 
 function Misc_Animation_Management:runOnIsPlaying(trackData)
 
@@ -78,7 +41,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
         end
 
         
-        if trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
+        if trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_RightParry.AnimationId then
             -- Parry animation started playing
             task.spawn(function() -- likely will cause delay if not in place
                 self.characterInstance:block(false)
@@ -91,10 +54,10 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             self.characterInstance.comboCounter = 3 -- Player can do a haymaker attack following a parry
             self.characterInstance.followUpCount = 1 -- for followup attacks, followUpCount must be > 1, so attacking will increase it (to 2), making it pass the > 1 check.
 
-        elseif trackData.Animation.AnimationId == AnimationInstances.FC_BlockStart.AnimationId then
+        elseif trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_BlockStart.AnimationId then
             -- drainStamina(self.characterInstance, trackData)
 
-        elseif trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId then
+        elseif trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_Block.AnimationId then
             
             self.characterInstance.holdingBlock = true
             
@@ -116,7 +79,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
         
     elseif not trackData.IsPlaying then
 
-        if trackData.Animation.AnimationId == AnimationInstances.FC_BlockStart.AnimationId then
+        if trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_BlockStart.AnimationId then
 
             -- Play the looping version of the blocking animation when block start animation ends
             -- warn("play loop")
@@ -135,7 +98,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             task.wait(0.2)
             -- regenStamina(self.characterInstance)
             
-        elseif trackData.Animation.AnimationId == AnimationInstances.FC_Block.AnimationId or trackData.Animation:GetAttribute("SyncBlockFinisher") then
+        elseif trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_Block.AnimationId or trackData.Animation:GetAttribute("SyncBlockFinisher") then
             self.characterInstance.holdingBlock = false
             -- regenStamina(self.characterInstance)
         
@@ -143,7 +106,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
             -- self.characterInstance.GlobalRemoteEvent:FireServer(self.characterInstance.enemyChar, self.characterInstance.Protocol, nil, nil, self.characterInstance.isBlocking, nil, false)
 
 
-        elseif trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
+        elseif trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_RightParry.AnimationId then
             -- Parry animation stopped playing
             -- self.characterInstance.isAttacking.Value = false
             
@@ -165,7 +128,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
                 self.characterInstance.SetSpeed(true)
             end
 
-        elseif trackData.Animation.AnimationId == AnimationInstances.FC_LeftParryRECEIVER.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParryRECEIVER.AnimationId then
+        elseif trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_LeftParryRECEIVER.AnimationId or trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_RightParryRECEIVER.AnimationId then
             -- Parry receiver animation stopped playing
             self.characterInstance.canFollowUp = false
             task.wait(0.4)
@@ -179,7 +142,7 @@ function Misc_Animation_Management:runOnIsPlaying(trackData)
         -- runs regardless of the receive type when they stop playing:
 
         -- This will run for the end for every misc animation thats not a parry:
-        if not trackData.Animation.AnimationId == AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == AnimationInstances.FC_RightParry.AnimationId then
+        if not trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_LeftParry.AnimationId or trackData.Animation.AnimationId == ModuleLoader.AnimationInstances.FC_RightParry.AnimationId then
             
             self.characterInstance.isAttacking.Value = false
             -- self.characterInstance.hitDebounce = false

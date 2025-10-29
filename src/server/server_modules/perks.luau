@@ -1,10 +1,8 @@
-local utilities = require(game.ReplicatedStorage.Shared.utilities)
+local ModuleLoader
 
-local perksFolder = Instance.new("Folder")
-perksFolder.Name = "perksFolder"
-perksFolder.Parent = game.ReplicatedStorage
+local perksFolder
 
-local GlobalBindableEvent = game.ReplicatedStorage:WaitForChild("GlobalBindableEvent")
+local GlobalBindableEvent
 
 local function newPerk(name, description, modifierTable, cost, killsRequired, productId)
 
@@ -33,26 +31,37 @@ end
 
 local Perks = {}
 
-local basePrice = 100 -- alot of perks will start out at this number, but when you buy a perk, the baseprice will increase, so it will be another 10 tokens for each
-local intermediatePrice = 200
+function Perks.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
 
-local activePerks = {
-    newPerk("Iron Fists", "Increases attack damage", {A1Damage = 1.2, A2Damage = 1.2, syncBlockDamage = 1.2, counterAttackDamage = 1.2}, basePrice, 20, 3382902336),
-    newPerk("Meat Head", "Increases health", {MaxHealth = 1.25}, basePrice, 35, 3382903295),
-    newPerk("Unbreakable", "Increases block absorption", {BlockAbsorption = 1.35}, basePrice, 45, 3382904079),
-    newPerk("Cardiosaurus Rex", "Decreases stamina degradation", {staminaDrainRate = 0.5}, basePrice, 60, 3382905392),
-    newPerk("Full-Auto", "Increases attack speed", {attackSpeed = 1.25}, basePrice, 75, 3382906629),
-    newPerk("Retaliation Specialist", "Counters and Dodge Attacks deal more damage", {counterAttackDamage = 1.35}, basePrice, 50, 3383626413),
-    newPerk("Bloodthirsty", "Each Takedown restores health", {HealthRegen = 1.2}, intermediatePrice, 80, 3384023927)
-}
+    perksFolder = Instance.new("Folder")
+    perksFolder.Name = "perksFolder"
+    perksFolder.Parent = game.ReplicatedStorage
 
-Perks.MaxActivePerks = 5 -- how many perks a player can equip at once
+    GlobalBindableEvent = game.ReplicatedStorage:WaitForChild("GlobalBindableEvent")
+
+    Perks.basePrice = 100 -- alot of perks will start out at this number, but when you buy a perk, the baseprice will increase, so it will be another 10 tokens for each
+    Perks.intermediatePrice = 200
+
+    Perks.activePerks = {
+        newPerk("Iron Fists", "Increases attack damage", {A1Damage = 1.2, A2Damage = 1.2, syncBlockDamage = 1.2, counterAttackDamage = 1.2}, Perks.basePrice, 20, 3382902336),
+        newPerk("Meat Head", "Increases health", {MaxHealth = 1.25}, Perks.basePrice, 35, 3382903295),
+        newPerk("Unbreakable", "Increases block absorption", {BlockAbsorption = 1.35}, Perks.basePrice, 45, 3382904079),
+        newPerk("Cardiosaurus Rex", "Decreases stamina degradation", {staminaDrainRate = 0.5}, Perks.basePrice, 60, 3382905392),
+        newPerk("Full-Auto", "Increases attack speed", {attackSpeed = 1.25}, Perks.basePrice, 75, 3382906629),
+        newPerk("Retaliation Specialist", "Counters and Dodge Attacks deal more damage", {counterAttackDamage = 1.35}, Perks.basePrice, 50, 3383626413),
+        newPerk("Bloodthirsty", "Each Takedown restores health", {HealthRegen = 1.2}, Perks.intermediatePrice, 80, 3384023927)
+    }
+
+    Perks.MaxActivePerks = 5 -- how many perks a player can equip at once
+
+end
 
 function Perks.getPerks(tbl, parent)
     if not tbl then tbl = {} end
     
     for ownedPerkName, _ in pairs(tbl) do
-        for _, avaliablePerk in pairs(activePerks) do
+        for _, avaliablePerk in pairs(Perks.activePerks) do
             if avaliablePerk.Name == ownedPerkName then
                 avaliablePerk:Clone().Parent = parent
                 break
@@ -84,11 +93,10 @@ function Perks.applyStatChange(characterInstance, perk, bool)
         characterInstance.statMultipliers:FindFirstChild(statMultiplierName):SetAttribute(perk.Name:gsub(" ", "_"), statChangeValue)
 
         -- Then after adding the new stat change(s), re-calculate:
-        characterInstance.finalStatValues[finalStatValueName].Value = utilities.multiplyTableValuesTogether(characterInstance.statMultipliers[statMultiplierName]:GetAttributes())
+        characterInstance.finalStatValues[finalStatValueName].Value = ModuleLoader.utilities.multiplyTableValuesTogether(characterInstance.statMultipliers[statMultiplierName]:GetAttributes())
 
         -- Then apply:
         characterInstance.proxyTable_finalStatValues[finalStatValueName] = characterInstance.finalStatValues[finalStatValueName].Value
-        print(characterInstance.statMultipliers[statMultiplierName]:GetAttributes())
     end
 end
 

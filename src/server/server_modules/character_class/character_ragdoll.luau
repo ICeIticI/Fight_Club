@@ -12,7 +12,7 @@
  	 property called .LimitsEnabled. If set to true, the baseparts can rotate to a
  	 limited degree.]]
 
-local ragdollFunction = require(game.ReplicatedStorage.Shared.ragdollFunction)
+local ModuleLoader
 
 local RagdollSystem = {}
 
@@ -22,6 +22,10 @@ local function setCharacterNetworkOwnershipTo(character : Model, newOwner)
 			child:SetNetworkOwner(newOwner)
 		end
 	end
+end
+
+function RagdollSystem.init()
+	ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
 end
 
 function RagdollSystem:InitializeCharacter()
@@ -34,7 +38,7 @@ function RagdollSystem:InitializeCharacter()
 	-- if self.characterInstance.player then
 	-- 	self.characterInstance.GlobalRemoteEvent:FireAllClients("setupRagdoll", {character = self.characterInstance.character, id = self.characterInstance.id})
 	-- else
-		ragdollFunction.setupRagdoll(self.characterInstance.character, self.characterInstance.id)
+		ModuleLoader.ragdollFunction.setupRagdoll(self.characterInstance.character, self.characterInstance.id)
 	-- end
 
 	humanoid.HealthChanged:Connect(function(newHealth) -- to ragdoll the character on death
@@ -44,7 +48,7 @@ function RagdollSystem:InitializeCharacter()
 			-- 	setCharacterNetworkOwnershipTo(self.characterInstance.character, self.characterInstance.player)
 			-- 	self.characterInstance.GlobalRemoteEvent:FireAllClients("ragdoll", {character = self.characterInstance.character, id = self.characterInstance.id, ragdollBool = true})
 			-- else -- NPC. Run on server right here
-			ragdollFunction.ragdoll(self.characterInstance.character, self.characterInstance.id, true)
+			ModuleLoader.ragdollFunction.ragdoll(self.characterInstance.character, self.characterInstance.id, true)
 			-- end	
 				
 		end

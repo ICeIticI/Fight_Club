@@ -1,27 +1,23 @@
 local Character_Grapple = {}
 Character_Grapple.__index = Character_Grapple
 
-local AnimationInstances = require(game.ReplicatedStorage.Shared.AnimationInstances)
-local utilities = require(game.ReplicatedStorage.Shared.utilities)
-
-local grabType = nil 
-
+local ModuleLoader
 
 local function getGrabAnimation(characterInstance)
-    if grabType == "attempt" then
-        return AnimationInstances.FC_GrabAttempt1 -- will be a more sophisticated way in the future when we start dealing with fighter classes and other animations
-    elseif grabType == "success" then
-        return AnimationInstances.FC_GrabSuccess1
-    elseif grabType == "secure" then
-        return AnimationInstances.FC_GrabSecure1
-    elseif grabType == "attack" then
+    if Character_Grapple.grabType == "attempt" then
+        return ModuleLoader.AnimationInstances.FC_GrabAttempt1 -- will be a more sophisticated way in the future when we start dealing with fighter classes and other animations
+    elseif Character_Grapple.grabType == "success" then
+        return ModuleLoader.AnimationInstances.FC_GrabSuccess1
+    elseif Character_Grapple.grabType == "secure" then
+        return ModuleLoader.AnimationInstances.FC_GrabSecure1
+    elseif Character_Grapple.grabType == "attack" then
         return characterInstance.randomAnimation(characterInstance.AT_GrabAttacks)
         -- return AnimationInstances.FC_GrabAttack1
-    elseif grabType == "execute" then
+    elseif Character_Grapple.grabType == "execute" then
         return characterInstance.randomAnimation(characterInstance.AT_GrabExecutions)
         -- return AnimationInstances.FC_GrabExecute2
-    elseif grabType == "breakout" then
-        return AnimationInstances.FC_EndGrab1
+    elseif Character_Grapple.grabType == "breakout" then
+        return ModuleLoader.AnimationInstances.FC_EndGrab1
     end
 end
 
@@ -38,7 +34,7 @@ local function setupGrabAnimation(characterInstance : table, enemyInstance : any
         trackData.attackLvl = trackData.Animation:GetAttribute("AttackLevel") or 1 -- only few grab attacks have an attacklevel thats not 1, so when we assign attacklevel to those few animations, its always different than 1
         characterInstance.attackDamage = characterInstance:setupAttackDamage(trackData)
         if enemyInstance and enemyInstance.humanoid.Health <= characterInstance.attackDamage then
-            grabType = "execute"
+            Character_Grapple.grabType = "execute"
         end
     end
     
@@ -74,9 +70,13 @@ local function playGrabAnimation(characterInstance, trackData, bool : boolean?)
 
 end
 
+function Character_Grapple.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+    Character_Grapple.grabType = nil
+end
 
 function Character_Grapple:Attempt(enemyInstance) --[[ The character goes to attempt to grab an enemy. If this succeeds, then it'll transition to the :Secure() method. ]]
-    grabType = "attempt"
+    Character_Grapple.grabType = "attempt"
     
     self.characterInstance.isGrappling = true
     self.characterInstance.grappleDelay = true -- Character should NOT be able to spam grapple, such as letting the enemy go and immediately grappling again. Thats absolute B.S (Bad Science for the record)
@@ -103,12 +103,12 @@ end
 function Character_Grapple:EndGrab(enemyInstance)
 
     if self.characterInstance.isGrappling then     
-        grabType = "breakout"
+        Character_Grapple.grabType = "breakout"
         local trackData = setupGrabAnimation(self.characterInstance)
         playGrabAnimation(self.characterInstance, trackData)
         enemyInstance:receive("repelGrab", self.characterInstance)
     else
-        grabType = "complete"
+        Character_Grapple.grabType = "complete"
         self.characterInstance.isGrappling = false
         enemyInstance.isGrappling = false
         self.characterInstance.reset()
@@ -125,7 +125,7 @@ function Character_Grapple:EndGrab(enemyInstance)
 end
 
 function Character_Grapple:Execute(enemyInstance)
-    grabType = "execute"
+    Character_Grapple.grabType = "execute"
     local trackData = setupGrabAnimation(self.characterInstance)
     self.characterInstance.setCharacterMassless(enemyInstance.character, false)
     enemyInstance.isInSecureGrapple = false
@@ -143,14 +143,14 @@ function Character_Grapple:Execute(enemyInstance)
 end
 
 function Character_Grapple:Success(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. We'll now strike the enemy to transition into :Secure() ]]
-    grabType = "success"
+    Character_Grapple.grabType = "success"
 
     enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
 
     local trackData = setupGrabAnimation(self.characterInstance)
     self.characterInstance.isInGrappleSuccess = true
 
-    if grabType == "execute" then -- if the enemy has low enough HP to kill them with a single attack, then we will just execute them instead
+    if Character_Grapple.grabType == "execute" then -- if the enemy has low enough HP to kill them with a single attack, then we will just execute them instead
         self:Execute(enemyInstance)
     else
         playGrabAnimation(self.characterInstance, trackData)
@@ -170,10 +170,10 @@ function Character_Grapple:Secure_TurnRight(enemyInstance)
 end
 
 function Character_Grapple:GrabAttack(enemyInstance)
-    grabType = "attack"
+    Character_Grapple.grabType = "attack"
     local trackData = setupGrabAnimation(self.characterInstance, enemyInstance)
     
-    if grabType == "execute" then -- if the enemy has low enough HP to kill them with a single attack, then we will just execute them instead
+    if Character_Grapple.grabType == "execute" then -- if the enemy has low enough HP to kill them with a single attack, then we will just execute them instead
         self:Execute(enemyInstance)
     else
         playGrabAnimation(self.characterInstance, trackData)
@@ -185,13 +185,13 @@ end
 function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to grab the enemy and succeeded. Now they can begin throwing blows and what not at the enemy while grappled on, and the enemy cant do anything about it except try to break free. ]]
     if enemyInstance.humanoid.Health <= 0 or self.characterInstance.humanoid.Health <= 0 then return end
     
-    grabType = "secure"
+    Character_Grapple.grabType = "secure"
     local trackData = setupGrabAnimation(self.characterInstance)
     playGrabAnimation(self.characterInstance, trackData)
     enemyInstance:receive("receiveGrabSecure", self.characterInstance)
 
     -- local offset = Vector3.new(0, 1, -3)
-    utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, self.characterInstance.player)
+    ModuleLoader.utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, self.characterInstance.player)
     enemyInstance.repositionInFrontOfEnemy(self.characterInstance.character)
     -- local grabWeld = Instance.new("WeldConstraint")
     -- grabWeld.Name = "grabWeld"
@@ -258,7 +258,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
     if enemyInstance then
         self.characterInstance.setCharacterMassless(enemyInstance.character, false)
         enemyInstance.humanoid.PlatformStand = false
-        utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, enemyInstance.player)
+        ModuleLoader.utilities.setCharacterNetworkOwnershipTo(enemyInstance.character, enemyInstance.player)
     end
     grabMotor:Destroy()
     grabMotor = nil
@@ -269,7 +269,7 @@ function Character_Grapple:Secure(enemyInstance) --[[ The character attempted to
 
 
 
-    if grabType == "execute" then
+    if Character_Grapple.grabType == "execute" then
         return true
     else
         return false

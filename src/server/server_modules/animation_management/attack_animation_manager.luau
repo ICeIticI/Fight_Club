@@ -4,7 +4,7 @@
 
 ]]
 
-local characters = require(game.ReplicatedStorage.Shared.server_modules.characters)
+local ModuleLoader
 
 local Attack_Animation_Management = {}
 
@@ -24,7 +24,7 @@ local function runOnAttackFrames(characterInstance, trackData) --[[ Manages char
             characterInstance.GlobalRemoteEvent:FireClient(characterInstance.player, "shakeCamera", {type = "SyncBlock", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
             characterInstance.playHitSFX(trackData)
         elseif trackData.Animation:GetAttribute("SyncBlockFinisher") == false then -- can be true or false, all we know is its a sync block of some sort
-            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage / characters:GetCharacterObjectByCharacter(characterInstance.enemyChar).finalStatValues.BlockAbsorption.Value)
+            characterInstance.enemyChar.Humanoid:TakeDamage(characterInstance.attackDamage / ModuleLoader.characters:GetCharacterObjectByCharacter(characterInstance.enemyChar).finalStatValues.BlockAbsorption.Value)
             characterInstance.GlobalRemoteEvent:FireClient(game.Players:GetPlayerFromCharacter(characterInstance.enemyChar), "shakeCamera", {type = "SyncBlock", AnimDirection = trackData.Animation:GetAttribute("AnimDirection")})
             characterInstance.playHitSFX(trackData)
             characterInstance.canFollowUp = true
@@ -79,6 +79,10 @@ end
 -- local attack2_amountOfTimeBeforeAttackFrames = 0.52
 -- local attack2_amountOfTimeBeforeEndOfAttack = 1.17
 -- local attack2_amountOfTimeBeforeEndOFAnimation = 1.18
+
+function Attack_Animation_Management.init()
+    ModuleLoader = require(game:GetService("ReplicatedStorage").Shared.ModuleLoader)
+end
 
 function Attack_Animation_Management:runOnIsPlaying(trackData) --[[ Manages character data based on when an attack is playing. NOT the animation track itself. That runs on the client. Unless I decided to move it to the server. ]]
 
